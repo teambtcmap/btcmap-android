@@ -67,4 +67,4 @@ fun <T : Any> rememberViewportFeatures(
     return ViewportFeatures(snapshot, geoJson)
 }
 
-private const val CAMERA_SETTLE_MS = 200L
+internal const val CAMERA_SETTLE_MS = 200L

@@ -767,6 +767,20 @@ Verified on the emulator: a merchant pin selects place 18048 (`business`), an
 exchange pin selects place 13818 (`currency_exchange`), and the event pin
 selects event 165.
 
+### Phase 3, seventh slice — done (area chips)
+
+Ported `org.btcmap.map.AreasAdapter`'s chips to `ui/.../map/AreaChips.kt`: the
+community and country circles at the map's bottom end, with the API image over
+the initials fallback and the upcoming-events badge.
+`ui/.../map/MapAreas.kt` drives the shared `MapAreasController` as the camera
+settles (the same debounce as the feature loading) and `MapScreen` overlays the
+chips. `:ui` now depends on Coil's Compose integration for the chip images,
+served on Android by the app's `SingletonImageLoader`.
+
+Verified on the emulator: Warsaw shows the Poland country chip and the
+"21 Bitcoin Polska" community chip, each with its event badge, and tapping a
+chip selects its area (530).
+
 ## Working notes
 
 Durable facts and conventions for continuing the migration.

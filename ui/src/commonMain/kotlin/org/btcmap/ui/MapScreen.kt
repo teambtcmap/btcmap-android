@@ -1,6 +1,8 @@
 package org.btcmap.ui
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
@@ -10,10 +12,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.withFrameNanos
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.rememberTextMeasurer
+import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -22,6 +26,7 @@ import kotlinx.serialization.json.longOrNull
 import org.btcmap.db.Database
 import org.btcmap.db.table.event.Event
 import org.btcmap.db.table.place.Place
+import org.btcmap.map.MapArea
 import org.btcmap.map.EMPTY_GEOJSON
 import org.btcmap.map.EVENT_ICON
 import org.btcmap.map.EVENT_MARKER_ICON_NAME
@@ -30,6 +35,8 @@ import org.btcmap.util.isUpcoming
 import org.btcmap.map.markerImageName
 import org.btcmap.map.toEventGeoJson
 import org.btcmap.map.toMarkerGeoJson
+import org.btcmap.ui.map.AreaChipPalette
+import org.btcmap.ui.map.AreaChips
 import org.btcmap.ui.map.EventLayers
 import org.btcmap.ui.map.ExchangeLayers
 import org.btcmap.ui.map.MARKER_PIN_IMAGE_ID
@@ -37,6 +44,7 @@ import org.btcmap.ui.map.MarkerBitmapFactory
 import org.btcmap.ui.map.MarkerClickHandler
 import org.btcmap.ui.map.MarkerPalette
 import org.btcmap.ui.map.MerchantLayers
+import org.btcmap.ui.map.rememberMapAreas
 import org.btcmap.ui.map.rememberViewportFeatures
 import org.maplibre.compose.camera.CameraPosition
 import org.maplibre.compose.interaction.ClickResult
@@ -60,10 +68,13 @@ fun MapScreen(
     initialZoom: Double,
     minVerifiedAt: ZonedDateTime?,
     palette: MarkerPalette,
+    areaChipPalette: AreaChipPalette,
+    apiUrl: String,
     usingOpenFreeMap: Boolean,
     iconFont: FontFamily?,
     onSelectPlace: (Place) -> Unit,
     onSelectEvent: (Event) -> Unit,
+    onSelectArea: (MapArea) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val textMeasurer = rememberTextMeasurer()
@@ -143,6 +154,8 @@ fun MapScreen(
         )
     }
 
+    val areas = rememberMapAreas(state, db)
+
     val merchants = rememberViewportFeatures(
         state = state,
         idOf = { it.id },
@@ -212,6 +225,17 @@ fun MapScreen(
     }
 
     AppTheme(iconFont = iconFont) {
-        MaplibreMap(modifier = modifier.fillMaxSize(), state = state)
+        Box(modifier = modifier.fillMaxSize()) {
+            MaplibreMap(modifier = Modifier.fillMaxSize(), state = state)
+            AreaChips(
+                areas = areas,
+                apiUrl = apiUrl,
+                palette = areaChipPalette,
+                onAreaClick = onSelectArea,
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .padding(end = 24.dp, bottom = 112.dp),
+            )
+        }
     }
 }

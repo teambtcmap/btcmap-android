@@ -14,6 +14,8 @@ import androidx.compose.ui.text.font.FontFamily
 import org.btcmap.db.Database
 import org.btcmap.db.table.event.Event
 import org.btcmap.db.table.place.Place
+import org.btcmap.map.MapArea
+import org.btcmap.ui.map.AreaChipPalette
 import org.btcmap.ui.map.MarkerPalette
 import java.time.ZonedDateTime
 
@@ -30,6 +32,8 @@ class MapComposeView @JvmOverloads constructor(
     var database: Database? by mutableStateOf(null)
 
     var styleUrl: String by mutableStateOf("https://tiles.openfreemap.org/styles/liberty")
+
+    var apiUrl: String by mutableStateOf("https://api.btcmap.org")
 
     var initialLat: Double by mutableStateOf(0.0)
 
@@ -51,6 +55,10 @@ class MapComposeView @JvmOverloads constructor(
 
     var markerBadgeTextColor: Color by mutableStateOf(Color.White)
 
+    var areaChipButtonColor: Color by mutableStateOf(Color(0xFF1B1B1B))
+
+    var areaChipIconColor: Color by mutableStateOf(Color.White)
+
     var usingOpenFreeMap: Boolean by mutableStateOf(true)
 
     var iconTypeface: Typeface? by mutableStateOf(null)
@@ -58,6 +66,8 @@ class MapComposeView @JvmOverloads constructor(
     var onPlaceSelected: (Place) -> Unit by mutableStateOf({})
 
     var onEventSelected: (Event) -> Unit by mutableStateOf({})
+
+    var onAreaSelected: (MapArea) -> Unit by mutableStateOf({})
 
     @Composable
     override fun Content() {
@@ -80,8 +90,16 @@ class MapComposeView @JvmOverloads constructor(
             ),
             usingOpenFreeMap = usingOpenFreeMap,
             iconFont = fontFamily,
+            areaChipPalette = AreaChipPalette(
+                buttonBackground = areaChipButtonColor,
+                buttonIcon = areaChipIconColor,
+                badgeBackground = markerBadgeBackgroundColor,
+                badgeText = markerBadgeTextColor,
+            ),
+            apiUrl = apiUrl,
             onSelectPlace = onPlaceSelected,
             onSelectEvent = onEventSelected,
+            onSelectArea = onAreaSelected,
         )
     }
 }

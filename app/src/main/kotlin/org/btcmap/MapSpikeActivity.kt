@@ -35,6 +35,9 @@ class MapSpikeActivity : AppCompatActivity() {
             onEventSelected = { event ->
                 Toast.makeText(this@MapSpikeActivity, "event ${event.id}: ${event.name}", Toast.LENGTH_SHORT).show()
             }
+            onAreaSelected = { area ->
+                Toast.makeText(this@MapSpikeActivity, "area ${area.id}: ${area.name}", Toast.LENGTH_SHORT).show()
+            }
         }
         setContentView(view)
     }
