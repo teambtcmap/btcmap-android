@@ -1,8 +1,11 @@
 package org.btcmap.api
 
+import com.google.gson.JsonObject
 import okhttp3.Request
 import org.btcmap.auth.withoutAuth
 import org.btcmap.util.toJsonArray
+import org.btcmap.util.toJsonObject
+import java.util.Base64
 
 data class PlaceImage(
     val id: Long,
@@ -12,6 +15,7 @@ data class PlaceImage(
     val height: Int,
     val sizeBytes: Long,
     val createdAt: String,
+    val createdBy: Long?,
 )
 
 /** Lists the metadata of every image stored against a place, newest first. */
@@ -19,17 +23,23 @@ suspend fun Api.getPlaceImages(placeId: Long): List<PlaceImage> {
     val url = buildUrl("v4", "places", "$placeId", "images")
 
     return call(Request.Builder().withoutAuth().url(url).build()) { stream ->
-        stream.toJsonArray().map {
-            PlaceImage(
-                id = it.long("id"),
-                placeId = it.long("place_id"),
-                type = it.string("type"),
-                width = it.int("width"),
-                height = it.int("height"),
-                sizeBytes = it.long("size_bytes"),
-                createdAt = it.string("created_at"),
-            )
-        }
+        stream.toJsonArray().map { it.toPlaceImage() }
+    }
+}
+
+/**
+ * Uploads a photo for a place, attributed to the signed-in user. Requires a
+ * Bearer token; the server stores it with `type = "user"`.
+ */
+suspend fun Api.addPlaceImage(placeId: Long, photo: ByteArray): PlaceImage {
+    val url = buildUrl("v4", "places", "$placeId", "images")
+
+    val req = JsonObject().apply {
+        addProperty("data_base64", Base64.getEncoder().encodeToString(photo))
+    }
+
+    return call(Request.Builder().post(jsonBody(req)).url(url).build()) { stream ->
+        stream.toJsonObject().toPlaceImage()
     }
 }
 
@@ -47,4 +57,17 @@ fun Api.placeImageUrl(
         width?.let { addQueryParameter("w", "$it") }
         height?.let { addQueryParameter("h", "$it") }
     }.toString()
+}
+
+private fun JsonObject.toPlaceImage(): PlaceImage {
+    return PlaceImage(
+        id = long("id"),
+        placeId = long("place_id"),
+        type = string("type"),
+        width = int("width"),
+        height = int("height"),
+        sizeBytes = long("size_bytes"),
+        createdAt = string("created_at"),
+        createdBy = longOrNull("created_by"),
+    )
 }

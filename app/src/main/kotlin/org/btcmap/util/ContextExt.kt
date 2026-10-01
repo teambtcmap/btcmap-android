@@ -9,19 +9,18 @@ import kotlinx.coroutines.withContext
 import java.io.ByteArrayOutputStream
 import kotlin.math.roundToInt
 
-// Report evidence is capped at 10 MB per photo by the API, and a camera shot
-// can easily exceed that, so photos are downscaled and re-encoded before they
-// are uploaded.
-private const val MAX_EVIDENCE_DIMENSION = 2048
-private const val EVIDENCE_JPEG_QUALITY = 85
+// Uploaded photos are capped at 10 MB by the API, and a camera shot can easily
+// exceed that, so photos are downscaled and re-encoded before they are uploaded.
+private const val MAX_PHOTO_DIMENSION = 2048
+private const val PHOTO_JPEG_QUALITY = 85
 
 /**
  * Reads the image at [uri], downscales it so its longest side is at most
- * [MAX_EVIDENCE_DIMENSION] pixels and re-encodes it as JPEG for use as report
- * evidence. [ImageDecoder] applies the source's EXIF orientation, so the result
- * is upright regardless of how the camera stored it.
+ * [MAX_PHOTO_DIMENSION] pixels and re-encodes it as JPEG for upload.
+ * [ImageDecoder] applies the source's EXIF orientation, so the result is
+ * upright regardless of how the camera stored it.
  */
-suspend fun Context.encodeEvidencePhoto(uri: Uri): ByteArray = withContext(Dispatchers.IO) {
+suspend fun Context.encodePhoto(uri: Uri): ByteArray = withContext(Dispatchers.IO) {
     val source = ImageDecoder.createSource(contentResolver, uri)
 
     val bitmap = ImageDecoder.decodeBitmap(source) { decoder, info, _ ->
@@ -30,8 +29,8 @@ suspend fun Context.encodeEvidencePhoto(uri: Uri): ByteArray = withContext(Dispa
         decoder.allocator = ImageDecoder.ALLOCATOR_SOFTWARE
 
         val longestSide = maxOf(info.size.width, info.size.height)
-        if (longestSide > MAX_EVIDENCE_DIMENSION) {
-            val scale = MAX_EVIDENCE_DIMENSION.toDouble() / longestSide
+        if (longestSide > MAX_PHOTO_DIMENSION) {
+            val scale = MAX_PHOTO_DIMENSION.toDouble() / longestSide
             decoder.setTargetSize(
                 (info.size.width * scale).roundToInt(),
                 (info.size.height * scale).roundToInt(),
@@ -41,7 +40,7 @@ suspend fun Context.encodeEvidencePhoto(uri: Uri): ByteArray = withContext(Dispa
 
     try {
         ByteArrayOutputStream().use { out ->
-            bitmap.compress(Bitmap.CompressFormat.JPEG, EVIDENCE_JPEG_QUALITY, out)
+            bitmap.compress(Bitmap.CompressFormat.JPEG, PHOTO_JPEG_QUALITY, out)
             out.toByteArray()
         }
     } finally {

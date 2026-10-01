@@ -5,11 +5,7 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import org.btcmap.databinding.PlacePhotoAddItemBinding
 
-/**
- * The leading "add photo" tile in the place gallery. It is inert for now —
- * there is no endpoint to attach a photo to an existing place yet — but it
- * takes [onClick] so the flow can be wired up without touching the adapter.
- */
+/** The trailing "add photo" tile in the place gallery. */
 class PlacePhotoAddAdapter(
     private val onClick: () -> Unit,
 ) : RecyclerView.Adapter<PlacePhotoAddAdapter.ItemViewHolder>() {

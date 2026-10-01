@@ -11,7 +11,6 @@ import android.widget.Toast
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.StringRes
-import androidx.core.content.FileProvider
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
@@ -25,7 +24,8 @@ import org.btcmap.api
 import org.btcmap.api.reportPlace
 import org.btcmap.databinding.ReportPhotoItemBinding
 import org.btcmap.databinding.ReportPlaceFragmentBinding
-import org.btcmap.util.encodeEvidencePhoto
+import org.btcmap.util.createPhotoCaptureTarget
+import org.btcmap.util.encodePhoto
 import org.btcmap.util.rethrowIfCancellation
 import java.io.File
 
@@ -133,13 +133,7 @@ class ReportPlaceFragment : Fragment() {
     }
 
     private fun startCamera() {
-        val dir = File(requireContext().cacheDir, "report-photos").apply { mkdirs() }
-        val file = File.createTempFile("evidence-", ".jpg", dir)
-        val uri = FileProvider.getUriForFile(
-            requireContext(),
-            "${requireContext().packageName}.fileprovider",
-            file,
-        )
+        val (uri, file) = createPhotoCaptureTarget()
 
         viewModel.pendingCameraFile = file
         viewModel.pendingCameraUri = uri
@@ -184,7 +178,7 @@ class ReportPlaceFragment : Fragment() {
                 var failed = false
                 val encoded = accepted.mapNotNull { uri ->
                     try {
-                        context.encodeEvidencePhoto(uri)
+                        context.encodePhoto(uri)
                     } catch (t: Throwable) {
                         t.rethrowIfCancellation()
                         failed = true
