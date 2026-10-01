@@ -1153,6 +1153,22 @@ follows the system's dark mode through it.
 Verified in the window: the desktop map is now the **dark** hosted style in this
 dark session, with its markers, cluster and area chips.
 
+### Phase 3, thirty-first slice — done (step 6: a distributable)
+
+`:desktopApp` copies the icon font out of the Android assets into its resources
+under a fixed name at build time (no 10 MB duplicate in the repository), and
+loads it from there first, falling back to the asset directory when running from
+the sources. `createDistributable` then produces a self-contained app image
+(`build/compose/binaries/main/app/BTC Map`), with the JVM runtime and the font
+inside it.
+
+Verified: the packaged launcher runs on its own — `desktop: icon font
+material-symbols.ttf (bundled)` and `Rendered the first map frame …` with no
+project directories in play. The map styles are still fetched from the network
+(the hosted URLs); bundling them (and the PMTiles basemap) is not done. `packageDeb`
+needs `dpkg-deb`, which this machine does not have, so only the app image was
+produced here.
+
 ## Working notes
 
 Durable facts and conventions for continuing the migration.

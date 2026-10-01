@@ -13,6 +13,20 @@ kotlin {
     jvmToolchain(25)
 }
 
+// The icon font is the Android asset; copy it in as a resource under a fixed
+// name so the packaged app carries it instead of reading it from the sources.
+val bundleIconFont by tasks.registering(Copy::class) {
+    from(rootProject.file("app/src/main/assets")) {
+        include("material-symbols-*.ttf")
+        rename { "material-symbols.ttf" }
+    }
+    into(layout.buildDirectory.dir("generated/icon-font"))
+}
+
+sourceSets.main {
+    resources.srcDir(bundleIconFont)
+}
+
 // The run task launches the project's toolchain, so it needs the Java 25 one
 // rather than the Gradle daemon's.
 java {

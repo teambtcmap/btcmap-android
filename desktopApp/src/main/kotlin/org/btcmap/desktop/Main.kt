@@ -320,6 +320,13 @@ private class DesktopHome {
  * beside the sources (or at `BTCMAP_ICON_FONT`).
  */
 private fun loadIconFont(): FontFamily? {
+    // The packaged app carries the font as a resource (see the build file); the
+    // asset directory is the fallback when running from the sources.
+    if (Thread.currentThread().contextClassLoader.getResource(ICON_FONT_RESOURCE) != null) {
+        println("desktop: icon font $ICON_FONT_RESOURCE (bundled)")
+        return FontFamily(Font(ICON_FONT_RESOURCE))
+    }
+
     val assetDir = File(
         System.getenv("BTCMAP_ICON_FONT")
             ?: System.getProperty("btcmap.iconFontDir")
@@ -330,6 +337,8 @@ private fun loadIconFont(): FontFamily? {
     println("desktop: icon font ${font?.absolutePath ?: "NOT FOUND (icons will show as text)"}")
     return font?.let { FontFamily(Font(it)) }
 }
+
+private const val ICON_FONT_RESOURCE = "material-symbols.ttf"
 
 private val PLACE_SHEET_STRINGS = org.btcmap.ui.PlaceSheetStrings(
     directions = "Directions",
