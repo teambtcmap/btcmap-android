@@ -718,6 +718,30 @@ Verified on the emulator: 12 merchants, 31 exchanges and 1 event loaded, and
 all three render — the merchant glyph baked into the pin, and the exchange and
 event glyphs on their own layers over the shared pin.
 
+### Phase 3, fifth slice — done (viewport-driven data)
+
+Ported `org.btcmap.map.ViewportCache`'s camera-driven loading to `:ui`:
+`ui/.../map/ViewportBounds.kt` (the expanded viewport and the antimeridian
+split, ported from `expand`/`queryByBounds`) and
+`ui/.../map/ViewportFeatures.kt`, a `rememberViewportFeatures` composable that
+merges what the viewport fetches into the shared `FeatureStore` and publishes
+the GeoJSON. `MapScreen` now takes a `Database` and loads merchants, exchanges
+and events itself, so `MapSpikeActivity` no longer loads anything.
+
+Notes worth keeping:
+
+- The camera reports `MapEvent.CameraMoveEnded` many times while a gesture is
+  still settling (one swipe produced ~38 rounds), so the reload is debounced
+  with `collectLatest { delay(200); load() }`; one settled move is one round.
+- `MapState.viewport` is nullable, so the initial load waits for
+  `StyleLoadState.Ready`, where the viewport first reflects the map size.
+- The marker image registration, with the "declare a marker layer only after
+  its images exist" rule, still runs whenever the loaded features change.
+
+Verified on the emulator: Warsaw's merchants, exchanges and event load on the
+first frame, and panning fetches the new viewport (markers appear and disappear
+with the area) in a single query round per settled camera move.
+
 ## Working notes
 
 Durable facts and conventions for continuing the migration.
