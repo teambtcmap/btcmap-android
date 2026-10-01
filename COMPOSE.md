@@ -1026,6 +1026,17 @@ Verified: `:desktopApp:run` opens the window and stays up (killed by the test's
 timeout, no exception); the Android modules are unaffected, so the version code
 is unchanged. Navigation, the database and the map on desktop follow.
 
+### Phase 3, twenty-third slice — done (step 6: desktop data and settings)
+
+`:desktopApp` now opens the shared `Database` on the JVM: a per-user data
+directory (`$BTCMAP_HOME` or `~/.btcmap`), the bundled SQLite driver, and
+`Settings` over the database with no legacy values to import. The window renders
+the shared stats screen with the counts it reads back.
+
+Verified: running the app creates `~/.btcmap/btcmap.db` with the full schema at
+version 107, and the window stays up. The icon font is not loaded on desktop
+yet, so the stats cards pass no icon.
+
 ## Working notes
 
 Durable facts and conventions for continuing the migration.

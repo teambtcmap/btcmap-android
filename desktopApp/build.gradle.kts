@@ -25,6 +25,8 @@ dependencies {
     implementation(project(":shared"))
     implementation(project(":ui"))
     implementation(compose.desktop.currentOs)
+    // The SQLite driver the shared database runs on off Android.
+    implementation(libs.androidx.sqlite.bundled.jvm)
 }
 
 compose.desktop {
