@@ -28,14 +28,10 @@ Next, in rough order of value:
 
 1. **Android main map swap** — point `MapFragment` at the shared map and delete
    `MapSetupController`, `MarkerIcon`, the layer builders, `MapSelectionController`
-   and `ViewportCache`/caches, then drop the MapLibre Android SDK. **Blocked** on
-   the marker filter (see the Working notes: maplibre-compose 0.18.0 stops the
-   shown kind drawing as soon as another kind's layers are hidden in place, and
-   neither a never-matching filter nor rebuilding the map around one kind worked),
-   and on the **location button** and the **offline toggle**, which have no
-   Compose equivalent yet.
-2. **Marker filter on the shared map** — the real unblocker for (1); an upstream
-   repro of the 0.18.0 behaviour would be worth filing.
+   and `ViewportCache`/caches, then drop the MapLibre Android SDK. The marker
+   filter is **no longer a blocker**: it was dropped and every kind is shown at
+   once (see the slice below). What remains is the **location button** and the
+   **offline toggle**, which have no Compose equivalent yet.
 3. **Desktop polish** — the add-place flow, the comments/user-profile screens and
    the auth forms (they need a place/session context), the location button, and
    offline tiles (the bundled styles still point their tile sources at the

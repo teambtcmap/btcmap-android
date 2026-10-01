@@ -97,7 +97,7 @@ class MapFragment : Fragment() {
     private var bottomSheetController: BottomSheetController? = null
     private var updateNotificationController: UpdateNotificationController? = null
 
-    private var currentCache: ViewportCache<*>? = null
+    private val caches = mutableListOf<ViewportCache<*>>()
     private var mapSelectionController: MapSelectionController? = null
     private var mapSetupController: MapSetupController? = null
     private var locationController: LocationController? = null
@@ -141,10 +141,6 @@ class MapFragment : Fragment() {
         // back-stack return there is no saved state (the fragment instance
         // survives, only its view is recreated), so the field keeps the filter
         // the user last chose; a fresh instance defaults to merchants.
-        filter = savedInstanceState?.getString(STATE_FILTER)
-            ?.let { name -> runCatching { Filter.valueOf(name) }.getOrNull() }
-            ?: filter
-
         // Registered here, not when the dialog is shown, so a form that was open
         // when the device rotated still reaches this (recreated) fragment.
         registerAuthResultListener { navigateToAddPlace() }
@@ -232,10 +228,6 @@ class MapFragment : Fragment() {
         }
         registerConnectivity()
 
-        binding.showMerchants.setOnClickListener { setFilter(Filter.MERCHANTS) }
-        binding.showEvents.setOnClickListener { setFilter(Filter.EVENTS) }
-        binding.showExchanges.setOnClickListener { setFilter(Filter.EXCHANGES) }
-
         binding.map.getMapAsync { map ->
             if (_binding == null) return@getMapAsync
             map.addOnCameraIdleListener {
@@ -296,18 +288,19 @@ class MapFragment : Fragment() {
 
                 syncController().events.collect { event ->
                     when (event) {
-                        SyncEvent.PlacesChanged -> rebuildCurrentCache()
+                        SyncEvent.PlacesChanged,
+                        SyncEvent.EventsChanged,
+                        SyncEvent.CommentsChanged,
+                        -> rebuildCaches()
+
                         SyncEvent.EventsChanged -> {
-                            if (filter == Filter.EVENTS) rebuildCurrentCache()
+                            rebuildCaches()
                             // The area chips display each area's upcoming event
                             // count, so a changed event table makes them stale
                             // even though the areas themselves did not change.
                             mapAreasController.reload()
                         }
-                        SyncEvent.CommentsChanged ->
-                            if (filter == Filter.MERCHANTS || filter == Filter.EXCHANGES) {
-                                rebuildCurrentCache()
-                            }
+
                         SyncEvent.AreasChanged -> mapAreasController.reload()
                     }
                 }
@@ -325,7 +318,7 @@ class MapFragment : Fragment() {
                         // the viewport, it sets this once its own move runs.
                         mapPositioned = true
                     }
-                    setFilter(filter)
+                    showAllKinds()
                 }
             }
         }
@@ -475,12 +468,8 @@ class MapFragment : Fragment() {
                 db().place.selectById(row.placeId)
             } ?: return@launch
 
-            if (place.isMerchant()) {
-                binding.showMerchants.performClick()
-            } else {
-                binding.showExchanges.performClick()
-            }
-
+            // Every marker kind is shown, so the place's own kind needs no
+            // switching before it is selected.
             selectPlace(place)
             moveTo(place.lat, place.lon)
         }
@@ -491,12 +480,6 @@ class MapFragment : Fragment() {
             val place = withContext(Dispatchers.IO) { db().place.selectById(placeId) }
 
             if (place != null) {
-                if (place.isMerchant()) {
-                    binding.showMerchants.performClick()
-                } else {
-                    binding.showExchanges.performClick()
-                }
-
                 selectPlace(place)
                 moveTo(place.lat, place.lon)
                 return@launch
@@ -584,7 +567,6 @@ class MapFragment : Fragment() {
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        outState.putString(STATE_FILTER, filter.name)
         selectedPlaceId?.let { outState.putLong(STATE_PLACE_ID, it) }
         outState.putInt(
             STATE_SHEET_STATE,
@@ -611,7 +593,7 @@ class MapFragment : Fragment() {
         mapSetupController = null
         locationController?.destroy()
         locationController = null
-        destroyCurrentCache()
+        destroyCaches()
         // Remembered so a back-stack return can restore the sheet, which has no
         // saved instance state to read from.
         lastSheetState = bottomSheetController?.bottomSheetBehavior?.state
@@ -633,11 +615,6 @@ class MapFragment : Fragment() {
         )
     }
 
-    private enum class Filter {
-        MERCHANTS, EVENTS, EXCHANGES,
-    }
-
-    private var filter = Filter.MERCHANTS
     private var searchDebounceJob: Job? = null
 
     /**
@@ -670,58 +647,43 @@ class MapFragment : Fragment() {
      */
     private var mapPositioned = false
 
-    private fun setFilter(filter: Filter) {
-        binding.showMerchants.isSelected = filter == Filter.MERCHANTS
-        binding.showEvents.isSelected = filter == Filter.EVENTS
-        binding.showExchanges.isSelected = filter == Filter.EXCHANGES
-
-        if (filter == this.filter && currentCache != null) {
-            currentCache?.refresh()
-            return
-        }
-
-        this.filter = filter
-
+    /**
+     * Shows every marker kind at once. The app used to show one at a time
+     * behind the map's button group; that filter is gone (the shared Compose map
+     * cannot hide a kind without stopping the others drawing), so merchants,
+     * events and exchanges are always all on.
+     */
+    private fun showAllKinds() {
         val setup = mapSetupController ?: return
 
-        destroyCurrentCache()
+        destroyCaches()
         setup.merchantsSource.setGeoJson(EMPTY_GEOJSON)
         setup.eventsSource.setGeoJson(EMPTY_GEOJSON)
         setup.exchangesSource.setGeoJson(EMPTY_GEOJSON)
 
-        val selected = filter
         binding.map.getMapAsync { map ->
             if (_binding == null) return@getMapAsync
-            // A newer switch may have run while this callback waited for the
-            // map; the last one wins, so drop the stale request.
-            if (selected != filter) return@getMapAsync
-            when (filter) {
-                Filter.MERCHANTS -> showCache {
-                    MerchantsCache(
-                        map,
-                        db(),
-                        setup.merchantsSource,
-                        prefs.verifiedFilterMinVerifiedAt(),
-                        ::reportMapContentDrawn,
-                    ) {
-                        mapSetupController?.ensureMerchantMarkers(it)
-                    }
+            addCache {
+                MerchantsCache(
+                    map,
+                    db(),
+                    setup.merchantsSource,
+                    prefs.verifiedFilterMinVerifiedAt(),
+                    ::reportMapContentDrawn,
+                ) {
+                    mapSetupController?.ensureMerchantMarkers(it)
                 }
-
-                Filter.EVENTS -> showCache {
-                    EventsCache(map, db(), setup.eventsSource, ::reportMapContentDrawn)
-                }
-
-                Filter.EXCHANGES -> showCache {
-                    ExchangesCache(
-                        map,
-                        db(),
-                        setup.exchangesSource,
-                        prefs.verifiedFilterMinVerifiedAt(),
-                        ::reportMapContentDrawn,
-                    ) {
-                        mapSetupController?.ensureExchangeMarkers(it)
-                    }
+            }
+            addCache { EventsCache(map, db(), setup.eventsSource, ::reportMapContentDrawn) }
+            addCache {
+                ExchangesCache(
+                    map,
+                    db(),
+                    setup.exchangesSource,
+                    prefs.verifiedFilterMinVerifiedAt(),
+                    ::reportMapContentDrawn,
+                ) {
+                    mapSetupController?.ensureExchangeMarkers(it)
                 }
             }
         }
@@ -801,28 +763,23 @@ class MapFragment : Fragment() {
         connectivityCallback = callback
     }
 
-    private fun showCache(factory: () -> ViewportCache<*>) {
-        val cache = factory()
-        // A race between two getMapAsync callbacks can reach here twice; drop
-        // whatever the previous call left behind before adopting the new one.
-        destroyCurrentCache()
-        currentCache = cache
+    private fun addCache(factory: () -> ViewportCache<*>) {
+        caches += factory()
     }
 
-    private fun destroyCurrentCache() {
-        // destroy() cancels the cache's own source collector with it, so no
-        // collector outlives the cache or accumulates on every filter switch.
-        currentCache?.destroy()
-        currentCache = null
+    private fun destroyCaches() {
+        // destroy() cancels each cache's own source collector with it, so no
+        // collector outlives the cache.
+        caches.forEach { it.destroy() }
+        caches.clear()
     }
 
-    private fun rebuildCurrentCache() {
-        val cache = currentCache
-        if (cache == null) {
-            setFilter(filter)
-            return
+    private fun rebuildCaches() {
+        if (caches.isEmpty()) {
+            showAllKinds()
+        } else {
+            caches.forEach { it.refresh() }
         }
-        cache.forceRebuild()
     }
 
     private var mapContentReported = false
@@ -922,7 +879,6 @@ class MapFragment : Fragment() {
     companion object {
         private const val SEARCH_DEBOUNCE_MS = 300L
 
-        private const val STATE_FILTER = "map_filter"
 
         private const val STATE_PLACE_ID = "map_selected_place_id"
 

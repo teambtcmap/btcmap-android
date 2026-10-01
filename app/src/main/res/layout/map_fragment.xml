@@ -82,28 +82,8 @@
             android:layout_marginTop="16dp"
             app:iconSrc="@drawable/icon_warning" />
 
-        <org.btcmap.view.IconButton
-            android:id="@+id/showMerchants"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_marginTop="16dp"
-            android:elevation="4dp"
-            app:iconSrc="@drawable/icon_store"
-            app:selected="true" />
 
-        <org.btcmap.view.IconButton
-            android:id="@+id/showEvents"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_marginTop="16dp"
-            app:iconSrc="@drawable/icon_event" />
 
-        <org.btcmap.view.IconButton
-            android:id="@+id/showExchanges"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_marginTop="16dp"
-            app:iconSrc="@drawable/icon_exchange" />
 
     </LinearLayout>
 
