@@ -50,6 +50,10 @@ kotlin {
             implementation(compose.desktop.currentOs)
             runtimeOnly(libs.maplibre.compose.runtime.opengl.linux.x64)
         }
+
+        jvmTest.dependencies {
+            implementation(kotlin("test"))
+        }
     }
 }
 

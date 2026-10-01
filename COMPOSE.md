@@ -879,6 +879,22 @@ restart (the persisted pack is listed and reported complete), and the
 The PMTiles/basemap side of step 4 is not touched yet: the bundled archive is
 Android-only (`AssetManager`), and the desktop strategy is still open.
 
+### Phase 3, fifteenth slice — done (step 5: the map's area chips)
+
+The map screen now draws its chips with the shared composable: `AreaChipsView`
+(`:ui` androidMain) hosts `AreaChips`, `map_fragment.xml` swaps the `RecyclerView`
+for it, and `MapFragment` feeds it the areas, the app's colors and the click,
+keeping the current list for the activity-feed button. `AreasAdapter` and
+`area_item.xml` are deleted, and `AreaInitialsTest` moves to `:ui`'s new
+`jvmTest` source set (the first test in `:ui`).
+
+Known gap: the connectivity-driven `AreasAdapter.refreshImages()` has no
+equivalent — Coil's `AsyncImage` retries when the composable re-runs, not on a
+connectivity change.
+
+Verified in the app itself (not the spike): the chips render on the Views map
+screen and a chip tap opens the area screen.
+
 ## Working notes
 
 Durable facts and conventions for continuing the migration.

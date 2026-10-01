@@ -1,50 +1,51 @@
-package org.btcmap.map
+package org.btcmap.ui.map
 
-import org.junit.Assert
-import org.junit.Test
+import org.btcmap.map.MapArea
+import kotlin.test.Test
+import kotlin.test.assertEquals
 
 class AreaInitialsTest {
 
     @Test
     fun initials_country_usesTheTwoLetterAlias() {
-        Assert.assertEquals("CW", areaInitials(country("Curaçao", "cw")))
+        assertEquals("CW", areaInitials(country("Curaçao", "cw")))
     }
 
     @Test
     fun initials_country_ignoresTheName() {
         // The alias is the ISO code the country is known by, even when the
         // localized name starts with different letters.
-        Assert.assertEquals("DE", areaInitials(country("Deutschland", "de")))
+        assertEquals("DE", areaInitials(country("Deutschland", "de")))
     }
 
     @Test
     fun initials_community_usesTheFirstLetterOfEachWord() {
-        Assert.assertEquals("BC", areaInitials(community("Bitcoin Curacao")))
+        assertEquals("BC", areaInitials(community("Bitcoin Curacao")))
     }
 
     @Test
     fun initials_community_takesOnlyTheFirstTwoWords() {
-        Assert.assertEquals("AB", areaInitials(community("Albany Bitcoin Group")))
+        assertEquals("AB", areaInitials(community("Albany Bitcoin Group")))
     }
 
     @Test
     fun initials_community_singleWord_usesTheFirstTwoLetters() {
-        Assert.assertEquals("PH", areaInitials(community("Phuket")))
+        assertEquals("PH", areaInitials(community("Phuket")))
     }
 
     @Test
     fun initials_community_ignoresLeadingWhitespace() {
-        Assert.assertEquals("BI", areaInitials(community("  Bitcoin ")))
+        assertEquals("BI", areaInitials(community("  Bitcoin ")))
     }
 
     @Test
     fun initials_community_skipsLeadingNonLetters() {
-        Assert.assertEquals("AB", areaInitials(community("🍊 Alicante Bitcoin")))
+        assertEquals("AB", areaInitials(community("🍊 Alicante Bitcoin")))
     }
 
     @Test
     fun initials_community_returnsEmptyForABlankName() {
-        Assert.assertEquals("", areaInitials(community("   ")))
+        assertEquals("", areaInitials(community("   ")))
     }
 
     private fun country(name: String, urlAlias: String) = area(name, "country", urlAlias)

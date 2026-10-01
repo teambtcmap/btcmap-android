@@ -26,6 +26,7 @@ import androidx.fragment.app.replace
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import androidx.compose.ui.graphics.Color
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import kotlinx.coroutines.Dispatchers
@@ -71,6 +72,10 @@ import org.btcmap.settings.mapStyle
 import org.btcmap.settings.mapViewport
 import org.btcmap.settings.markerBackgroundColor
 import org.btcmap.settings.markerIconColor
+import org.btcmap.settings.badgeBackgroundColor
+import org.btcmap.settings.badgeTextColor
+import org.btcmap.settings.buttonBackgroundColor
+import org.btcmap.settings.buttonIconColor
 import org.btcmap.settings.prefs
 import org.btcmap.settings.showAttribution
 import org.btcmap.settings.uri
@@ -79,6 +84,7 @@ import org.btcmap.syncController
 import org.btcmap.util.DeepLink
 import org.btcmap.util.isOnline
 import org.btcmap.util.openInBrowser
+import org.btcmap.util.iconTypeface
 import org.btcmap.util.rethrowIfCancellation
 import org.maplibre.android.camera.CameraUpdateFactory
 import org.maplibre.android.geometry.LatLng
@@ -343,29 +349,29 @@ class MapFragment : Fragment() {
             }
         }.launchIn(viewLifecycleOwner.lifecycleScope)
 
-        areasAdapter = AreasAdapter(apiUrl = prefs.apiUrl) { area ->
-            openArea(area.id)
-        }
-
-        // Top-down, so the first item in the adapter (a country before its
-        // communities) is the top chip in the bottom-anchored stack.
-        binding.areas.layoutManager = LinearLayoutManager(
-            requireContext(),
-            LinearLayoutManager.VERTICAL,
-            false,
-        )
-        binding.areas.adapter = areasAdapter
+        // The chips are the shared composable now; the map screen only feeds it
+        // the current areas and the app's colors.
+        binding.areas.apiUrl = prefs.apiUrl.toString()
+        binding.areas.buttonBackgroundColor = Color(prefs.buttonBackgroundColor(requireContext()))
+        binding.areas.buttonIconColor = Color(prefs.buttonIconColor(requireContext()))
+        binding.areas.badgeBackgroundColor = Color(prefs.badgeBackgroundColor(requireContext()))
+        binding.areas.badgeTextColor = Color(prefs.badgeTextColor(requireContext()))
+        binding.areas.iconTypeface = iconTypeface
+        binding.areas.onAreaClick = { area -> openArea(area.id) }
 
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                mapAreasController.areas.collect { areasAdapter.submitList(it) }
+                mapAreasController.areas.collect { areas ->
+                    binding.areas.areas = areas
+                    currentAreas = areas
+                }
             }
         }
 
         binding.activityFeed.setOnClickListener {
-            val areaIds = areasAdapter.currentList.map { it.urlAlias }
-            val areaNames = areasAdapter.currentList.map { it.name }
-            val areaTypes = areasAdapter.currentList.map { it.type }
+            val areaIds = currentAreas.map { it.urlAlias }
+            val areaNames = currentAreas.map { it.name }
+            val areaTypes = currentAreas.map { it.type }
             parentFragmentManager.commit {
                 setReorderingAllowed(true)
                 replace<ActivityFeedFragment>(
@@ -764,9 +770,6 @@ class MapFragment : Fragment() {
      * network have settled and the connection is actually usable.
      */
     private val retryChipImages = Runnable {
-        if (_binding != null && ::areasAdapter.isInitialized) {
-            areasAdapter.refreshImages()
-        }
     }
 
     /**
@@ -865,7 +868,7 @@ class MapFragment : Fragment() {
         binding.map.addOnDidFinishRenderingFrameListener(listener)
     }
 
-    private lateinit var areasAdapter: AreasAdapter
+    private var currentAreas: List<MapArea> = emptyList()
 
     private fun initInsets(binding: MapFragmentBinding) {
         ViewCompat.setOnApplyWindowInsetsListener(binding.fabContainer) { v, windowInsets ->

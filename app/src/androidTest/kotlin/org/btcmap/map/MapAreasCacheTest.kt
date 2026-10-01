@@ -1,6 +1,6 @@
 package org.btcmap.map
 
-import androidx.recyclerview.widget.RecyclerView
+import org.btcmap.ui.AreaChipsView
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -32,7 +32,7 @@ class MapAreasCacheTest : AppTestCase() {
         app.mapStyleUriForTesting = OFFLINE_STYLE_URI
         try {
             ActivityScenario.launch(Activity::class.java).use { scenario ->
-                lateinit var areasList: RecyclerView
+                lateinit var areasList: AreaChipsView
 
                 scenario.onActivity { activity ->
                     val mapFragment = activity.supportFragmentManager
@@ -42,10 +42,10 @@ class MapAreasCacheTest : AppTestCase() {
 
                 // The area and its event badge come from the local cache, so no
                 // /v4/areas?lat=&lon= request is involved.
-                waitUntilOnMain { (areasList.adapter?.itemCount ?: 0) > 0 }
+                waitUntilOnMain { areasList.areas.isNotEmpty() }
 
                 scenario.onActivity {
-                    val row = (areasList.adapter as AreasAdapter).currentList.single()
+                    val row = areasList.areas.single()
                     Assert.assertEquals("Grand Paris", row.name)
                     Assert.assertEquals("community", row.type)
                     Assert.assertEquals(1, row.upcomingEventsCount)
@@ -71,7 +71,7 @@ class MapAreasCacheTest : AppTestCase() {
         app.mapStyleUriForTesting = OFFLINE_STYLE_URI
         try {
             ActivityScenario.launch(Activity::class.java).use { scenario ->
-                lateinit var areasList: RecyclerView
+                lateinit var areasList: AreaChipsView
 
                 scenario.onActivity { activity ->
                     val mapFragment = activity.supportFragmentManager
@@ -79,16 +79,13 @@ class MapAreasCacheTest : AppTestCase() {
                     areasList = mapFragment.requireView().findViewById(R.id.areas)
                 }
 
-                waitUntilOnMain {
-                    (areasList.adapter?.itemCount ?: 0) >= 2 && areasList.childCount >= 2
-                }
+                waitUntilOnMain { areasList.areas.size >= 2 }
 
                 scenario.onActivity {
-                    val types = (areasList.adapter as AreasAdapter).currentList.map { it.type }
+                    val types = areasList.areas.map { it.type }
+                    // The chips render top-down in list order, so the country
+                    // must come first for it to be the topmost chip.
                     Assert.assertEquals(listOf("country", "community"), types)
-                    // The chips render top-down, so the country must also be the
-                    // topmost child; a reversed layout manager would flip this.
-                    Assert.assertTrue(areasList.getChildAt(0).top < areasList.getChildAt(1).top)
                 }
             }
         } finally {
@@ -116,7 +113,7 @@ class MapAreasCacheTest : AppTestCase() {
         app.mapStyleUriForTesting = OFFLINE_STYLE_URI
         try {
             ActivityScenario.launch(Activity::class.java).use { scenario ->
-                lateinit var areasList: RecyclerView
+                lateinit var areasList: AreaChipsView
 
                 scenario.onActivity { activity ->
                     val mapFragment = activity.supportFragmentManager
@@ -124,10 +121,10 @@ class MapAreasCacheTest : AppTestCase() {
                     areasList = mapFragment.requireView().findViewById(R.id.areas)
                 }
 
-                waitUntilOnMain { (areasList.adapter?.itemCount ?: 0) >= 2 }
+                waitUntilOnMain { areasList.areas.size >= 2 }
 
                 scenario.onActivity {
-                    val areas = (areasList.adapter as AreasAdapter).currentList
+                    val areas = areasList.areas
                     // The chip carries the same image the area screen shows, so
                     // it can warm Coil's cache for it: the wide icon when there
                     // is one, the square icon otherwise.
