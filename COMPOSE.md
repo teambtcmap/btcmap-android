@@ -1109,6 +1109,39 @@ gdbus call --session --dest org.freedesktop.portal.Desktop \
 Launch the app first so its window is focused — the portal captures the whole
 screen, so whatever is in front is what lands in the file.
 
+### Phase 3, twenty-eighth slice — done (desktop settings screen + headless screenshots)
+
+Two things:
+
+- The settings every host shares (`apiUrl`, `authToken`/`authorized`,
+  `showAttribution`, `mapRotationEnabled`) moved from `:app` to
+  `shared/.../settings/AppSettings.kt`; only the resource-dependent ones (colors,
+  style names) stay with their host. The package is unchanged, so the Android app
+  is untouched.
+- The desktop window gained a **Settings** screen (API URL, Show attribution and
+  Map rotation toggles, the account state), and `:desktopApp` gained a
+  **`screenshot` task** that renders a screen to a PNG without a window
+  (`ImageComposeScene`): `./gradlew :desktopApp:screenshot -Pscreenshot=<screen>:<path>`
+  (`settings` and `cache` today). The map needs a real window and GPU context, so
+  it is not one of the screens this can draw. This makes the desktop UI verifiable
+  headlessly, which the window screenshots could not do.
+
+Verified: the headless render of the settings screen shows the API URL, both
+toggles and the account row.
+
+### Phase 3, twenty-ninth slice — done (desktop window background)
+
+The deskop window's own background is white and Compose Desktop draws nothing
+behind a screen that does not paint one; `SettingsScreen`'s `ListItem`s are
+transparent, so the light window showed through a dark theme. The window (and the
+headless render) now wrap the content in a `Surface`, which paints the theme's
+background. `AppTheme` also gained a `darkTheme: Boolean?` override, and the
+screenshot spec accepts a third field (`dark`/`light`) — the headless render has
+no system theme to read, so it always rendered light before.
+
+Still to do on desktop: the map style is the hosted light `liberty` one, so the
+map stays light in dark mode; it should follow the style setting.
+
 ## Working notes
 
 Durable facts and conventions for continuing the migration.

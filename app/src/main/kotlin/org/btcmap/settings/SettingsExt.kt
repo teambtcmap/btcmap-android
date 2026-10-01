@@ -257,23 +257,6 @@ fun Settings.setBadgeTextColor(color: Int?) {
     putInt("badgeTextColor", color)
 }
 
-private const val KEY_API_URL = "apiUrl"
-
-private const val DEFAULT_API_URL = "https://api.btcmap.org"
-
-/**
- * The configured API base URL. A stored value that cannot be parsed falls back
- * to the public API instead of throwing, so a malformed preference cannot take
- * down every request. `TokenSettingInterceptor` therefore never has to guess.
- */
-var Settings.apiUrl: HttpUrl
-    get() = (getString(KEY_API_URL, null) ?: DEFAULT_API_URL)
-        .toHttpUrlOrNull()
-        ?: DEFAULT_API_URL.toHttpUrl()
-    set(value) {
-        putString(KEY_API_URL, value.toString())
-    }
-
 private const val KEY_BUTTON_BACKGROUND_COLOR = "buttonBackgroundColor"
 
 fun Settings.buttonBackgroundColor(context: Context): Int {
@@ -321,36 +304,6 @@ fun Settings.buttonBorderColor(context: Context): Int {
 fun Settings.setButtonBorderColor(color: Int?) {
     putInt(KEY_BUTTON_BORDER_COLOR, color)
 }
-
-/**
- * The stored session token, or null when signed out. It is written only through
- * [Settings.replaceSession], [Settings.clearSession] and
- * [Settings.clearSessionIfTokenMatches], which keep it consistent with the
- * cached account and serialize against concurrent session changes. It is read
- * from the in-memory session cache and never touches the database, so it is safe
- * to call from the main thread.
- */
-val Settings.authToken: String?
-    get() = sessionToken
-
-val Settings.authorized: Boolean
-    get() = !authToken.isNullOrBlank()
-
-private const val KEY_SHOW_ATTRIBUTION = "show_attribution"
-
-var Settings.showAttribution: Boolean
-    get() = getBoolean(KEY_SHOW_ATTRIBUTION, true)
-    set(value) {
-        putBoolean(KEY_SHOW_ATTRIBUTION, value)
-    }
-
-private const val KEY_MAP_ROTATION_ENABLED = "map_rotation_enabled"
-
-var Settings.mapRotationEnabled: Boolean
-    get() = getBoolean(KEY_MAP_ROTATION_ENABLED, false)
-    set(value) {
-        putBoolean(KEY_MAP_ROTATION_ENABLED, value)
-    }
 
 private const val KEY_VERIFIED_FILTER_YEARS = "verified_filter_years"
 

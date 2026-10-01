@@ -36,6 +36,27 @@ dependencies {
     implementation(libs.androidx.sqlite.bundled.jvm)
 }
 
+// Renders one screen to a PNG without a window, so the desktop UI can be checked
+// from a headless run: `./gradlew :desktopApp:screenshot -Pscreenshot=<screen>:<path>`.
+tasks.register<JavaExec>("screenshot") {
+    group = "verification"
+    description = "Renders a desktop screen to a PNG."
+    classpath = sourceSets.main.get().runtimeClasspath
+    mainClass.set("org.btcmap.desktop.MainKt")
+    javaLauncher.set(
+        javaToolchains.launcherFor {
+            languageVersion.set(JavaLanguageVersion.of(25))
+        },
+    )
+    jvmArgs("--enable-native-access=ALL-UNNAMED")
+    args = listOf(
+        "--screenshot=" + (
+            project.findProperty("screenshot")?.toString()
+                ?: "settings:${layout.buildDirectory.get().asFile}/desktop-screen.png"
+            ),
+    )
+}
+
 compose.desktop {
     application {
         mainClass = "org.btcmap.desktop.MainKt"

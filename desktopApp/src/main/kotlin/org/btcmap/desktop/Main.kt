@@ -25,7 +25,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.NavigationRail
 import androidx.compose.material3.NavigationRailItem
+import androidx.compose.material3.Surface
 import org.btcmap.ui.MaterialSymbol
+import org.btcmap.ui.SettingsItem
+import org.btcmap.ui.SettingsScreen
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.LaunchedEffect
@@ -44,6 +47,10 @@ import org.btcmap.sync.Sync
 import org.btcmap.sync.SyncManager
 import org.btcmap.settings.KEY_AUTH_TOKEN
 import org.btcmap.settings.Settings
+import org.btcmap.settings.apiUrl
+import org.btcmap.settings.authorized
+import org.btcmap.settings.mapRotationEnabled
+import org.btcmap.settings.showAttribution
 import org.btcmap.stats.StatsEntry
 import org.btcmap.stats.StatsSection
 import org.btcmap.ui.AppTheme
@@ -57,7 +64,16 @@ import java.io.File
  * reads back, so the shared data layer runs on the JVM; navigation and the map
  * follow.
  */
-fun main() = application {
+fun main(args: Array<String>) {
+    val screenshot = args.firstOrNull { it.startsWith(SCREENSHOT_ARG) }
+    if (screenshot != null) {
+        renderScreen(screenshot.removePrefix(SCREENSHOT_ARG))
+        return
+    }
+    runApp()
+}
+
+private fun runApp() = application {
     val home = DesktopHome()
     val db = home.database()
     val settings = home.settings(db).apply { preload() }
@@ -97,6 +113,9 @@ fun main() = application {
         val mapHost = rememberAwtComposeMapPresentationHost(window)
         ProvideMapPresentationHost(mapHost) {
             AppTheme(iconFont = iconFont) {
+                // The window's own background is white, which shows through the
+                // transparent rows of screens like the settings list.
+                Surface(modifier = androidx.compose.ui.Modifier.fillMaxSize()) {
                 val syncState by syncManager.state.collectAsState()
                 LaunchedEffect(Unit) { syncManager.start() }
 
@@ -115,6 +134,12 @@ fun main() = application {
                             onClick = { screen = Screen.Stats },
                             icon = { MaterialSymbol(glyph = "insights", contentDescription = null) },
                             label = { Text("Cache") },
+                        )
+                        NavigationRailItem(
+                            selected = screen == Screen.Settings,
+                            onClick = { screen = Screen.Settings },
+                            icon = { MaterialSymbol(glyph = "settings", contentDescription = null) },
+                            label = { Text("Settings") },
                         )
                     }
 
@@ -152,6 +177,8 @@ fun main() = application {
                     onSelectArea = {},
                     formatDistance = { meters -> "%.1f km".format(meters / 1000) },
                 )
+                } else if (screen == Screen.Settings) {
+                    DesktopSettingsScreen(db, settings)
                 } else {
                     Column(
                         verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -165,13 +192,97 @@ fun main() = application {
                 }
                 }
                 }
+                }
             }
         }
     }
 }
 
 /** The desktop app's screens. */
-private enum class Screen { Map, Stats }
+private enum class Screen { Map, Stats, Settings }
+
+private const val SCREENSHOT_ARG = "--screenshot="
+
+/**
+ * Renders one screen to a PNG without opening a window, so the desktop UI can be
+ * checked from a headless/CI run: `--screenshot=<screen>:<path>`. The map needs a
+ * real window and GPU context, so it is not one of the screens this can draw.
+ */
+private fun renderScreen(spec: String) {
+    val parts = spec.split(':')
+    val name = parts[0]
+    val path = parts[1]
+    val darkTheme = when (parts.getOrNull(2)) {
+        "dark" -> true
+        "light" -> false
+        else -> null
+    }
+
+    val home = DesktopHome()
+    val db = home.database()
+    val settings = home.settings(db).apply { preload() }
+
+    val scene = androidx.compose.ui.ImageComposeScene(
+        width = 900,
+        height = 1000,
+        density = androidx.compose.ui.unit.Density(2f),
+    ) {
+        AppTheme(iconFont = loadIconFont(), darkTheme = darkTheme) {
+            // Paint the theme's background, as the window does, so the render
+            // shows what the screen actually sits on.
+            Surface(modifier = androidx.compose.ui.Modifier.fillMaxSize()) {
+                when (name) {
+                    "settings" -> DesktopSettingsScreen(db, settings)
+                    "cache" -> StatsScreen(sections = statsSections(db, settings))
+                    else -> Text(text = "Unknown screen: $name")
+                }
+            }
+        }
+    }
+
+    val bytes = scene.render().encodeToData(org.jetbrains.skia.EncodedImageFormat.PNG)?.bytes
+    scene.close()
+    requireNotNull(bytes) { "could not encode the screenshot" }
+    File(path).writeBytes(bytes)
+    println("desktop: wrote $path")
+}
+
+/** The shared settings list, used by both the window and the screenshot mode. */
+@androidx.compose.runtime.Composable
+private fun DesktopSettingsScreen(
+    db: Database,
+    settings: Settings,
+) {
+    var attribution by remember { mutableStateOf(settings.showAttribution) }
+    var rotation by remember { mutableStateOf(settings.mapRotationEnabled) }
+
+    SettingsScreen(
+        items = listOf(
+            SettingsItem.Action(key = "api", title = "API", secondary = settings.apiUrl.toString()),
+            SettingsItem.Toggle(key = "attribution", title = "Show attribution", checked = attribution),
+            SettingsItem.Toggle(key = "rotation", title = "Map rotation", checked = rotation),
+            SettingsItem.Action(
+                key = "account",
+                title = "Account",
+                secondary = if (settings.authorized) "Signed in" else "Not signed in",
+            ),
+        ),
+        onItemClick = {},
+        onItemCheckedChange = { key, checked ->
+            when (key) {
+                "attribution" -> {
+                    attribution = checked
+                    settings.showAttribution = checked
+                }
+
+                "rotation" -> {
+                    rotation = checked
+                    settings.mapRotationEnabled = checked
+                }
+            }
+        },
+    )
+}
 
 private const val API_URL = "https://api.btcmap.org"
 private const val USER_AGENT = "btcmap-desktop"

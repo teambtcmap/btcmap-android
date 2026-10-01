@@ -3,6 +3,8 @@ package org.btcmap.ui
 import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.darkColorScheme
+import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.staticCompositionLocalOf
@@ -24,10 +26,21 @@ val LocalIconFont = staticCompositionLocalOf<FontFamily?> { null }
 @Composable
 fun AppTheme(
     iconFont: FontFamily? = null,
+    /**
+     * Forces the light or dark scheme instead of the platform's. The desktop's
+     * headless screenshot has no system theme to read, so it passes this.
+     */
+    darkTheme: Boolean? = null,
     content: @Composable () -> Unit,
 ) {
+    val scheme = when (darkTheme) {
+        null -> platformColorScheme()
+        true -> darkColorScheme()
+        false -> lightColorScheme()
+    }
+
     CompositionLocalProvider(LocalIconFont provides iconFont) {
-        MaterialTheme(colorScheme = platformColorScheme()) {
+        MaterialTheme(colorScheme = scheme) {
             // MaterialTheme does not provide a content color, so a bare Text
             // would fall back to black and vanish on a dark background. Set it
             // to the scheme's onBackground for the whole tree.
