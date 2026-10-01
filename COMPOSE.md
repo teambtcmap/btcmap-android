@@ -448,6 +448,17 @@ and the add-screen navigation. `CommentsAdapter` and its item layout stay for
 `PlaceFragment`, which still renders the same rows in Views. Updated
 `CommentsFragmentTest` to drive the Compose view. No behavior change.
 
+### Phase 2, eighth slice — done
+
+Migrated `AddCommentFragment`'s form to a shared `AddCommentForm` in `:ui`:
+the disclosure, the current fee (with a loading spinner and a retry), a
+500-character comment field with a counter and empty-comment validation, and the
+continue button, hosted by an `AddCommentFormComposeView`. The invoice/payment
+block stays a Views `include`, because `InvoicePaymentController` is shared with
+the other payment screens — so this screen is a Compose form plus a Views payment
+block for now. Updated `CommentsFragmentTest` to drive the Compose field and
+button. No behavior change.
+
 ## Next
 
 Phase 2 continues: migrate the remaining non-map screens to `:ui` screen by

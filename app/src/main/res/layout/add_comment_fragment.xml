@@ -2,7 +2,6 @@
 
 <androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -36,122 +35,10 @@
             android:paddingEnd="@dimen/form_horizontal_padding"
             android:paddingBottom="24dp">
 
-            <TextView
+            <org.btcmap.ui.AddCommentFormComposeView
+                android:id="@+id/addCommentForm"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/add_element_comment_disclosure_1"
-                android:textAppearance="?attr/textAppearanceBodyMedium"
-                android:textColor="?attr/colorOnSurfaceVariant" />
-
-            <LinearLayout
-                android:id="@+id/fee_row"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:gravity="start|center_vertical">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/current_fee"
-                    android:textAppearance="?attr/textAppearanceBodyMedium"
-                    android:textColor="?attr/colorOnSurfaceVariant" />
-
-                <TextView
-                    android:id="@+id/fee"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="4dp"
-                    android:textAppearance="?attr/textAppearanceTitleMedium"
-                    android:textColor="?attr/colorOnSurface"
-                    android:accessibilityLiveRegion="polite" />
-
-                <com.google.android.material.progressindicator.CircularProgressIndicator
-                    android:id="@+id/quote_progress"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
-                    android:contentDescription="@string/loading_quote"
-                    android:indeterminate="true"
-                    android:visibility="gone"
-                    app:indicatorSize="16dp"
-                    app:trackThickness="2dp" />
-
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/quote_retry"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:orientation="vertical"
-                android:visibility="gone"
-                tools:visibility="visible">
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/failed_to_load"
-                    android:textAppearance="?attr/textAppearanceBodyMedium"
-                    android:textColor="?attr/colorError" />
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/quote_retry_button"
-                    style="@style/Widget.Material3.Button.TextButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:insetLeft="0dp"
-                    android:insetRight="0dp"
-                    android:insetTop="0dp"
-                    android:insetBottom="0dp"
-                    android:minWidth="0dp"
-                    android:paddingStart="0dp"
-                    android:paddingEnd="0dp"
-                    android:text="@string/tap_to_retry" />
-
-            </LinearLayout>
-
-            <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/comment_input"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:hint="@string/comment"
-                app:counterEnabled="true"
-                app:counterMaxLength="500"
-                app:placeholderText="@string/comment_placeholder">
-
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/comment"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="start"
-                    android:inputType="textMultiLine"
-                    android:lines="5"
-                    android:maxLength="500"
-                    android:maxLines="10" />
-
-            </com.google.android.material.textfield.TextInputLayout>
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btn_continue"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="24dp"
-                android:layout_marginBottom="16dp"
-                android:enabled="false"
-                android:text="@string/btn_continue" />
-
-            <com.google.android.material.progressindicator.CircularProgressIndicator
-                android:id="@+id/order_progress"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:layout_marginTop="8dp"
-                android:contentDescription="@string/loading"
-                android:indeterminate="true"
-                android:visibility="gone"
-                app:indicatorSize="32dp" />
+                android:layout_height="wrap_content" />
 
             <include
                 android:id="@+id/invoice_payment"

@@ -1,21 +1,18 @@
 package org.btcmap.comment
 
 import android.os.Bundle
-import android.widget.Button
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performTextInput
 import androidx.fragment.app.commit
 import androidx.fragment.app.replace
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
-import androidx.test.espresso.Espresso.onView
-import androidx.test.espresso.action.ViewActions.click
-import androidx.test.espresso.action.ViewActions.closeSoftKeyboard
-import androidx.test.espresso.action.ViewActions.typeText
-import androidx.test.espresso.matcher.ViewMatchers.withId
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import mockwebserver3.Dispatcher
 import mockwebserver3.MockResponse
@@ -23,6 +20,8 @@ import mockwebserver3.RecordedRequest
 import org.btcmap.Activity
 import org.btcmap.R
 import org.btcmap.db.table.comment.Comment
+import org.btcmap.ui.COMMENT_CONTINUE_TAG
+import org.btcmap.ui.COMMENT_FIELD_TAG
 import org.btcmap.ui.CommentsComposeView
 import org.btcmap.util.AppTestCase
 import org.btcmap.util.waitUntil
@@ -139,11 +138,13 @@ class CommentsFragmentTest : AppTestCase() {
                     .findFragmentById(R.id.fragmentContainerView) is AddCommentFragment
             }
             waitUntilOnMain {
-                activity.findViewById<Button>(R.id.btn_continue)?.isEnabled == true
+                runCatching {
+                    composeTestRule.onNodeWithTag(COMMENT_CONTINUE_TAG).assertIsEnabled()
+                }.isSuccess
             }
 
-            onView(withId(R.id.comment)).perform(typeText("gm"), closeSoftKeyboard())
-            onView(withId(R.id.btn_continue)).perform(click())
+            composeTestRule.onNodeWithTag(COMMENT_FIELD_TAG).performTextInput("gm")
+            composeTestRule.onNodeWithTag(COMMENT_CONTINUE_TAG).performClick()
 
             waitUntil { dispatcher.orderRequests.get() == 1 }
             waitUntilOnMain {
@@ -186,11 +187,13 @@ class CommentsFragmentTest : AppTestCase() {
                     .findFragmentById(R.id.fragmentContainerView) is AddCommentFragment
             }
             waitUntilOnMain {
-                activity.findViewById<Button>(R.id.btn_continue)?.isEnabled == true
+                runCatching {
+                    composeTestRule.onNodeWithTag(COMMENT_CONTINUE_TAG).assertIsEnabled()
+                }.isSuccess
             }
 
-            onView(withId(R.id.comment)).perform(typeText("gm"), closeSoftKeyboard())
-            onView(withId(R.id.btn_continue)).perform(click())
+            composeTestRule.onNodeWithTag(COMMENT_FIELD_TAG).performTextInput("gm")
+            composeTestRule.onNodeWithTag(COMMENT_CONTINUE_TAG).performClick()
 
             waitUntil { dispatcher.orderRequests.get() == 1 }
             waitUntilOnMain {
@@ -237,11 +240,13 @@ class CommentsFragmentTest : AppTestCase() {
                     .findFragmentById(R.id.fragmentContainerView) is AddCommentFragment
             }
             waitUntilOnMain {
-                activity.findViewById<Button>(R.id.btn_continue)?.isEnabled == true
+                runCatching {
+                    composeTestRule.onNodeWithTag(COMMENT_CONTINUE_TAG).assertIsEnabled()
+                }.isSuccess
             }
 
-            onView(withId(R.id.comment)).perform(typeText("gm"), closeSoftKeyboard())
-            onView(withId(R.id.btn_continue)).perform(click())
+            composeTestRule.onNodeWithTag(COMMENT_FIELD_TAG).performTextInput("gm")
+            composeTestRule.onNodeWithTag(COMMENT_CONTINUE_TAG).performClick()
 
             waitUntil { dispatcher.orderRequests.get() == 1 }
             waitUntilOnMain {
@@ -287,11 +292,13 @@ class CommentsFragmentTest : AppTestCase() {
                     .findFragmentById(R.id.fragmentContainerView) is AddCommentFragment
             }
             waitUntilOnMain {
-                activity.findViewById<Button>(R.id.btn_continue)?.isEnabled == true
+                runCatching {
+                    composeTestRule.onNodeWithTag(COMMENT_CONTINUE_TAG).assertIsEnabled()
+                }.isSuccess
             }
 
-            onView(withId(R.id.comment)).perform(typeText("gm"), closeSoftKeyboard())
-            onView(withId(R.id.btn_continue)).perform(click())
+            composeTestRule.onNodeWithTag(COMMENT_FIELD_TAG).performTextInput("gm")
+            composeTestRule.onNodeWithTag(COMMENT_CONTINUE_TAG).performClick()
 
             waitUntil { dispatcher.orderRequests.get() == 1 }
             waitUntilOnMain {
@@ -330,11 +337,13 @@ class CommentsFragmentTest : AppTestCase() {
                     .findFragmentById(R.id.fragmentContainerView) is AddCommentFragment
             }
             waitUntilOnMain {
-                activity.findViewById<Button>(R.id.btn_continue)?.isEnabled == true
+                runCatching {
+                    composeTestRule.onNodeWithTag(COMMENT_CONTINUE_TAG).assertIsEnabled()
+                }.isSuccess
             }
 
-            onView(withId(R.id.comment)).perform(typeText("gm"), closeSoftKeyboard())
-            onView(withId(R.id.btn_continue)).perform(click())
+            composeTestRule.onNodeWithTag(COMMENT_FIELD_TAG).performTextInput("gm")
+            composeTestRule.onNodeWithTag(COMMENT_CONTINUE_TAG).performClick()
 
             waitUntil { dispatcher.orderRequests.get() == 1 }
             waitUntilOnMain {
