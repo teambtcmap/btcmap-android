@@ -33,8 +33,8 @@ private const val SEARCH_DEBOUNCE_MS = 300L
 private const val AREA_ICON = "public"
 
 /**
- * The local search results for [query], ported from
- * `org.btcmap.map.SearchController`. Places, areas and events come from the
+ * The local search results for [query], ported from the app's Views search.
+ * Places, areas and events come from the
  * local cache only, so search needs no network call. Results are ordered like
  * the server: boosted places first, then exact, prefix and substring name
  * matches, with proximity breaking ties.

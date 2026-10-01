@@ -112,6 +112,14 @@ class MapComposeView @JvmOverloads constructor(
 
     var openPlaceId: Long? by mutableStateOf(null)
 
+    var reloadKey: Int by mutableStateOf(0)
+
+    var onCameraIdle: ((Double, Double, Double) -> Unit)? by mutableStateOf(null)
+
+    var placeSheet: Boolean by mutableStateOf(true)
+
+    var openTarget: Pair<Double, Double>? by mutableStateOf(null)
+
     @Composable
     override fun Content() {
         val fontFamily = remember(iconTypeface) { iconTypeface?.let { FontFamily(it) } }
@@ -146,6 +154,10 @@ class MapComposeView @JvmOverloads constructor(
             onAddPlace = onAddPlace,
             onOpenFeed = onOpenFeed,
             openPlaceId = openPlaceId,
+            reloadKey = reloadKey,
+            onCameraIdle = onCameraIdle,
+            placeSheet = placeSheet,
+            openTarget = openTarget,
             photos = photos,
             bookmarked = bookmarked,
             onPlaceSelected = onPlaceSelected,

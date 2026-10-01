@@ -27,10 +27,10 @@ import org.btcmap.map.isOutdated
 import kotlin.math.roundToInt
 
 /**
- * Builds the marker bitmaps in common Compose graphics, ported from
- * `org.btcmap.map.MarkerIcon` (which draws them with the Android Canvas). The
- * pin outline is the same vector as `R.drawable.map_marker`; the glyph and the
- * comment badge are laid out at the same dp sizes.
+ * Builds the marker bitmaps in common Compose graphics, ported from the Views
+ * builder that did the same with the Android Canvas. The pin outline is the
+ * same vector as `R.drawable.map_marker`; the glyph and the comment badge are
+ * laid out at the same dp sizes.
  */
 class MarkerBitmapFactory(
     private val textMeasurer: TextMeasurer,

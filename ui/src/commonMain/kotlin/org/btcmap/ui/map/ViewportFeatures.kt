@@ -23,13 +23,19 @@ class ViewportFeatures<T>(val snapshot: Set<T>, val geoJson: String)
 
 /**
  * Keeps a GeoJSON string up to date with the features in the map's viewport,
- * ported from `org.btcmap.map.ViewportCache`. The features accumulate in a
+ * ported from the app's Viewport Views cache. The features accumulate in a
  * [FeatureStore] so panning back over an already-loaded area does not refetch
  * it. The query runs when the camera comes to rest, not on every frame.
  */
 @Composable
 fun <T : Any> rememberViewportFeatures(
     state: MapState,
+    /**
+     * Bumped by the host when the synced data behind these features changed, so
+     * the viewport is queried again instead of being left stale until the next
+     * camera move.
+     */
+    reloadKey: Int = 0,
     idOf: (T) -> Long,
     toGeoJson: (Set<T>) -> String,
     fetch: suspend (ViewportBounds) -> List<T>,
@@ -41,7 +47,7 @@ fun <T : Any> rememberViewportFeatures(
     var snapshot by remember { mutableStateOf<Set<T>>(emptySet()) }
     var geoJson by remember { mutableStateOf(EMPTY_GEOJSON) }
 
-    LaunchedEffect(state, state.style.loadState) {
+    LaunchedEffect(state, state.style.loadState, reloadKey) {
         if (state.style.loadState !is StyleLoadState.Ready) return@LaunchedEffect
 
         suspend fun load() {

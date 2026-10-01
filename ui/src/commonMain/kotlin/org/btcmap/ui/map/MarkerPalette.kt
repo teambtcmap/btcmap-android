@@ -3,8 +3,8 @@ package org.btcmap.ui.map
 import androidx.compose.ui.graphics.Color
 
 /**
- * The marker colors the app supplies to the shared map, mirroring the color
- * roles `MapSetupController` is given on Android.
+ * The marker colors the app supplies to the shared map: the marker background
+ * and icon, the boosted variants, and the comment-count badge.
  */
 data class MarkerPalette(
     val markerBackground: Color,

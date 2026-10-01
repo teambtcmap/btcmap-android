@@ -21,7 +21,7 @@ import org.maplibre.compose.map.StyleLoadState
  * driving [MapAreasController].
  */
 @Composable
-fun rememberMapAreas(state: MapState, db: Database): List<MapArea> {
+fun rememberMapAreas(state: MapState, db: Database, reloadKey: Int = 0): List<MapArea> {
     val controller = remember(db) { MapAreasController(db) }
     DisposableEffect(controller) {
         onDispose { controller.dispose() }
@@ -30,7 +30,7 @@ fun rememberMapAreas(state: MapState, db: Database): List<MapArea> {
     val areas by controller.areas.collectAsState()
     val loadState = state.style.loadState
 
-    LaunchedEffect(state, controller, loadState) {
+    LaunchedEffect(state, controller, loadState, reloadKey) {
         if (loadState !is StyleLoadState.Ready) return@LaunchedEffect
 
         fun load() {

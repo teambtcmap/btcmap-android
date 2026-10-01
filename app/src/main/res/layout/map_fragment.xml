@@ -5,26 +5,16 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <org.maplibre.android.maps.MapView
+    <!--
+        The map itself is the shared Compose map, which also draws the search
+        field, the area chips, the activity button and the location button. What
+        is left here is the Android-only chrome around it: the place sheet with
+        its Views place screen, the sync and update buttons, and the attribution.
+    -->
+    <org.btcmap.ui.MapComposeView
         android:id="@+id/map"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
-
-    </org.maplibre.android.maps.MapView>
-
-    <com.google.android.material.appbar.AppBarLayout
-        android:id="@+id/appBar"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@android:color/transparent"
-        android:fitsSystemWindows="true">
-
-        <org.btcmap.ui.SearchOverlayView
-            android:id="@+id/search"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
-
-    </com.google.android.material.appbar.AppBarLayout>
+        android:layout_height="match_parent" />
 
     <TextView
         android:id="@+id/debugStats"
@@ -82,52 +72,7 @@
             android:layout_marginTop="16dp"
             app:iconSrc="@drawable/icon_warning" />
 
-
-
-
     </LinearLayout>
 
-    <LinearLayout
-        android:id="@+id/fabContainer"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="end|bottom"
-        android:layout_margin="24dp"
-        android:orientation="vertical">
-
-        <org.btcmap.ui.AreaChipsView
-            android:id="@+id/areas"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="8dp" />
-
-        <org.btcmap.view.IconButton
-            android:id="@+id/activityFeed"
-            android:layout_width="56dp"
-            android:layout_height="56dp"
-            android:layout_marginBottom="8dp"
-            app:iconSrc="@drawable/icon_activity" />
-
-        <org.btcmap.view.IconButton
-            android:id="@+id/fab"
-            android:layout_width="56dp"
-            android:layout_height="56dp"
-            android:layout_marginTop="8dp"
-            app:iconSrc="@drawable/icon_my_location" />
-
-    </LinearLayout>
-
-    <TextView
-        android:id="@+id/attribution"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom|center_horizontal"
-        android:layout_marginBottom="32dp"
-        android:paddingHorizontal="6dp"
-        android:paddingVertical="2dp"
-        android:textColor="@color/osm_attribution_text"
-        android:textSize="11sp"
-        android:text="@string/osm_attribution"
-        android:contentDescription="@string/osm_attribution" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

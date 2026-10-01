@@ -16,9 +16,11 @@ Done and pushed:
 - **`:ui`** — the Compose Multiplatform UI: the previously Views screens, the
   shared theme/toolkit, and the map (`MapScreen` and its layers, markers, chips,
   search, place sheet with photos/comments/preview map, offline packs).
-- **Android** — the area chips, search, place preview map, event map and the whole
-  place sheet are on the shared map; the MapLibre Android SDK is still used only
-  by `MapFragment` and the remaining Views pieces.
+- **Android** — the **main map is the shared map**: markers, clusters, chips,
+  search, the location button and the activity button all come from `MapScreen`.
+  The place sheet is still the Views `PlaceFragment` (its twelve actions live
+  there), and the MapLibre Android SDK is still used by the offline-pack
+  downloader and the add-place form.
 - **Desktop (`:desktopApp`)** — runs, opens the shared database in `~/.btcmap`,
   syncs the full cache, renders the shared map with the bundled styles and font,
   and opens Settings from the search bar's gear and Activity from a pulse button
@@ -26,19 +28,22 @@ Done and pushed:
 
 Next, in rough order of value:
 
-1. **Android main map swap** — point `MapFragment` at the shared map and delete
-   `MapSetupController`, `MarkerIcon`, the layer builders, `MapSelectionController`,
-   `LocationController`, `SearchController`, `BottomSheetController` and
-   `ViewportCache`/caches, then drop the MapLibre Android SDK. Every former
-   blocker is gone (slices 35-38): the marker filter and the offline bundled
-   basemap were dropped, the location button was ported, and the shared map now
-   has the hooks the Android host needs (see slice 38), so what remains is the
-   fragment and layout rewrite, the deletions, and the instrumented tests that
-   target the Views UI.
-2. **Desktop polish** — the add-place flow, the comments/user-profile screens and
-   the auth forms (they need a place/session context).
-3. **Packaging** — `packageDeb` needs `dpkg-deb` (absent here); DMG/MSI need
-   their platforms.
+1. **Place sheet action parity** — the map screen keeps its Views place screen,
+   because the shared sheet's twelve actions (verify, report, boost, photos,
+   bookmark, comments) are implemented there. Porting them to the Compose sheet is
+   the last big Android slice; `MapScreen.placeSheet = false` is the staging flag
+   that keeps the Views sheet in charge meanwhile.
+2. **Desktop polish** — the add-place flow, the comments/user-profile screens and the
+   auth forms on the desktop (they need a place/session context).
+3. **Port the deleted search tests.** `EventSearchTest`'s offline search cases
+   went with the Views search; the shared `MapSearch` is its port and has no tests
+   yet. `MarkerIconTest`'s glyph check went the same way (the shared
+   `MarkerBitmapFactory.renderableGlyph` is private and needs a font in jvmTest).
+4. **Small parity gaps** left by the swap, all listed in slice 39: the map is no
+   longer reported fully drawn, tapping empty map no longer dismisses the place
+   sheet, an area search result opens the area screen instead of framing its
+   bbox, and the `showAttribution` setting no longer hides the map's own
+   attribution.
 
 ## Goal
 
@@ -1303,6 +1308,57 @@ Verified through the spike activity on the emulator: `openPlaceId` selected
 "Bazzart" (12 Ząbkowska, Warszawa), moved the camera to it at zoom 16 and opened
 the sheet; panning away and then tapping the same search result brought the map
 back to the place. The add-place and feed hooks are wired in the spike (Toasts).
+
+### Phase 3, thirty-ninth slice — done (the Android main map swap)
+
+`MapFragment` hosts the shared `MapComposeView` now, and the Views map stack is
+gone: `MapSetupController`, `MapSelectionController`, `LocationController`,
+`MarkerIcon`, `ViewportCache` with the three caches, `SearchController`, the three
+layer builders, `LatLngBoundsExt`, and the `SearchOverlayView`/`AreaChipsView`
+Views wrappers around the shared composables. The layout keeps only the
+Android-side chrome: the place bottom sheet, the sync and update buttons and the
+debug stats view; the search field, the chips, the activity and location buttons
+and the attribution are the shared map's own.
+
+The host feeds the map the database, the bundled style JSON, the stored camera
+and the app's colours, and takes back what stays Android's: `onPlaceSelected`
+opens the Views place sheet, `onAreaSelected` opens the area screen,
+`onEventSelected` opens the event screen, `onOpenFeed` opens the activity feed for
+the areas the map is showing, `onAddPlace` opens the add-place form at the centre
+the map reports, and `onCameraIdle` saves the camera so the next launch reopens
+where the user left off (new `mapCenterLat`/`mapCenterLon`/`mapZoom` settings,
+replacing the `LatLngBounds` one). `SyncEvent`s bump a `reloadKey`, so the
+markers and chips requery when a sync finishes instead of staying stale until the
+next camera move.
+
+**The place sheet stays Views on purpose.** The shared sheet's twelve actions are
+implemented in `PlaceFragment` (verify, report, boost, add photo, comments,
+bookmark, share), so the map borrows only the map and keeps its own sheet:
+`placeSheet = false`.
+
+Verified on the emulator: the map renders the bundled dark style with markers and
+clusters, the area chips, the search field with its add-place and settings
+actions, the activity and location buttons and the attribution; tapping a marker
+opens the Views place sheet with every action; searching for "mommies" listed
+"Mommies Angels, 2.2 km" and tapping it moved the camera to the place (zoom 16)
+and opened the sheet; the activity button opened the feed for the map's areas; and
+the camera was restored after a force-stop and relaunch.
+
+Tests: the instrumented Views-map tests went with the Views map
+(`MapPlaceSelectionTest`, `MapPlaceSearchTest`, `MapAreasCacheTest`,
+`MapSelectionErrorHandlingTest`, `EventSearchTest`, `MarkerIconTest`,
+`ParisPlaces`), as did the app-side `SearchControllerTest`,
+`MarkerImageRegistryTest` and `LatLngBoundsExtTest`. `LatLngBoundsExtTest` was
+instead **ported** to `:ui:jvmTest` as `ViewportBoundsTest` (minus the
+`queryByBounds` cases, which the shared map does with `longitudeRanges().flatMap`,
+and the crossing-viewport `expand` case, which `VisibleBounds` refuses to
+construct). Porting the search and marker-glyph tests is listed as remaining work.
+
+Known gaps this leaves: the startup "fully drawn" report the Views map made; the
+place sheet no longer closes on a tap on empty map (the shared map has no no-hit
+callback); an area **search result** opens the area screen rather than framing the
+area's bbox as before; and the map's own attribution replaces the Views one, so
+the `showAttribution` setting no longer hides anything.
 
 ## Working notes
 

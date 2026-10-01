@@ -16,6 +16,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.withFrameNanos
+import kotlinx.coroutines.flow.filterIsInstance
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
@@ -68,6 +69,7 @@ import org.maplibre.compose.location.LocationPermission
 import org.maplibre.compose.location.LocationTrackingEffect
 import org.maplibre.compose.location.rememberLocationState
 import org.maplibre.compose.map.LocalMapState
+import org.maplibre.compose.map.MapEvent
 import org.maplibre.compose.map.MaplibreMap
 import org.maplibre.compose.map.StyleLoadState
 import org.maplibre.compose.map.rememberMapState
@@ -101,6 +103,24 @@ fun MapScreen(
      */
     onAddPlace: ((Double, Double) -> Unit)? = null,
     onOpenFeed: ((List<MapArea>) -> Unit)? = null,
+    /**
+     * Bumped by the host when the synced data changed, so the markers and the
+     * area chips are queried again rather than left stale until the next camera
+     * move.
+     */
+    reloadKey: Int = 0,
+    /** Reports where the camera came to rest, so the host can remember it. */
+    onCameraIdle: ((Double, Double, Double) -> Unit)? = null,
+    /**
+     * Whether the map draws its own place sheet. A host with a place screen of
+     * its own says no and handles [onPlaceSelected] itself.
+     */
+    placeSheet: Boolean = true,
+    /**
+     * A point the host wants the map to move to, as latitude to longitude, for
+     * a place that is not in the local cache.
+     */
+    openTarget: Pair<Double, Double>? = null,
     /**
      * A place the host wants the map to open from outside it, such as a deep
      * link. The map selects it and moves to it, as a tap on its marker would.
@@ -238,7 +258,23 @@ fun MapScreen(
         }
     }
 
-    val areas = rememberMapAreas(state, db)
+    val areas = rememberMapAreas(state, db, reloadKey)
+
+    // The host may want to remember where the user left the map.
+    LaunchedEffect(state, onCameraIdle) {
+        val callback = onCameraIdle ?: return@LaunchedEffect
+        state.events.filterIsInstance<MapEvent.CameraMoveEnded>().collect {
+            val camera = state.cameraPosition ?: return@collect
+            callback(camera.target.latitude, camera.target.longitude, camera.zoom)
+        }
+    }
+
+    LaunchedEffect(openTarget) {
+        val target = openTarget ?: return@LaunchedEffect
+        state.animateCamera(
+            CameraUpdate(target = Position(target.second, target.first), zoom = OPEN_ZOOM),
+        )
+    }
 
     LaunchedEffect(openPlaceId) {
         val id = openPlaceId ?: return@LaunchedEffect
@@ -304,6 +340,7 @@ fun MapScreen(
 
     val merchants = rememberViewportFeatures(
         state = state,
+        reloadKey = reloadKey,
         idOf = { it.id },
         toGeoJson = { it.toMarkerGeoJson() },
     ) { bounds ->
@@ -314,6 +351,7 @@ fun MapScreen(
 
     val exchanges = rememberViewportFeatures(
         state = state,
+        reloadKey = reloadKey,
         idOf = { it.id },
         toGeoJson = { it.toMarkerGeoJson() },
     ) { bounds ->
@@ -324,6 +362,7 @@ fun MapScreen(
 
     val events = rememberViewportFeatures(
         state = state,
+        reloadKey = reloadKey,
         idOf = { it.id },
         toGeoJson = { it.toEventGeoJson() },
     ) { bounds ->
@@ -421,7 +460,7 @@ fun MapScreen(
                     MaterialSymbol(glyph = "my_location", contentDescription = null)
                 }
             }
-            selectedPlace?.let { place ->
+            if (placeSheet) selectedPlace?.let { place ->
                 PlaceSheet(
                     place = place,
                     comments = selectedComments,

@@ -4,7 +4,7 @@ package org.btcmap.ui.map
 const val MARKER_PIN_IMAGE_ID = "btcmap-marker"
 
 /**
- * Opacity of an outdated marker's glyph, matching
- * `org.btcmap.map.MarkerIcon.OUTDATED_ICON_ALPHA`.
+ * Opacity of an outdated marker's glyph, matching the alpha the Views marker
+ * builder gave it.
  */
 const val OUTDATED_ICON_ALPHA = 0.6f

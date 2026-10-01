@@ -6,7 +6,6 @@ import androidx.core.content.edit
 import androidx.core.graphics.toColorInt
 import org.btcmap.App
 import org.btcmap.R
-import org.maplibre.android.geometry.LatLngBounds
 import okhttp3.HttpUrl
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
@@ -27,21 +26,29 @@ fun init(app: App) {
     )
 }
 
-var Settings.mapViewport: LatLngBounds
-    get() {
-        return LatLngBounds.from(
-            latNorth = getFloat("latNorth", 12.116667f + 0.04f).toDouble(),
-            lonEast = getFloat("lonEast", -68.93333f + 0.04f + 0.03f).toDouble(),
-            latSouth = getFloat("latSouth", 12.116667f - 0.04f).toDouble(),
-            lonWest = getFloat("lonWest", -68.93333f - 0.04f + 0.03f).toDouble(),
-        )
-    }
-    set(value) {
-        putFloat("latNorth", value.latitudeNorth.toFloat())
-        putFloat("lonEast", value.longitudeEast.toFloat())
-        putFloat("latSouth", value.latitudeSouth.toFloat())
-        putFloat("lonWest", value.longitudeWest.toFloat())
-    }
+/**
+ * Where the map was last left. The map screen saves these as the camera comes to
+ * rest and reopens there, so the app returns to what the user was looking at.
+ */
+var Settings.mapCenterLat: Double
+    get() = getFloat("mapCenterLat", DEFAULT_CENTER_LAT.toFloat()).toDouble()
+    set(value) = putFloat("mapCenterLat", value.toFloat())
+
+var Settings.mapCenterLon: Double
+    get() = getFloat("mapCenterLon", DEFAULT_CENTER_LON.toFloat()).toDouble()
+    set(value) = putFloat("mapCenterLon", value.toFloat())
+
+var Settings.mapZoom: Double
+    get() = getFloat("mapZoom", DEFAULT_ZOOM.toFloat()).toDouble()
+    set(value) = putFloat("mapZoom", value.toFloat())
+
+/**
+ * The default view before anything has been saved: the island the app's old
+ * default viewport framed, at the zoom that viewport worked out to.
+ */
+private const val DEFAULT_CENTER_LAT = 12.116667
+private const val DEFAULT_CENTER_LON = -68.90333
+private const val DEFAULT_ZOOM = 12.0
 
 fun MapStyle.name(context: Context): String {
     return when (this) {

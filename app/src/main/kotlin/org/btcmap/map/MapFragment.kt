@@ -1,23 +1,13 @@
 package org.btcmap.map
 
-import android.Manifest
-import android.content.pm.PackageManager
-import android.net.ConnectivityManager
-import android.net.Network
-import android.net.NetworkCapabilities
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.core.app.ActivityCompat
-import androidx.core.net.toUri
+import androidx.compose.ui.graphics.Color
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
-import androidx.core.view.isVisible
 import androidx.core.view.updateLayoutParams
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.commit
@@ -25,22 +15,13 @@ import androidx.fragment.app.replace
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import androidx.compose.ui.graphics.Color
-import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.btcmap.Activity
 import org.btcmap.App
 import org.btcmap.R
-import org.btcmap.sync.SyncEvent
-import org.btcmap.sync.SyncState
-import org.btcmap.feed.ActivityFeedFragment
 import org.btcmap.api
 import org.btcmap.api.getEvent
 import org.btcmap.api.getPlaceCoordinates
@@ -49,14 +30,13 @@ import org.btcmap.area.AreaFragment
 import org.btcmap.auth.registerAuthResultListener
 import org.btcmap.auth.showAuthDialog
 import org.btcmap.db
-import org.btcmap.db.table.place.Place
 import org.btcmap.databinding.MapFragmentBinding
 import org.btcmap.event.EventFragment
 import org.btcmap.event.toBundle
+import org.btcmap.feed.ActivityFeedFragment
 import org.btcmap.place.AddPlaceFragment
+import org.btcmap.db.table.place.Place
 import org.btcmap.place.PlaceFragment
-import org.btcmap.place.isMerchant
-import org.btcmap.search.SearchAdapterItem
 import org.btcmap.settings.SettingsFragment
 import org.btcmap.settings.apiUrl
 import org.btcmap.settings.authorized
@@ -64,29 +44,25 @@ import org.btcmap.settings.badgeBackgroundColor
 import org.btcmap.settings.badgeTextColor
 import org.btcmap.settings.boostedMarkerBackgroundColor
 import org.btcmap.settings.boostedMarkerIconColor
-import org.btcmap.settings.mapRotationEnabled
-import org.btcmap.settings.mapStyle
-import org.btcmap.settings.mapViewport
-import org.btcmap.settings.markerBackgroundColor
-import org.btcmap.settings.markerIconColor
-import org.btcmap.settings.badgeBackgroundColor
-import org.btcmap.settings.badgeTextColor
 import org.btcmap.settings.buttonBackgroundColor
 import org.btcmap.settings.buttonIconColor
+import org.btcmap.settings.mapCenterLat
+import org.btcmap.settings.mapCenterLon
+import org.btcmap.settings.mapStyle
+import org.btcmap.settings.mapZoom
+import org.btcmap.settings.markerBackgroundColor
+import org.btcmap.settings.markerIconColor
 import org.btcmap.settings.prefs
-import org.btcmap.settings.showAttribution
 import org.btcmap.settings.uri
 import org.btcmap.settings.verifiedFilterMinVerifiedAt
+import org.btcmap.sync.SyncState
 import org.btcmap.syncController
+import org.btcmap.ui.map.SearchActions
+import org.btcmap.ui.map.bundledStyleJsonFor
 import org.btcmap.util.DeepLink
-import org.btcmap.util.isOnline
-import org.btcmap.util.openInBrowser
 import org.btcmap.util.iconTypeface
 import org.btcmap.util.rethrowIfCancellation
-import org.maplibre.android.camera.CameraUpdateFactory
-import org.maplibre.android.geometry.LatLng
-import org.maplibre.android.geometry.LatLngBounds
-import org.maplibre.android.maps.MapView
+import java.text.NumberFormat
 
 class MapFragment : Fragment() {
     private var _binding: MapFragmentBinding? = null
@@ -95,32 +71,6 @@ class MapFragment : Fragment() {
     private var statusBarController: MapStatusBarController? = null
     private var bottomSheetController: BottomSheetController? = null
     private var updateNotificationController: UpdateNotificationController? = null
-
-    private val caches = mutableListOf<ViewportCache<*>>()
-    private var mapSelectionController: MapSelectionController? = null
-    private var mapSetupController: MapSetupController? = null
-    private var locationController: LocationController? = null
-
-    private lateinit var searchController: SearchController
-    private lateinit var mapAreasController: MapAreasController
-
-    private val locationPermissionRequest = registerForActivityResult(
-        ActivityResultContracts.RequestMultiplePermissions(),
-    ) {
-        // The result can be delivered after the view is gone (the callback is
-        // not view-lifecycle-scoped); there is nothing left to build a location
-        // component on, and touching the binding would throw.
-        if (_binding == null) return@registerForActivityResult
-        if (it.getOrDefault(Manifest.permission.ACCESS_COARSE_LOCATION, false)) {
-            ensureLocationController().onPermissionGranted(requireContext(), animateToFirstKnown = true)
-        }
-    }
-
-    private fun ensureLocationController(): LocationController {
-        val existing = locationController
-        if (existing != null) return existing
-        return LocationController(binding.map).also { locationController = it }
-    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -135,32 +85,9 @@ class MapFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // Restore the filter before the map's first position settles, so a
-        // rotation does not drop the list the user was looking at. On a
-        // back-stack return there is no saved state (the fragment instance
-        // survives, only its view is recreated), so the field keeps the filter
-        // the user last chose; a fresh instance defaults to merchants.
         // Registered here, not when the dialog is shown, so a form that was open
         // when the device rotated still reaches this (recreated) fragment.
-        registerAuthResultListener { navigateToAddPlace() }
-
-        // The MapView owns native resources and must receive its lifecycle
-        // callbacks; without onDestroy in particular, reopening the map leaves a
-        // dead renderer behind and later queries can crash natively.
-        binding.map.onCreate(savedInstanceState)
-
-        // Capture the viewport to restore before any camera idle can overwrite
-        // it, so the restore does not race the map's default camera. moveTo
-        // clears it for a deep link or a search selection on this view.
-        viewportToRestore = prefs.mapViewport
-        mapPositioned = false
-
-        searchController = SearchController(
-            db = db(),
-            resources = resources,
-        )
-
-        mapAreasController = MapAreasController(db = db())
+        registerAuthResultListener { addPlaceAfterAuth() }
 
         val bottomSheet = BottomSheetController(
             view = binding.placeBottomSheet,
@@ -185,90 +112,7 @@ class MapFragment : Fragment() {
             icon = binding.update,
         )
 
-        binding.search.onAddPlace = { openAddPlace() }
-        binding.search.onSettings = { navigateToSettings() }
-        binding.search.placeholder = getString(R.string.search_hint)
-        binding.search.iconTypeface = iconTypeface
-        binding.search.onResultClick = { row ->
-            binding.search.query = ""
-            binding.search.results = emptyList()
-            when (row) {
-                is SearchAdapterItem.Place -> openPlace(row)
-                is SearchAdapterItem.Area -> openArea(row)
-                is SearchAdapterItem.Event -> openEventById(row.eventId)
-            }
-        }
-
-        binding.attribution.isVisible = prefs.showAttribution
-        binding.attribution.setOnClickListener {
-            openInBrowser(getString(R.string.osm_attribution_url).toUri())
-        }
-
-        val app = requireContext().applicationContext as App
-        val styleUri = app.mapStyleUriForTesting ?: prefs.mapStyle.uri(requireContext())
-        mapSetupController = MapSetupController(
-            mapView = binding.map,
-            styleUri = styleUri,
-            markerBackgroundColor = prefs.markerBackgroundColor(requireContext()),
-            markerIconColor = prefs.markerIconColor(requireContext()),
-            markerBadgeBackgroundColor = prefs.badgeBackgroundColor(requireContext()),
-            markerBadgeTextColor = prefs.badgeTextColor(requireContext()),
-            boostedMarkerBackgroundColor = prefs.boostedMarkerBackgroundColor(),
-            boostedMarkerIconColor = prefs.boostedMarkerIconColor(),
-            // Every selectable style draws from OpenFreeMap, so it carries the
-            // Noto Sans Bold font the cluster counts need. A test style pinned
-            // via mapStyleUriForTesting does not.
-            usingOpenFreeMap = app.mapStyleUriForTesting == null,
-            rotationEnabled = prefs.mapRotationEnabled,
-        ).also {
-            it.install()
-        }
-        registerConnectivity()
-
-        binding.map.getMapAsync { map ->
-            if (_binding == null) return@getMapAsync
-            map.addOnCameraIdleListener {
-                if (_binding == null) return@addOnCameraIdleListener
-                val bounds = map.projection.visibleRegion.latLngBounds
-                // The default camera is not a position the user chose: saving it
-                // would replace the stored viewport with the world view and the
-                // next open would zoom all the way out.
-                if (mapPositioned) prefs.mapViewport = bounds
-                mapAreasController.load(bounds.center.latitude, bounds.center.longitude)
-            }
-
-            // The setup controller owns the per-map marker image registry, so
-            // hit-testing rejects taps through a marker's transparent pixels
-            // using the same images the renderer was given.
-            val setup = mapSetupController ?: return@getMapAsync
-            mapSelectionController = MapSelectionController(
-                map = map,
-                db = db(),
-                markerImageRegistry = setup.markerImageRegistry,
-                onOpenPlace = ::selectPlace,
-                onOpenEvent = { openEvent(it.toBundle()) },
-                onNoHit = { bottomSheetController?.hide() },
-            ).also { controller -> controller.install() }
-        }
-
-        if (ActivityCompat.checkSelfPermission(
-                requireContext(), Manifest.permission.ACCESS_FINE_LOCATION
-            ) == PackageManager.PERMISSION_GRANTED
-        ) {
-            ensureLocationController().onPermissionGranted(requireContext(), animateToFirstKnown = false)
-        }
-
-        binding.fab.setOnClickListener {
-            if (ActivityCompat.checkSelfPermission(
-                    requireContext(), Manifest.permission.ACCESS_FINE_LOCATION
-                ) != PackageManager.PERMISSION_GRANTED
-            ) {
-                requestLocationPermissions()
-                return@setOnClickListener
-            }
-
-            ensureLocationController().zoomToLastKnown()
-        }
+        setUpMap()
 
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
@@ -283,93 +127,11 @@ class MapFragment : Fragment() {
                     }
                 }
 
-                syncController().events.collect { event ->
-                    when (event) {
-                        SyncEvent.PlacesChanged,
-                        SyncEvent.EventsChanged,
-                        SyncEvent.CommentsChanged,
-                        -> rebuildCaches()
-
-                        SyncEvent.EventsChanged -> {
-                            rebuildCaches()
-                            // The area chips display each area's upcoming event
-                            // count, so a changed event table makes them stale
-                            // even though the areas themselves did not change.
-                            mapAreasController.reload()
-                        }
-
-                        SyncEvent.AreasChanged -> mapAreasController.reload()
-                    }
-                }
-            }
-        }
-
-        viewLifecycleOwner.lifecycleScope.launch {
-            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.CREATED) {
-                binding.map.getMapAsync { map ->
-                    if (_binding == null) return@getMapAsync
-                    viewportToRestore?.let { bounds ->
-                        map.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds, 0))
-                        // Restoring is the first intentional position, so camera
-                        // idles are persisted from here on. When moveTo cleared
-                        // the viewport, it sets this once its own move runs.
-                        mapPositioned = true
-                    }
-                    showAllKinds()
-                }
-            }
-        }
-
-        searchController.results.onEach { results ->
-            _binding?.search?.results = results
-        }.launchIn(viewLifecycleOwner.lifecycleScope)
-
-        // The chips are the shared composable now; the map screen only feeds it
-        // the current areas and the app's colors.
-        binding.areas.apiUrl = prefs.apiUrl.toString()
-        binding.areas.buttonBackgroundColor = Color(prefs.buttonBackgroundColor(requireContext()))
-        binding.areas.buttonIconColor = Color(prefs.buttonIconColor(requireContext()))
-        binding.areas.badgeBackgroundColor = Color(prefs.badgeBackgroundColor(requireContext()))
-        binding.areas.badgeTextColor = Color(prefs.badgeTextColor(requireContext()))
-        binding.areas.iconTypeface = iconTypeface
-        binding.areas.onAreaClick = { area -> openArea(area.id) }
-
-        viewLifecycleOwner.lifecycleScope.launch {
-            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                mapAreasController.areas.collect { areas ->
-                    binding.areas.areas = areas
-                    currentAreas = areas
-                }
-            }
-        }
-
-        binding.activityFeed.setOnClickListener {
-            val areaIds = currentAreas.map { it.urlAlias }
-            val areaNames = currentAreas.map { it.name }
-            val areaTypes = currentAreas.map { it.type }
-            parentFragmentManager.commit {
-                setReorderingAllowed(true)
-                replace<ActivityFeedFragment>(
-                    R.id.fragmentContainerView, null, Bundle().apply {
-                        putStringArrayList("area_ids", ArrayList(areaIds))
-                        putStringArrayList("area_names", ArrayList(areaNames))
-                        putStringArrayList("area_types", ArrayList(areaTypes))
-                    }
-                )
-                addToBackStack(null)
-            }
-        }
-
-        binding.search.onQueryChange = { text ->
-            binding.search.query = text
-            searchDebounceJob?.cancel()
-            searchDebounceJob = viewLifecycleOwner.lifecycleScope.launch {
-                delay(SEARCH_DEBOUNCE_MS)
-                binding.map.getMapAsync { map ->
-                    searchController.search(
-                        referenceLocation = map.projection.visibleRegion.latLngBounds.center,
-                        query = text,
-                    )
+                syncController().events.collect {
+                    // The shared map reads its features when the camera settles,
+                    // so a finished sync asks it to query them again instead of
+                    // leaving the map stale until the user moves it.
+                    binding.map.reloadKey++
                 }
             }
         }
@@ -384,6 +146,69 @@ class MapFragment : Fragment() {
         // After the deep link, so a fresh link still wins: the restore only runs
         // on a recreation, where the Activity does not re-deliver the link.
         restoreBottomSheet(savedInstanceState)
+    }
+
+    /**
+     * Hands the shared map everything it needs from this host: the database, the
+     * style, the stored camera and the app's colours, plus the callbacks for
+     * what stays Android-side.
+     */
+    private fun setUpMap() {
+        val app = requireContext().applicationContext as App
+        val styleUrl = app.mapStyleUriForTesting ?: prefs.mapStyle.uri(requireContext())
+        // Read before apply(): inside it, the name would resolve to the view's
+        // own property instead of the icon font lazily built from the assets.
+        val typeface = iconTypeface
+
+        binding.map.apply {
+            database = db()
+            this.styleUrl = styleUrl
+            styleJson = if (app.mapStyleUriForTesting == null) {
+                bundledStyleJsonFor(requireContext(), styleUrl)
+            } else {
+                null
+            }
+            initialLat = prefs.mapCenterLat
+            initialLon = prefs.mapCenterLon
+            initialZoom = prefs.mapZoom
+            minVerifiedAt = prefs.verifiedFilterMinVerifiedAt()
+            apiUrl = prefs.apiUrl.toString()
+            // Every selectable style draws from OpenFreeMap, so it carries the
+            // Noto Sans Bold font the cluster counts need. A test style pinned
+            // via mapStyleUriForTesting does not.
+            usingOpenFreeMap = app.mapStyleUriForTesting == null
+            iconTypeface = typeface
+            markerBackgroundColor = Color(prefs.markerBackgroundColor(requireContext()))
+            markerIconColor = Color(prefs.markerIconColor(requireContext()))
+            boostedMarkerBackgroundColor = Color(prefs.boostedMarkerBackgroundColor())
+            boostedMarkerIconColor = Color(prefs.boostedMarkerIconColor())
+            markerBadgeBackgroundColor = Color(prefs.badgeBackgroundColor(requireContext()))
+            markerBadgeTextColor = Color(prefs.badgeTextColor(requireContext()))
+            areaChipButtonColor = Color(prefs.buttonBackgroundColor(requireContext()))
+            areaChipIconColor = Color(prefs.buttonIconColor(requireContext()))
+            // The place screen is still a Views screen: verify, report, boost
+            // and the photo flows live there, so this host keeps its own sheet
+            // and borrows only the map.
+            placeSheet = false
+            onPlaceSelected = ::selectPlace
+            onEventSelected = { openEvent(it.toBundle()) }
+            onAreaSelected = ::openArea
+            onOpenFeed = ::openFeed
+            onAddPlace = { lat, lon ->
+                pendingAddPlace = lat to lon
+                if (prefs.authorized) navigateToAddPlace(lat, lon) else showAuthDialog()
+            }
+            searchActions = SearchActions(onSettings = { navigateToSettings() })
+            formatDistance = ::formatDistance
+            onCameraIdle = { lat, lon, zoom ->
+                // Recorded so the next launch reopens what the user was looking
+                // at. The first idle is the stored camera itself, so this is a
+                // no-op until the map is actually moved.
+                prefs.mapCenterLat = lat
+                prefs.mapCenterLon = lon
+                prefs.mapZoom = zoom
+            }
+        }
     }
 
     /**
@@ -459,26 +284,13 @@ class MapFragment : Fragment() {
         }
     }
 
-    private fun openPlace(row: SearchAdapterItem.Place) {
-        viewLifecycleOwner.lifecycleScope.launch {
-            val place = withContext(Dispatchers.IO) {
-                db().place.selectById(row.placeId)
-            } ?: return@launch
-
-            // Every marker kind is shown, so the place's own kind needs no
-            // switching before it is selected.
-            selectPlace(place)
-            moveTo(place.lat, place.lon)
-        }
-    }
-
     fun openPlaceById(placeId: Long) {
         viewLifecycleOwner.lifecycleScope.launch {
             val place = withContext(Dispatchers.IO) { db().place.selectById(placeId) }
 
             if (place != null) {
-                selectPlace(place)
-                moveTo(place.lat, place.lon)
+                // The shared map selects it, opens the sheet and moves to it.
+                binding.map.openPlaceId = place.id
                 return@launch
             }
 
@@ -489,40 +301,8 @@ class MapFragment : Fragment() {
                 null
             } ?: return@launch
 
-            moveTo(coordinates.lat, coordinates.lon)
-        }
-    }
-
-    private fun moveTo(lat: Double, lon: Double) {
-        // Supersede the pending restore for this view: the deep link or search
-        // selection is the intended position, and the stored viewport is
-        // updated from it once the camera settles.
-        viewportToRestore = null
-        binding.map.getMapAsync {
-            it.moveCamera(
-                CameraUpdateFactory.newLatLngZoom(
-                    LatLng(lat, lon),
-                    16.0,
-                )
-            )
-            mapPositioned = true
-        }
-    }
-
-    private fun openArea(row: SearchAdapterItem.Area) {
-        val bbox = row.bbox
-        if (bbox != null && bbox.size == 4) {
-            binding.map.getMapAsync { map ->
-                val bounds = LatLngBounds.from(
-                    latNorth = bbox[3],
-                    lonEast = bbox[2],
-                    latSouth = bbox[1],
-                    lonWest = bbox[0],
-                )
-                map.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds, 0))
-            }
-        } else {
-            openArea(row.areaId)
+            // Not cached yet: there is no place to select, so the map only moves.
+            binding.map.openTarget = coordinates.lat to coordinates.lon
         }
     }
 
@@ -537,29 +317,18 @@ class MapFragment : Fragment() {
         }
     }
 
-    override fun onStart() {
-        super.onStart()
-        _binding?.map?.onStart()
-    }
-
-    override fun onResume() {
-        super.onResume()
-        _binding?.map?.onResume()
-    }
-
-    override fun onPause() {
-        _binding?.map?.onPause()
-        super.onPause()
-    }
-
-    override fun onStop() {
-        _binding?.map?.onStop()
-        super.onStop()
-    }
-
-    override fun onLowMemory() {
-        super.onLowMemory()
-        _binding?.map?.onLowMemory()
+    private fun openFeed(areas: List<MapArea>) {
+        parentFragmentManager.commit {
+            setReorderingAllowed(true)
+            replace<ActivityFeedFragment>(
+                R.id.fragmentContainerView, null, Bundle().apply {
+                    putStringArrayList("area_ids", ArrayList(areas.map { it.urlAlias }))
+                    putStringArrayList("area_names", ArrayList(areas.map { it.name }))
+                    putStringArrayList("area_types", ArrayList(areas.map { it.type }))
+                }
+            )
+            addToBackStack(null)
+        }
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
@@ -570,27 +339,10 @@ class MapFragment : Fragment() {
             bottomSheetController?.bottomSheetBehavior?.state
                 ?: BottomSheetBehavior.STATE_HIDDEN,
         )
-        _binding?.map?.onSaveInstanceState(outState)
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
-        connectivityCallback?.let { callback ->
-            requireContext().getSystemService(ConnectivityManager::class.java)
-                ?.unregisterNetworkCallback(callback)
-        }
-        connectivityCallback = null
-        connectivityHandler.removeCallbacks(retryChipImages)
-        searchDebounceJob?.cancel()
-        searchDebounceJob = null
-        searchController.dispose()
-        mapAreasController.dispose()
-        mapSelectionController?.detach()
-        mapSelectionController = null
-        mapSetupController = null
-        locationController?.destroy()
-        locationController = null
-        destroyCaches()
         // Remembered so a back-stack return can restore the sheet, which has no
         // saved instance state to read from.
         lastSheetState = bottomSheetController?.bottomSheetBehavior?.state
@@ -599,20 +351,8 @@ class MapFragment : Fragment() {
         statusBarController?.onDestroyView()
         statusBarController = null
         updateNotificationController = null
-        _binding?.map?.onDestroy()
         _binding = null
     }
-
-    private fun requestLocationPermissions() {
-        locationPermissionRequest.launch(
-            arrayOf(
-                Manifest.permission.ACCESS_FINE_LOCATION,
-                Manifest.permission.ACCESS_COARSE_LOCATION,
-            )
-        )
-    }
-
-    private var searchDebounceJob: Job? = null
 
     /**
      * The place the bottom sheet is showing, or null when nothing is selected.
@@ -630,182 +370,29 @@ class MapFragment : Fragment() {
     private var lastSheetState = BottomSheetBehavior.STATE_HIDDEN
 
     /**
-     * The viewport to apply once the map is ready, or null once [moveTo] has
-     * superseded it for the current view. It is captured when the view is
-     * created so a camera idle fired by the map's default camera cannot
-     * overwrite the stored viewport before the restore runs.
+     * The map centre an add-place that still has to authenticate should use once
+     * the form comes back signed in.
      */
-    private var viewportToRestore: LatLngBounds? = null
+    private var pendingAddPlace: Pair<Double, Double>? = null
 
-    /**
-     * Whether the map has been positioned on purpose (restored, or moved by a
-     * deep link or a search selection). Camera idles are only persisted once
-     * this is true, so the default camera is never saved as the viewport.
-     */
-    private var mapPositioned = false
-
-    /**
-     * Shows every marker kind at once. The app used to show one at a time
-     * behind the map's button group; that filter is gone (the shared Compose map
-     * cannot hide a kind without stopping the others drawing), so merchants,
-     * events and exchanges are always all on.
-     */
-    private fun showAllKinds() {
-        val setup = mapSetupController ?: return
-
-        destroyCaches()
-        setup.merchantsSource.setGeoJson(EMPTY_GEOJSON)
-        setup.eventsSource.setGeoJson(EMPTY_GEOJSON)
-        setup.exchangesSource.setGeoJson(EMPTY_GEOJSON)
-
-        binding.map.getMapAsync { map ->
-            if (_binding == null) return@getMapAsync
-            addCache {
-                MerchantsCache(
-                    map,
-                    db(),
-                    setup.merchantsSource,
-                    prefs.verifiedFilterMinVerifiedAt(),
-                    ::reportMapContentDrawn,
-                ) {
-                    mapSetupController?.ensureMerchantMarkers(it)
-                }
-            }
-            addCache { EventsCache(map, db(), setup.eventsSource, ::reportMapContentDrawn) }
-            addCache {
-                ExchangesCache(
-                    map,
-                    db(),
-                    setup.exchangesSource,
-                    prefs.verifiedFilterMinVerifiedAt(),
-                    ::reportMapContentDrawn,
-                ) {
-                    mapSetupController?.ensureExchangeMarkers(it)
-                }
-            }
-        }
+    private fun addPlaceAfterAuth() {
+        val pending = pendingAddPlace ?: return
+        navigateToAddPlace(pending.first, pending.second)
     }
 
-    private val connectivityHandler = Handler(Looper.getMainLooper())
-
-    private var connectivityCallback: ConnectivityManager.NetworkCallback? = null
-
-    // Tracks the last observed connectivity so a chip's failed image request is
-    // retried only when the network comes back, not on every capability change.
-    private var online = false
-
-    /**
-     * Re-runs the chips' image requests after the network comes back. Posted
-     * after a short delay so it runs once the callbacks that announce the
-     * network have settled and the connection is actually usable.
-     */
-    private val retryChipImages = Runnable {
-    }
-
-    /**
-     * Re-issues the chips' failed image requests as the network comes and goes.
-     */
-    private fun registerConnectivity() {
-        val manager = requireContext().getSystemService(ConnectivityManager::class.java) ?: return
-        // Application context, not the fragment's: a callback already in flight
-        // when the view is destroyed must not touch a detached fragment.
-        val context = requireContext().applicationContext
-
-        val callback = object : ConnectivityManager.NetworkCallback() {
-            override fun onAvailable(network: Network) = refresh()
-            override fun onLost(network: Network) = refresh()
-            override fun onCapabilitiesChanged(
-                network: Network,
-                capabilities: NetworkCapabilities,
-            ) = refresh()
-
-            private fun refresh() {
-                connectivityHandler.post {
-                    val isOnline = context.isOnline()
-                    // An image request made offline failed and was not retried,
-                    // so a chip that fell back to its initials needs a fresh
-                    // request once the network is back. The delay coalesces the
-                    // burst of callbacks that announces the network and lets it
-                    // become usable before the requests are re-issued.
-                    if (isOnline && !online) {
-                        connectivityHandler.removeCallbacks(retryChipImages)
-                        connectivityHandler.postDelayed(
-                            retryChipImages,
-                            CHIP_IMAGE_RETRY_DELAY_MS,
-                        )
-                    }
-                    online = isOnline
-                }
-            }
-        }
-
-        manager.registerDefaultNetworkCallback(callback)
-        connectivityCallback = callback
-    }
-
-    private fun addCache(factory: () -> ViewportCache<*>) {
-        caches += factory()
-    }
-
-    private fun destroyCaches() {
-        // destroy() cancels each cache's own source collector with it, so no
-        // collector outlives the cache.
-        caches.forEach { it.destroy() }
-        caches.clear()
-    }
-
-    private fun rebuildCaches() {
-        if (caches.isEmpty()) {
-            showAllKinds()
+    /** Mirrors the distance labels the Views search showed. */
+    private fun formatDistance(meters: Double): String {
+        val format = NumberFormat.getNumberInstance().apply { maximumFractionDigits = 1 }
+        return if (meters < 1_000) {
+            getString(R.string.s_m, format.format(meters))
         } else {
-            caches.forEach { it.refresh() }
+            getString(R.string.s_km, format.format(meters / 1_000))
         }
     }
-
-    private var mapContentReported = false
-
-    /**
-     * Reports the app as fully drawn once the map has drawn its first real
-     * feature snapshot. Android's default fully-drawn moment is the first
-     * frame, which here is an empty map, so the default startup metric stops
-     * well before the pins the user is waiting for. Deferring it to the frame
-     * after the first non-empty snapshot makes the metric match the map the
-     * user actually sees.
-     */
-    private fun reportMapContentDrawn() {
-        if (mapContentReported || _binding == null) return
-        mapContentReported = true
-
-        val listener = object : MapView.OnDidFinishRenderingFrameListener {
-            override fun onDidFinishRenderingFrame(
-                fullyRendered: Boolean,
-                frameEncodingTime: Double,
-                frameRenderingTime: Double,
-            ) {
-                _binding?.map?.removeOnDidFinishRenderingFrameListener(this)
-                (activity as? Activity)?.reportFullyDrawn()
-            }
-        }
-
-        binding.map.addOnDidFinishRenderingFrameListener(listener)
-    }
-
-    private var currentAreas: List<MapArea> = emptyList()
 
     private fun initInsets(binding: MapFragmentBinding) {
-        ViewCompat.setOnApplyWindowInsetsListener(binding.fabContainer) { v, windowInsets ->
-            val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
-
-            v.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-                topMargin = insets.top
-                rightMargin = insets.right + dpToPx(24)
-                bottomMargin = insets.bottom + dpToPx(24)
-                leftMargin = insets.left
-            }
-
-            WindowInsetsCompat.CONSUMED
-        }
-
+        // The search field, the chips and the location button are the shared
+        // map's own, so only the sync and update buttons are inset here.
         ViewCompat.setOnApplyWindowInsetsListener(binding.buttonGroup) { v, windowInsets ->
             val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
 
@@ -832,40 +419,23 @@ class MapFragment : Fragment() {
         }
     }
 
-    private fun openAddPlace() {
-        if (prefs.authorized) {
-            navigateToAddPlace()
-        } else {
-            showAuthDialog()
+    private fun navigateToAddPlace(lat: Double, lon: Double) {
+        pendingAddPlace = null
+        parentFragmentManager.commit {
+            setReorderingAllowed(true)
+            replace<AddPlaceFragment>(
+                R.id.fragmentContainerView, null, Bundle().apply {
+                    putDouble("lat", lat)
+                    putDouble("lon", lon)
+                }
+            )
+            addToBackStack(null)
         }
     }
 
-    private fun navigateToAddPlace() {
-        binding.map.getMapAsync { map ->
-            val center = map.cameraPosition.target ?: return@getMapAsync
-            parentFragmentManager.commit {
-                setReorderingAllowed(true)
-                replace<AddPlaceFragment>(
-                    R.id.fragmentContainerView, null, Bundle().apply {
-                        putDouble("lat", center.latitude)
-                        putDouble("lon", center.longitude)
-                    }
-                )
-                addToBackStack(null)
-            }
-        }
-    }
-
-    companion object {
-        private const val SEARCH_DEBOUNCE_MS = 300L
-
-
+    private companion object {
         private const val STATE_PLACE_ID = "map_selected_place_id"
 
         private const val STATE_SHEET_STATE = "map_sheet_state"
-
-        // Long enough for the connectivity callbacks that follow a network
-        // coming back to settle before the chip images are retried.
-        private const val CHIP_IMAGE_RETRY_DELAY_MS = 1_000L
     }
 }
