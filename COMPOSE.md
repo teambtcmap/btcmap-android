@@ -581,16 +581,21 @@ set into the `MaterialAlertDialog` via `setView`. Deleted
 `map_style_dialog.xml` and `verified_filter_dialog.xml`. The activity feed's chip
 filter dialog is still Views. No behavior change.
 
+### Phase 2, thirteenth slice — done
+
+Migrated the activity feed's filter dialog to a shared `ChipFilterContent` in
+`:ui` (area chips, multi-select; interval chips, single-select), hosted by a
+`ChipFilterComposeView` set into the `MaterialAlertDialog`. The fragment keeps
+the selection and reloads on each toggle; the dialog stays open until OK.
+Deleted `activity_feed_filter_dialog.xml`. This was the last non-auth Views
+dialog. No behavior change.
+
 ## Next
 
-The immediate next slice is the small Views dialogs — the **map-style** dialog,
-the **verified-filter** dialog and the **activity-feed filter** dialog (radio /
-chip pickers built with `MaterialAlertDialogBuilder`). Lowest-risk remaining
-work; finishes screens already migrated.
-
-Then, roughly in order: `AreaFragment`, `EventFragment`, the remaining place
-screens (`PlaceFragment` is the largest and MapLibre-heavy), and the deferred
-**auth dialogs** (form scaffolding + rotation tests) last.
+The small Views dialogs are done (all three are now Compose). Next, roughly in
+order: `AreaFragment`, `EventFragment`, the remaining place screens
+(`PlaceFragment` is the largest and MapLibre-heavy), and the deferred **auth
+dialogs** (form scaffolding + rotation tests) last.
 
 Still open for the desktop target: the `:ui:run` entry point renders only
 `StatsScreen` today; a JVM theme fallback exists but no desktop navigation. Phase

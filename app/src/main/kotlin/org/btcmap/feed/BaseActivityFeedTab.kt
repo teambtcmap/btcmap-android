@@ -9,7 +9,9 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.commit
 import androidx.fragment.app.replace
 import androidx.lifecycle.lifecycleScope
-import com.google.android.material.chip.Chip
+import androidx.lifecycle.setViewTreeLifecycleOwner
+import androidx.lifecycle.setViewTreeViewModelStoreOwner
+import androidx.savedstate.setViewTreeSavedStateRegistryOwner
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -20,7 +22,6 @@ import org.btcmap.api
 import org.btcmap.api.ActivityFeedItem
 import org.btcmap.api.getActivity
 import org.btcmap.api.getPlaceOsmId
-import org.btcmap.databinding.ActivityFeedFilterDialogBinding
 import org.btcmap.databinding.ActivityFeedTabBinding
 import org.btcmap.db
 import org.btcmap.place.PlaceFragment
@@ -30,6 +31,8 @@ import org.btcmap.settings.activityIntervalDays
 import org.btcmap.settings.prefs
 import org.btcmap.ui.ActivityFeedComposeView
 import org.btcmap.ui.ActivityFeedState
+import org.btcmap.ui.ChipFilterComposeView
+import org.btcmap.ui.ChipOption
 import org.btcmap.util.iconTypeface
 import org.btcmap.util.openInBrowser
 import org.btcmap.util.rethrowIfCancellation
@@ -110,49 +113,50 @@ abstract class BaseActivityFeedTab : Fragment() {
 
     /** Opens the filter dialog with area chips (optional) and interval chips. */
     fun showFilterDialog() {
-        val b = _binding ?: return
-        val dialogBinding = ActivityFeedFilterDialogBinding.inflate(layoutInflater)
-
-        if (showAreaChips && initialAreas.isNotEmpty()) {
-            for (area in initialAreas) {
-                val chip = Chip(requireContext())
-                chip.text = area.name
-                chip.isCheckable = true
-                chip.isChecked = selectedIds.contains(area.id)
-                chip.isCloseIconVisible = false
-                chip.setOnClickListener {
-                    if (chip.isChecked) selectedIds.add(area.id)
-                    else selectedIds.remove(area.id)
-                    loadActivity()
-                }
-                dialogBinding.areasChipGroup.addView(chip)
-            }
-        } else {
-            dialogBinding.areasLabel.visibility = View.GONE
-            dialogBinding.areasChipGroup.visibility = View.GONE
+        val view = ChipFilterComposeView(requireContext()).apply {
+            setViewTreeLifecycleOwner(this@BaseActivityFeedTab)
+            setViewTreeSavedStateRegistryOwner(this@BaseActivityFeedTab)
+            setViewTreeViewModelStoreOwner(this@BaseActivityFeedTab)
+            areasLabel = getString(R.string.activity_filter_areas)
+            intervalLabel = getString(R.string.activity_interval)
         }
+        updateChipView(view)
 
-        val currentDays = prefs.activityIntervalDays
-        for (interval in ActivityInterval.entries) {
-            val chip = Chip(requireContext())
-            chip.text = interval.name(requireContext())
-            chip.isCheckable = true
-            chip.isChecked = interval.days == currentDays
-            chip.isCloseIconVisible = false
-            chip.setOnClickListener {
-                if (chip.isChecked && prefs.activityIntervalDays != interval.days) {
-                    prefs.activityIntervalDays = interval.days
+        view.onAreaToggle = { key ->
+            if (selectedIds.contains(key)) selectedIds.remove(key) else selectedIds.add(key)
+            updateChipView(view)
+            loadActivity()
+        }
+        view.onIntervalSelect = { key ->
+            key.toIntOrNull()?.let { days ->
+                if (prefs.activityIntervalDays != days) {
+                    prefs.activityIntervalDays = days
+                    updateChipView(view)
                     loadActivity()
                 }
             }
-            dialogBinding.intervalChipGroup.addView(chip)
         }
 
         MaterialAlertDialogBuilder(requireContext())
             .setTitle(R.string.filter)
-            .setView(dialogBinding.root)
+            .setView(view)
             .setPositiveButton(android.R.string.ok, null)
             .show()
+    }
+
+    private fun updateChipView(view: ChipFilterComposeView) {
+        view.areaOptions = if (showAreaChips) {
+            initialAreas.map { area -> ChipOption(area.id, area.name, selectedIds.contains(area.id)) }
+        } else {
+            emptyList()
+        }
+        view.intervalOptions = ActivityInterval.entries.map { interval ->
+            ChipOption(
+                key = interval.days.toString(),
+                label = interval.name(requireContext()),
+                selected = interval.days == prefs.activityIntervalDays,
+            )
+        }
     }
 
     /**
