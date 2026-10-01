@@ -742,6 +742,31 @@ Verified on the emulator: Warsaw's merchants, exchanges and event load on the
 first frame, and panning fetches the new viewport (markers appear and disappear
 with the area) in a single query round per settled camera move.
 
+### Phase 3, sixth slice — done (marker selection)
+
+Ported `MapSelectionController`'s tap handling: the marker layers
+(`MERCHANT_MARKER_LAYER_ID`, `EXCHANGE_MARKER_LAYER_ID`, `EVENT_MARKER_LAYER_ID`)
+now take a `MarkerClickHandler` returning a `ClickResult`, and `MapScreen`
+resolves the tapped feature to a place or an event (an event feature has no
+`iconId`), loads it with `place`/`event.selectById`, and calls
+`onSelectPlace`/`onSelectEvent`. `MapSpikeActivity` shows a toast so the
+selection is visible before the bottom sheet exists.
+
+Notes worth keeping:
+
+- MapLibre Compose delivers the tapped features straight to the layer's
+  `onClick`, so the manual `queryRenderedFeatures` plus screen-point projection
+  is gone, and with it `MarkerImageRegistry`/`AlphaMask` for hit-testing.
+- There is no alpha test: a symbol is hit anywhere in its (optionally
+  `hitPadding`-expanded) bounds. The masks would only return if a tap had to
+  fall through the pin's transparent corners.
+- The handler runs on the composition's coroutine scope; the database lookups
+  go through `Dispatchers.Default`.
+
+Verified on the emulator: a merchant pin selects place 18048 (`business`), an
+exchange pin selects place 13818 (`currency_exchange`), and the event pin
+selects event 165.
+
 ## Working notes
 
 Durable facts and conventions for continuing the migration.

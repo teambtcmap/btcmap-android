@@ -12,6 +12,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.AbstractComposeView
 import androidx.compose.ui.text.font.FontFamily
 import org.btcmap.db.Database
+import org.btcmap.db.table.event.Event
+import org.btcmap.db.table.place.Place
 import org.btcmap.ui.map.MarkerPalette
 import java.time.ZonedDateTime
 
@@ -53,6 +55,10 @@ class MapComposeView @JvmOverloads constructor(
 
     var iconTypeface: Typeface? by mutableStateOf(null)
 
+    var onPlaceSelected: (Place) -> Unit by mutableStateOf({})
+
+    var onEventSelected: (Event) -> Unit by mutableStateOf({})
+
     @Composable
     override fun Content() {
         val fontFamily = remember(iconTypeface) { iconTypeface?.let { FontFamily(it) } }
@@ -74,6 +80,8 @@ class MapComposeView @JvmOverloads constructor(
             ),
             usingOpenFreeMap = usingOpenFreeMap,
             iconFont = fontFamily,
+            onSelectPlace = onPlaceSelected,
+            onSelectEvent = onEventSelected,
         )
     }
 }

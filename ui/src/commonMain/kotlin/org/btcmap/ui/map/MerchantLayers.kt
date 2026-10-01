@@ -46,6 +46,7 @@ fun MerchantLayers(
     clusterTextColor: Color,
     usingOpenFreeMap: Boolean,
     showMarkers: Boolean,
+    onMarkerClick: MarkerClickHandler,
 ) {
     val source = rememberGeoJsonSource(
         data = GeoJsonData.JsonString(geoJson),
@@ -87,6 +88,7 @@ fun MerchantLayers(
                 condition(Feature.get("outdated").convertToBoolean(), const(0.85f)),
                 fallback = const(1f),
             ),
+            onClick = onMarkerClick,
         )
     }
 }

@@ -52,6 +52,7 @@ fun ExchangeLayers(
     badgeTextColor: Color,
     usingOpenFreeMap: Boolean,
     showMarkers: Boolean,
+    onMarkerClick: MarkerClickHandler,
 ) {
     val source = rememberGeoJsonSource(
         data = GeoJsonData.JsonString(geoJson),
@@ -88,6 +89,7 @@ fun ExchangeLayers(
             iconAnchor = const(SymbolAnchor.Bottom),
             iconAllowOverlap = const(true),
             iconIgnorePlacement = const(true),
+            onClick = onMarkerClick,
         )
 
         SymbolLayer(

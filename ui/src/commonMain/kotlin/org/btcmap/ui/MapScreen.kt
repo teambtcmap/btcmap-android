@@ -7,13 +7,21 @@ import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.rememberTextMeasurer
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import kotlinx.serialization.json.jsonPrimitive
+import kotlinx.serialization.json.longOrNull
 import org.btcmap.db.Database
+import org.btcmap.db.table.event.Event
+import org.btcmap.db.table.place.Place
 import org.btcmap.map.EMPTY_GEOJSON
 import org.btcmap.map.EVENT_ICON
 import org.btcmap.map.EVENT_MARKER_ICON_NAME
@@ -26,10 +34,12 @@ import org.btcmap.ui.map.EventLayers
 import org.btcmap.ui.map.ExchangeLayers
 import org.btcmap.ui.map.MARKER_PIN_IMAGE_ID
 import org.btcmap.ui.map.MarkerBitmapFactory
+import org.btcmap.ui.map.MarkerClickHandler
 import org.btcmap.ui.map.MarkerPalette
 import org.btcmap.ui.map.MerchantLayers
 import org.btcmap.ui.map.rememberViewportFeatures
 import org.maplibre.compose.camera.CameraPosition
+import org.maplibre.compose.interaction.ClickResult
 import org.maplibre.compose.map.MaplibreMap
 import org.maplibre.compose.map.StyleLoadState
 import org.maplibre.compose.map.rememberMapState
@@ -52,10 +62,32 @@ fun MapScreen(
     palette: MarkerPalette,
     usingOpenFreeMap: Boolean,
     iconFont: FontFamily?,
+    onSelectPlace: (Place) -> Unit,
+    onSelectEvent: (Event) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val textMeasurer = rememberTextMeasurer()
     val density = LocalDensity.current
+
+    val scope = rememberCoroutineScope()
+    val onMarkerClick: MarkerClickHandler = { features ->
+        val properties = features.firstOrNull()?.properties
+        val id = properties?.get("id")?.jsonPrimitive?.longOrNull
+        if (id == null) {
+            ClickResult.Pass
+        } else {
+            // Event features carry no iconId; place features do.
+            val isEvent = properties["iconId"] == null
+            scope.launch {
+                if (isEvent) {
+                    withContext(Dispatchers.Default) { db.event.selectById(id) }?.let(onSelectEvent)
+                } else {
+                    withContext(Dispatchers.Default) { db.place.selectById(id) }?.let(onSelectPlace)
+                }
+            }
+            ClickResult.Consume
+        }
+    }
 
     val factory = remember(textMeasurer, iconFont, density, palette) {
         MarkerBitmapFactory(
@@ -89,6 +121,7 @@ fun MapScreen(
             clusterTextColor = palette.markerIcon,
             usingOpenFreeMap = usingOpenFreeMap,
             showMarkers = imagesReady,
+            onMarkerClick = onMarkerClick,
         )
         EventLayers(
             geoJson = eventsGeoJson.value,
@@ -96,6 +129,7 @@ fun MapScreen(
             clusterTextColor = palette.markerIcon,
             usingOpenFreeMap = usingOpenFreeMap,
             showMarkers = imagesReady,
+            onMarkerClick = onMarkerClick,
         )
         ExchangeLayers(
             geoJson = exchangesGeoJson.value,
@@ -105,6 +139,7 @@ fun MapScreen(
             badgeTextColor = palette.badgeText,
             usingOpenFreeMap = usingOpenFreeMap,
             showMarkers = imagesReady,
+            onMarkerClick = onMarkerClick,
         )
     }
 

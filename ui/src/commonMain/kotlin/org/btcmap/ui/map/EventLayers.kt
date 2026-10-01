@@ -37,6 +37,7 @@ fun EventLayers(
     clusterTextColor: Color,
     usingOpenFreeMap: Boolean,
     showMarkers: Boolean,
+    onMarkerClick: MarkerClickHandler,
 ) {
     val source = rememberGeoJsonSource(
         data = GeoJsonData.JsonString(geoJson),
@@ -73,6 +74,7 @@ fun EventLayers(
             iconAnchor = const(SymbolAnchor.Bottom),
             iconAllowOverlap = const(true),
             iconIgnorePlacement = const(true),
+            onClick = onMarkerClick,
         )
 
         SymbolLayer(

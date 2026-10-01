@@ -1,6 +1,7 @@
 package org.btcmap
 
 import android.os.Bundle
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.setViewTreeLifecycleOwner
 import androidx.lifecycle.setViewTreeViewModelStoreOwner
@@ -28,6 +29,12 @@ class MapSpikeActivity : AppCompatActivity() {
             initialLon = CENTER_LON
             initialZoom = 13.0
             iconTypeface = org.btcmap.util.iconTypeface
+            onPlaceSelected = { place ->
+                Toast.makeText(this@MapSpikeActivity, "place ${place.id}: ${place.name}", Toast.LENGTH_SHORT).show()
+            }
+            onEventSelected = { event ->
+                Toast.makeText(this@MapSpikeActivity, "event ${event.id}: ${event.name}", Toast.LENGTH_SHORT).show()
+            }
         }
         setContentView(view)
     }
