@@ -1155,6 +1155,24 @@ gdbus call --session --dest org.freedesktop.portal.Desktop \
 Launch the app first so its window is focused — the portal captures the whole
 screen, so whatever is in front is what lands in the file.
 
+### Running the desktop app
+
+`./gradlew :desktopApp:run` opens the window and leaves it up. A first run also
+syncs the whole delta history, so wait for the signal instead of sleeping a fixed
+number of seconds:
+
+```bash
+nohup ./gradlew :desktopApp:run --console=plain > /tmp/opencode/desktop-run.log 2>&1 &
+until grep -q "Rendered the first map frame" /tmp/opencode/desktop-run.log; do sleep 2; done
+```
+
+Stop it with a pattern the shell cannot match against itself — an unbracketed
+`pgrep -f desktopApp:run` matches the command running it and kills the shell:
+
+```bash
+pgrep -f "org.btcmap.desktop.MainK[t]" | xargs -r kill
+```
+
 ### Phase 3, twenty-eighth slice — done (desktop settings screen + headless screenshots)
 
 Two things:
