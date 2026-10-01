@@ -28,12 +28,12 @@ Next, in rough order of value:
 
 1. **Android main map swap** — point `MapFragment` at the shared map and delete
    `MapSetupController`, `MarkerIcon`, the layer builders, `MapSelectionController`
-   and `ViewportCache`/caches, then drop the MapLibre Android SDK. Two former
-   blockers are gone: the marker filter and the offline bundled basemap were both
-   dropped (slices 35 and 36). The **location button** is what remains — the
-   Compose location API and the Android permission flow still have to be wired.
-2. **Desktop polish** — the add-place flow, the comments/user-profile screens, the
-   auth forms (they need a place/session context) and the location button.
+   and `ViewportCache`/caches, then drop the MapLibre Android SDK. Every former
+   blocker is gone: the marker filter and the offline bundled basemap were dropped
+   (slices 35 and 36) and the location button was ported to the shared map
+   (slice 37), so the swap itself is all that is left.
+2. **Desktop polish** — the add-place flow, the comments/user-profile screens and
+   the auth forms (they need a place/session context).
 3. **Packaging** — `packageDeb` needs `dpkg-deb` (absent here); DMG/MSI need
    their platforms.
 
@@ -1042,8 +1042,9 @@ would regress, so the main map cannot be swapped in one slice yet:
   no markers at all, even though the map itself rendered. That is unexplained —
   it may be the keying, or something about a lone layer set — but it means the
   filter is not solved, and the main map swap stays blocked.
-- **Location** — `LocationController` is not ported; the Compose location API and
-  the permission flow still have to be wired.
+- **Location** — resolved in slice 37: the shared map owns the location button,
+  the permission prompt and the puck, through the MapLibre Compose location
+  module.
 - **Offline/basemap** — resolved by dropping the feature (slice 36): the bundled
   z0–z4 PMTiles archive, `BundledBasemapStyle`'s layer uncapping and the offline
   flip are gone, and the map always uses the hosted style.
@@ -1265,6 +1266,25 @@ asset.
 
 Verified on the emulator: the map renders the hosted dark style with every
 marker kind, chips and the place sheet intact.
+
+### Phase 3, thirty-seventh slice — done (the location button)
+
+The map got its own **location button** on the shared side: `MapScreen` keeps
+`rememberLocationState()` (the module resolves the Android framework/fused
+provider and, on desktop, the portal), a `LocationIndicatorLayer` draws the puck,
+and a `LocationTrackingEffect` moves the camera only when the button asked for it
+— following every fix would fight the user's gestures. Pressing the button when
+permission is missing calls `requestPermission()`, so the button doubles as the
+prompt, exactly like the Android map's own FAB; otherwise it moves to the last
+known fix, or waits for one. This removes the last blocker on the main map swap,
+and gives the desktop the same affordance.
+
+Verified on the emulator through the spike activity: with the permission revoked,
+pressing the button raised the system dialog ("Allow BTC Map to access this
+device's location?"); allowing it recentred the camera onto the fix and drew the
+purple puck at the centre. The desktop window also renders the button (its Linux
+portal backend lives in the `location-runtime-linux` artifact the module pulls
+in).
 
 ## Working notes
 

@@ -60,7 +60,13 @@ import org.btcmap.ui.map.rememberMapAreas
 import org.btcmap.ui.map.rememberViewportFeatures
 import androidx.compose.material3.FilledTonalIconButton
 import org.maplibre.compose.camera.CameraPosition
+import org.maplibre.compose.camera.CameraUpdate
 import org.maplibre.compose.interaction.ClickResult
+import org.maplibre.compose.layers.LocationIndicatorLayer
+import org.maplibre.compose.location.LocationPermission
+import org.maplibre.compose.location.LocationTrackingEffect
+import org.maplibre.compose.location.rememberLocationState
+import org.maplibre.compose.map.LocalMapState
 import org.maplibre.compose.map.MaplibreMap
 import org.maplibre.compose.map.StyleLoadState
 import org.maplibre.compose.map.rememberMapState
@@ -158,6 +164,15 @@ fun MapScreen(
     val exchangesGeoJson = remember { mutableStateOf(EMPTY_GEOJSON) }
     val eventsGeoJson = remember { mutableStateOf(EMPTY_GEOJSON) }
 
+    // The platform's own location provider: the module resolves the Android
+    // framework or fused provider and the desktop portal, and reports an
+    // unsupported backend through [locationState] rather than failing.
+    val locationState = rememberLocationState()
+
+    // Set when the user asked for their location but no fix has arrived yet:
+    // the tracking effect below moves the camera as soon as one does.
+    var recenterToLocation by remember { mutableStateOf(false) }
+
     val state = rememberMapState(
         // The bundled styles are handed over as JSON: the Compose map cannot
         // read the asset:// style the Android SDK uses.
@@ -193,6 +208,23 @@ fun MapScreen(
             showMarkers = imagesReady,
             onMarkerClick = onMarkerClick,
         )
+
+        // The puck draws the last known position. The tracking effect is the
+        // only thing that moves the camera, and only when the location button
+        // asked for it: following every fix would fight the user's gestures.
+        val mapState = checkNotNull(LocalMapState.current)
+        LocationIndicatorLayer(
+            id = LOCATION_INDICATOR_LAYER_ID,
+            locationState = locationState,
+        )
+        LocationTrackingEffect(locationState = locationState) {
+            if (recenterToLocation) {
+                recenterToLocation = false
+                mapState.animateCamera(
+                    CameraUpdate(target = currentLocation.position, zoom = LOCATION_ZOOM),
+                )
+            }
+        }
     }
 
     val areas = rememberMapAreas(state, db)
@@ -312,6 +344,33 @@ fun MapScreen(
                         MaterialSymbol(glyph = "monitor_heart", contentDescription = null)
                     }
                 }
+                FilledTonalIconButton(
+                    onClick = {
+                        if (locationState.permission is LocationPermission.Granted) {
+                            val last = locationState.lastLocation
+                            if (last == null) {
+                                // Tracking is on, but no fix has arrived yet.
+                                recenterToLocation = true
+                            } else {
+                                scope.launch {
+                                    state.animateCamera(
+                                        CameraUpdate(
+                                            target = last.position,
+                                            zoom = LOCATION_ZOOM,
+                                        ),
+                                    )
+                                }
+                            }
+                        } else {
+                            // The button doubles as the prompt, the way the
+                            // Android map's own location button does.
+                            recenterToLocation = true
+                            locationState.requestPermission()
+                        }
+                    },
+                ) {
+                    MaterialSymbol(glyph = "my_location", contentDescription = null)
+                }
             }
             selectedPlace?.let { place ->
                 PlaceSheet(
@@ -352,3 +411,9 @@ fun MapScreen(
         }
     }
 }
+
+/** The zoom the location button moves to, matching the Android map's own. */
+private const val LOCATION_ZOOM = 14.0
+
+/** The id of the user-location layer the puck draws through. */
+private const val LOCATION_INDICATOR_LAYER_ID = "user-location"
