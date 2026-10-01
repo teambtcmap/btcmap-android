@@ -2,7 +2,6 @@ package org.btcmap.imagestats
 
 import androidx.fragment.app.commit
 import androidx.fragment.app.replace
-import androidx.recyclerview.widget.RecyclerView
 import androidx.test.core.app.ActivityScenario
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.action.ViewActions.click
@@ -13,7 +12,7 @@ import com.google.android.material.appbar.MaterialToolbar
 import org.btcmap.Activity
 import org.btcmap.R
 import org.btcmap.settings.SettingsFragment
-import org.btcmap.stats.StatsAdapter
+import org.btcmap.ui.StatsComposeView
 import org.btcmap.util.AppTestCase
 import org.btcmap.util.waitUntilOnMain
 import org.junit.Assert
@@ -32,20 +31,17 @@ class ImageStatsFragmentTest : AppTestCase() {
     @Test
     fun showsCacheSectionsAndLoadCounters() {
         launchFragment { scenario, fragment ->
-            lateinit var list: RecyclerView
+            lateinit var list: StatsComposeView
             scenario.onActivity {
                 list = fragment.requireView().findViewById(R.id.statsList)
             }
 
-            waitUntilOnMain {
-                val adapter = list.adapter as? StatsAdapter ?: return@waitUntilOnMain false
-                adapter.currentList.any { it.title == "Memory cache" }
-            }
+            waitUntilOnMain { list.sections.any { it.title == "Memory cache" } }
 
             scenario.onActivity {
-                val adapter = list.adapter as StatsAdapter
-                val sections = adapter.currentList.associateBy { it.title }
-                val titles = adapter.currentList.map { it.title }
+                val current = list.sections
+                val sections = current.associateBy { it.title }
+                val titles = current.map { it.title }
                 Assert.assertTrue("missing memory section, was $titles", "Memory cache" in sections)
                 Assert.assertTrue("missing disk section, was $titles", "Disk cache" in sections)
                 Assert.assertTrue("missing loads section, was $titles", "Loads" in sections)
@@ -72,7 +68,7 @@ class ImageStatsFragmentTest : AppTestCase() {
     @Test
     fun refreshButtonReReadsTheCounters() {
         launchFragment { scenario, fragment ->
-            lateinit var list: RecyclerView
+            lateinit var list: StatsComposeView
             scenario.onActivity {
                 list = fragment.requireView().findViewById(R.id.statsList)
             }
@@ -130,10 +126,9 @@ class ImageStatsFragmentTest : AppTestCase() {
         }
     }
 
-    private fun valueOf(list: RecyclerView, sectionTitle: String, label: String): String? =
-        (list.adapter as? StatsAdapter)
-            ?.currentList
-            ?.firstOrNull { it.title == sectionTitle }
+    private fun valueOf(list: StatsComposeView, sectionTitle: String, label: String): String? =
+        list.sections
+            .firstOrNull { it.title == sectionTitle }
             ?.entries
             ?.firstOrNull { it.label == label }
             ?.value

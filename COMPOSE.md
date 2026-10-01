@@ -372,6 +372,15 @@ Verified: `:ui` compiles for Android + JVM; `:shared:jvmTest` (62),
 `:app:compileDebugAndroidTestKotlin`; and on the emulator the screen renders its
 cards in both light and dark mode with no crash. No behavior change.
 
+### Phase 2, second slice — done
+
+Migrated `ImageStatsFragment` to the same `StatsComposeView`, so both stats
+screens render the shared `StatsScreen`. Deleted `StatsAdapter` and the
+`stats_section_item`/`stats_row_item` layouts, and updated
+`DbStatsFragmentTest` and `ImageStatsFragmentTest` to read the Compose view's
+`sections` instead of a `RecyclerView` adapter (the DbStats test had been left
+runtime-broken by the first slice). No behavior change.
+
 ## Next
 
 Phase 2 continues: migrate the remaining non-map screens to `:ui` screen by

@@ -2,7 +2,6 @@ package org.btcmap.dbstats
 
 import androidx.fragment.app.commit
 import androidx.fragment.app.replace
-import androidx.recyclerview.widget.RecyclerView
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.Espresso.onView
@@ -17,8 +16,8 @@ import org.btcmap.sync.SyncState
 import org.btcmap.db.Database
 import org.btcmap.db.table.place.Place
 import org.btcmap.settings.SettingsFragment
-import org.btcmap.stats.StatsAdapter
 import org.btcmap.stats.StatsSection
+import org.btcmap.ui.StatsComposeView
 import org.btcmap.util.AppTestCase
 import org.btcmap.util.TestSyncController
 import org.btcmap.util.waitUntil
@@ -39,19 +38,16 @@ class DbStatsFragmentTest : AppTestCase() {
         databaseRule.db.place.insert(listOf(place(1L), place(2L)))
 
         launchFragment { scenario, fragment ->
-            lateinit var list: RecyclerView
+            lateinit var list: StatsComposeView
             scenario.onActivity {
                 list = fragment.requireView().findViewById(R.id.statsList)
             }
 
-            waitUntilOnMain {
-                val adapter = list.adapter as? StatsAdapter ?: return@waitUntilOnMain false
-                adapter.currentList.any { it.title == "place table" }
-            }
+            waitUntilOnMain { list.sections.any { it.title == "place table" } }
 
             scenario.onActivity {
-                val adapter = list.adapter as StatsAdapter
-                val sections = adapter.currentList.associateBy { it.title }
+                val current = list.sections
+                val sections = current.associateBy { it.title }
 
                 val place = sections.getValue("place table").entries.associate { it.label to it.value }
                 Assert.assertEquals("2", place["Rows"])
@@ -65,14 +61,14 @@ class DbStatsFragmentTest : AppTestCase() {
                 )
 
                 Assert.assertTrue(
-                    "expected a Database section, sections were ${adapter.currentList.map { it.title }}",
+                    "expected a Database section, sections were ${current.map { it.title }}",
                     "Database" in sections,
                 )
                 val version = sections.getValue("Database").entries.first { it.label == "Version" }
                 Assert.assertEquals(Database.VERSION.toString(), version.value)
 
                 Assert.assertTrue(
-                    "expected a Sync section, sections were ${adapter.currentList.map { it.title }}",
+                    "expected a Sync section, sections were ${current.map { it.title }}",
                     "Sync" in sections,
                 )
                 val syncState = sections.getValue("Sync").entries.first { it.label == "State" }
@@ -96,7 +92,7 @@ class DbStatsFragmentTest : AppTestCase() {
     @Test
     fun showsBundleStatsForEachSnapshot() {
         launchFragment { scenario, fragment ->
-            lateinit var list: RecyclerView
+            lateinit var list: StatsComposeView
             scenario.onActivity {
                 list = fragment.requireView().findViewById(R.id.statsList)
             }
@@ -120,7 +116,7 @@ class DbStatsFragmentTest : AppTestCase() {
         databaseRule.db.place.insert(listOf(place(1L)))
 
         launchFragment { scenario, fragment ->
-            lateinit var list: RecyclerView
+            lateinit var list: StatsComposeView
             scenario.onActivity {
                 list = fragment.requireView().findViewById(R.id.statsList)
             }
@@ -175,10 +171,10 @@ class DbStatsFragmentTest : AppTestCase() {
         }
     }
 
-    private fun sectionOf(list: RecyclerView, title: String): StatsSection? =
-        (list.adapter as? StatsAdapter)?.currentList?.firstOrNull { it.title == title }
+    private fun sectionOf(list: StatsComposeView, title: String): StatsSection? =
+        list.sections.firstOrNull { it.title == title }
 
-    private fun valueOf(list: RecyclerView, sectionTitle: String, label: String): String? =
+    private fun valueOf(list: StatsComposeView, sectionTitle: String, label: String): String? =
         sectionOf(list, sectionTitle)?.entries?.firstOrNull { it.label == label }?.value
 
     private fun place(id: Long): Place {

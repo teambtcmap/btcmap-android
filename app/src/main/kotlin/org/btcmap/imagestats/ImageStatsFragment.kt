@@ -7,16 +7,15 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
-import androidx.recyclerview.widget.LinearLayoutManager
 import coil3.SingletonImageLoader
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.btcmap.R
 import org.btcmap.databinding.ImageStatsFragmentBinding
-import org.btcmap.stats.StatsAdapter
 import org.btcmap.stats.StatsEntry
 import org.btcmap.stats.StatsSection
+import org.btcmap.util.iconTypeface
 import org.btcmap.util.rethrowIfCancellation
 import org.btcmap.util.showError
 import java.text.NumberFormat
@@ -25,8 +24,6 @@ class ImageStatsFragment : Fragment() {
 
     private var _binding: ImageStatsFragmentBinding? = null
     private val binding get() = _binding!!
-
-    private lateinit var adapter: StatsAdapter
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -51,9 +48,7 @@ class ImageStatsFragment : Fragment() {
             }
         }
 
-        binding.statsList.layoutManager = LinearLayoutManager(requireContext())
-        adapter = StatsAdapter()
-        binding.statsList.adapter = adapter
+        binding.statsList.iconTypeface = iconTypeface
 
         refresh()
     }
@@ -72,7 +67,7 @@ class ImageStatsFragment : Fragment() {
     private fun refresh() {
         val appContext = requireContext().applicationContext
         val homeDirectory = requireContext().dataDir.path
-        val currentAdapter = adapter
+        val statsList = binding.statsList
         viewLifecycleOwner.lifecycleScope.launch {
             try {
                 // Reading the caches can initialize them and touch the disk, so
@@ -83,7 +78,7 @@ class ImageStatsFragment : Fragment() {
                         homeDirectory = homeDirectory,
                     ).read()
                 }
-                currentAdapter.submitList(buildSections(cache, ImageLoadStats.snapshot()))
+                statsList.sections = buildSections(cache, ImageLoadStats.snapshot())
             } catch (e: Throwable) {
                 e.rethrowIfCancellation()
                 showError(e)
