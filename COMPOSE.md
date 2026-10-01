@@ -1051,6 +1051,25 @@ Verified as far as this environment allows: the run logs the font it loaded
 error. The desktop window cannot be screenshotted here (`import` fails on this
 X setup), so the rendering itself was not seen.
 
+### Phase 3, twenty-fifth slice — done (step 6: the map on desktop)
+
+The desktop app now renders the shared map. The pieces the desktop needs beyond
+the UI:
+
+- **`MapRuntimeOptions(cacheFile = ...)`** pointing at a file under the data
+  directory — a *file*, not a directory: a directory path makes the offline
+  manager fail to open its database.
+- **`kotlinx-coroutines-swing`**, for `Dispatchers.Main` on the AWT event thread;
+  without it the map runtime cannot be created.
+- **`rememberAwtComposeMapPresentationHost(window)` + `ProvideMapPresentationHost`**
+  around the map, so each window supplies its GPU context.
+- The style is the hosted `tiles.openfreemap.org/styles/liberty` URL: the bundled
+  styles are Android assets and their sprite/glyph provider is Android-only.
+
+Verified by the run log: `Rendered the first map frame with OPENGL on
+maplibre-linux-map-renderer, extent 480x702`. The window still cannot be
+screenshotted here.
+
 ## Working notes
 
 Durable facts and conventions for continuing the migration.

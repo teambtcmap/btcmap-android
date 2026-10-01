@@ -25,6 +25,11 @@ dependencies {
     implementation(project(":shared"))
     implementation(project(":ui"))
     implementation(compose.desktop.currentOs)
+    implementation(libs.maplibre.compose)
+    // Provides Dispatchers.Main on the AWT event thread, which the map's engine
+    // callbacks need.
+    implementation(libs.kotlinx.coroutines.swing)
+    runtimeOnly(libs.maplibre.compose.runtime.opengl.linux.x64)
     // The SQLite driver the shared database runs on off Android.
     implementation(libs.androidx.sqlite.bundled.jvm)
 }

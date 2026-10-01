@@ -8,6 +8,15 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
+import kotlinx.io.files.Path
+import org.maplibre.compose.desktop.rememberAwtComposeMapPresentationHost
+import org.maplibre.compose.desktop.ProvideMapPresentationHost
+import org.maplibre.compose.map.DefaultMapRuntime
+import org.maplibre.compose.map.MapRuntimeOptions
+import org.btcmap.ui.map.AreaChipPalette
+import org.btcmap.ui.map.MarkerPalette
+import java.awt.Color as AwtColor
+import androidx.compose.ui.graphics.Color
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import org.btcmap.db.Database
 import org.btcmap.settings.KEY_AUTH_TOKEN
@@ -15,6 +24,7 @@ import org.btcmap.settings.Settings
 import org.btcmap.stats.StatsEntry
 import org.btcmap.stats.StatsSection
 import org.btcmap.ui.AppTheme
+import org.btcmap.ui.MapScreen
 import org.btcmap.ui.StatsScreen
 import java.io.File
 
@@ -31,13 +41,51 @@ fun main() = application {
 
     val iconFont = loadIconFont()
 
+    // The map needs an app-wide cache directory and, per window, its GPU
+    // context, before any map is created.
+    DefaultMapRuntime.configure(
+        MapRuntimeOptions(cacheFile = Path(home.cacheFile().absolutePath)),
+    )
+
     Window(
         onCloseRequest = ::exitApplication,
         title = "BTC Map",
         state = rememberWindowState(size = DpSize(480.dp, 720.dp)),
     ) {
-        AppTheme(iconFont = iconFont) {
-            StatsScreen(sections = statsSections(db, settings))
+        val mapHost = rememberAwtComposeMapPresentationHost(window)
+        ProvideMapPresentationHost(mapHost) {
+            AppTheme(iconFont = iconFont) {
+                MapScreen(
+                    db = db,
+                    styleUrl = "https://tiles.openfreemap.org/styles/liberty",
+                    initialLat = 52.2333742,
+                    initialLon = 21.0711489,
+                    initialZoom = 13.0,
+                    minVerifiedAt = null,
+                    palette = MarkerPalette(
+                        markerBackground = Color(0xFFF7931A),
+                        markerIcon = Color.White,
+                        boostedMarkerBackground = Color(0xFF7B3FE4),
+                        boostedMarkerIcon = Color.White,
+                        badgeBackground = Color(0xFFE53935),
+                        badgeText = Color.White,
+                    ),
+                    areaChipPalette = AreaChipPalette(
+                        buttonBackground = Color(0xFF1B1B1B),
+                        buttonIcon = Color.White,
+                        badgeBackground = Color(0xFFE53935),
+                        badgeText = Color.White,
+                    ),
+                    apiUrl = "https://api.btcmap.org",
+                    usingOpenFreeMap = true,
+                    iconFont = iconFont,
+                    placeSheetStrings = PLACE_SHEET_STRINGS,
+                    onPlaceAction = { _, _ -> },
+                    onSelectEvent = {},
+                    onSelectArea = {},
+                    formatDistance = { meters -> "%.1f km".format(meters / 1000) },
+                )
+            }
         }
     }
 }
@@ -51,6 +99,8 @@ private class DesktopHome {
         driver = BundledSQLiteDriver(),
         path = File(dir, "btcmap.db").absolutePath,
     )
+
+    fun cacheFile(): File = File(dir, "map-cache").apply { mkdirs() }.let { File(it, "cache.db") }
 
     fun settings(db: Database): Settings = Settings(
         dbProvider = { db },
@@ -76,6 +126,28 @@ private fun loadIconFont(): FontFamily? {
     println("desktop: icon font ${font?.absolutePath ?: "NOT FOUND (icons will show as text)"}")
     return font?.let { FontFamily(Font(it)) }
 }
+
+private val PLACE_SHEET_STRINGS = org.btcmap.ui.PlaceSheetStrings(
+    directions = "Directions",
+    share = "Share",
+    viewOnBtcmap = "View on btcmap.org",
+    viewOnOsm = "View on openstreetmap.org",
+    editOnOsm = "Edit on openstreetmap.org",
+    notVerified = "Not verified",
+    companionWarning = { "This place needs a companion app ($it)." },
+    verificationWarningTitle = "Verification needed",
+    verificationWarningOutdated = "This place was last verified more than a year ago.",
+    verificationWarningNotVerified = "This place has not been verified yet.",
+    ok = "OK",
+    verify = "Verify",
+    report = "Report",
+    boost = "Boost",
+    comments = { "Comments ($it)" },
+    commentsTitle = { "Comments ($it)" },
+    addComment = "Add comment",
+    save = "Save",
+    addPhoto = "Add photo",
+)
 
 private fun statsSections(db: Database, settings: Settings): List<StatsSection> = listOf(
     StatsSection(
