@@ -34,16 +34,13 @@ Next, in rough order of value (state at 2026-10-02):
 
 Everything previously listed here is done: the desktop-polish screens
 (slices 47-55), the add-photo unification (56), the two tests the map swap
-deleted (57), the MapLibre Compose 0.19.0 upgrade (58) and the two map parity
-gaps (59). What remains is optional:
+deleted (57), the MapLibre Compose 0.19.0 upgrade (58), the two map parity gaps
+(59), and the marker-kind filter back on 0.19.0 (60-61). **Nothing is pending.**
 
-1. **Bring back the marker-kind filter** — dropped in slice 35 because 0.18.0
-   could not hide one kind in place. Re-tested on 0.19.0 (slice 60): hiding a kind
-   at runtime no longer stops the others drawing, so the filter can return by
-   declaring only the included kinds. It waits on a product call about the
-   merchants/events/exchanges buttons.
-2. Nothing else is planned: iOS is out of scope, and the bundled assets are
-   refreshed manually (`./devtools bundle`).
+Optional ideas, none planned: an iOS target (out of scope), moving the last
+Views screens (the standalone place, add-place and report screens) into `:ui` so
+they share the desktop's, and the bundled assets are refreshed manually
+(`./devtools bundle`).
 
 ## Goal
 
@@ -1802,6 +1799,24 @@ call.
 
 No version code bump: the experiment left no code.
 
+### Phase 3, sixty-first slice — done (the marker-kind filter is back)
+
+Slice 60's re-test said the filter could return, so it has. `MapScreen` gained a
+`MarkerKind` (`Merchants`/`Events`/`Exchanges`), remembered with
+`rememberSaveable`, declares only the selected kind's layers, and overlays
+`MarkerFilterButtons` at the bottom-start — the same single-select behaviour the
+Views button group had, merchants by default. Selecting a place (a search hit or
+an `openPlaceId` deep link) switches to its kind first, so its marker is not
+hidden by the filter. The buttons are on the shared map, so the desktop gets them
+too.
+
+A `MarkerFilterButtonsTest` drives the composable. The map itself was checked on
+the emulator: merchants, events and exchanges each draw their own markers when
+selected (a merchant cluster and pin, the one Warsaw event, and the exchange
+pins). The desktop window renders the buttons as well.
+
+Bump the version code to 221.
+
 ## Working notes
 
 Durable facts and conventions for continuing the migration.
@@ -1908,14 +1923,14 @@ Durable facts and conventions for continuing the migration.
 
 ## Next
 
-Hand-off for the next session (state at 2026-10-02, tip `0ee45e82`):
+Hand-off for the next session (state at 2026-10-02, tip `8a027a2a`):
 
 Phases 1-3 are complete: `:shared` holds the portable core, both UIs are Compose
 Multiplatform with the desktop running its whole UI from the same code, the
 Android map and its place sheet are shared, and the library is on MapLibre
-Compose 0.19.0. Every item the plan listed is done. The marker-kind filter that
-0.18.0 forced out now works again on 0.19.0 (slice 60); the only open question is
-whether to bring the merchants/events/exchanges buttons back.
+Compose 0.19.0. Every item the plan listed is done, including the marker-kind
+filter that 0.18.0 forced out and 0.19.0 made possible again (slices 60-61).
+Nothing is pending.
 
 Useful commands, all of them exercised this week:
 

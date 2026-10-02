@@ -14,6 +14,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.withFrameNanos
 import kotlinx.coroutines.flow.filterIsInstance
@@ -45,6 +46,7 @@ import org.btcmap.map.markerImageName
 import org.btcmap.search.SearchAdapterItem
 import org.btcmap.map.toEventGeoJson
 import org.btcmap.map.toMarkerGeoJson
+import org.btcmap.place.isMerchant
 import org.btcmap.ui.map.AreaChipPalette
 import org.btcmap.ui.map.AreaChips
 import org.btcmap.ui.map.EventLayers
@@ -52,6 +54,8 @@ import org.btcmap.ui.map.ExchangeLayers
 import org.btcmap.ui.map.MARKER_PIN_IMAGE_ID
 import org.btcmap.ui.map.MarkerBitmapFactory
 import org.btcmap.ui.map.MarkerClickHandler
+import org.btcmap.ui.map.MarkerFilterButtons
+import org.btcmap.ui.map.MarkerKind
 import org.btcmap.ui.map.MarkerPalette
 import org.btcmap.ui.map.MerchantLayers
 import org.btcmap.ui.map.PlacePreviewMap
@@ -238,6 +242,10 @@ fun MapScreen(
     // the tracking effect below moves the camera as soon as one does.
     var recenterToLocation by remember { mutableStateOf(false) }
 
+    // Which marker kind the map shows. One at a time, as the Views button group
+    // was; merchants are the default.
+    var markerKind by rememberSaveable { mutableStateOf(MarkerKind.Merchants) }
+
     val state = rememberMapState(
         // The bundled styles are handed over as JSON: the Compose map cannot
         // read the asset:// style the Android SDK uses.
@@ -247,32 +255,38 @@ fun MapScreen(
             zoom = initialZoom,
         ),
     ) {
-        MerchantLayers(
-            geoJson = merchantsGeoJson.value,
-            clusterBackgroundColor = palette.markerBackground,
-            clusterTextColor = palette.markerIcon,
-            usingOpenFreeMap = usingOpenFreeMap,
-            showMarkers = imagesReady,
-            onMarkerClick = onMarkerClick,
-        )
-        EventLayers(
-            geoJson = eventsGeoJson.value,
-            clusterBackgroundColor = palette.markerBackground,
-            clusterTextColor = palette.markerIcon,
-            usingOpenFreeMap = usingOpenFreeMap,
-            showMarkers = imagesReady,
-            onMarkerClick = onMarkerClick,
-        )
-        ExchangeLayers(
-            geoJson = exchangesGeoJson.value,
-            clusterBackgroundColor = palette.markerBackground,
-            clusterTextColor = palette.markerIcon,
-            badgeBackgroundColor = palette.badgeBackground,
-            badgeTextColor = palette.badgeText,
-            usingOpenFreeMap = usingOpenFreeMap,
-            showMarkers = imagesReady,
-            onMarkerClick = onMarkerClick,
-        )
+        // Only the selected kind is declared: 0.19.0 fixed the 0.18.0 quirk that
+        // made hiding a kind stop the others drawing (see the working notes).
+        when (markerKind) {
+            MarkerKind.Merchants -> MerchantLayers(
+                geoJson = merchantsGeoJson.value,
+                clusterBackgroundColor = palette.markerBackground,
+                clusterTextColor = palette.markerIcon,
+                usingOpenFreeMap = usingOpenFreeMap,
+                showMarkers = imagesReady,
+                onMarkerClick = onMarkerClick,
+            )
+
+            MarkerKind.Events -> EventLayers(
+                geoJson = eventsGeoJson.value,
+                clusterBackgroundColor = palette.markerBackground,
+                clusterTextColor = palette.markerIcon,
+                usingOpenFreeMap = usingOpenFreeMap,
+                showMarkers = imagesReady,
+                onMarkerClick = onMarkerClick,
+            )
+
+            MarkerKind.Exchanges -> ExchangeLayers(
+                geoJson = exchangesGeoJson.value,
+                clusterBackgroundColor = palette.markerBackground,
+                clusterTextColor = palette.markerIcon,
+                badgeBackgroundColor = palette.badgeBackground,
+                badgeTextColor = palette.badgeText,
+                usingOpenFreeMap = usingOpenFreeMap,
+                showMarkers = imagesReady,
+                onMarkerClick = onMarkerClick,
+            )
+        }
 
         // The puck draws the last known position. The tracking effect is the
         // only thing that moves the camera, and only when the location button
@@ -315,6 +329,9 @@ fun MapScreen(
         val place = withContext(Dispatchers.Default) { db.place.selectById(id) }
             ?: return@LaunchedEffect
         selectedPlace = place
+        // The place may be of the kind the filter is hiding, so show its kind
+        // before moving to it, as the Views map did.
+        markerKind = if (place.isMerchant()) MarkerKind.Merchants else MarkerKind.Exchanges
         onPlaceSelected(place)
         state.animateCamera(
             CameraUpdate(target = Position(place.lon, place.lat), zoom = OPEN_ZOOM),
@@ -351,6 +368,7 @@ fun MapScreen(
             is SearchAdapterItem.Place -> scope.launch {
                 withContext(Dispatchers.Default) { db.place.selectById(result.placeId) }?.let { place ->
                     selectedPlace = place
+                    markerKind = if (place.isMerchant()) MarkerKind.Merchants else MarkerKind.Exchanges
                     onPlaceSelected(place)
                     // A search result can be anywhere, so the map moves to it
                     // rather than only opening its sheet.
@@ -560,6 +578,13 @@ fun MapScreen(
                     },
                 )
             }
+            MarkerFilterButtons(
+                selected = markerKind,
+                onSelect = { markerKind = it },
+                modifier = Modifier
+                    .align(Alignment.BottomStart)
+                    .padding(start = 24.dp, bottom = 112.dp),
+            )
             SearchOverlay(
                 query = searchQuery,
                 onQueryChange = { searchQuery = it },
