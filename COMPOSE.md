@@ -37,10 +37,11 @@ Everything previously listed here is done: the desktop-polish screens
 deleted (57), the MapLibre Compose 0.19.0 upgrade (58) and the two map parity
 gaps (59). What remains is optional:
 
-1. **Re-test the marker-kind filter** — dropped in slice 35 because 0.18.0 could
-   not hide one kind in place (the filter made the visible kind stop drawing).
-   0.19.0 may or may not have fixed it; worth re-checking before deciding whether
-   the merchants/events/exchanges buttons come back.
+1. **Bring back the marker-kind filter** — dropped in slice 35 because 0.18.0
+   could not hide one kind in place. Re-tested on 0.19.0 (slice 60): hiding a kind
+   at runtime no longer stops the others drawing, so the filter can return by
+   declaring only the included kinds. It waits on a product call about the
+   merchants/events/exchanges buttons.
 2. Nothing else is planned: iOS is out of scope, and the bundled assets are
    refreshed manually (`./devtools bundle`).
 
@@ -1781,14 +1782,31 @@ not reachable while it is open.
 
 Bump the version code to 220.
 
+### Phase 3, sixtieth slice — done (re-testing the marker filter on 0.19.0)
+
+Slice 35 dropped the merchants/events/exchanges buttons because 0.18.0 could not
+hide a marker kind in place: taking a kind's layers out, setting `visible`, or
+emptying its source all made the *visible* kinds stop drawing.
+
+Re-tested on 0.19.0 by hiding merchants at runtime (a `LaunchedEffect` flips a
+flag after 20s, and the map declares its layers from that flag). The desktop
+window was screenshotted before and after: the orange marker pixels stayed at
+5,486 → 5,423, and the pins left standing were the event and the exchange — the
+merchants went and the others stayed. With all three kinds hidden the count fell
+to 75 (just the UI accents), confirming the flag reached the map. The 0.18.0 bug
+would have collapsed the count to that same ~75 the moment one kind was hidden.
+
+So the filter is possible again by declaring only the included kinds. No code was
+kept: the experiment was reverted, and bringing the buttons back is a product
+call.
+
+No version code bump: the experiment left no code.
+
 ## Working notes
 
 Durable facts and conventions for continuing the migration.
 
-### MapLibre Compose layer quirks (recorded on 0.18.0)
-
-Not re-verified on 0.19.0 beyond the map rendering; the image-registration
-quirk in particular still governs how the marker layers are declared.
+### MapLibre Compose layer quirks
 
 - **The app's styles are `asset://map-styles/<style>/style.json`** (a MapLibre
   Android SDK scheme). The Compose map cannot load them: the load fails and only
@@ -1797,12 +1815,14 @@ quirk in particular still governs how the marker layers are declared.
   reading the JSON and passing `BaseStyle.Json`, with its sprite/glyph URLs
   rewritten — which is the step 4 basemap piece. (Tried swapping the place
   screen's preview `MapView` to the shared preview map: it compiled and laid out
-  but stayed blank for exactly this reason, so it was reverted.)
-- Taking a marker kind's layers out of the declaration (an early return, or an
-  `if`) makes the other marker kinds stop drawing entirely. So does setting the
-  layer's own `visible` property, and so does emptying the hidden kind's source
-  features. The map screen therefore keeps all three kinds declared with real
-  data, and the show/hide toggle from the map's button group is not ported yet.
+  but stayed blank for exactly this reason, so it was reverted. The main map
+  later passed `styleJson`, which is what unblocked it.)
+- **Hiding a marker kind in place was impossible on 0.18.0**: taking a kind's
+  layers out (an early return, or an `if`), setting the layer's own `visible`
+  property, and emptying the hidden kind's source features all made the *visible*
+  kinds stop drawing. **Re-tested on 0.19.0 (slice 60) and fixed** — hiding a kind
+  at runtime leaves the others drawing, so the merchants/events/exchanges filter
+  can come back by declaring only the included kinds.
 - A never-true filter is not an escape hatch either: `const(false)` is rejected
   as "filter value must be a non empty array" and `const(1).eq(const(0))` as
   "filter property must be a string", both aborting the style.
@@ -1888,13 +1908,14 @@ quirk in particular still governs how the marker layers are declared.
 
 ## Next
 
-Hand-off for the next session (state at 2026-10-02, tip `38f7af62`):
+Hand-off for the next session (state at 2026-10-02, tip `0ee45e82`):
 
 Phases 1-3 are complete: `:shared` holds the portable core, both UIs are Compose
 Multiplatform with the desktop running its whole UI from the same code, the
 Android map and its place sheet are shared, and the library is on MapLibre
-Compose 0.19.0. Every item the plan listed is done; the only optional follow-up
-is re-testing the dropped marker-kind filter on 0.19.0.
+Compose 0.19.0. Every item the plan listed is done. The marker-kind filter that
+0.18.0 forced out now works again on 0.19.0 (slice 60); the only open question is
+whether to bring the merchants/events/exchanges buttons back.
 
 Useful commands, all of them exercised this week:
 
