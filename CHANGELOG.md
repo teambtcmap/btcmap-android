@@ -17,6 +17,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Stop a dismissed place from reopening when returning to the map
 - Make the map honour the "Allow map rotation" setting
 - Show the soft keyboard in the login, sign-up and change-password dialogs
+- Bring the desktop settings screen to parity with Android, adding map style, colours, verification filter and database stats
 
 ## [1.2.0] - 2026-09-30
 

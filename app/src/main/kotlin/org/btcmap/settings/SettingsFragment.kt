@@ -25,7 +25,8 @@ import org.btcmap.dbstats.DbStatsFragment
 import org.btcmap.imagestats.ImageStatsFragment
 import org.btcmap.ui.RadioOption
 import org.btcmap.ui.RadioPickerComposeView
-import org.btcmap.ui.SettingsItem
+import org.btcmap.ui.SettingsStrings
+import org.btcmap.ui.settingsItems
 
 class SettingsFragment : Fragment() {
 
@@ -78,45 +79,27 @@ class SettingsFragment : Fragment() {
     private fun refreshItems() {
         _binding ?: return
 
-        binding.settingsList.items = listOf(
-            SettingsItem.Action("account", accountTitle, accountSecondary),
-            SettingsItem.Action(
-                "mapStyle",
-                getString(R.string.map_style),
-                prefs.mapStyle.name(requireContext()),
+        binding.settingsList.items = settingsItems(
+            SettingsStrings(
+                accountTitle = accountTitle,
+                accountSecondary = accountSecondary,
+                mapStyle = getString(R.string.map_style),
+                mapStyleValue = prefs.mapStyle.name(requireContext()),
+                customizeColors = getString(R.string.customize_colors),
+                customizeColorsSecondary = getString(R.string.customize_colors_secondary),
+                verifiedFilter = getString(R.string.verified_filter),
+                verifiedFilterValue = prefs.verifiedFilterYears.toVerifiedFilterYears(requireContext()),
+                showAttribution = getString(R.string.show_attribution),
+                showAttributionSecondary = getString(R.string.show_attribution_secondary),
+                mapRotation = getString(R.string.map_rotation),
+                mapRotationSecondary = getString(R.string.map_rotation_secondary),
+                dbStats = getString(R.string.database_stats),
+                dbStatsSecondary = getString(R.string.database_stats_secondary),
+                imageStats = getString(R.string.image_stats),
+                imageStatsSecondary = getString(R.string.image_stats_secondary),
             ),
-            SettingsItem.Action(
-                "customizeColors",
-                getString(R.string.customize_colors),
-                getString(R.string.customize_colors_secondary),
-            ),
-            SettingsItem.Action(
-                "verifiedFilter",
-                getString(R.string.verified_filter),
-                prefs.verifiedFilterYears.toVerifiedFilterYears(requireContext()),
-            ),
-            SettingsItem.Toggle(
-                "showAttribution",
-                getString(R.string.show_attribution),
-                getString(R.string.show_attribution_secondary),
-                prefs.showAttribution,
-            ),
-            SettingsItem.Toggle(
-                "mapRotation",
-                getString(R.string.map_rotation),
-                getString(R.string.map_rotation_secondary),
-                prefs.mapRotationEnabled,
-            ),
-            SettingsItem.Action(
-                "dbStats",
-                getString(R.string.database_stats),
-                getString(R.string.database_stats_secondary),
-            ),
-            SettingsItem.Action(
-                "imageStats",
-                getString(R.string.image_stats),
-                getString(R.string.image_stats_secondary),
-            ),
+            showAttribution = prefs.showAttribution,
+            mapRotationEnabled = prefs.mapRotationEnabled,
         )
     }
 

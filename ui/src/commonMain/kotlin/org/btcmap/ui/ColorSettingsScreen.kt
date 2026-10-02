@@ -20,6 +20,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import org.btcmap.settings.MapColor
+import org.btcmap.settings.Settings
+import org.btcmap.settings.mapColor
 
 /** One customizable color: a label, its hex value and a swatch. */
 data class ColorItem(
@@ -28,6 +31,24 @@ data class ColorItem(
     val value: String,
     val color: Color,
 )
+
+/**
+ * Builds the color rows from the shared [MapColor] registry, naming each one
+ * with [title]. Hosts supply only the labels; the stored keys have one
+ * definition, so Android and the desktop read and write the same colors.
+ */
+fun mapColorItems(
+    settings: Settings,
+    title: (MapColor) -> String,
+): List<ColorItem> = MapColor.entries.map { color ->
+    val argb = settings.mapColor(color)
+    ColorItem(
+        key = color.key,
+        title = title(color),
+        value = "#" + argb.toUInt().toString(16).uppercase().padStart(8, '0'),
+        color = Color(argb),
+    )
+}
 
 @Composable
 fun ColorSettingsScreen(

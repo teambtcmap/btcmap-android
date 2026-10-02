@@ -6,15 +6,18 @@ import androidx.compose.ui.test.isToggleable
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.runComposeUiTest
+import org.btcmap.settings.MapStyle
+import org.btcmap.settings.mapStyle
 import org.btcmap.settings.showAttribution
 import kotlin.test.Test
+import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 /**
- * The desktop settings screen. The Account row opened nothing for a while
- * because the window called the screen without its callback; the screen now
- * requires the callback, and this drives the row so the wiring cannot regress.
+ * The desktop settings screen. It now renders the same shared row list Android
+ * does, so these tests pin the rows and the wiring of the ones that open another
+ * screen or a dialog.
  */
 class DesktopSettingsScreenTest {
 
@@ -23,12 +26,25 @@ class DesktopSettingsScreenTest {
 
     @OptIn(ExperimentalTestApi::class)
     @Test
+    fun rows_renderTheSameSettingsAsAndroid() {
+        runComposeUiTest {
+            setContent { DesktopSettingsScreen(settings, db, {}, {}, {}) }
+            onNodeWithText("Map style").assertIsDisplayed()
+            onNodeWithText("Customize colors").assertIsDisplayed()
+            onNodeWithText("Only show places").assertIsDisplayed()
+            onNodeWithText("Show attribution").assertIsDisplayed()
+            onNodeWithText("Allow map rotation").assertIsDisplayed()
+            onNodeWithText("Database").assertIsDisplayed()
+            onNodeWithText("Account").assertIsDisplayed()
+        }
+    }
+
+    @OptIn(ExperimentalTestApi::class)
+    @Test
     fun accountRow_opensTheAccountPage() {
         var opened = false
         runComposeUiTest {
-            setContent {
-                DesktopSettingsScreen(settings, onOpenAccount = { opened = true })
-            }
+            setContent { DesktopSettingsScreen(settings, db, { opened = true }, {}, {}) }
             onNodeWithText("Account").performClick()
         }
         assertTrue(opened)
@@ -36,13 +52,35 @@ class DesktopSettingsScreenTest {
 
     @OptIn(ExperimentalTestApi::class)
     @Test
-    fun rows_renderTheStoredValues() {
+    fun customizeColorsRow_opensTheColorsPage() {
+        var opened = false
         runComposeUiTest {
-            setContent { DesktopSettingsScreen(settings, onOpenAccount = {}) }
-            onNodeWithText("Show attribution").assertIsDisplayed()
-            onNodeWithText("Map rotation").assertIsDisplayed()
-            onNodeWithText("Account").assertIsDisplayed()
+            setContent { DesktopSettingsScreen(settings, db, {}, { opened = true }, {}) }
+            onNodeWithText("Customize colors").performClick()
         }
+        assertTrue(opened)
+    }
+
+    @OptIn(ExperimentalTestApi::class)
+    @Test
+    fun databaseRow_opensTheDatabasePage() {
+        var opened = false
+        runComposeUiTest {
+            setContent { DesktopSettingsScreen(settings, db, {}, {}, { opened = true }) }
+            onNodeWithText("Database").performClick()
+        }
+        assertTrue(opened)
+    }
+
+    @OptIn(ExperimentalTestApi::class)
+    @Test
+    fun mapStyleRow_picksAStyleAndStoresIt() {
+        runComposeUiTest {
+            setContent { DesktopSettingsScreen(settings, db, {}, {}, {}) }
+            onNodeWithText("Map style").performClick()
+            onNodeWithText("OpenFreeMap Dark").performClick()
+        }
+        assertEquals(MapStyle.Dark, settings.mapStyle)
     }
 
     @OptIn(ExperimentalTestApi::class)
@@ -50,9 +88,8 @@ class DesktopSettingsScreenTest {
     fun togglingAttribution_writesItThrough() {
         assertTrue(settings.showAttribution)
         runComposeUiTest {
-            setContent { DesktopSettingsScreen(settings, onOpenAccount = {}) }
-            // Only the switch is clickable; the row is not (toggles have no
-            // action of their own).
+            setContent { DesktopSettingsScreen(settings, db, {}, {}, {}) }
+            // The first toggle is Show attribution, the second Map rotation.
             onAllNodes(isToggleable())[0].performClick()
         }
         assertFalse(settings.showAttribution)

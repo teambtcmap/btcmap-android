@@ -1,16 +1,12 @@
+@file:Suppress("UNUSED_PARAMETER")
+
 package org.btcmap.settings
 
 import android.content.Context
 import android.content.res.Configuration
 import androidx.core.content.edit
-import androidx.core.graphics.toColorInt
 import org.btcmap.App
 import org.btcmap.R
-import okhttp3.HttpUrl
-import okhttp3.HttpUrl.Companion.toHttpUrl
-import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
-import java.time.ZoneOffset
-import java.time.ZonedDateTime
 
 lateinit var prefs: Settings
     private set
@@ -109,150 +105,48 @@ private const val LIBERTY_STYLE_URL = "https://tiles.openfreemap.org/styles/libe
 private const val POSITRON_STYLE_URL = "https://tiles.openfreemap.org/styles/positron"
 private const val BRIGHT_STYLE_URL = "https://tiles.openfreemap.org/styles/bright"
 
-fun Settings.mapStyleIsDark(): Boolean {
-    return when (mapStyle) {
-        MapStyle.Dark, MapStyle.DarkMatter -> true
-        MapStyle.Auto -> {
-            false
-        }
+/*
+ * The map colors and the verification window moved to `:shared` (see
+ * `MapColors.kt` and `AppSettings.kt`) so the desktop app reads the same keys
+ * and defaults. These wrappers keep the Android call sites unchanged; the
+ * `context` is no longer consulted because the defaults do not vary by theme.
+ */
+fun Settings.markerBackgroundColor(context: Context): Int = mapColor(MapColor.MarkerBackground)
 
-        else -> false
-    }
-}
+fun Settings.setMarkerBackgroundColor(color: Int?) = setMapColor(MapColor.MarkerBackground, color)
 
-fun Settings.markerBackgroundColor(context: Context): Int {
-    val customColor = getIntOrNull("markerBackgroundColor")
-    if (customColor != null) return customColor
+fun Settings.boostedMarkerBackgroundColor(): Int = mapColor(MapColor.BoostedMarkerBackground)
 
-    val isDark = mapStyleIsDark() ||
-            (context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES)
+fun Settings.setBoostedMarkerBackgroundColor(color: Int?) =
+    setMapColor(MapColor.BoostedMarkerBackground, color)
 
-    return if (isDark) 0xFF0e95af.toInt() else 0xFF0e95af.toInt()
-}
+fun Settings.boostedMarkerIconColor(): Int = mapColor(MapColor.BoostedMarkerIcon)
 
-fun Settings.setMarkerBackgroundColor(color: Int?) {
-    putInt("markerBackgroundColor", color)
-}
+fun Settings.setBoostedMarkerIconColor(color: Int?) = setMapColor(MapColor.BoostedMarkerIcon, color)
 
-private const val KEY_BOOSTED_MARKER_BACKGROUND_COLOR = "boostedMarkerBackgroundColor"
+fun Settings.markerIconColor(context: Context): Int = mapColor(MapColor.MarkerIcon)
 
-fun Settings.boostedMarkerBackgroundColor(): Int {
-    return getInt(KEY_BOOSTED_MARKER_BACKGROUND_COLOR, "#f7931a".toColorInt())
-}
+fun Settings.setMarkerIconColor(color: Int?) = setMapColor(MapColor.MarkerIcon, color)
 
-fun Settings.setBoostedMarkerBackgroundColor(color: Int?) {
-    putInt(KEY_BOOSTED_MARKER_BACKGROUND_COLOR, color)
-}
+fun Settings.badgeBackgroundColor(context: Context): Int = mapColor(MapColor.BadgeBackground)
 
-private const val KEY_BOOSTED_MARKER_ICON_COLOR = "boostedMarkerIconColor"
+fun Settings.setBadgeBackgroundColor(color: Int?) = setMapColor(MapColor.BadgeBackground, color)
 
-fun Settings.boostedMarkerIconColor(): Int {
-    return getInt(KEY_BOOSTED_MARKER_ICON_COLOR, 0xFFFFFFFF.toInt())
-}
+fun Settings.badgeTextColor(context: Context): Int = mapColor(MapColor.BadgeText)
 
-fun Settings.setBoostedMarkerIconColor(color: Int?) {
-    putInt(KEY_BOOSTED_MARKER_ICON_COLOR, color)
-}
+fun Settings.setBadgeTextColor(color: Int?) = setMapColor(MapColor.BadgeText, color)
 
-fun Settings.markerIconColor(context: Context): Int {
-    val customColor = getIntOrNull("markerIconColor")
-    if (customColor != null) return customColor
+fun Settings.buttonBackgroundColor(context: Context): Int = mapColor(MapColor.ButtonBackground)
 
-    val isDark = mapStyleIsDark() ||
-            (context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES)
+fun Settings.setButtonBackgroundColor(color: Int?) = setMapColor(MapColor.ButtonBackground, color)
 
-    return if (isDark) 0xFFFFFFFF.toInt() else 0xFFFFFFFF.toInt() // White for both
-}
+fun Settings.buttonIconColor(context: Context): Int = mapColor(MapColor.ButtonIcon)
 
-fun Settings.setMarkerIconColor(color: Int?) {
-    putInt("markerIconColor", color)
-}
+fun Settings.setButtonIconColor(color: Int?) = setMapColor(MapColor.ButtonIcon, color)
 
-fun Settings.badgeBackgroundColor(context: Context): Int {
-    val customColor = getIntOrNull("badgeBackgroundColor")
-    if (customColor != null) return customColor
+fun Settings.buttonBorderColor(context: Context): Int = mapColor(MapColor.ButtonBorder)
 
-    val isDark = mapStyleIsDark() ||
-            (context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES)
-
-    return if (isDark) 0xFF00a63e.toInt() else 0xFF00a63e.toInt()
-}
-
-fun Settings.setBadgeBackgroundColor(color: Int?) {
-    putInt("badgeBackgroundColor", color)
-}
-
-fun Settings.badgeTextColor(context: Context): Int {
-    val customColor = getIntOrNull("badgeTextColor")
-    if (customColor != null) return customColor
-
-    val isDark = mapStyleIsDark() ||
-            (context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES)
-
-    return if (isDark) 0xFFFFFFFF.toInt() else 0xFFFFFFFF.toInt()
-}
-
-fun Settings.setBadgeTextColor(color: Int?) {
-    putInt("badgeTextColor", color)
-}
-
-private const val KEY_BUTTON_BACKGROUND_COLOR = "buttonBackgroundColor"
-
-fun Settings.buttonBackgroundColor(context: Context): Int {
-    val customColor = getIntOrNull(KEY_BUTTON_BACKGROUND_COLOR)
-    if (customColor != null) return customColor
-
-    val isDark = mapStyleIsDark() ||
-            (context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES)
-
-    return if (isDark) 0xFF1f2937.toInt() else 0xFF1f2937.toInt()
-}
-
-fun Settings.setButtonBackgroundColor(color: Int?) {
-    putInt(KEY_BUTTON_BACKGROUND_COLOR, color)
-}
-
-private const val KEY_BUTTON_ICON_COLOR = "buttonIconColor"
-
-fun Settings.buttonIconColor(context: Context): Int {
-    val customColor = getIntOrNull(KEY_BUTTON_ICON_COLOR)
-    if (customColor != null) return customColor
-
-    val isDark = mapStyleIsDark() ||
-            (context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES)
-
-    return if (isDark) 0xFFFFFFFF.toInt() else 0xFFFFFFFF.toInt()
-}
-
-fun Settings.setButtonIconColor(color: Int?) {
-    putInt(KEY_BUTTON_ICON_COLOR, color)
-}
-
-private const val KEY_BUTTON_BORDER_COLOR = "buttonBorderColor"
-
-fun Settings.buttonBorderColor(context: Context): Int {
-    val customColor = getIntOrNull(KEY_BUTTON_BORDER_COLOR)
-    if (customColor != null) return customColor
-
-    val isDark = mapStyleIsDark() ||
-            (context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES)
-
-    return if (isDark) 0xFFFFFFFF.toInt() else 0xFFFFFFFF.toInt()
-}
-
-fun Settings.setButtonBorderColor(color: Int?) {
-    putInt(KEY_BUTTON_BORDER_COLOR, color)
-}
-
-private const val KEY_VERIFIED_FILTER_YEARS = "verified_filter_years"
-
-var Settings.verifiedFilterYears: Int
-    get() {
-        return getInt(KEY_VERIFIED_FILTER_YEARS, 3)
-    }
-    set(value) {
-        putInt(KEY_VERIFIED_FILTER_YEARS, value)
-    }
+fun Settings.setButtonBorderColor(color: Int?) = setMapColor(MapColor.ButtonBorder, color)
 
 fun Int.toVerifiedFilterYears(context: Context): String {
     return when (this) {
@@ -261,19 +155,6 @@ fun Int.toVerifiedFilterYears(context: Context): String {
         3 -> context.getString(R.string.verified_filter_3_years)
         else -> ""
     }
-}
-
-/**
- * The oldest verification instant the map still shows: places verified before
- * this moment are hidden. Derived from [Settings.verifiedFilterYears], so the
- * map, not just the settings screen, honours the choice.
- *
- * The result is normalised to UTC: the viewport query compares it with
- * `julianday()`, which returns NULL for a zone id such as `[Asia/Bangkok]`, so
- * a cutoff carrying one would hide every place instead of the old ones.
- */
-fun Settings.verifiedFilterMinVerifiedAt(now: ZonedDateTime = ZonedDateTime.now()): ZonedDateTime {
-    return now.minusYears(verifiedFilterYears.toLong()).withZoneSameInstant(ZoneOffset.UTC)
 }
 
 enum class ActivityInterval(val days: Int) {

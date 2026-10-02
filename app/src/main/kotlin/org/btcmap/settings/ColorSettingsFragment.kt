@@ -4,17 +4,20 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.compose.ui.graphics.Color
+import androidx.annotation.StringRes
 import androidx.fragment.app.Fragment
 import com.mrudultora.colorpicker.ColorPickerPopUp
 import com.mrudultora.colorpicker.ColorPickerPopUp.OnPickColorListener
 import org.btcmap.R
 import org.btcmap.databinding.ColorSettingsFragmentBinding
-import org.btcmap.ui.ColorItem
+import org.btcmap.ui.mapColorItems
 
 /**
  * The map's customizable colors, one row per element, split off the main
  * settings screen so its list of colors does not crowd out everything else.
+ *
+ * The list itself and the stored keys come from the shared `MapColor` registry;
+ * only the picker is Android's.
  */
 class ColorSettingsFragment : Fragment() {
 
@@ -36,7 +39,7 @@ class ColorSettingsFragment : Fragment() {
         }
 
         binding.colorSettingsList.onItemClick = { key ->
-            specs()[key]?.let { showColorPicker(it) }
+            MapColor.fromKey(key)?.let { showColorPicker(it) }
         }
 
         refreshItems()
@@ -47,91 +50,39 @@ class ColorSettingsFragment : Fragment() {
         _binding = null
     }
 
-    /**
-     * One customizable color: the label, how to read it and how to change it.
-     * [showResetLabel] labels the picker's negative button as a reset, matching
-     * the marker colors; the badge and button rows keep the picker's own label.
-     */
-    private data class ColorSpec(
-        val titleRes: Int,
-        val get: () -> Int,
-        val apply: (Int?) -> Unit,
-        val showResetLabel: Boolean = false,
-    )
-
-    private fun specs(): Map<String, ColorSpec> = linkedMapOf(
-        "markerBackgroundColor" to ColorSpec(
-            R.string.marker_background_color,
-            { prefs.markerBackgroundColor(requireContext()) },
-            { prefs.setMarkerBackgroundColor(it) },
-            showResetLabel = true,
-        ),
-        "markerIconColor" to ColorSpec(
-            R.string.marker_icon_color,
-            { prefs.markerIconColor(requireContext()) },
-            { prefs.setMarkerIconColor(it) },
-            showResetLabel = true,
-        ),
-        "boostedMarkerBackgroundColor" to ColorSpec(
-            R.string.boosted_marker_background,
-            { prefs.boostedMarkerBackgroundColor() },
-            { prefs.setBoostedMarkerBackgroundColor(it) },
-            showResetLabel = true,
-        ),
-        "boostedMarkerIconColor" to ColorSpec(
-            R.string.boosted_marker_icon,
-            { prefs.boostedMarkerIconColor() },
-            { prefs.setBoostedMarkerIconColor(it) },
-            showResetLabel = true,
-        ),
-        "badgeBackgroundColor" to ColorSpec(
-            R.string.badge_background,
-            { prefs.badgeBackgroundColor(requireContext()) },
-            { prefs.setBadgeBackgroundColor(it) },
-        ),
-        "badgeTextColor" to ColorSpec(
-            R.string.badge_text,
-            { prefs.badgeTextColor(requireContext()) },
-            { prefs.setBadgeTextColor(it) },
-        ),
-        "buttonBackgroundColor" to ColorSpec(
-            R.string.button_background,
-            { prefs.buttonBackgroundColor(requireContext()) },
-            { prefs.setButtonBackgroundColor(it) },
-        ),
-        "buttonIconColor" to ColorSpec(
-            R.string.button_icon,
-            { prefs.buttonIconColor(requireContext()) },
-            { prefs.setButtonIconColor(it) },
-        ),
-        "buttonBorderColor" to ColorSpec(
-            R.string.button_border,
-            { prefs.buttonBorderColor(requireContext()) },
-            { prefs.setButtonBorderColor(it) },
-        ),
-    )
+    @StringRes
+    private fun MapColor.titleRes(): Int = when (this) {
+        MapColor.MarkerBackground -> R.string.marker_background_color
+        MapColor.MarkerIcon -> R.string.marker_icon_color
+        MapColor.BoostedMarkerBackground -> R.string.boosted_marker_background
+        MapColor.BoostedMarkerIcon -> R.string.boosted_marker_icon
+        MapColor.BadgeBackground -> R.string.badge_background
+        MapColor.BadgeText -> R.string.badge_text
+        MapColor.ButtonBackground -> R.string.button_background
+        MapColor.ButtonIcon -> R.string.button_icon
+        MapColor.ButtonBorder -> R.string.button_border
+    }
 
     private fun refreshItems() {
         _binding ?: return
 
-        binding.colorSettingsList.items = specs().map { (key, spec) ->
-            val color = spec.get()
-            ColorItem(
-                key = key,
-                title = getString(spec.titleRes),
-                value = getString(R.string.color_hex, color.toHexString()),
-                color = Color(color),
-            )
+        binding.colorSettingsList.items = mapColorItems(prefs) { color ->
+            getString(color.titleRes())
         }
     }
 
-    private fun showColorPicker(spec: ColorSpec) {
+    /**
+     * Opens the Android color picker for [color]. The four marker colors get a
+     * reset labelled as such, matching the desktop; the badge and button rows
+     * keep the picker's own negative-button label.
+     */
+    private fun showColorPicker(color: MapColor) {
         val colorPickerPopUp = ColorPickerPopUp(context)
         colorPickerPopUp.setShowAlpha(true)
-            .setDefaultColor(spec.get())
+            .setDefaultColor(prefs.mapColor(color))
             .setOnPickColorListener(object : OnPickColorListener {
-                override fun onColorPicked(color: Int) {
-                    spec.apply(color)
+                override fun onColorPicked(picked: Int) {
+                    prefs.setMapColor(color, picked)
                     refreshItems()
                 }
 
@@ -140,11 +91,11 @@ class ColorSettingsFragment : Fragment() {
                 }
             })
             .show()
-        if (spec.showResetLabel) {
+        if (color.resettable) {
             colorPickerPopUp.negativeButton.setText(R.string.reset)
         }
         colorPickerPopUp.negativeButton.setOnClickListener {
-            spec.apply(null)
+            prefs.setMapColor(color, null)
             refreshItems()
             colorPickerPopUp.dismissDialog()
         }

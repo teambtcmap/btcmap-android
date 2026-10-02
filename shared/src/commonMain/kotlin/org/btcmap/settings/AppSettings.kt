@@ -3,6 +3,8 @@ package org.btcmap.settings
 import okhttp3.HttpUrl
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
+import java.time.ZoneOffset
+import java.time.ZonedDateTime
 
 /**
  * The settings every host shares. They are plain [Settings] reads and writes, so
@@ -123,3 +125,31 @@ var Settings.mapRotationEnabled: Boolean
     set(value) {
         putBoolean(KEY_MAP_ROTATION_ENABLED, value)
     }
+
+/** Whether the picked map style draws a dark basemap. */
+fun Settings.mapStyleIsDark(): Boolean = when (mapStyle) {
+    MapStyle.Dark, MapStyle.DarkMatter -> true
+    MapStyle.Auto, MapStyle.Liberty, MapStyle.Positron, MapStyle.Bright -> false
+}
+
+private const val KEY_VERIFIED_FILTER_YEARS = "verified_filter_years"
+
+/** The window, in years, inside which a place must have been verified to show. */
+var Settings.verifiedFilterYears: Int
+    get() = getInt(KEY_VERIFIED_FILTER_YEARS, 3)
+    set(value) {
+        putInt(KEY_VERIFIED_FILTER_YEARS, value)
+    }
+
+/**
+ * The oldest verification instant the map still shows: places verified before
+ * this moment are hidden. Derived from [Settings.verifiedFilterYears], so the
+ * map, not just the settings screen, honours the choice.
+ *
+ * The result is normalised to UTC: the viewport query compares it with
+ * `julianday()`, which returns NULL for a zone id such as `[Asia/Bangkok]`, so
+ * a cutoff carrying one would hide every place instead of the old ones.
+ */
+fun Settings.verifiedFilterMinVerifiedAt(now: ZonedDateTime = ZonedDateTime.now()): ZonedDateTime {
+    return now.minusYears(verifiedFilterYears.toLong()).withZoneSameInstant(ZoneOffset.UTC)
+}

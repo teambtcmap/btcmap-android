@@ -13,12 +13,9 @@ import org.maplibre.compose.desktop.rememberAwtComposeMapPresentationHost
 import org.maplibre.compose.desktop.ProvideMapPresentationHost
 import org.maplibre.compose.map.DefaultMapRuntime
 import org.maplibre.compose.map.MapRuntimeOptions
-import org.btcmap.ui.map.AreaChipPalette
-import org.btcmap.ui.map.MarkerPalette
 import java.awt.Color as AwtColor
 import androidx.compose.ui.graphics.Color
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.Column
@@ -43,9 +40,6 @@ import org.btcmap.ui.MaterialSymbol
 import org.btcmap.ui.map.SearchActions
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withTimeoutOrNull
-import org.btcmap.ui.SettingsItem
-import org.btcmap.ui.SettingsScreen
-import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -77,8 +71,8 @@ import org.btcmap.settings.mapRotationEnabled
 import org.btcmap.settings.mapStyle
 import org.maplibre.compose.resource.MapResourceProvider
 import org.btcmap.settings.showAttribution
-import org.btcmap.stats.StatsEntry
-import org.btcmap.stats.StatsSection
+import org.btcmap.settings.verifiedFilterMinVerifiedAt
+import org.btcmap.sync.SyncState
 import org.btcmap.ui.AppTheme
 import org.btcmap.ui.MapScreen
 import org.btcmap.ui.StatsScreen
@@ -191,30 +185,16 @@ private fun runApp() = application {
                             initialLat = 52.2333742,
                             initialLon = 21.0711489,
                             initialZoom = 13.0,
-                            minVerifiedAt = null,
-                            // The colour defaults the Android app resolves in
-                            // `SettingsExt.kt`: teal pins, orange for boosted
-                            // ones, green badges and the dark round buttons. The
-                            // desktop has no colour settings screen yet, so it
-                            // uses those defaults.
-                            palette = MarkerPalette(
-                                markerBackground = Color(0xFF0E95AF),
-                                markerIcon = Color.White,
-                                boostedMarkerBackground = Color(0xFFF7931A),
-                                boostedMarkerIcon = Color.White,
-                                badgeBackground = Color(0xFF00A63E),
-                                badgeText = Color.White,
-                            ),
-                            areaChipPalette = AreaChipPalette(
-                                buttonBackground = Color(0xFF1F2937),
-                                buttonIcon = Color.White,
-                                buttonBorder = Color.White,
-                                badgeBackground = Color(0xFF00A63E),
-                                badgeText = Color.White,
-                            ),
+                            // The user's verification window and colour choices
+                            // come from the shared settings, so the desktop map
+                            // honours the same screen Android does.
+                            minVerifiedAt = settings.verifiedFilterMinVerifiedAt(),
+                            palette = markerPalette(settings),
+                            areaChipPalette = areaChipPalette(settings),
                             apiUrl = API_URL,
                             usingOpenFreeMap = true,
                             mapRotationEnabled = settings.mapRotationEnabled,
+                            showAttribution = settings.showAttribution,
                             iconFont = iconFont,
                             placeSheetStrings = PLACE_SHEET_STRINGS,
                             attributionText = "© OpenStreetMap contributors",
@@ -335,19 +315,27 @@ private fun runApp() = application {
                             title = "Settings",
                             onBack = { route = Route.Map },
                         ) {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-                            ) {
-                                Text(text = "Sync: $syncState")
-                                Button(onClick = { syncManager.start() }) { Text("Sync now") }
-                            }
                             DesktopSettingsScreen(
                                 settings = settings,
+                                db = db,
                                 onOpenAccount = { route = Route.Account },
+                                onOpenColors = { route = Route.Colors },
+                                onOpenDbStats = { route = Route.DbStats },
                             )
                         }
+
+                        Route.Colors -> DesktopColorsScreen(
+                            settings = settings,
+                            onBack = { route = Route.Settings },
+                        )
+
+                        Route.DbStats -> DesktopDbStatsScreen(
+                            db = db,
+                            settings = settings,
+                            syncState = syncState,
+                            onSync = { syncManager.start() },
+                            onBack = { route = Route.Settings },
+                        )
 
                         Route.Account -> DesktopAccountScreen(
                             api = api,
@@ -396,7 +384,7 @@ internal fun ScreenPage(
 }
 
 /** The desktop app's full-window pages. */
-private enum class Route { Map, Feed, Settings, Account, Report, AddPlace, AddComment, Boost }
+private enum class Route { Map, Feed, Settings, Colors, DbStats, Account, Report, AddPlace, AddComment, Boost }
 
 private const val SCREENSHOT_ARG = "--screenshot="
 
@@ -429,7 +417,23 @@ private fun renderScreen(spec: String) {
             // shows what the screen actually sits on.
             Surface(modifier = androidx.compose.ui.Modifier.fillMaxSize()) {
                 when (name) {
-                    "settings" -> DesktopSettingsScreen(settings, onOpenAccount = {})
+                    "settings" -> DesktopSettingsScreen(
+                        settings = settings,
+                        db = db,
+                        onOpenAccount = {},
+                        onOpenColors = {},
+                        onOpenDbStats = {},
+                    )
+
+                    "colors" -> DesktopColorsScreen(settings = settings, onBack = {})
+                    "dbstats" -> DesktopDbStatsScreen(
+                        db = db,
+                        settings = settings,
+                        syncState = SyncState.Idle,
+                        onSync = {},
+                        onBack = {},
+                    )
+
                     "report" -> DesktopReportScreen(
                         api = Api(
                             httpClient = apiHttpClient(
@@ -619,44 +623,6 @@ private suspend fun toggleSavedPlace(api: Api, db: Database, placeId: Long) {
     }
 }
 
-/** The reasons a report can give, in the order the form offers them. */
-/** The shared settings list, used by both the window and the screenshot mode. */
-@androidx.compose.runtime.Composable
-internal fun DesktopSettingsScreen(
-    settings: Settings,
-    onOpenAccount: () -> Unit,
-) {
-    var attribution by remember { mutableStateOf(settings.showAttribution) }
-    var rotation by remember { mutableStateOf(settings.mapRotationEnabled) }
-
-    SettingsScreen(
-        items = listOf(
-            SettingsItem.Action(key = "api", title = "API", secondary = settings.apiUrl.toString()),
-            SettingsItem.Toggle(key = "attribution", title = "Show attribution", checked = attribution),
-            SettingsItem.Toggle(key = "rotation", title = "Map rotation", checked = rotation),
-            SettingsItem.Action(
-                key = "account",
-                title = "Account",
-                secondary = if (settings.authorized) "Signed in" else "Not signed in",
-            ),
-        ),
-        onItemClick = { key -> if (key == "account") onOpenAccount() },
-        onItemCheckedChange = { key, checked ->
-            when (key) {
-                "attribution" -> {
-                    attribution = checked
-                    settings.showAttribution = checked
-                }
-
-                "rotation" -> {
-                    rotation = checked
-                    settings.mapRotationEnabled = checked
-                }
-            }
-        },
-    )
-}
-
 private const val API_URL = "https://api.btcmap.org"
 private const val USER_AGENT = "btcmap-desktop"
 private const val HOSTED_STYLE_URL = "https://tiles.openfreemap.org/styles/liberty"
@@ -753,26 +719,4 @@ private val PLACE_SHEET_STRINGS = org.btcmap.ui.PlaceSheetStrings(
     addComment = "Add comment",
     save = "Save",
     addPhoto = "Add photo",
-)
-
-private fun statsSections(db: Database, settings: Settings): List<StatsSection> = listOf(
-    StatsSection(
-        key = "cache",
-        title = "Local cache",
-        icon = "storefront",
-        entries = listOf(
-            StatsEntry("Places", db.place.selectCount().toString()),
-            StatsEntry("Areas", db.area.selectCount().toString()),
-            StatsEntry("Comments", db.comment.selectCount().toString()),
-            StatsEntry("Events", db.event.selectCount().toString()),
-        ),
-    ),
-    StatsSection(
-        key = "session",
-        title = "Session",
-        icon = "person",
-        entries = listOf(
-            StatsEntry("Signed in", (settings.getString(KEY_AUTH_TOKEN, null) != null).toString()),
-        ),
-    ),
 )
