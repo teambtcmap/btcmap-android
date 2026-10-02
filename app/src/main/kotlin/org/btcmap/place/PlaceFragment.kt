@@ -6,7 +6,6 @@ import android.content.ComponentName
 import android.content.Intent
 import android.content.res.ColorStateList
 import android.graphics.drawable.Drawable
-import android.net.Uri
 import android.os.Bundle
 import android.text.SpannableString
 import android.text.Spanned
@@ -19,11 +18,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.TextView
-import android.widget.Toast
-import androidx.activity.result.PickVisualMediaRequest
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.StringRes
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.compose.ui.graphics.Color
 import androidx.appcompat.widget.Toolbar
@@ -54,7 +49,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.btcmap.Activity
 import org.btcmap.api
-import org.btcmap.api.addPlaceImage
 import org.btcmap.api.getPlaceCoordinates
 import org.btcmap.api.getPlaceImages
 import org.btcmap.api.placeImageUrl
@@ -69,8 +63,6 @@ import org.btcmap.comment.CommentsAdapter
 import org.btcmap.comment.commentDateFormatter
 import org.btcmap.comment.toAdapterItem
 import org.btcmap.comment.CommentsFragment
-import org.btcmap.util.createPhotoCaptureTarget
-import org.btcmap.util.encodePhoto
 import org.btcmap.util.iconTypeface
 import org.btcmap.util.showError
 import org.btcmap.map.getErrorColor
@@ -98,7 +90,6 @@ import org.btcmap.settings.uri
 import org.btcmap.syncController
 import org.btcmap.util.openInBrowser
 import org.btcmap.util.rethrowIfCancellation
-import java.io.File
 import java.time.LocalDate
 import java.time.ZonedDateTime
 import kotlin.math.abs
@@ -159,26 +150,20 @@ class PlaceFragment : Fragment() {
     /** The place whose photos the strip currently belongs to, or null. */
     private var renderedPhotosPlaceId: Long? = null
 
-    private var pendingPhotoUri: Uri? = null
-    private var pendingPhotoFile: File? = null
-
-    private var uploadingDialog: AlertDialog? = null
-
-    private val pickPhoto = registerForActivityResult(
-        ActivityResultContracts.PickVisualMedia(),
-    ) { uri ->
-        if (uri != null) uploadPhoto(uri)
-    }
-
-    private val capturePhoto = registerForActivityResult(
-        ActivityResultContracts.TakePicture(),
-    ) { success ->
-        val uri = pendingPhotoUri
-        val file = pendingPhotoFile
-        pendingPhotoUri = null
-        pendingPhotoFile = null
-        if (success && uri != null) uploadPhoto(uri, file) else file?.delete()
-    }
+    private val photoUploader = PlacePhotoUploader(
+        fragment = this,
+        onAuthRequired = { placeId, placeName ->
+            showAuthDialog(
+                Bundle().apply {
+                    putString(EXTRA_AUTH_ACTION, AUTH_ACTION_ADD_PHOTO)
+                    putLong(EXTRA_PLACE_ID, placeId)
+                    putString(EXTRA_PLACE_NAME, placeName)
+                },
+            )
+        },
+        onUploaded = { placeId -> renderPhotos(placeId) },
+        onError = { showError(it) },
+    )
 
     private var previewPlace: Place? = null
     private var previewLat: Double? = null
@@ -469,7 +454,7 @@ class PlaceFragment : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
-        hideUploading()
+        photoUploader.hideUploading()
         _binding = null
     }
 
@@ -843,95 +828,7 @@ class PlaceFragment : Fragment() {
 
     /** Uploads require a signed-in user, so prompt for auth first if needed. */
     private fun requestAddPhoto() {
-        if (prefs.authorized) {
-            showAddPhotoSourceDialog()
-        } else {
-            showAuthDialog(Bundle().apply {
-                putString(EXTRA_AUTH_ACTION, AUTH_ACTION_ADD_PHOTO)
-                putLong(EXTRA_PLACE_ID, placeId)
-                putString(EXTRA_PLACE_NAME, placeName)
-            })
-        }
-    }
-
-    private fun showAddPhotoSourceDialog() {
-        MaterialAlertDialogBuilder(requireContext())
-            .setTitle(R.string.add_photo)
-            .setItems(
-                arrayOf(
-                    getString(R.string.report_photo_take),
-                    getString(R.string.report_photo_choose),
-                ),
-            ) { _, which ->
-                when (which) {
-                    0 -> startCamera()
-                    1 -> pickPhoto.launch(
-                        PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly),
-                    )
-                }
-            }
-            .show()
-    }
-
-    private fun startCamera() {
-        val (uri, file) = createPhotoCaptureTarget()
-        pendingPhotoUri = uri
-        pendingPhotoFile = file
-
-        try {
-            capturePhoto.launch(uri)
-        } catch (e: ActivityNotFoundException) {
-            pendingPhotoUri = null
-            pendingPhotoFile = null
-            file.delete()
-            Toast.makeText(requireContext(), R.string.report_photo_no_camera, Toast.LENGTH_LONG)
-                .show()
-        }
-    }
-
-    /**
-     * Reads and re-encodes the picked photo, uploads it to the place and
-     * refreshes the strip. [cleanupFile] is the temporary capture backing a
-     * camera result; it is removed once the photo has been read.
-     */
-    private fun uploadPhoto(uri: Uri, cleanupFile: File? = null) {
-        val context = requireContext().applicationContext
-        showUploading()
-
-        viewLifecycleOwner.lifecycleScope.launch {
-            try {
-                val photo = withContext(Dispatchers.IO) { context.encodePhoto(uri) }
-                api().addPlaceImage(placeId, photo)
-                withResumed {
-                    hideUploading()
-                    renderPhotos(placeId)
-                }
-            } catch (t: Throwable) {
-                t.rethrowIfCancellation()
-                withResumed {
-                    hideUploading()
-                    showError(t)
-                }
-            } finally {
-                cleanupFile?.delete()
-            }
-        }
-    }
-
-    private fun showUploading() {
-        if (uploadingDialog?.isShowing == true) return
-
-        val view = layoutInflater.inflate(R.layout.account_progress_dialog, null)
-        view.findViewById<TextView>(R.id.progressMessage).text = getString(R.string.loading)
-        uploadingDialog = MaterialAlertDialogBuilder(requireContext())
-            .setView(view)
-            .setCancelable(false)
-            .show()
-    }
-
-    private fun hideUploading() {
-        uploadingDialog?.dismiss()
-        uploadingDialog = null
+        photoUploader.request(placeId, placeName)
     }
 
     /**

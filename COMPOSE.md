@@ -34,17 +34,15 @@ Next, in rough order of value (state at 2026-10-02):
 
 **Desktop polish is done** (slices 47-55): sign in, sign up, profile, save,
 report with evidence photos, add-place, boost and comment, all on the same
-`:shared` + `:ui` code. What remains is not desktop-specific:
+`:shared` + `:ui` code. The add-photo flows were unified too (slice 56). What
+remains is small:
 
-1. **Unify the two add-photo flows** — slice 43 gave the map sheet its own copy of
-   the picker, camera and upload (the helpers are shared, the launchers are not).
-   It collapses when the place screen itself becomes Compose.
-2. **Two tests the swap deleted are still to replace** — the search cases came
+1. **Two tests the swap deleted are still to replace** — the search cases came
    back in slice 44; left are `MarkerIconTest`'s glyph check (the shared
    `MarkerBitmapFactory.renderableGlyph` is private and needs the icon font on the
    jvmTest classpath) and a Compose-side test for the sheet refreshing when a sync
    rewrites the row it shows.
-3. **Small parity gaps** — tapping empty map no longer dismisses the place sheet
+2. **Small parity gaps** — tapping empty map no longer dismisses the place sheet
    (the map exposes no map-tap callback; `InteractionBindingsBuilder` has gesture
    bindings but no host click callback), and an area search result opens the area
    screen instead of framing its bbox (arguably the better behaviour; it needs a
@@ -1706,6 +1704,22 @@ screen 5,000/10,000/30,000 sat for 1/3/12 months.
 
 No version code bump: the Android app is unchanged.
 
+### Phase 3, fifty-sixth slice — done (one add-photo flow)
+
+The map sheet's add-photo flow and the standalone place screen's were the same
+code written twice: the source dialog, the camera and picker launchers, the
+upload and the progress dialog. Both fragments now construct a
+`PlacePhotoUploader` that owns all of it, and keep only what genuinely differs:
+the auth gate (`onAuthRequired`) and what to refresh after an upload
+(`onUploaded` — the photo strip on the place screen, the sheet on the map).
+
+The plan said the duplication could only collapse once the place screen itself
+became Compose; an Android-side delegate removes it without that migration, and
+the flow can still move into `:ui` later. No new tests: the flow is Android-only
+and covered by the instrumented tests, which are compile-checked here.
+
+Bump the version code to 217.
+
 ## Working notes
 
 Durable facts and conventions for continuing the migration.
@@ -1810,15 +1824,13 @@ Durable facts and conventions for continuing the migration.
 
 ## Next
 
-Hand-off for the next session (state at 2026-10-02, tip `41ccb378`):
+Hand-off for the next session (state at 2026-10-02, tip `bfea277d`):
 
 Phases 1 and 2 are complete. Phase 3 is nearly complete: the Android map and its
-place sheet are shared, and the desktop app runs its map, feed, settings, account
-(sign-in/sign-up/profile), report (with evidence photos), add-place, boost and
-comment screens from the same code, so the desktop-polish work is done. The
-desktop has a Compose UI test source set (`:desktopApp:test`). The remaining items
-under "Next, in rough order of value" are the add-photo unification, the two
-missing tests and the map parity gaps.
+place sheet are shared, the desktop app runs its whole UI from the same code, and
+the two add-photo flows are one. The remaining items under "Next, in rough order
+of value" are the two tests the map swap deleted and the two small map parity
+gaps; both want a decision before code.
 
 Useful commands, all of them exercised this week:
 
