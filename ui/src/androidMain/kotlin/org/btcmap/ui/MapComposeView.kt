@@ -66,6 +66,8 @@ class MapComposeView @JvmOverloads constructor(
 
     var usingOpenFreeMap: Boolean by mutableStateOf(true)
 
+    var mapRotationEnabled: Boolean by mutableStateOf(false)
+
     var iconTypeface: Typeface? by mutableStateOf(null)
 
     var placeSheetStrings: PlaceSheetStrings by mutableStateOf(
@@ -97,6 +99,8 @@ class MapComposeView @JvmOverloads constructor(
     var bookmarked: Boolean by mutableStateOf(false)
 
     var onPlaceSelected: (Place) -> Unit by mutableStateOf({})
+
+    var onPlaceDismissed: () -> Unit by mutableStateOf({})
 
     var onPlaceAction: (Place, PlaceAction) -> Unit by mutableStateOf({ _, _ -> })
 
@@ -151,6 +155,7 @@ class MapComposeView @JvmOverloads constructor(
                 badgeText = markerBadgeTextColor,
             ),
             usingOpenFreeMap = usingOpenFreeMap,
+            mapRotationEnabled = mapRotationEnabled,
             iconFont = fontFamily,
             areaChipPalette = AreaChipPalette(
                 buttonBackground = areaChipButtonColor,
@@ -176,6 +181,7 @@ class MapComposeView @JvmOverloads constructor(
             photos = photos,
             bookmarked = bookmarked,
             onPlaceSelected = onPlaceSelected,
+            onPlaceDismissed = onPlaceDismissed,
             onPlaceAction = onPlaceAction,
             onSelectEvent = onEventSelected,
             onSelectArea = onAreaSelected,

@@ -68,6 +68,7 @@ import org.btcmap.settings.buttonBorderColor
 import org.btcmap.settings.buttonIconColor
 import org.btcmap.settings.mapCenterLat
 import org.btcmap.settings.mapCenterLon
+import org.btcmap.settings.mapRotationEnabled
 import org.btcmap.settings.mapStyle
 import org.btcmap.settings.mapZoom
 import org.btcmap.settings.markerBackgroundColor
@@ -202,6 +203,7 @@ class MapFragment : Fragment() {
             // Noto Sans Bold font the cluster counts need. A test style pinned
             // via mapStyleUriForTesting does not.
             usingOpenFreeMap = app.mapStyleUriForTesting == null
+            mapRotationEnabled = prefs.mapRotationEnabled
             iconTypeface = typeface
             markerBackgroundColor = Color(prefs.markerBackgroundColor(requireContext()))
             markerIconColor = Color(prefs.markerIconColor(requireContext()))
@@ -245,6 +247,7 @@ class MapFragment : Fragment() {
                 ContextCompat.getColor(requireContext(), R.color.osm_attribution_text),
             )
             onPlaceSelected = ::onPlaceSelected
+            onPlaceDismissed = { selectedPlaceId = null }
             onPlaceAction = ::onPlaceAction
             onEventSelected = { openEvent(it.toBundle()) }
             onAreaSelected = ::openArea

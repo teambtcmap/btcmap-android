@@ -16,6 +16,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.withFrameNanos
@@ -107,6 +108,11 @@ fun MapScreen(
     areaChipPalette: AreaChipPalette,
     apiUrl: String,
     usingOpenFreeMap: Boolean,
+    /**
+     * Whether user input may change the map's bearing. Programmatic camera
+     * moves are unaffected, so the map can still be pointed at a place.
+     */
+    mapRotationEnabled: Boolean = false,
     iconFont: FontFamily?,
     placeSheetStrings: PlaceSheetStrings,
     searchActions: SearchActions? = null,
@@ -160,6 +166,11 @@ fun MapScreen(
     photos: List<String> = emptyList(),
     bookmarked: Boolean = false,
     onPlaceSelected: (Place) -> Unit = {},
+    /**
+     * Called when the map closes its own place sheet, so a host that remembers
+     * the selection (to reopen it after the view is recreated) can forget it.
+     */
+    onPlaceDismissed: () -> Unit = {},
     onPlaceAction: (Place, PlaceAction) -> Unit,
     onSelectEvent: (Event) -> Unit,
     onSelectArea: (Long) -> Unit,
@@ -176,13 +187,22 @@ fun MapScreen(
     val shownPlace = rememberReloadedPlace(selectedPlace, db, reloadKey)
     // A tap that no marker layer consumed (empty map) dismisses the sheet, as
     // the Views map did. The handler reads the live selection, so it is built
-    // once instead of on every recomposition.
-    val mapInteractions = remember {
+    // once instead of on every recomposition; the dismissal callback goes
+    // through a live state so a changed host lambda is still the one called.
+    val currentOnPlaceDismissed by rememberUpdatedState(onPlaceDismissed)
+    val mapInteractions = remember(mapRotationEnabled) {
         MapInteractions {
+            camera {
+                // Bearing permission. A gesture binding cannot re-enable a
+                // movement the camera disallows, so this alone stops user
+                // rotation (two-finger twist, drag, keys).
+                rotate { enabled = mapRotationEnabled }
+            }
             callbacks {
                 click {
                     onUnhandled {
                         selectedPlace = null
+                        currentOnPlaceDismissed()
                         ClickResult.Consume
                     }
                 }
@@ -596,7 +616,10 @@ fun MapScreen(
                     bookmarked = bookmarked,
                     strings = placeSheetStrings,
                     onAction = { onPlaceAction(place, it) },
-                    onDismiss = { selectedPlace = null },
+                    onDismiss = {
+                        selectedPlace = null
+                        onPlaceDismissed()
+                    },
                 )
             }
             MarkerFilterButtons(

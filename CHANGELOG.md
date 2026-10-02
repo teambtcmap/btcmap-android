@@ -14,6 +14,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Restore the map controls' pre-rewrite sizes, colours and positions
 - Open the place details sheet half-expanded on the map, so the map stays visible behind it
 - Drop the redundant mini map from the place sheet opened from the map
+- Stop a dismissed place from reopening when returning to the map
+- Make the map honour the "Allow map rotation" setting
 
 ## [1.2.0] - 2026-09-30
 

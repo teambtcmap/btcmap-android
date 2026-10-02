@@ -209,6 +209,7 @@ private fun runApp() = application {
                             ),
                             apiUrl = API_URL,
                             usingOpenFreeMap = true,
+                            mapRotationEnabled = settings.mapRotationEnabled,
                             iconFont = iconFont,
                             placeSheetStrings = PLACE_SHEET_STRINGS,
                             attributionText = "© OpenStreetMap contributors",
@@ -225,6 +226,12 @@ private fun runApp() = application {
                             onOpenFeed = { route = Route.Feed },
                             bookmarked = bookmarked,
                             onPlaceSelected = { selectedPlaceId = it.id },
+                            onPlaceDismissed = {
+                                selectedPlaceId = null
+                                // The feed row that opened this place has been
+                                // seen; do not reopen it when the map returns.
+                                feedPlaceId = null
+                            },
                             onPlaceAction = { place, action ->
                                 when (action) {
                                     // Verify and Report are the same form, one
