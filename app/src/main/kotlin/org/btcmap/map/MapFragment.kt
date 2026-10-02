@@ -631,15 +631,18 @@ class MapFragment : Fragment() {
     }
 
     private fun initInsets(binding: MapFragmentBinding) {
-        // The search field, the chips and the location button are the shared
-        // map's own, so only the sync and update buttons are inset here.
+        // The search field, the chips, the marker filter and the location button
+        // are the shared map's own, so only the sync and update indicators are
+        // inset here. They belong above the filter column, as they did in the
+        // Views button group, so the bottom margin clears the column rather than
+        // sitting the group in the bottom corner under it.
         ViewCompat.setOnApplyWindowInsetsListener(binding.buttonGroup) { v, windowInsets ->
             val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
 
             v.updateLayoutParams<ViewGroup.MarginLayoutParams> {
                 topMargin = insets.top
                 rightMargin = insets.right
-                bottomMargin = insets.bottom + dpToPx(20)
+                bottomMargin = dpToPx(FILTER_COLUMN_CLEARANCE_DP)
                 leftMargin = insets.left + dpToPx(24)
             }
 
@@ -675,6 +678,11 @@ class MapFragment : Fragment() {
 
     private companion object {
         private const val STATE_PLACE_ID = "map_selected_place_id"
+
+        // The shared map's marker filter column reserves this much from the map's
+        // bottom edge: 112dp of bottom padding, the three 48dp buttons 8dp apart
+        // (MarkerFilterButtons), and the 8dp gap the sync group left it.
+        private const val FILTER_COLUMN_CLEARANCE_DP = 112 + 3 * 48 + 2 * 8 + 8
 
         // The auth hand-off protocol, the same shape the place screen uses: what
         // the sheet asked for, and what the form has to hand back to finish it.

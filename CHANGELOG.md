@@ -10,6 +10,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Show a place's photos on the place screen, with a fullscreen viewer
 - Let signed-in users upload photos to a place
 - Restore the map's OpenStreetMap attribution line at the bottom of the screen
+- Show the sync indicator above the map's marker filter buttons
 
 ## [1.2.0] - 2026-09-30
 
