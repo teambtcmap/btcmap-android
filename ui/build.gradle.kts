@@ -1,3 +1,5 @@
+@file:OptIn(org.jetbrains.compose.ExperimentalComposeLibrary::class)
+
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
@@ -58,8 +60,17 @@ kotlin {
             implementation(libs.androidx.sqlite.bundled.jvm)
             // The table rows the search reads carry a Gson geometry column.
             implementation(libs.gson)
+            // `runComposeUiTest`, for the tests that drive a composable.
+            implementation(compose.uiTest)
         }
     }
+}
+
+tasks.withType<org.gradle.api.tasks.testing.Test>().configureEach {
+    // Skiko, which the Compose test scene renders through, uses the FFM API.
+    jvmArgs("--enable-native-access=ALL-UNNAMED")
+    // The bundled Material Symbols font the marker glyph test loads.
+    systemProperty("btcmap.iconFontDir", rootProject.file("app/src/main/assets").absolutePath)
 }
 
 compose.desktop {

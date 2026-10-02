@@ -59,6 +59,7 @@ import org.btcmap.ui.map.SearchActions
 import org.btcmap.ui.map.SearchOverlay
 import org.btcmap.ui.map.rememberSearchResults
 import org.btcmap.ui.map.rememberMapAreas
+import org.btcmap.ui.map.rememberReloadedPlace
 import org.btcmap.ui.map.rememberViewportFeatures
 import androidx.compose.material3.FilledTonalIconButton
 import org.maplibre.compose.camera.CameraPosition
@@ -152,10 +153,13 @@ fun MapScreen(
 
     val scope = rememberCoroutineScope()
     var selectedPlace by remember { mutableStateOf<Place?>(null) }
+    // The sheet shows the current row: a sync rewrites rows in place, so the
+    // selected copy is re-read whenever the host bumps the reload key.
+    val shownPlace = rememberReloadedPlace(selectedPlace, db, reloadKey)
     var selectedComments by remember { mutableStateOf<List<CommentsAdapterItem>>(emptyList()) }
 
-    LaunchedEffect(selectedPlace) {
-        val place = selectedPlace
+    LaunchedEffect(shownPlace) {
+        val place = shownPlace
         selectedComments = if (place == null) {
             emptyList()
         } else {
@@ -279,14 +283,6 @@ fun MapScreen(
             val camera = state.cameraPosition ?: return@collect
             callback(camera.target.latitude, camera.target.longitude, camera.zoom)
         }
-    }
-
-    // The sheet shows the row the map last opened. A sync rewrites rows in
-    // place, so re-read the selected one instead of leaving a stale copy up.
-    LaunchedEffect(reloadKey) {
-        val current = selectedPlace ?: return@LaunchedEffect
-        withContext(Dispatchers.Default) { db.place.selectById(current.id) }
-            ?.let { selectedPlace = it }
     }
 
     LaunchedEffect(openTarget) {
@@ -497,7 +493,7 @@ fun MapScreen(
                     MaterialSymbol(glyph = "my_location", contentDescription = null)
                 }
             }
-            if (placeSheet) selectedPlace?.let { place ->
+            if (placeSheet) shownPlace?.let { place ->
                 PlaceSheet(
                     place = place,
                     comments = selectedComments,

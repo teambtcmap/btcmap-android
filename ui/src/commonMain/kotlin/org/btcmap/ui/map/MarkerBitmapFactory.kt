@@ -177,7 +177,7 @@ class MarkerBitmapFactory(
      * available. Unknown names would render as tofu, so they fall back to the
      * same storefront glyph the Android implementation uses.
      */
-    private fun renderableGlyph(character: String?): String? {
+    internal fun renderableGlyph(character: String?): String? {
         if (character.isNullOrEmpty() || iconFont == null) return null
         resolvedGlyphs[character]?.let { return it }
 

@@ -34,15 +34,10 @@ Next, in rough order of value (state at 2026-10-02):
 
 **Desktop polish is done** (slices 47-55): sign in, sign up, profile, save,
 report with evidence photos, add-place, boost and comment, all on the same
-`:shared` + `:ui` code. The add-photo flows were unified too (slice 56). What
-remains is small:
+`:shared` + `:ui` code. The add-photo flows were unified (slice 56) and the two
+tests the map swap deleted are back (slice 57). What remains is small:
 
-1. **Two tests the swap deleted are still to replace** — the search cases came
-   back in slice 44; left are `MarkerIconTest`'s glyph check (the shared
-   `MarkerBitmapFactory.renderableGlyph` is private and needs the icon font on the
-   jvmTest classpath) and a Compose-side test for the sheet refreshing when a sync
-   rewrites the row it shows.
-2. **Small parity gaps** — tapping empty map no longer dismisses the place sheet
+1. **Small parity gaps** — tapping empty map no longer dismisses the place sheet
    (the map exposes no map-tap callback; `InteractionBindingsBuilder` has gesture
    bindings but no host click callback), and an area search result opens the area
    screen instead of framing its bbox (arguably the better behaviour; it needs a
@@ -1720,6 +1715,23 @@ and covered by the instrumented tests, which are compile-checked here.
 
 Bump the version code to 217.
 
+### Phase 3, fifty-seventh slice — done (the two tests the map swap deleted)
+
+Both tests the Android map swap deleted are back on the JVM.
+
+- **`MarkerGlyphTest`** ports `MarkerIconTest`: the shared `MarkerBitmapFactory`'s
+  glyph resolution measures the bundled Material Symbols font, so a known glyph
+  resolves to itself, an unknown name falls back to `storefront`, and no font
+  means no glyph. `renderableGlyph` is `internal` now, and the build puts the
+  app's font directory on the `:ui` jvmTest system property.
+- **`PlaceReloadTest`** ports `MapPlaceDeepLinkRefreshTest`: the reload logic
+  moved out of `MapScreen` into `rememberReloadedPlace(place, db, reloadKey)`,
+  which re-reads the selected row when the host bumps the key. The test drives it
+  with a real database and a Compose test scene.
+
+`:ui`'s jvmTest gained `compose.uiTest` (with Skiko native access on the test
+JVM) for the reload test. Bump the version code to 218.
+
 ## Working notes
 
 Durable facts and conventions for continuing the migration.
@@ -1824,13 +1836,13 @@ Durable facts and conventions for continuing the migration.
 
 ## Next
 
-Hand-off for the next session (state at 2026-10-02, tip `bfea277d`):
+Hand-off for the next session (state at 2026-10-02, tip `0de81f2d`):
 
 Phases 1 and 2 are complete. Phase 3 is nearly complete: the Android map and its
-place sheet are shared, the desktop app runs its whole UI from the same code, and
-the two add-photo flows are one. The remaining items under "Next, in rough order
-of value" are the two tests the map swap deleted and the two small map parity
-gaps; both want a decision before code.
+place sheet are shared, the desktop app runs its whole UI from the same code, the
+two add-photo flows are one, and the two tests the map swap deleted are back. The
+one remaining item under "Next, in rough order of value" is the pair of small map
+parity gaps; both want a decision before code.
 
 Useful commands, all of them exercised this week:
 
