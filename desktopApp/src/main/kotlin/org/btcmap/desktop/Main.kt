@@ -192,19 +192,24 @@ private fun runApp() = application {
                             initialLon = 21.0711489,
                             initialZoom = 13.0,
                             minVerifiedAt = null,
+                            // The colour defaults the Android app resolves in
+                            // `SettingsExt.kt`: teal pins, orange for boosted
+                            // ones, green badges and the dark round buttons. The
+                            // desktop has no colour settings screen yet, so it
+                            // uses those defaults.
                             palette = MarkerPalette(
-                                markerBackground = Color(0xFFF7931A),
+                                markerBackground = Color(0xFF0E95AF),
                                 markerIcon = Color.White,
-                                boostedMarkerBackground = Color(0xFF7B3FE4),
+                                boostedMarkerBackground = Color(0xFFF7931A),
                                 boostedMarkerIcon = Color.White,
-                                badgeBackground = Color(0xFFE53935),
+                                badgeBackground = Color(0xFF00A63E),
                                 badgeText = Color.White,
                             ),
                             areaChipPalette = AreaChipPalette(
-                                buttonBackground = Color(0xFF1B1B1B),
+                                buttonBackground = Color(0xFF1F2937),
                                 buttonIcon = Color.White,
                                 buttonBorder = Color.White,
-                                badgeBackground = Color(0xFFE53935),
+                                badgeBackground = Color(0xFF00A63E),
                                 badgeText = Color.White,
                             ),
                             apiUrl = API_URL,

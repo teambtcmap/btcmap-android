@@ -46,6 +46,14 @@ dependencies {
     implementation(compose.desktop.currentOs)
     implementation(compose.material3)
     implementation(libs.okhttp)
+    // Coil has no built-in network fetcher on the JVM, so the remote images the
+    // shared screens request (area chips, place photos, search results) never
+    // load without this on the classpath. Coil's ServiceLoader picks it up, as
+    // it does for `:app` on Android.
+    implementation(libs.coil.network)
+    // Country flags and some area icons are SVG and the API returns them as-is,
+    // so the shared screens need the SVG decoder to draw those chips.
+    implementation(libs.coil.svg)
     implementation(libs.maplibre.compose)
     // Provides Dispatchers.Main on the AWT event thread, which the map's engine
     // callbacks need.
@@ -62,6 +70,10 @@ dependencies {
     testImplementation(compose.uiTest)
     testImplementation(kotlin("test"))
     testImplementation(libs.junit)
+    // The remote-image test builds Coil's loader directly; the main source set
+    // only sees Coil transitively through `:ui`.
+    testImplementation(libs.coil)
+    testImplementation(libs.mockwebserver)
 }
 
 tasks.test {
