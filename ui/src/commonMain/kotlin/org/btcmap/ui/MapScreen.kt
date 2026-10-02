@@ -66,6 +66,7 @@ import androidx.compose.material3.FilledTonalIconButton
 import org.maplibre.compose.camera.CameraPosition
 import org.maplibre.compose.camera.CameraUpdate
 import org.maplibre.compose.interaction.ClickResult
+import org.maplibre.compose.interaction.MapInteractions
 import org.maplibre.compose.layers.LocationIndicatorLayer
 import org.maplibre.compose.location.LocationPermission
 import org.maplibre.compose.location.LocationTrackingEffect
@@ -77,6 +78,7 @@ import org.maplibre.compose.map.StyleLoadState
 import org.maplibre.compose.map.rememberMapState
 import org.maplibre.compose.overlay.ExpandingAttributionButton
 import org.maplibre.compose.style.BaseStyle
+import org.maplibre.spatialk.geojson.BoundingBox
 import org.maplibre.spatialk.geojson.Position
 import java.time.ZonedDateTime
 
@@ -157,6 +159,21 @@ fun MapScreen(
     // The sheet shows the current row: a sync rewrites rows in place, so the
     // selected copy is re-read whenever the host bumps the reload key.
     val shownPlace = rememberReloadedPlace(selectedPlace, db, reloadKey)
+    // A tap that no marker layer consumed (empty map) dismisses the sheet, as
+    // the Views map did. The handler reads the live selection, so it is built
+    // once instead of on every recomposition.
+    val mapInteractions = remember {
+        MapInteractions {
+            callbacks {
+                click {
+                    onUnhandled {
+                        selectedPlace = null
+                        ClickResult.Consume
+                    }
+                }
+            }
+        }
+    }
     var selectedComments by remember { mutableStateOf<List<CommentsAdapterItem>>(emptyList()) }
 
     LaunchedEffect(shownPlace) {
@@ -351,7 +368,26 @@ fun MapScreen(
                     ?.let(onSelectEvent)
             }
 
-            is SearchAdapterItem.Area -> onSelectArea(result.areaId)
+            // A search result frames the area on the map, as the Views map did;
+            // the area screen stays one tap away on the chip that appears. An
+            // area without a bbox has nothing to frame, so it opens instead.
+            is SearchAdapterItem.Area -> {
+                val bbox = result.bbox
+                if (bbox != null && bbox.size == 4) {
+                    scope.launch {
+                        state.animateCameraToBounds(
+                            BoundingBox(
+                                west = bbox[0],
+                                south = bbox[1],
+                                east = bbox[2],
+                                north = bbox[3],
+                            ),
+                        )
+                    }
+                } else {
+                    onSelectArea(result.areaId)
+                }
+            }
         }
     }
 
@@ -443,7 +479,11 @@ fun MapScreen(
 
     AppTheme(iconFont = iconFont) {
         Box(modifier = modifier.fillMaxSize()) {
-            MaplibreMap(modifier = Modifier.fillMaxSize(), state = state) {
+            MaplibreMap(
+                modifier = Modifier.fillMaxSize(),
+                state = state,
+                interactions = mapInteractions,
+            ) {
                 if (showAttribution) ExpandingAttributionButton()
             }
             Column(

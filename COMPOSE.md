@@ -32,16 +32,17 @@ Done and pushed:
 
 Next, in rough order of value (state at 2026-10-02):
 
-**Desktop polish is done** (slices 47-55): sign in, sign up, profile, save,
-report with evidence photos, add-place, boost and comment, all on the same
-`:shared` + `:ui` code. The add-photo flows were unified (slice 56) and the two
-tests the map swap deleted are back (slice 57). What remains is small:
+Everything previously listed here is done: the desktop-polish screens
+(slices 47-55), the add-photo unification (56), the two tests the map swap
+deleted (57), the MapLibre Compose 0.19.0 upgrade (58) and the two map parity
+gaps (59). What remains is optional:
 
-1. **Small parity gaps** — tapping empty map no longer dismisses the place sheet
-   (the map exposes no map-tap callback; `InteractionBindingsBuilder` has gesture
-   bindings but no host click callback), and an area search result opens the area
-   screen instead of framing its bbox (arguably the better behaviour; it needs a
-   decision, not code).
+1. **Re-test the marker-kind filter** — dropped in slice 35 because 0.18.0 could
+   not hide one kind in place (the filter made the visible kind stop drawing).
+   0.19.0 may or may not have fixed it; worth re-checking before deciding whether
+   the merchants/events/exchanges buttons come back.
+2. Nothing else is planned: iOS is out of scope, and the bundled assets are
+   refreshed manually (`./devtools bundle`).
 
 ## Goal
 
@@ -1756,6 +1757,30 @@ crash.
 
 Bump the version code to 219.
 
+### Phase 3, fifty-ninth slice — done (the two map parity gaps)
+
+Both gaps the map swap left are closed on the shared map:
+
+- **A tap that hits no feature clears the selection**, so an empty-map tap
+  dismisses the sheet. 0.19's `MapInteractions` has a map-level
+  `callbacks { click { onUnhandled { … } } }` that runs when no feature layer
+  consumed the tap; the map wires it to clear `selectedPlace`. It lives on the
+  shared map, so the desktop benefits too. On a phone the sheet is fully
+  expanded (`skipPartiallyExpanded`), so it covers the map and the tap is not
+  reachable there while the sheet is open; the callback matters where the map is
+  still visible.
+- **An area search result frames its bbox** on the map again (the pre-swap
+  behaviour) instead of opening the area screen; the chip that appears on the
+  map still opens the area screen. An area with no bbox opens the screen, since
+  there is nothing to frame.
+
+No new tests: the interaction needs a live map and the framing is a camera
+command. Both were checked by compiling and running the app — the map renders and
+the activity resumes; the sheet is full-height, so the empty-map tap itself is
+not reachable while it is open.
+
+Bump the version code to 220.
+
 ## Working notes
 
 Durable facts and conventions for continuing the migration.
@@ -1863,14 +1888,13 @@ quirk in particular still governs how the marker layers are declared.
 
 ## Next
 
-Hand-off for the next session (state at 2026-10-02, tip `8351eb45`):
+Hand-off for the next session (state at 2026-10-02, tip `38f7af62`):
 
-Phases 1 and 2 are complete. Phase 3 is nearly complete: the Android map and its
-place sheet are shared, the desktop app runs its whole UI from the same code, the
-two add-photo flows are one, the two tests the map swap deleted are back, and the
-library is on MapLibre Compose 0.19.0. The one remaining item under "Next, in
-rough order of value" is the pair of small map parity gaps; both want a decision
-before code.
+Phases 1-3 are complete: `:shared` holds the portable core, both UIs are Compose
+Multiplatform with the desktop running its whole UI from the same code, the
+Android map and its place sheet are shared, and the library is on MapLibre
+Compose 0.19.0. Every item the plan listed is done; the only optional follow-up
+is re-testing the dropped marker-kind filter on 0.19.0.
 
 Useful commands, all of them exercised this week:
 
