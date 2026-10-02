@@ -62,6 +62,7 @@ import androidx.compose.ui.Modifier
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import org.btcmap.api.Api
 import org.btcmap.api.signIn
+import org.btcmap.api.submitPlace
 import org.btcmap.ui.PlaceAction
 import org.btcmap.api.savePlace
 import org.btcmap.api.removeSavedPlace
@@ -172,21 +173,23 @@ private fun runApp() = application {
                     // map disposes it and coming back rebuilds it, so opening a
                     // row always lands on the map with that place selected.
                     var feedPlaceId by remember { mutableStateOf<Long?>(null) }
+                    // Where the add-place screen was opened from the map.
+                    var addPlace by remember { mutableStateOf<Pair<Double, Double>?>(null) }
+
+                    // The bundled style, shared by the map and the add-place map.
+                    // Its sprite and glyph URLs are served from the app's
+                    // resources (the style itself references them with Android's
+                    // asset:// scheme, which the Compose map cannot read).
+                    val darkTheme = androidx.compose.foundation.isSystemInDarkTheme()
+                    val styleAsset = settings.mapStyle.bundledStyleAsset(darkSystemTheme = darkTheme)
+                    val styleJson = remember(styleAsset) { bundledStyleJson(styleAsset) }
 
                     when (route) {
                         Route.Map -> MapScreen(
                             db = db,
                             openPlaceId = feedPlaceId,
-                            styleUrl = "https://tiles.openfreemap.org/styles/liberty",
-                            // The bundled style, with its sprite and glyph URLs
-                            // served from the app's resources (the style itself
-                            // references them with Android's asset:// scheme,
-                            // which the Compose map cannot read).
-                            styleJson = bundledStyleJson(
-                                settings.mapStyle.bundledStyleAsset(
-                                    darkSystemTheme = androidx.compose.foundation.isSystemInDarkTheme(),
-                                ),
-                            ),
+                            styleUrl = HOSTED_STYLE_URL,
+                            styleJson = styleJson,
                             initialLat = 52.2333742,
                             initialLon = 21.0711489,
                             initialZoom = 13.0,
@@ -210,6 +213,10 @@ private fun runApp() = application {
                             iconFont = iconFont,
                             placeSheetStrings = PLACE_SHEET_STRINGS,
                             searchActions = SearchActions(onSettings = { route = Route.Settings }),
+                            onAddPlace = { lat, lon ->
+                                addPlace = lat to lon
+                                route = if (settings.authorized) Route.AddPlace else Route.Account
+                            },
                             onOpenFeed = { route = Route.Feed },
                             bookmarked = bookmarked,
                             onPlaceSelected = { selectedPlaceId = it.id },
@@ -260,6 +267,25 @@ private fun runApp() = application {
                             onBack = { route = Route.Map },
                         )
 
+                        Route.AddPlace -> DesktopAddPlaceScreen(
+                            lat = addPlace?.first ?: 0.0,
+                            lon = addPlace?.second ?: 0.0,
+                            styleUrl = HOSTED_STYLE_URL,
+                            styleJson = styleJson,
+                            submit = { draft ->
+                                api.submitPlace(
+                                    lat = draft.lat,
+                                    lon = draft.lon,
+                                    category = draft.category,
+                                    name = draft.name,
+                                    address = draft.address.takeIf { it.isNotEmpty() },
+                                    website = draft.website.takeIf { it.isNotEmpty() },
+                                    description = draft.description.takeIf { it.isNotEmpty() },
+                                )
+                            },
+                            onBack = { route = Route.Map },
+                        )
+
                         Route.Settings -> ScreenPage(
                             title = "Settings",
                             onBack = { route = Route.Map },
@@ -303,7 +329,7 @@ private fun runApp() = application {
 
 /** A screen the map opens, with a back affordance of its own. */
 @androidx.compose.runtime.Composable
-private fun ScreenPage(
+internal fun ScreenPage(
     title: String,
     onBack: () -> Unit,
     content: @androidx.compose.runtime.Composable () -> Unit,
@@ -325,7 +351,7 @@ private fun ScreenPage(
 }
 
 /** The desktop app's full-window pages. */
-private enum class Route { Map, Feed, Settings, Account, Report }
+private enum class Route { Map, Feed, Settings, Account, Report, AddPlace }
 
 private const val SCREENSHOT_ARG = "--screenshot="
 
@@ -387,6 +413,14 @@ private fun renderScreen(spec: String) {
                         ),
                         db = db,
                         settings = settings,
+                        onBack = {},
+                    )
+
+                    "addplace" -> AddPlaceForm(
+                        busy = false,
+                        error = null,
+                        submitted = false,
+                        onSubmit = { _, _, _, _, _ -> },
                         onBack = {},
                     )
 
@@ -768,6 +802,7 @@ internal fun DesktopSettingsScreen(
 
 private const val API_URL = "https://api.btcmap.org"
 private const val USER_AGENT = "btcmap-desktop"
+private const val HOSTED_STYLE_URL = "https://tiles.openfreemap.org/styles/liberty"
 
 /** The per-user data directory the desktop app keeps its database in. */
 private class DesktopHome {

@@ -3,9 +3,9 @@
 Status (2026-10-02): Phases 1 and 2 are complete (the portable core in `:shared`;
 the non-map UI in Compose). Phase 3 is **most of the way there**: the Android map
 and its place sheet are the shared Compose ones, and a working **desktop app**
-runs from the same `:shared` + `:ui` code with its map, feed, settings, account
-and report screens. What is left is listed under Next steps. See Progress for
-every slice and Working notes for the pitfalls.
+runs from the same `:shared` + `:ui` code with its map, feed, settings, account,
+report and add-place screens. What is left is listed under Next steps. See
+Progress for every slice and Working notes for the pitfalls.
 
 ## Current status and next steps
 
@@ -33,10 +33,10 @@ Done and pushed:
 Next, in rough order of value (state at 2026-10-02):
 
 1. **Desktop polish** — what the sign-in unlocked is partly done: save and report
-   work (slices 48 and 49). Left: the **add-place** and **user-profile** screens,
-   report **evidence photos**, **sign-up and sign-out**, and the two sheet actions
-   that are paid in sats (**boost** and **comment**) and so need a wallet flow
-   rather than another form.
+   work (slices 48 and 49) and **add-place** (slice 51). Left: the **user-profile**
+   screen, report **evidence photos**, **sign-up and sign-out**, and the two sheet
+   actions that are paid in sats (**boost** and **comment**) and so need a wallet
+   flow rather than another form.
 2. **Unify the two add-photo flows** — slice 43 gave the map sheet its own copy of
    the picker, camera and upload (the helpers are shared, the launchers are not).
    It collapses when the place screen itself becomes Compose.
@@ -1171,21 +1171,27 @@ screen, so whatever is in front is what lands in the file.
 
 ### Driving the desktop app's window
 
-`xdotool` drives the running window: the Compose window is an **XWayland**
-client (AWT's X11 toolkit), so `search`, `activate`, `getactivewindow` and
-`click` all work and XTEST clicks land on the app.
+`xdotool` can *find and address* the window — the Compose window is an
+**XWayland** client (AWT's X11 toolkit), so `search`, `activate` and
+`getactivewindow` work:
 
 ```bash
 xdotool search --name "BTC Map"        # the top-level window id
 xdotool windowactivate <id>
-xdotool mousemove --window <id> 400 300 click 1
-xdotool type --window <id> "bitcoin"
 ```
+
+**Its injected input does not reach the app, though**: under GNOME's rootless
+XWayland the X pointer is virtual (`mousemove` leaves a stale position on the
+compositor's guard window), so `click`/`type` are no-ops. Real injection needs
+`ydotool` (uinput, plus an `input`-group udev rule and a relogin) or the
+portal's RemoteDesktop. To verify a screen instead, boot the app straight into
+it with a temporary route and screenshot — that is how slice 51 checked its
+screen.
 
 Live screenshots still need the portal above — `ffmpeg -f x11grab` on the
 XWayland root comes out black, because mutter composites the XWayland surfaces
 instead of leaving them in the root window. (The "no input-injection tool"
-caveats in the slices below describe the state before `xdotool` was installed.)
+caveats in the slices below describe the state before the tooling above.)
 
 ### Running the desktop app
 
@@ -1597,6 +1603,29 @@ as in the tests. Live screenshots still need the XDG portal.
 
 No version code bump: the Android app is unchanged.
 
+### Phase 3, fifty-first slice — done (the desktop adds a place)
+
+The search bar's add-place action is live on the desktop. `MapScreen` already
+hands the map centre over through `onAddPlace`; the desktop now opens an **Add a
+place** page: a 240dp positioning map (pan and zoom under a centred pin) over the
+name, category and address (required) and website/description (optional) fields,
+submitting through the shared `submitPlace` and confirming like the report form.
+A signed-out user is sent to the Account page, as Save, Verify and Report already
+are.
+
+The form is split from the map (`AddPlaceForm`) so it can be driven without a
+GPU; two tests cover the required-field validation and the submitted draft
+(`:desktopApp:test`). The positioning map hides the logo and attribution, as the
+Android add-place map does.
+
+Verified by booting straight into the screen with a temporary route and
+capturing it: the map renders at 480x240 with its pin, and the five fields
+follow. That is also the verification shape the tooling below describes, since
+live pointer injection does not reach the window. The headless `screenshot` mode
+gained an `addplace` case.
+
+No version code bump: the Android app is unchanged.
+
 ## Working notes
 
 Durable facts and conventions for continuing the migration.
@@ -1701,14 +1730,14 @@ Durable facts and conventions for continuing the migration.
 
 ## Next
 
-Hand-off for the next session (state at 2026-10-02, tip `5bbed404`):
+Hand-off for the next session (state at 2026-10-02, tip `81dda38f`):
 
 Phases 1 and 2 are complete. Phase 3 is nearly complete: the Android map and its
-place sheet are shared, and the desktop app runs its map, feed, settings, account
-and report screens from the same code. The desktop now has a Compose UI test
-source set (`:desktopApp:test`) and `xdotool` can drive its window. Pick up from
-the four items under "Next, in rough order of value" at the top of this file; the
-first is the desktop's add-place screen.
+place sheet are shared, and the desktop app runs its map, feed, settings, account,
+report and add-place screens from the same code. The desktop has a Compose UI
+test source set (`:desktopApp:test`). Pick up from the four items under "Next, in
+rough order of value" at the top of this file; the first is the desktop's
+user-profile screen.
 
 Useful commands, all of them exercised this week:
 
@@ -1717,7 +1746,7 @@ Useful commands, all of them exercised this week:
   :app:compileDebugKotlin :app:compileDebugAndroidTestKotlin :desktopApp:test
 ./devtools app run                     # build, install, launch on emulator-5554
 ./gradlew :desktopApp:run              # the desktop window (poll for "Rendered the first map frame")
-./gradlew :desktopApp:screenshot -Pscreenshot=settings:/tmp/x.png:dark   # settings, cache, account, report
+./gradlew :desktopApp:screenshot -Pscreenshot=settings:/tmp/x.png:dark   # settings, cache, account, report, addplace
 ```
 
 Instrumented tests are compile-checked here but not run (`AGENTS.md`); the
