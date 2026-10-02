@@ -47,8 +47,6 @@ import org.btcmap.ui.SettingsItem
 import org.btcmap.ui.SettingsScreen
 import androidx.compose.material3.Button
 import androidx.compose.material3.OutlinedTextField
-import org.btcmap.api.reportPlace
-import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.runtime.LaunchedEffect
@@ -264,6 +262,7 @@ private fun runApp() = application {
                             placeId = reportPlace?.first ?: 0L,
                             placeName = reportPlace?.second ?: "",
                             initialType = reportType,
+                            pickPhotos = reportPhotoPicker(window),
                             onBack = { route = Route.Map },
                         )
 
@@ -661,111 +660,6 @@ private suspend fun toggleSavedPlace(api: Api, db: Database, placeId: Long) {
 }
 
 /** The reasons a report can give, in the order the form offers them. */
-private val REPORT_TYPES = listOf(
-    Triple(
-        "verified",
-        "Verified - still accepts Bitcoin",
-        "You confirmed this place exists and currently accepts Bitcoin payments.",
-    ),
-    Triple(
-        "refused_sats",
-        "Refused Bitcoin payment",
-        "An attempt to pay with Bitcoin on-site was refused by the merchant.",
-    ),
-    Triple(
-        "out_of_business",
-        "Out of business",
-        "The place has been permanently closed or is no longer operating.",
-    ),
-)
-
-/**
- * The desktop's report form for a place: the same three reasons the app offers,
- * an optional note, and the shared `reportPlace` call. Evidence photos are not
- * attached from here yet; the endpoint takes them optionally.
- */
-@androidx.compose.runtime.Composable
-internal fun DesktopReportScreen(
-    api: Api,
-    placeId: Long,
-    placeName: String,
-    initialType: String?,
-    onBack: () -> Unit,
-) {
-    var type by remember { mutableStateOf(initialType) }
-    var note by remember { mutableStateOf("") }
-    var busy by remember { mutableStateOf(false) }
-    var error by remember { mutableStateOf<String?>(null) }
-    var submitted by remember { mutableStateOf(false) }
-    val scope = rememberCoroutineScope()
-
-    ScreenPage(title = placeName.ifBlank { "Report a place" }, onBack = onBack) {
-        Column(
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-            modifier = Modifier.padding(16.dp),
-        ) {
-            if (submitted) {
-                Text(text = "Report submitted.")
-                Button(onClick = onBack) { Text(text = "Back to the map") }
-                return@Column
-            }
-
-            Text(
-                text = "Let editors know the current state of this place. Your " +
-                    "report will be reviewed by the BTC Map community.",
-                style = MaterialTheme.typography.bodyMedium,
-            )
-
-            REPORT_TYPES.forEach { (value, label, description) ->
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    RadioButton(selected = type == value, onClick = { type = value })
-                    Column(modifier = Modifier.padding(start = 4.dp)) {
-                        Text(text = label)
-                        Text(
-                            text = description,
-                            style = MaterialTheme.typography.bodySmall,
-                        )
-                    }
-                }
-            }
-
-            OutlinedTextField(
-                value = note,
-                onValueChange = { note = it },
-                label = { Text(text = "Additional notes (optional)") },
-                modifier = Modifier.padding(top = 8.dp),
-            )
-
-            error?.let { Text(text = it, color = MaterialTheme.colorScheme.error) }
-
-            Button(
-                enabled = type != null && !busy,
-                onClick = {
-                    val reason = type ?: return@Button
-                    busy = true
-                    error = null
-                    scope.launch {
-                        try {
-                            api.reportPlace(
-                                placeId = placeId,
-                                type = reason,
-                                comment = note.trim().takeIf { it.isNotEmpty() },
-                            )
-                            submitted = true
-                        } catch (t: Throwable) {
-                            error = t.message ?: t.toString()
-                        } finally {
-                            busy = false
-                        }
-                    }
-                },
-            ) {
-                Text(text = "Submit")
-            }
-        }
-    }
-}
-
 /** The shared settings list, used by both the window and the screenshot mode. */
 @androidx.compose.runtime.Composable
 internal fun DesktopSettingsScreen(

@@ -33,10 +33,10 @@ Done and pushed:
 Next, in rough order of value (state at 2026-10-02):
 
 1. **Desktop polish** — what the sign-in unlocked is mostly done: save and report
-   work (slices 48 and 49), **add-place** (slice 51) and the **profile** with
-   change-username/password and log-out (slice 52). Left: report **evidence
-   photos**, **sign-up**, and the two sheet actions that are paid in sats
-   (**boost** and **comment**) and so need a wallet flow rather than another form.
+   work (slices 48 and 49), **add-place** (slice 51), the **profile** (slice 52)
+   and report **evidence photos** (slice 53). Left: **sign-up**, and the two sheet
+   actions that are paid in sats (**boost** and **comment**) and so need a wallet
+   flow rather than another form.
 2. **Unify the two add-photo flows** — slice 43 gave the map sheet its own copy of
    the picker, camera and upload (the helpers are shared, the launchers are not).
    It collapses when the place screen itself becomes Compose.
@@ -1647,6 +1647,24 @@ loads off the main thread is captured settled rather than blank.
 
 No version code bump: the Android app is unchanged.
 
+### Phase 3, fifty-third slice — done (report evidence photos on the desktop)
+
+The desktop report form can attach the same optional evidence photos the app
+sends: up to five, chosen with an AWT `FileDialog`, downscaled to 2048 px and
+re-encoded as JPEG (quality 85) through `javax.imageio`, shown as removable
+thumbnails, and passed to the shared `reportPlace` as base64. The picker is
+injected, so the form renders without a file dialog in tests.
+
+The report screen moved out of `Main.kt` into `ReportScreen.kt`, and the encoder
+and picker live in `ReportPhotos.kt`. The Android encoder is mirrored; EXIF
+orientation is not applied, so a sideways phone photo can stay sideways. The
+file dialog needs input the environment cannot inject, so it was not exercised.
+
+Verified by three report tests (reason gating, attach/remove, the five-photo cap)
+and the headless `report` screenshot, which shows the Add photo control.
+
+No version code bump: the Android app is unchanged.
+
 ## Working notes
 
 Durable facts and conventions for continuing the migration.
@@ -1751,14 +1769,14 @@ Durable facts and conventions for continuing the migration.
 
 ## Next
 
-Hand-off for the next session (state at 2026-10-02, tip `1fa7f8d5`):
+Hand-off for the next session (state at 2026-10-02, tip `8aaff601`):
 
 Phases 1 and 2 are complete. Phase 3 is nearly complete: the Android map and its
 place sheet are shared, and the desktop app runs its map, feed, settings, account,
-report, add-place and profile screens from the same code. The desktop has a
-Compose UI test source set (`:desktopApp:test`). Pick up from the four items under
-"Next, in rough order of value" at the top of this file; the first is report
-evidence photos on the desktop.
+report (with evidence photos), add-place and profile screens from the same code.
+The desktop has a Compose UI test source set (`:desktopApp:test`). Pick up from
+the four items under "Next, in rough order of value" at the top of this file; the
+first is sign-up on the desktop.
 
 Useful commands, all of them exercised this week:
 
