@@ -1,9 +1,13 @@
 package org.btcmap.ui.map
 
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.material3.FilledIconButton
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.FilledTonalIconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -24,13 +28,15 @@ const val MARKER_FILTER_EVENTS_TAG = "marker-filter-events"
 const val MARKER_FILTER_EXCHANGES_TAG = "marker-filter-exchanges"
 
 /**
- * The map's marker-kind filter: one button per kind, the active one filled. Ported
- * from the Views button group the map swap dropped.
+ * The map's marker-kind filter: one button per kind, the active one ringed.
+ * Ported from the Views button group the map swap dropped, whose buttons shared
+ * the app's button background and marked the selected one with a border.
  */
 @Composable
 fun MarkerFilterButtons(
     selected: MarkerKind,
     onSelect: (MarkerKind) -> Unit,
+    palette: AreaChipPalette,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -44,6 +50,7 @@ fun MarkerFilterButtons(
             tag = MARKER_FILTER_MERCHANTS_TAG,
             selected = selected,
             onSelect = onSelect,
+            palette = palette,
         )
         MarkerFilterButton(
             kind = MarkerKind.Events,
@@ -51,6 +58,7 @@ fun MarkerFilterButtons(
             tag = MARKER_FILTER_EVENTS_TAG,
             selected = selected,
             onSelect = onSelect,
+            palette = palette,
         )
         MarkerFilterButton(
             kind = MarkerKind.Exchanges,
@@ -58,6 +66,7 @@ fun MarkerFilterButtons(
             tag = MARKER_FILTER_EXCHANGES_TAG,
             selected = selected,
             onSelect = onSelect,
+            palette = palette,
         )
     }
 }
@@ -69,15 +78,36 @@ private fun MarkerFilterButton(
     tag: String,
     selected: MarkerKind,
     onSelect: (MarkerKind) -> Unit,
+    palette: AreaChipPalette,
 ) {
-    val onClick = { onSelect(kind) }
-    if (kind == selected) {
-        FilledIconButton(onClick = onClick, modifier = Modifier.testTag(tag)) {
-            MaterialSymbol(glyph = glyph, contentDescription = null)
-        }
-    } else {
-        FilledTonalIconButton(onClick = onClick, modifier = Modifier.testTag(tag)) {
+    FilledTonalIconButton(
+        onClick = { onSelect(kind) },
+        colors = IconButtonDefaults.filledTonalIconButtonColors(
+            containerColor = palette.buttonBackground,
+            contentColor = palette.buttonIcon,
+        ),
+        modifier = Modifier.testTag(tag),
+    ) {
+        // The ring is drawn on the button's visual circle, not its larger touch
+        // target, so it traces the background the way the Views border did.
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier
+                .size(FILTER_BUTTON_SIZE)
+                .then(
+                    if (kind == selected) {
+                        Modifier.border(FILTER_BORDER_WIDTH, palette.buttonBorder, CircleShape)
+                    } else {
+                        Modifier
+                    },
+                ),
+        ) {
             MaterialSymbol(glyph = glyph, contentDescription = null)
         }
     }
 }
+
+/** Material's icon button visual container, which its touch target pads to 48. */
+private val FILTER_BUTTON_SIZE = 40.dp
+
+private val FILTER_BORDER_WIDTH = 2.dp

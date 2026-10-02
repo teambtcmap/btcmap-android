@@ -55,12 +55,12 @@ private fun AreaChip(
     modifier: Modifier = Modifier,
 ) {
     Box(
-        modifier = modifier.size(CHIP_SIZE).clickable { onClick(area) },
+        modifier = modifier.size(AREA_CHIP_SIZE).clickable { onClick(area) },
         contentAlignment = Alignment.Center,
     ) {
         Box(
             modifier = Modifier
-                .size(CHIP_SIZE)
+                .size(AREA_CHIP_SIZE)
                 .clip(CircleShape)
                 .background(palette.buttonBackground),
             contentAlignment = Alignment.Center,
@@ -74,7 +74,7 @@ private fun AreaChip(
                 model = "$apiUrl/v4/areas/${area.id}/image?type=square&w=256&h=256",
                 contentDescription = null,
                 contentScale = ContentScale.Crop,
-                modifier = Modifier.size(CHIP_SIZE).clip(CircleShape),
+                modifier = Modifier.size(AREA_CHIP_SIZE).clip(CircleShape),
             )
         }
 
@@ -94,7 +94,8 @@ private fun AreaChip(
     }
 }
 
-private val CHIP_SIZE = 56.dp
+/** The chip's side, which the map's round action buttons below it also use. */
+internal val AREA_CHIP_SIZE = 56.dp
 
 /**
  * The letters shown on a chip until its image loads, or in its place when the

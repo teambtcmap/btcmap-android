@@ -203,6 +203,7 @@ private fun runApp() = application {
                             areaChipPalette = AreaChipPalette(
                                 buttonBackground = Color(0xFF1B1B1B),
                                 buttonIcon = Color.White,
+                                buttonBorder = Color.White,
                                 badgeBackground = Color(0xFFE53935),
                                 badgeText = Color.White,
                             ),

@@ -1,5 +1,6 @@
 package org.btcmap.ui.map
 
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
@@ -21,6 +22,13 @@ class MarkerFilterButtonsTest {
                     MarkerFilterButtons(
                         selected = MarkerKind.Merchants,
                         onSelect = { selected = it },
+                        palette = AreaChipPalette(
+                            buttonBackground = Color(0xFF1F2937),
+                            buttonIcon = Color.White,
+                            buttonBorder = Color.White,
+                            badgeBackground = Color(0xFFE53935),
+                            badgeText = Color.White,
+                        ),
                     )
                 }
             }

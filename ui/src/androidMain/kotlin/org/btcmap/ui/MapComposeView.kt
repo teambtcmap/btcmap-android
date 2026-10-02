@@ -62,6 +62,8 @@ class MapComposeView @JvmOverloads constructor(
 
     var areaChipIconColor: Color by mutableStateOf(Color.White)
 
+    var areaChipBorderColor: Color by mutableStateOf(Color.White)
+
     var usingOpenFreeMap: Boolean by mutableStateOf(true)
 
     var iconTypeface: Typeface? by mutableStateOf(null)
@@ -153,6 +155,7 @@ class MapComposeView @JvmOverloads constructor(
             areaChipPalette = AreaChipPalette(
                 buttonBackground = areaChipButtonColor,
                 buttonIcon = areaChipIconColor,
+                buttonBorder = areaChipBorderColor,
                 badgeBackground = markerBadgeBackgroundColor,
                 badgeText = markerBadgeTextColor,
             ),

@@ -64,6 +64,7 @@ import org.btcmap.settings.badgeTextColor
 import org.btcmap.settings.boostedMarkerBackgroundColor
 import org.btcmap.settings.boostedMarkerIconColor
 import org.btcmap.settings.buttonBackgroundColor
+import org.btcmap.settings.buttonBorderColor
 import org.btcmap.settings.buttonIconColor
 import org.btcmap.settings.mapCenterLat
 import org.btcmap.settings.mapCenterLon
@@ -210,6 +211,7 @@ class MapFragment : Fragment() {
             markerBadgeTextColor = Color(prefs.badgeTextColor(requireContext()))
             areaChipButtonColor = Color(prefs.buttonBackgroundColor(requireContext()))
             areaChipIconColor = Color(prefs.buttonIconColor(requireContext()))
+            areaChipBorderColor = Color(prefs.buttonBorderColor(requireContext()))
             placeSheetStrings = PlaceSheetStrings(
                 directions = getString(R.string.directions),
                 share = getString(R.string.share),
@@ -680,9 +682,10 @@ class MapFragment : Fragment() {
         private const val STATE_PLACE_ID = "map_selected_place_id"
 
         // The shared map's marker filter column reserves this much from the map's
-        // bottom edge: 112dp of bottom padding, the three 48dp buttons 8dp apart
-        // (MarkerFilterButtons), and the 8dp gap the sync group left it.
-        private const val FILTER_COLUMN_CLEARANCE_DP = 112 + 3 * 48 + 2 * 8 + 8
+        // bottom edge: MapScreen's MAP_CONTROLS_BOTTOM (52dp, just above the
+        // attribution), the three 48dp buttons 8dp apart (MarkerFilterButtons),
+        // and the 8dp gap the sync group left it.
+        private const val FILTER_COLUMN_CLEARANCE_DP = 52 + 3 * 48 + 2 * 8 + 8
 
         // The auth hand-off protocol, the same shape the place screen uses: what
         // the sheet asked for, and what the form has to hand back to finish it.

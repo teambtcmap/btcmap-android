@@ -6,7 +6,11 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
@@ -49,6 +53,7 @@ import org.btcmap.search.SearchAdapterItem
 import org.btcmap.map.toEventGeoJson
 import org.btcmap.map.toMarkerGeoJson
 import org.btcmap.place.isMerchant
+import org.btcmap.ui.map.AREA_CHIP_SIZE
 import org.btcmap.ui.map.AreaChipPalette
 import org.btcmap.ui.map.AreaChips
 import org.btcmap.ui.map.EventLayers
@@ -69,6 +74,7 @@ import org.btcmap.ui.map.rememberReloadedPlace
 import org.btcmap.ui.map.rememberViewportFeatures
 import org.btcmap.ui.map.setBitmap
 import androidx.compose.material3.FilledTonalIconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.Text
 import org.maplibre.compose.camera.CameraPosition
 import org.maplibre.compose.camera.CameraUpdate
@@ -522,15 +528,22 @@ fun MapScreen(
                     fontSize = 11.sp,
                     modifier = Modifier
                         .align(Alignment.BottomCenter)
-                        .padding(bottom = 32.dp),
+                        .padding(bottom = ATTRIBUTION_BOTTOM),
                 )
             }
+            // The map's own controls wear the app's configurable button colours,
+            // not Material's tonal container, so they keep the look the Views map
+            // had (and the area chips already share it).
+            val controlColors = IconButtonDefaults.filledTonalIconButtonColors(
+                containerColor = areaChipPalette.buttonBackground,
+                contentColor = areaChipPalette.buttonIcon,
+            )
             Column(
                 horizontalAlignment = Alignment.End,
                 verticalArrangement = Arrangement.spacedBy(8.dp),
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
-                    .padding(end = 24.dp, bottom = 112.dp),
+                    .padding(end = 24.dp, bottom = MAP_CONTROLS_BOTTOM),
             ) {
                 AreaChips(
                     areas = areas,
@@ -541,8 +554,12 @@ fun MapScreen(
                 onOpenFeed?.let { openFeed ->
                     // The feed is about the areas the map is showing, and the
                     // map is the only one that knows them.
-                    FilledTonalIconButton(onClick = { openFeed(areas) }) {
-                        MaterialSymbol(glyph = "monitor_heart", contentDescription = null)
+                    FilledTonalIconButton(
+                        onClick = { openFeed(areas) },
+                        colors = controlColors,
+                        modifier = Modifier.size(AREA_CHIP_SIZE),
+                    ) {
+                        MaterialSymbol(glyph = "vital_signs", contentDescription = null)
                     }
                 }
                 FilledTonalIconButton(
@@ -569,6 +586,8 @@ fun MapScreen(
                             locationState.requestPermission()
                         }
                     },
+                    colors = controlColors,
+                    modifier = Modifier.size(AREA_CHIP_SIZE),
                 ) {
                     MaterialSymbol(glyph = "my_location", contentDescription = null)
                 }
@@ -602,9 +621,10 @@ fun MapScreen(
             MarkerFilterButtons(
                 selected = markerKind,
                 onSelect = { markerKind = it },
+                palette = areaChipPalette,
                 modifier = Modifier
                     .align(Alignment.BottomStart)
-                    .padding(start = 24.dp, bottom = 112.dp),
+                    .padding(start = 24.dp, bottom = MAP_CONTROLS_BOTTOM),
             )
             SearchOverlay(
                 query = searchQuery,
@@ -614,11 +634,25 @@ fun MapScreen(
                 actions = mapSearchActions,
                 modifier = Modifier
                     .align(Alignment.TopCenter)
-                    .padding(start = 16.dp, end = 16.dp, top = 56.dp, bottom = 16.dp),
+                    // The Views SearchBar sat below the status bar with its own
+                    // 16dp margin; the map is edge-to-edge, so the inset is drawn
+                    // here rather than by the window.
+                    .windowInsetsPadding(WindowInsets.statusBars)
+                    .padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 16.dp),
             )
         }
     }
 }
+
+/** How far the attribution line sits above the bottom of the map. */
+private val ATTRIBUTION_BOTTOM = 32.dp
+
+/**
+ * How far the side panels sit above the bottom: just clear of the attribution
+ * line, as the Views button groups did before the map swap. The sync indicator
+ * in the Android host clears the filter panel from this same offset.
+ */
+private val MAP_CONTROLS_BOTTOM = ATTRIBUTION_BOTTOM + 20.dp
 
 /** The zoom a place the map was asked to open is shown at. */
 private const val OPEN_ZOOM = 16.0
