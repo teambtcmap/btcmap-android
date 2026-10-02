@@ -162,7 +162,7 @@ Shares `:shared` and `:ui`; it opens the shared database under `$BTCMAP_HOME` or
 `~/.btcmap`.
 
 ```bash
-./gradlew :desktopApp:run        # open the window (poll the log for "Rendered the first map frame")
+./gradlew :desktopApp:run        # open the window; launch it in the background, see below
 ./gradlew :desktopApp:test       # Compose UI tests, no window
 ./gradlew :desktopApp:screenshot -Pscreenshot=settings:/tmp/x.png:dark
 ```
@@ -170,9 +170,22 @@ Shares `:shared` and `:ui`; it opens the shared database under `$BTCMAP_HOME` or
 - `screenshot` renders one screen headlessly to a PNG; today's screens are
   `settings`, `account`, `report`, `addplace` and `payment` (the map needs a real
   window and GPU, so it is not one of them).
+- When asked to run or restart the window, **never run `:desktopApp:run` in the
+  foreground and never `sleep`/poll waiting for it to start**. `run` blocks for
+  the life of the window, so launch it detached with its output in a named log,
+  e.g. `(./gradlew :desktopApp:run > /tmp/btcmap-desktop.log 2>&1 &)`, and return
+  control immediately.
+- The running app is identified by `pgrep -f "org.btcmap.desktop.MainK[t]"`
+  (the brackets keep the pattern from matching the shell). Check it *before*
+  launching: if it is already listed, the window is already open — do not start a
+  second instance. The log at `/tmp/btcmap-desktop.log` is the other marker, and
+  its last lines (e.g. `desktop: icon font ...`, and the `Rendered the first map
+  frame` line once the map is up) tell you how far startup got when you next look,
+  without blocking on it.
 - Stop a running window with
   `pgrep -f "org.btcmap.desktop.MainK[t]" | xargs -r kill` (the brackets keep the
-  pattern from matching the shell).
+  pattern from matching the shell). Do this before a restart so only one instance
+  is ever open.
 - A window screenshot captures the whole screen, so focus the window first; the
   third spec field is optional (`dark`/`light`).
 - Input cannot be injected into the window here: it is an XWayland client and
