@@ -272,7 +272,10 @@ private fun runApp() = application {
                                 Text(text = "Sync: $syncState")
                                 Button(onClick = { syncManager.start() }) { Text("Sync now") }
                             }
-                            DesktopSettingsScreen(db, settings)
+                            DesktopSettingsScreen(
+                                settings = settings,
+                                onOpenAccount = { route = Route.Account },
+                            )
                         }
 
                         Route.Account -> DesktopAccountScreen(
@@ -355,7 +358,7 @@ private fun renderScreen(spec: String) {
             // shows what the screen actually sits on.
             Surface(modifier = androidx.compose.ui.Modifier.fillMaxSize()) {
                 when (name) {
-                    "settings" -> DesktopSettingsScreen(db, settings)
+                    "settings" -> DesktopSettingsScreen(settings, onOpenAccount = {})
                     "report" -> DesktopReportScreen(
                         api = Api(
                             httpClient = apiHttpClient(
@@ -506,7 +509,7 @@ private fun relativeDate(date: String): String = runCatching {
  * out, and the other account actions follow later.
  */
 @androidx.compose.runtime.Composable
-private fun DesktopAccountScreen(
+internal fun DesktopAccountScreen(
     api: Api,
     db: Database,
     settings: Settings,
@@ -645,7 +648,7 @@ private val REPORT_TYPES = listOf(
  * attached from here yet; the endpoint takes them optionally.
  */
 @androidx.compose.runtime.Composable
-private fun DesktopReportScreen(
+internal fun DesktopReportScreen(
     api: Api,
     placeId: Long,
     placeName: String,
@@ -728,10 +731,9 @@ private fun DesktopReportScreen(
 
 /** The shared settings list, used by both the window and the screenshot mode. */
 @androidx.compose.runtime.Composable
-private fun DesktopSettingsScreen(
-    db: Database,
+internal fun DesktopSettingsScreen(
     settings: Settings,
-    onOpenAccount: () -> Unit = {},
+    onOpenAccount: () -> Unit,
 ) {
     var attribution by remember { mutableStateOf(settings.showAttribution) }
     var rotation by remember { mutableStateOf(settings.mapRotationEnabled) }

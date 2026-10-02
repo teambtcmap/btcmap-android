@@ -1,6 +1,6 @@
 # Migration Plan: Compose (Multiplatform) and a Shared Module
 
-Status (2026-10-01): Phases 1 and 2 are complete (the portable core in `:shared`;
+Status (2026-10-02): Phases 1 and 2 are complete (the portable core in `:shared`;
 the non-map UI in Compose). Phase 3 is **most of the way there**: the Android map
 and its place sheet are the shared Compose ones, and a working **desktop app**
 runs from the same `:shared` + `:ui` code with its map, feed, settings, account
@@ -30,7 +30,7 @@ Done and pushed:
   form. Headless screenshots render a screen to a PNG, and `createDistributable`
   yields a self-contained app image.
 
-Next, in rough order of value (state at 2026-10-01):
+Next, in rough order of value (state at 2026-10-02):
 
 1. **Desktop polish** — what the sign-in unlocked is partly done: save and report
    work (slices 48 and 49). Left: the **add-place** and **user-profile** screens,
@@ -1169,6 +1169,24 @@ gdbus call --session --dest org.freedesktop.portal.Desktop \
 Launch the app first so its window is focused — the portal captures the whole
 screen, so whatever is in front is what lands in the file.
 
+### Driving the desktop app's window
+
+`xdotool` drives the running window: the Compose window is an **XWayland**
+client (AWT's X11 toolkit), so `search`, `activate`, `getactivewindow` and
+`click` all work and XTEST clicks land on the app.
+
+```bash
+xdotool search --name "BTC Map"        # the top-level window id
+xdotool windowactivate <id>
+xdotool mousemove --window <id> 400 300 click 1
+xdotool type --window <id> "bitcoin"
+```
+
+Live screenshots still need the portal above — `ffmpeg -f x11grab` on the
+XWayland root comes out black, because mutter composites the XWayland surfaces
+instead of leaving them in the root window. (The "no input-injection tool"
+caveats in the slices below describe the state before `xdotool` was installed.)
+
 ### Running the desktop app
 
 `./gradlew :desktopApp:run` opens the window and leaves it up. A first run also
@@ -1560,6 +1578,25 @@ Verified by rendering the form with the desktop's headless screenshot mode
 (`-Pscreenshot=report:...`); the submission itself needs a signed-in session and
 was not exercised.
 
+### Phase 3, fiftieth slice — done (the desktop's tests, and the settings wiring)
+
+The desktop's Settings **Account** row was dead in the window: slice 47 gave the
+page a callback, but the window called `DesktopSettingsScreen` without it, so
+`onOpenAccount` fell back to its no-op default and only a signed-out Save,
+Verify or Report could reach the page. The default is gone, so a caller that
+forgets the callback no longer compiles, and the window passes it.
+
+`:desktopApp` gained a Compose UI test source set (`runComposeUiTest`, no
+window): the settings row's Account callback and attribution toggle, the account
+page's signed-out form, and the report form's disabled Submit. Five tests, run
+with `./gradlew :desktopApp:test`.
+
+The slice also stood up the desktop input tooling: `xdotool` drives the running
+window (an XWayland client), so the screens can be clicked through live as well
+as in the tests. Live screenshots still need the XDG portal.
+
+No version code bump: the Android app is unchanged.
+
 ## Working notes
 
 Durable facts and conventions for continuing the migration.
@@ -1633,6 +1670,12 @@ Durable facts and conventions for continuing the migration.
   `BOOST_OPTION_TAG_PREFIX`, `FEED_RETRY_TAG`).
 - Instrumented tests are compile-checked but **not run** here (`AGENTS.md`); keep
   them compiling and honest anyway.
+- The desktop screens are tested on the JVM with `runComposeUiTest` (no window):
+  `./gradlew :desktopApp:test`. `:desktopApp` carries `compose.uiTest` (behind
+  `ExperimentalComposeLibrary`) and a `--enable-native-access=ALL-UNNAMED` test
+  JVM, and the screens the tests drive are `internal` rather than `private`.
+  Click a `Switch` through `isToggleable()` and a `RadioButton` through
+  `isSelectable()`; a toggle's row text is not clickable.
 
 ### Process (every slice)
 
@@ -1658,19 +1701,20 @@ Durable facts and conventions for continuing the migration.
 
 ## Next
 
-Hand-off for the next session (state at 2026-10-01, tip `2371d0cf`):
+Hand-off for the next session (state at 2026-10-02, tip `5bbed404`):
 
 Phases 1 and 2 are complete. Phase 3 is nearly complete: the Android map and its
 place sheet are shared, and the desktop app runs its map, feed, settings, account
-and report screens from the same code. Pick up from the four items under "Next,
-in rough order of value" at the top of this file; the first is the desktop's
-add-place screen.
+and report screens from the same code. The desktop now has a Compose UI test
+source set (`:desktopApp:test`) and `xdotool` can drive its window. Pick up from
+the four items under "Next, in rough order of value" at the top of this file; the
+first is the desktop's add-place screen.
 
 Useful commands, all of them exercised this week:
 
 ```bash
 ./gradlew :shared:jvmTest :ui:jvmTest :app:testDebugUnitTest \
-  :app:compileDebugKotlin :app:compileDebugAndroidTestKotlin :desktopApp:compileKotlin
+  :app:compileDebugKotlin :app:compileDebugAndroidTestKotlin :desktopApp:test
 ./devtools app run                     # build, install, launch on emulator-5554
 ./gradlew :desktopApp:run              # the desktop window (poll for "Rendered the first map frame")
 ./gradlew :desktopApp:screenshot -Pscreenshot=settings:/tmp/x.png:dark   # settings, cache, account, report

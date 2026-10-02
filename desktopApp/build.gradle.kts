@@ -1,3 +1,4 @@
+import org.jetbrains.compose.ExperimentalComposeLibrary
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 
 plugins {
@@ -38,6 +39,7 @@ java {
     }
 }
 
+@OptIn(ExperimentalComposeLibrary::class)
 dependencies {
     implementation(project(":shared"))
     implementation(project(":ui"))
@@ -51,6 +53,16 @@ dependencies {
     runtimeOnly(libs.maplibre.compose.runtime.opengl.linux.x64)
     // The SQLite driver the shared database runs on off Android.
     implementation(libs.androidx.sqlite.bundled.jvm)
+    // Compose desktop UI tests: `runComposeUiTest` drives the screens without a
+    // window, so the desktop wiring can be clicked through on the JVM.
+    testImplementation(compose.uiTest)
+    testImplementation(kotlin("test"))
+    testImplementation(libs.junit)
+}
+
+tasks.test {
+    // Skiko, which the Compose test scene renders through, uses the FFM API.
+    jvmArgs("--enable-native-access=ALL-UNNAMED")
 }
 
 // Renders one screen to a PNG without a window, so the desktop UI can be checked
