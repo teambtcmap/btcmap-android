@@ -5,7 +5,16 @@
 - **Build System**: Gradle with Kotlin DSL
 - **Min SDK**: 29 (Android 10)
 - **Target SDK**: 37
-- **Architecture**: Android Views with ViewBinding, SQLite database, Coroutines for async
+- **Architecture**: Compose Multiplatform UI over a shared Kotlin Multiplatform core; on Android the Compose screens are hosted by Views fragments. SQLite database, Coroutines for async. No iOS target.
+
+There are four Gradle modules:
+
+- **`:app`** — the Android application: the remaining Views chrome (fragments), platform glue, and the `AbstractComposeView` hosts for the shared screens. It has no Compose compiler.
+- **`:shared`** — Kotlin Multiplatform (Android + JVM): the whole portable core (`api`, `db`, `i18n`, `sync`, `openinghours`, `stats`, `settings`, the pure `map` data helpers, `offline`, `payment`, `imagestats`, `auth`/`http`). No Android dependency.
+- **`:ui`** — Kotlin Multiplatform (Android + JVM): the Compose Multiplatform UI (`AppTheme`, `MaterialSymbol`, the screens, and the map: `MapScreen`, its layers, markers, chips, search and place sheet).
+- **`:desktopApp`** — the JVM Compose Desktop app, sharing `:shared` and `:ui`.
+
+The only Android-carrying logic left in `:app` outside the UI is `area/AreaFormatting` (`R.string`) and `UserAgent` (`BuildConfig.VERSION_CODE`).
 
 ## Build Commands
 
@@ -30,6 +39,13 @@ than the whole suite, and always run a test you newly added to confirm it passes
 
 # Run all unit tests
 ./gradlew testDebugUnitTest
+```
+
+`:shared` and `:ui` also have JVM tests, and `:desktopApp` has Compose UI tests
+that run without a window:
+
+```bash
+./gradlew :shared:jvmTest :ui:jvmTest :desktopApp:test
 ```
 
 Instrumented tests are **opt-in**: do not run `connectedDebugAndroidTest` on
@@ -86,6 +102,83 @@ The `./devtools` wrapper manages the emulator and app deployment. Default device
 
 When asked to "launch", "run", or "start" the app, use `./devtools app run` (it builds, installs and launches in one step). Assume the emulator is already running; if it is not, start it yourself with `./devtools emulator start` and wait for boot to complete (check `adb devices` or `adb -s emulator-5554 shell getprop sys.boot_completed`). Use `./devtools app install` when only an install is needed (e.g. before running instrumented tests). `./devtools app deploy-beta` and `./devtools app deploy-release` build and push APK artifacts to the remote `btcmap-api` host — use only when explicitly asked to publish a build. `deploy-beta` also purges `beta.apk`, `beta-universal.apk` and `latest-app-beta-ver.json` from the BunnyCDN `static.btcmap.org` pull zone, since those files are overwritten in place; it therefore requires a BunnyCDN API key in `BUNNY_API_KEY` or `bunny.api.key` in `local.properties`, and refuses to deploy when neither is set rather than silently leaving stale objects on the CDN. `./devtools website deploy` builds the Hugo documentation site and rsyncs it to `android.btcmap.org` — use only when explicitly asked to publish the site. That site is the Hugo project in `website/`, with its pages in `website/content/` and screenshots in `website/static/images/`.
 
+### Verifying on the emulator
+
+- Reach a signed-in screen by seeding the session into the app DB
+  (`adb shell run-as org.btcmap.debug sqlite3 databases/btcmap.db`, keys
+  `auth_token` and `user` in the `pref` table), then relaunch.
+- Read the screen with `adb shell uiautomator dump /sdcard/ui.xml` + `adb pull`;
+  Compose content is visible to it.
+- Capture with `adb shell screencap -p /sdcard/x.png` + `adb pull` (piping
+  `exec-out screencap -p` mangles the PNG with CRLF). The map's marker colour is
+  the app's own palette (teal in the debug app), not a fixed colour.
+
+## Compose Multiplatform
+
+The UI is Compose Multiplatform, shared by Android and desktop.
+
+- A screen is a `@Composable` in `:ui`'s `commonMain`, hosted on Android by an
+  `AbstractComposeView` subclass in `:ui`'s `androidMain`: the subclass exposes
+  plain `var` properties (backed by `mutableStateOf`) and callbacks, and the
+  fragment sets them. `:app` therefore needs no Compose compiler and stays on
+  Views. `Content()` wraps the screen in `AppTheme`.
+- Screens never touch Android resources: the host resolves strings (often via a
+  labels data class) and passes them in.
+- Compose content inside an Android `MaterialAlertDialog`: build a `:ui`
+  `AbstractComposeView`, set the view-tree lifecycle, saved-state and view-model
+  owners on it (a dialog window does not inherit them), then `setView(view)`.
+- `AppTheme` (in `:ui`) provides the color scheme (dynamic on Android, system
+  light/dark on the JVM), the Material Symbols typeface via `LocalIconFont`, and
+  `LocalContentColor` set to `onBackground` (a bare `Text` is otherwise black and
+  invisible on a dark background).
+- The icon font is the app asset (`app/src/main/assets/material-symbols-*.ttf`);
+  the Android-KMP library plugin does not package `androidMain/assets`, so hosts
+  pass a `Typeface?` and draw glyphs with the shared `MaterialSymbol` composable.
+- Recurring frictions: `internal` does not cross modules (widen to `public`);
+  Kotlin will not smart-cast a nullable property from another module (bind a
+  local first); the CMP `compose.*` dependency accessors warn but work.
+
+### MapLibre Compose
+
+- `org.maplibre.compose:maplibre-compose` **0.19.0**, Android + desktop. Pin the
+  exact version: minor releases contain breaking changes. `:ui` uses
+  `jvmToolchain(25)`; the Android target emits JVM 17 bytecode and the JVM target
+  25. The desktop app runs on Java 25 with `--enable-native-access=ALL-UNNAMED`.
+- The Compose map cannot load the app's `asset://` styles: hosts read the bundled
+  style JSON and pass `BaseStyle.Json`, with its sprite/glyph URLs rewritten to
+  an `app://` provider (`configureBundledMapResources` / `bundledStyleJson` on
+  Android).
+- Style images take a `ResolvedStyleImage`; use the `StyleImages.setBitmap`
+  helper (`ResolvedStyleImage.fromBitmap`).
+- Layer click handlers are a `ClickEvent` extension (`MarkerClickHandler`).
+- Offline packs come from `OfflineManager.state`
+  (`Loading`/`Ready(packs)`/`Failed`).
+- Hiding a marker kind works on 0.19.0 (declare only the included kinds); it did
+  not on 0.18.0.
+
+## Desktop App (`:desktopApp`)
+
+Shares `:shared` and `:ui`; it opens the shared database under `$BTCMAP_HOME` or
+`~/.btcmap`.
+
+```bash
+./gradlew :desktopApp:run        # open the window (poll the log for "Rendered the first map frame")
+./gradlew :desktopApp:test       # Compose UI tests, no window
+./gradlew :desktopApp:screenshot -Pscreenshot=settings:/tmp/x.png:dark
+```
+
+- `screenshot` renders one screen headlessly to a PNG; today's screens are
+  `settings`, `account`, `report`, `addplace` and `payment` (the map needs a real
+  window and GPU, so it is not one of them).
+- Stop a running window with
+  `pgrep -f "org.btcmap.desktop.MainK[t]" | xargs -r kill` (the brackets keep the
+  pattern from matching the shell).
+- A window screenshot captures the whole screen, so focus the window first; the
+  third spec field is optional (`dark`/`light`).
+- Input cannot be injected into the window here: it is an XWayland client and
+  GNOME leaves its pointer virtual, so verify a screen by booting into it with a
+  temporary route and screenshotting.
+
 ## Bundled Assets
 
 Places, areas, comments, events and map styles are
@@ -115,7 +208,7 @@ intentional:
 
 ## Code Style Guidelines
 
-- Source files in `app/src/main/kotlin/`, one class per file (filename matches class name); packages mirror directories
+- Source files live under each module's `src/<source set>/kotlin/`, one class per file (filename matches class name); packages mirror directories
 - Imports grouped: Kotlin stdlib → `android.*` → `androidx.*` → third-party → project; no wildcard imports
 - Extensions preferred over utility classes; live in files named after the extended type (e.g., `FragmentExt.kt`), using receiver type aliases where they help
 - Use `org.btcmap.db.Database` for all database access; tables live in `org.btcmap.db.table`
@@ -124,12 +217,12 @@ intentional:
 ## Dependencies
 - **Networking**: OkHttp with coroutines extension
 - **JSON**: Gson
-- **Database**: androidx.sqlite (with framework driver)
-- **Maps**: MapLibre (Open-source Mapbox alternative)
+- **Database**: androidx.sqlite (framework driver on Android, bundled on the JVM)
+- **Maps**: `org.maplibre.compose:maplibre-compose` (Compose Multiplatform, Android + desktop) and the MapLibre Android SDK for the Views add-place map and the offline-pack downloader
 - **Images**: Coil
-- **UI**: Material Design Components
+- **UI**: Compose Multiplatform / Material 3 (Android and desktop); Material Components for the remaining Android Views
 - **Async**: Kotlin Coroutines
-- **QR Codes**: QRGenerator
+- **QR Codes**: QRGenerator (Android), ZXing (desktop)
 - **Color Picker**: Colorpicker library
 
 ## Testing
@@ -140,8 +233,22 @@ intentional:
   explicitly asks for them. Never run the full instrumented suite to verify a
   change on your own
 - When instrumented tests are run and a MapLibre-based or timing-dependent test
-  fails (e.g. `MapPlaceSelectionTest`), treat it as an environment issue, not a
+  fails (e.g. `AreaOfflineMapTest`), treat it as an environment issue, not a
   code regression, and do not try to fix it unless explicitly asked
+- Compose UI tests that run on the JVM live in `:ui:jvmTest` and `:desktopApp:test`
+  (`runComposeUiTest`, no window). `:ui`'s jvmTest puts the app's icon-font
+  directory on a `btcmap.iconFontDir` system property, and both test JVMs need
+  `--enable-native-access=ALL-UNNAMED`.
+- Compose instrumented tests use `createEmptyComposeRule` and
+  `androidx.compose.ui.test` (`onNodeWithText`, `onNodeWithTag`, `performClick`,
+  `performTextInput`); Espresso cannot see Compose content. Assert on a host
+  view's exposed state (e.g. `state`, `sections`, `rows`) where a `RecyclerView`
+  adapter used to be read
+- Add `testTag` constants in the `:ui` screen for anything a test must drive
+  (e.g. `COMMENT_FIELD_TAG`, `BOOST_CONTINUE_TAG`). A desktop screen a test must
+  drive is `internal`, not `private`; click a `Switch` through `isToggleable()`
+  and a `RadioButton` through `isSelectable()` (a toggle's row text is not
+  clickable)
 
 ## Commits
 - Never create a commit unless the user explicitly asks for one. Implement the
