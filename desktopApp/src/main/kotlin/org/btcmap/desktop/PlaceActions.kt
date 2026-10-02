@@ -30,20 +30,25 @@ fun handlePlaceAction(place: Place, action: PlaceAction) {
     }
 }
 
-private fun openUrl(url: String) {
+internal fun openUrl(url: String) {
     println("desktop: opening $url")
     try {
         if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
             Desktop.getDesktop().browse(URI(url))
-        } else {
-            ProcessBuilder("xdg-open", url).start()
+            return
         }
+    } catch (t: Throwable) {
+        // No handler for the scheme (a `lightning:` URI with no wallet, say);
+        // fall through to xdg-open.
+    }
+    try {
+        ProcessBuilder("xdg-open", url).start()
     } catch (t: Throwable) {
         println("desktop: could not open $url: ${t.message}")
     }
 }
 
-private fun copyToClipboard(text: String) {
+internal fun copyToClipboard(text: String) {
     println("desktop: copying $text")
     try {
         Toolkit.getDefaultToolkit().systemClipboard.setContents(StringSelection(text), null)

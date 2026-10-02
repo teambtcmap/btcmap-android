@@ -53,6 +53,10 @@ dependencies {
     runtimeOnly(libs.maplibre.compose.runtime.opengl.linux.x64)
     // The SQLite driver the shared database runs on off Android.
     implementation(libs.androidx.sqlite.bundled.jvm)
+    // QR encoding for Lightning invoices; the shared InvoicePayment takes an
+    // ImageBitmap, which Android generates with QRGenerator and the desktop with
+    // ZXing.
+    implementation(libs.zxing.core)
     // Compose desktop UI tests: `runComposeUiTest` drives the screens without a
     // window, so the desktop wiring can be clicked through on the JVM.
     testImplementation(compose.uiTest)

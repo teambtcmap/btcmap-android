@@ -4,8 +4,8 @@ Status (2026-10-02): Phases 1 and 2 are complete (the portable core in `:shared`
 the non-map UI in Compose). Phase 3 is **most of the way there**: the Android map
 and its place sheet are the shared Compose ones, and a working **desktop app**
 runs from the same `:shared` + `:ui` code with its map, feed, settings, account,
-report, add-place and profile screens. What is left is listed under Next steps.
-See Progress for every slice and Working notes for the pitfalls.
+report, add-place, profile, boost and comment screens. What is left is listed
+under Next steps. See Progress for every slice and Working notes for the pitfalls.
 
 ## Current status and next steps
 
@@ -32,20 +32,19 @@ Done and pushed:
 
 Next, in rough order of value (state at 2026-10-02):
 
-1. **Desktop polish** — what the sign-in unlocked is done except the wallet: save
-   and report work (slices 48 and 49), **add-place** (51), the **profile** (52),
-   report **evidence photos** (53) and **sign-up** (54). Left: the two sheet
-   actions that are paid in sats (**boost** and **comment**), which need a wallet
-   flow rather than another form.
-2. **Unify the two add-photo flows** — slice 43 gave the map sheet its own copy of
+**Desktop polish is done** (slices 47-55): sign in, sign up, profile, save,
+report with evidence photos, add-place, boost and comment, all on the same
+`:shared` + `:ui` code. What remains is not desktop-specific:
+
+1. **Unify the two add-photo flows** — slice 43 gave the map sheet its own copy of
    the picker, camera and upload (the helpers are shared, the launchers are not).
    It collapses when the place screen itself becomes Compose.
-3. **Two tests the swap deleted are still to replace** — the search cases came
+2. **Two tests the swap deleted are still to replace** — the search cases came
    back in slice 44; left are `MarkerIconTest`'s glyph check (the shared
    `MarkerBitmapFactory.renderableGlyph` is private and needs the icon font on the
    jvmTest classpath) and a Compose-side test for the sheet refreshing when a sync
    rewrites the row it shows.
-4. **Small parity gaps** — tapping empty map no longer dismisses the place sheet
+3. **Small parity gaps** — tapping empty map no longer dismisses the place sheet
    (the map exposes no map-tap callback; `InteractionBindingsBuilder` has gesture
    bindings but no host click callback), and an area search result opens the area
    screen instead of framing its bbox (arguably the better behaviour; it needs a
@@ -1683,6 +1682,30 @@ needs real credentials and was not exercised.
 
 No version code bump: the Android app is unchanged.
 
+### Phase 3, fifty-fifth slice — done (the desktop pays in sats: boost and comment)
+
+The sheet's Boost and Comment actions work on the desktop. Both screens reuse the
+shared forms (`BoostForm`, `AddCommentForm`) and add the Lightning payment the
+app gates them behind: the quote is loaded from the shared API, ordering returns
+an invoice, the invoice is drawn as a QR (ZXing, black on white), and the shared
+`InvoicePayment` block offers Pay, Copy and Start over. Pay opens `lightning:`
+through `Desktop.browse` with an `xdg-open` fallback, Copy puts the BOLT11 on the
+AWT clipboard, and a poll of `awaitPaidInvoice` waits for payment before showing
+"posted"/"active". Starting over asks first, since a discarded invoice stays
+payable and could be charged twice. No session is needed: the Lightning payment
+is the gate.
+
+A new `Payment.kt` holds the QR encoder and the shared payment section; ZXing
+`core` is now a `:desktopApp` dependency (it was already on the Android graph via
+QRGenerator). The headless `screenshot` mode gained a `payment` case.
+
+Verified by a QR round-trip test (encode, decode, the text matches), two payment
+tests (the actions render; Start over confirms before discarding), and the live
+app booted into each screen: the comment screen quoted 500 sat, and the boost
+screen 5,000/10,000/30,000 sat for 1/3/12 months.
+
+No version code bump: the Android app is unchanged.
+
 ## Working notes
 
 Durable facts and conventions for continuing the migration.
@@ -1787,15 +1810,15 @@ Durable facts and conventions for continuing the migration.
 
 ## Next
 
-Hand-off for the next session (state at 2026-10-02, tip `2035a0a4`):
+Hand-off for the next session (state at 2026-10-02, tip `41ccb378`):
 
 Phases 1 and 2 are complete. Phase 3 is nearly complete: the Android map and its
 place sheet are shared, and the desktop app runs its map, feed, settings, account
-(sign-in/sign-up/profile), report (with evidence photos), add-place screens from
-the same code. The desktop has a Compose UI test source set (`:desktopApp:test`).
-The remaining desktop-polish item is the sats-paid **boost**/**comment** pair,
-which needs a wallet flow; the other items under "Next, in rough order of value"
-are the add-photo unification, the two missing tests and the map parity gaps.
+(sign-in/sign-up/profile), report (with evidence photos), add-place, boost and
+comment screens from the same code, so the desktop-polish work is done. The
+desktop has a Compose UI test source set (`:desktopApp:test`). The remaining items
+under "Next, in rough order of value" are the add-photo unification, the two
+missing tests and the map parity gaps.
 
 Useful commands, all of them exercised this week:
 

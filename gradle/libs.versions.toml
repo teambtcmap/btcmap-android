@@ -60,6 +60,10 @@ maplibre-compose = "0.18.0"
 # Used for displaying LN invoices
 # https://github.com/androidmads/QRGenerator/releases
 qrgenerator = "1.0.5"
+# QR encoding for the desktop's Lightning invoices (already on the graph as a
+# transitive dependency of QRGenerator on Android)
+# https://github.com/zxing/zxing/releases
+zxing = "3.5.0"
 # Helps customize colors, when necessary
 # https://github.com/mrudultora/Colorpicker/releases
 colorpicker = "1.2.0"
@@ -112,6 +116,7 @@ maplibre-compose = { module = "org.maplibre.compose:maplibre-compose", version.r
 maplibre-compose-runtime-opengl-android = { module = "org.maplibre.compose:maplibre-compose-runtime-opengl-android", version.ref = "maplibre-compose" }
 maplibre-compose-runtime-opengl-linux-x64 = { module = "org.maplibre.compose:maplibre-compose-runtime-opengl-linux-x64", version.ref = "maplibre-compose" }
 qrgenerator = { module = "com.github.androidmads:QRGenerator", version.ref = "qrgenerator" }
+zxing-core = { module = "com.google.zxing:core", version.ref = "zxing" }
 colorpicker = { module = "com.github.mrudultora:Colorpicker", version.ref = "colorpicker" }
 coil = { group = "io.coil-kt.coil3", name = "coil", version.ref = "coil" }
 coil-compose = { group = "io.coil-kt.coil3", name = "coil-compose", version.ref = "coil" }

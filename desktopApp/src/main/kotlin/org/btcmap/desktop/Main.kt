@@ -171,6 +171,8 @@ private fun runApp() = application {
                     var feedPlaceId by remember { mutableStateOf<Long?>(null) }
                     // Where the add-place screen was opened from the map.
                     var addPlace by remember { mutableStateOf<Pair<Double, Double>?>(null) }
+                    // The place a boost or comment payment screen is for.
+                    var paymentPlace by remember { mutableStateOf<Pair<Long, String>?>(null) }
 
                     // The bundled style, shared by the map and the add-place map.
                     // Its sprite and glyph URLs are served from the app's
@@ -247,6 +249,19 @@ private fun runApp() = application {
                                         }
                                     }
 
+                                    // The sats-paid actions open their own
+                                    // payment screens; no session is needed, the
+                                    // Lightning payment is the gate.
+                                    PlaceAction.Boost -> {
+                                        paymentPlace = place.id to place.name.orEmpty()
+                                        route = Route.Boost
+                                    }
+
+                                    PlaceAction.AddComment -> {
+                                        paymentPlace = place.id to place.name.orEmpty()
+                                        route = Route.AddComment
+                                    }
+
                                     else -> handlePlaceAction(place, action)
                                 }
                             },
@@ -280,6 +295,20 @@ private fun runApp() = application {
                                     description = draft.description.takeIf { it.isNotEmpty() },
                                 )
                             },
+                            onBack = { route = Route.Map },
+                        )
+
+                        Route.AddComment -> DesktopAddCommentScreen(
+                            api = api,
+                            placeId = paymentPlace?.first ?: 0L,
+                            placeName = paymentPlace?.second.orEmpty(),
+                            onBack = { route = Route.Map },
+                        )
+
+                        Route.Boost -> DesktopBoostScreen(
+                            api = api,
+                            placeId = paymentPlace?.first ?: 0L,
+                            placeName = paymentPlace?.second.orEmpty(),
                             onBack = { route = Route.Map },
                         )
 
@@ -348,7 +377,7 @@ internal fun ScreenPage(
 }
 
 /** The desktop app's full-window pages. */
-private enum class Route { Map, Feed, Settings, Account, Report, AddPlace }
+private enum class Route { Map, Feed, Settings, Account, Report, AddPlace, AddComment, Boost }
 
 private const val SCREENSHOT_ARG = "--screenshot="
 
@@ -411,6 +440,11 @@ private fun renderScreen(spec: String) {
                         db = db,
                         settings = settings,
                         onBack = {},
+                    )
+
+                    "payment" -> InvoicePaymentSection(
+                        invoice = Invoice(id = "demo", bolt11 = "lnbc1u1p3exampleinvoice"),
+                        onStartOver = {},
                     )
 
                     "addplace" -> AddPlaceForm(
