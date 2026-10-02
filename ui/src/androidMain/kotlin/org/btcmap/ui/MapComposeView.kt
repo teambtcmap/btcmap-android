@@ -122,6 +122,10 @@ class MapComposeView @JvmOverloads constructor(
 
     var showAttribution: Boolean by mutableStateOf(true)
 
+    var attributionText: String by mutableStateOf("© OpenStreetMap contributors")
+
+    var attributionTextColor: Color by mutableStateOf(Color.Black.copy(alpha = 0.8f))
+
     var openTarget: Pair<Double, Double>? by mutableStateOf(null)
 
     @Composable
@@ -163,6 +167,8 @@ class MapComposeView @JvmOverloads constructor(
             onFeaturesDrawn = onFeaturesDrawn,
             placeSheet = placeSheet,
             showAttribution = showAttribution,
+            attributionText = attributionText,
+            attributionTextColor = attributionTextColor,
             openTarget = openTarget,
             photos = photos,
             bookmarked = bookmarked,

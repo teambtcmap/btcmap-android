@@ -11,6 +11,7 @@ import android.widget.Toast
 import androidx.browser.customtabs.CustomTabsClient
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.compose.ui.graphics.Color
+import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -237,6 +238,10 @@ class MapFragment : Fragment() {
                 addPhoto = getString(R.string.add_photo),
             )
             showAttribution = prefs.showAttribution
+            attributionText = getString(R.string.osm_attribution)
+            attributionTextColor = Color(
+                ContextCompat.getColor(requireContext(), R.color.osm_attribution_text),
+            )
             onPlaceSelected = ::onPlaceSelected
             onPlaceAction = ::onPlaceAction
             onEventSelected = { openEvent(it.toBundle()) }

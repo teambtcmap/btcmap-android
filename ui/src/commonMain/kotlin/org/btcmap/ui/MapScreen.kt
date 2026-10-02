@@ -20,10 +20,12 @@ import androidx.compose.runtime.withFrameNanos
 import kotlinx.coroutines.flow.filterIsInstance
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -67,6 +69,7 @@ import org.btcmap.ui.map.rememberReloadedPlace
 import org.btcmap.ui.map.rememberViewportFeatures
 import org.btcmap.ui.map.setBitmap
 import androidx.compose.material3.FilledTonalIconButton
+import androidx.compose.material3.Text
 import org.maplibre.compose.camera.CameraPosition
 import org.maplibre.compose.camera.CameraUpdate
 import org.maplibre.compose.interaction.ClickResult
@@ -80,7 +83,6 @@ import org.maplibre.compose.map.MapEvent
 import org.maplibre.compose.map.MaplibreMap
 import org.maplibre.compose.map.StyleLoadState
 import org.maplibre.compose.map.rememberMapState
-import org.maplibre.compose.overlay.ExpandingAttributionButton
 import org.maplibre.compose.style.BaseStyle
 import org.maplibre.spatialk.geojson.BoundingBox
 import org.maplibre.spatialk.geojson.Position
@@ -120,9 +122,16 @@ fun MapScreen(
     reloadKey: Int = 0,
     /**
      * Whether the map draws its attribution. The app has a setting for this, so
-     * the pill is the map's own overlay rather than a fixed part of it.
+     * it is the map's own overlay rather than a fixed part of it.
      */
     showAttribution: Boolean = true,
+    /**
+     * The attribution line, shown centred at the bottom of the map. The host
+     * supplies it because the string is localized there.
+     */
+    attributionText: String = "© OpenStreetMap contributors",
+    /** The colour of [attributionText], which the host resolves from its theme. */
+    attributionTextColor: Color = Color.Black.copy(alpha = 0.8f),
     /** Reports where the camera came to rest, so the host can remember it. */
     onCameraIdle: ((Double, Double, Double) -> Unit)? = null,
     /**
@@ -501,8 +510,20 @@ fun MapScreen(
                 modifier = Modifier.fillMaxSize(),
                 state = state,
                 interactions = mapInteractions,
-            ) {
-                if (showAttribution) ExpandingAttributionButton()
+                // The map would otherwise include MapOverlay.Default, its
+                // MapLibre logo and expanding attribution pill. The app draws
+                // its own attribution line below, as the Views map did.
+                overlay = {},
+            )
+            if (showAttribution) {
+                Text(
+                    text = attributionText,
+                    color = attributionTextColor,
+                    fontSize = 11.sp,
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .padding(bottom = 32.dp),
+                )
             }
             Column(
                 horizontalAlignment = Alignment.End,

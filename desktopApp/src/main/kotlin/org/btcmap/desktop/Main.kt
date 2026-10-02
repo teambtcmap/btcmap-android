@@ -210,6 +210,12 @@ private fun runApp() = application {
                             usingOpenFreeMap = true,
                             iconFont = iconFont,
                             placeSheetStrings = PLACE_SHEET_STRINGS,
+                            attributionText = "© OpenStreetMap contributors",
+                            attributionTextColor = if (darkTheme) {
+                                Color.White
+                            } else {
+                                Color.Black.copy(alpha = 0.8f)
+                            },
                             searchActions = SearchActions(onSettings = { route = Route.Settings }),
                             onAddPlace = { lat, lon ->
                                 addPlace = lat to lon
