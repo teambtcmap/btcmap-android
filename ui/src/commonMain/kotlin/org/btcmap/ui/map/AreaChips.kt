@@ -2,6 +2,7 @@ package org.btcmap.ui.map
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
@@ -33,14 +34,16 @@ fun AreaChips(
     onAreaClick: (MapArea) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Column(modifier = modifier) {
+    Column(
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(MAP_CONTROLS_GAP),
+    ) {
         areas.forEach { area ->
             AreaChip(
                 area = area,
                 apiUrl = apiUrl,
                 palette = palette,
                 onClick = onAreaClick,
-                modifier = Modifier.padding(bottom = 8.dp),
             )
         }
     }
@@ -96,6 +99,12 @@ private fun AreaChip(
 
 /** The chip's side, which the map's round action buttons below it also use. */
 internal val AREA_CHIP_SIZE = 56.dp
+
+/**
+ * The vertical gap between the map's stacked controls: between chips, and
+ * between the chips and the round action buttons below them.
+ */
+internal val MAP_CONTROLS_GAP = 16.dp
 
 /**
  * The letters shown on a chip until its image loads, or in its place when the

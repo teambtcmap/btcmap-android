@@ -41,7 +41,9 @@ fun MarkerFilterButtons(
 ) {
     Column(
         modifier = modifier,
-        verticalArrangement = Arrangement.spacedBy(8.dp),
+        // The icon button's 48dp touch target pads its 40dp circle by 4dp on
+        // each side, so 8dp here reads as MAP_CONTROLS_GAP on screen.
+        verticalArrangement = Arrangement.spacedBy(MAP_CONTROLS_GAP - 8.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         MarkerFilterButton(
@@ -109,5 +111,8 @@ private fun MarkerFilterButton(
 
 /** Material's icon button visual container, which its touch target pads to 48. */
 private val FILTER_BUTTON_SIZE = 40.dp
+
+/** Half the padding the 48dp touch target adds around the [FILTER_BUTTON_SIZE] circle. */
+internal val FILTER_BUTTON_INSET = 4.dp
 
 private val FILTER_BORDER_WIDTH = 2.dp

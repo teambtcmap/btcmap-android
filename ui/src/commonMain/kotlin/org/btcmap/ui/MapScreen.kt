@@ -56,6 +56,8 @@ import org.btcmap.ui.map.AreaChipPalette
 import org.btcmap.ui.map.AreaChips
 import org.btcmap.ui.map.EventLayers
 import org.btcmap.ui.map.ExchangeLayers
+import org.btcmap.ui.map.FILTER_BUTTON_INSET
+import org.btcmap.ui.map.MAP_CONTROLS_GAP
 import org.btcmap.ui.map.MARKER_PIN_IMAGE_ID
 import org.btcmap.ui.map.MarkerBitmapFactory
 import org.btcmap.ui.map.MarkerClickHandler
@@ -556,7 +558,7 @@ fun MapScreen(
             )
             Column(
                 horizontalAlignment = Alignment.End,
-                verticalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(MAP_CONTROLS_GAP),
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
                     .padding(end = 24.dp, bottom = MAP_CONTROLS_BOTTOM),
@@ -628,7 +630,10 @@ fun MapScreen(
                 palette = areaChipPalette,
                 modifier = Modifier
                     .align(Alignment.BottomStart)
-                    .padding(start = 24.dp, bottom = MAP_CONTROLS_BOTTOM),
+                    // The filter buttons' touch targets extend 4dp below their
+                    // circles, so lift the group by that much to line their
+                    // visual bottoms up with the round buttons on the right.
+                    .padding(start = 24.dp, bottom = MAP_CONTROLS_BOTTOM - FILTER_BUTTON_INSET),
             )
             SearchOverlay(
                 query = searchQuery,
