@@ -61,6 +61,7 @@ import org.btcmap.ui.map.rememberSearchResults
 import org.btcmap.ui.map.rememberMapAreas
 import org.btcmap.ui.map.rememberReloadedPlace
 import org.btcmap.ui.map.rememberViewportFeatures
+import org.btcmap.ui.map.setBitmap
 import androidx.compose.material3.FilledTonalIconButton
 import org.maplibre.compose.camera.CameraPosition
 import org.maplibre.compose.camera.CameraUpdate
@@ -426,15 +427,15 @@ fun MapScreen(
         withFrameNanos { }
 
         val images = state.style.images
-        images.set(MARKER_PIN_IMAGE_ID, factory.pin(palette.markerBackground))
+        images.setBitmap(MARKER_PIN_IMAGE_ID, factory.pin(palette.markerBackground))
         if (hasEvents) {
-            images.set(EVENT_MARKER_ICON_NAME, factory.icon(EVENT_ICON, palette.markerIcon))
+            images.setBitmap(EVENT_MARKER_ICON_NAME, factory.icon(EVENT_ICON, palette.markerIcon))
         }
         markersByName.forEach { (name, marker) ->
-            images.set(name, factory.merchantMarker(marker))
+            images.setBitmap(name, factory.merchantMarker(marker))
         }
         exchangeIcons.forEach { icon ->
-            images.set(exchangeMarkerIconImageName(icon), factory.icon(icon, palette.markerIcon))
+            images.setBitmap(exchangeMarkerIconImageName(icon), factory.icon(icon, palette.markerIcon))
         }
 
         imagesReady = true

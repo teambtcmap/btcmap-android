@@ -19,6 +19,7 @@ import org.btcmap.offline.toBytes
 import org.maplibre.compose.map.DefaultMapRuntime
 import org.maplibre.compose.offline.DownloadProgress
 import org.maplibre.compose.offline.DownloadStatus
+import org.maplibre.compose.offline.OfflineManagerState
 import org.maplibre.compose.offline.OfflinePack
 import org.maplibre.compose.offline.OfflinePackDefinition
 import org.maplibre.spatialk.geojson.BoundingBox
@@ -38,9 +39,9 @@ class OfflinePacks(private val pixelRatio: Float) {
     private val observations = mutableMapOf<Long, Pair<Job, OfflinePack>>()
 
     /**
-     * Areas whose download has been asked for but whose pack may not be in
-     * [org.maplibre.compose.offline.OfflineManager.packs] yet, so a packs
-     * emission does not drop the state the UI is already showing.
+     * Areas whose download has been asked for but whose pack may not be in the
+     * manager's ready state yet, so a packs emission does not drop the state the
+     * UI is already showing.
      */
     private val pending = mutableSetOf<Long>()
 
@@ -49,7 +50,9 @@ class OfflinePacks(private val pixelRatio: Float) {
 
     init {
         scope.launch {
-            manager.packs.collect(::syncPacks)
+            // 0.19 publishes Loading/Ready/Failed; only the ready packs hold the
+            // regions, and a not-ready manager has none to show yet.
+            manager.state.collect { syncPacks(it.packsOrEmpty()) }
         }
     }
 
@@ -111,7 +114,7 @@ class OfflinePacks(private val pixelRatio: Float) {
     }
 
     private fun existingPack(areaId: Long): OfflinePack? =
-        manager.packs.value.firstOrNull { pack ->
+        manager.state.value.packsOrEmpty().firstOrNull { pack ->
             parseOfflineRegionMetadata(pack.metadata.value)?.areaId == areaId
         }
 
@@ -172,6 +175,10 @@ private fun DownloadProgress.toAreaState(metadata: OfflineRegionMetadata): Offli
 
         DownloadProgress.Unknown -> OfflineAreaState.Downloading(completedBytes = 0L, progress = null)
     }
+
+/** The packs the manager holds, or none while it is still loading or failed. */
+private fun OfflineManagerState.packsOrEmpty(): Set<OfflinePack> =
+    (this as? OfflineManagerState.Ready)?.packs ?: emptySet()
 
 private fun OfflineBounds.toBoundingBox(): BoundingBox = BoundingBox(
     west = west,

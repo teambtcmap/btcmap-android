@@ -1732,11 +1732,38 @@ Both tests the Android map swap deleted are back on the JVM.
 `:ui`'s jvmTest gained `compose.uiTest` (with Skiko native access on the test
 JVM) for the reload test. Bump the version code to 218.
 
+### Phase 3, fifty-eighth slice — done (MapLibre Compose 0.19.0)
+
+Upgraded `org.maplibre.compose:maplibre-compose` (and its Android/desktop OpenGL
+runtimes) from 0.18.0 to 0.19.0. The breaking changes that reached this code:
+
+- **Style images** take a `ResolvedStyleImage` instead of a bare `ImageBitmap`;
+  a `StyleImages.setBitmap` helper wraps `ResolvedStyleImage.fromBitmap`, and the
+  registration sites in the map, place and event previews use it.
+- **Layer click handlers** are a `ClickEvent` extension, so `MarkerClickHandler`
+  gained the receiver (unused here; it carries where the tap landed if a
+  nearest-feature pick is ever wanted).
+- **Offline packs** moved from `OfflineManager.packs` to `OfflineManager.state`
+  (`Loading`/`Ready(packs)`/`Failed`); `OfflinePacks` collects the state and reads
+  the packs from `Ready`.
+
+Everything else compiled unchanged (no image sources, no `DelicateMapApi`).
+
+Verified: `:shared:jvmTest`, `:ui:jvmTest`, `:app:testDebugUnitTest`,
+`:desktopApp:test`; the desktop window and the debug APK on the emulator both log
+`Rendered the first map frame with OPENGL` with no style or image errors and no
+crash.
+
+Bump the version code to 219.
+
 ## Working notes
 
 Durable facts and conventions for continuing the migration.
 
-### MapLibre Compose 0.18.0 layer quirks
+### MapLibre Compose layer quirks (recorded on 0.18.0)
+
+Not re-verified on 0.19.0 beyond the map rendering; the image-registration
+quirk in particular still governs how the marker layers are declared.
 
 - **The app's styles are `asset://map-styles/<style>/style.json`** (a MapLibre
   Android SDK scheme). The Compose map cannot load them: the load fails and only
@@ -1836,13 +1863,14 @@ Durable facts and conventions for continuing the migration.
 
 ## Next
 
-Hand-off for the next session (state at 2026-10-02, tip `0de81f2d`):
+Hand-off for the next session (state at 2026-10-02, tip `8351eb45`):
 
 Phases 1 and 2 are complete. Phase 3 is nearly complete: the Android map and its
 place sheet are shared, the desktop app runs its whole UI from the same code, the
-two add-photo flows are one, and the two tests the map swap deleted are back. The
-one remaining item under "Next, in rough order of value" is the pair of small map
-parity gaps; both want a decision before code.
+two add-photo flows are one, the two tests the map swap deleted are back, and the
+library is on MapLibre Compose 0.19.0. The one remaining item under "Next, in
+rough order of value" is the pair of small map parity gaps; both want a decision
+before code.
 
 Useful commands, all of them exercised this week:
 

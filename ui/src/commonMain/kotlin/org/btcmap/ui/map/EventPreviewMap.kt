@@ -81,8 +81,8 @@ fun EventPreviewMap(
         if (loadState !is StyleLoadState.Ready) return@LaunchedEffect
         imagesReady = false
         withFrameNanos { }
-        state.style.images.set(MARKER_PIN_IMAGE_ID, factory.pin(palette.markerBackground))
-        state.style.images.set(EVENT_MARKER_ICON_NAME, factory.icon(EVENT_ICON, palette.markerIcon))
+        state.style.images.setBitmap(MARKER_PIN_IMAGE_ID, factory.pin(palette.markerBackground))
+        state.style.images.setBitmap(EVENT_MARKER_ICON_NAME, factory.icon(EVENT_ICON, palette.markerIcon))
         imagesReady = true
     }
 

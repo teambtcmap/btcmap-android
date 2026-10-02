@@ -24,7 +24,17 @@ import org.btcmap.db.table.place.Marker
 import org.btcmap.map.MAX_COMMENT_BADGE
 import org.btcmap.map.isBoosted
 import org.btcmap.map.isOutdated
+import org.maplibre.compose.map.ResolvedStyleImage
+import org.maplibre.compose.map.StyleImages
 import kotlin.math.roundToInt
+
+/**
+ * Registers [image] under [name]. Since MapLibre Compose 0.19 the style images
+ * take a [ResolvedStyleImage] rather than a bare [ImageBitmap].
+ */
+internal fun StyleImages.setBitmap(name: String, image: ImageBitmap) {
+    set(name, ResolvedStyleImage.fromBitmap(image))
+}
 
 /**
  * Builds the marker bitmaps in common Compose graphics, ported from the Views

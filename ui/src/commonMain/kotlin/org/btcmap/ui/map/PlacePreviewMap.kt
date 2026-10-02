@@ -87,7 +87,7 @@ fun PlacePreviewMap(
         }
         imagesReady = false
         withFrameNanos { }
-        state.style.images.set(imageName, factory.merchantMarker(marker))
+        state.style.images.setBitmap(imageName, factory.merchantMarker(marker))
         imagesReady = true
     }
 
