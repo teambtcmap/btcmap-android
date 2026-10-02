@@ -32,10 +32,10 @@ Done and pushed:
 
 Next, in rough order of value (state at 2026-10-02):
 
-1. **Desktop polish** — what the sign-in unlocked is mostly done: save and report
-   work (slices 48 and 49), **add-place** (slice 51), the **profile** (slice 52)
-   and report **evidence photos** (slice 53). Left: **sign-up**, and the two sheet
-   actions that are paid in sats (**boost** and **comment**) and so need a wallet
+1. **Desktop polish** — what the sign-in unlocked is done except the wallet: save
+   and report work (slices 48 and 49), **add-place** (51), the **profile** (52),
+   report **evidence photos** (53) and **sign-up** (54). Left: the two sheet
+   actions that are paid in sats (**boost** and **comment**), which need a wallet
    flow rather than another form.
 2. **Unify the two add-photo flows** — slice 43 gave the map sheet its own copy of
    the picker, camera and upload (the helpers are shared, the launchers are not).
@@ -1665,6 +1665,24 @@ and the headless `report` screenshot, which shows the Add photo control.
 
 No version code bump: the Android app is unchanged.
 
+### Phase 3, fifty-fourth slice — done (the desktop signs up)
+
+The Account page can create an account as well as sign in. Sign-up adds the
+confirmation field and applies the shared `AuthValidation.signUp` rules (a
+non-blank username, an 8-character minimum and a matching confirmation); on
+submit it calls `createUser`, then signs in with the created name and stores the
+session like sign-in does. A failed creation is ambiguous (the account may exist
+if the response was lost), so when creation succeeded but the sign-in failed the
+form falls back to sign-in with a message rather than a retry that would fail as
+"already taken". A link toggles between the two forms.
+
+The account/auth screen moved out of `Main.kt` into `AccountScreen.kt`. Tests
+cover the sign-in form and the sign-up validation, and the headless
+`screenshot=account` render was checked in both modes; the sign-up call itself
+needs real credentials and was not exercised.
+
+No version code bump: the Android app is unchanged.
+
 ## Working notes
 
 Durable facts and conventions for continuing the migration.
@@ -1769,14 +1787,15 @@ Durable facts and conventions for continuing the migration.
 
 ## Next
 
-Hand-off for the next session (state at 2026-10-02, tip `8aaff601`):
+Hand-off for the next session (state at 2026-10-02, tip `2035a0a4`):
 
 Phases 1 and 2 are complete. Phase 3 is nearly complete: the Android map and its
-place sheet are shared, and the desktop app runs its map, feed, settings, account,
-report (with evidence photos), add-place and profile screens from the same code.
-The desktop has a Compose UI test source set (`:desktopApp:test`). Pick up from
-the four items under "Next, in rough order of value" at the top of this file; the
-first is sign-up on the desktop.
+place sheet are shared, and the desktop app runs its map, feed, settings, account
+(sign-in/sign-up/profile), report (with evidence photos), add-place screens from
+the same code. The desktop has a Compose UI test source set (`:desktopApp:test`).
+The remaining desktop-polish item is the sats-paid **boost**/**comment** pair,
+which needs a wallet flow; the other items under "Next, in rough order of value"
+are the add-photo unification, the two missing tests and the map parity gaps.
 
 Useful commands, all of them exercised this week:
 

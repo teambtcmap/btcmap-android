@@ -46,9 +46,7 @@ import kotlinx.coroutines.withTimeoutOrNull
 import org.btcmap.ui.SettingsItem
 import org.btcmap.ui.SettingsScreen
 import androidx.compose.material3.Button
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -538,97 +536,6 @@ private fun relativeDate(date: String): String = runCatching {
         else -> "$days days ago"
     }
 }.getOrDefault(date)
-
-/**
- * The desktop's account page. It signs in with the same credentials the app
- * uses and stores the same session the rest of the app reads, so everything
- * that needs a signed-in user works once this succeeds. When signed in it shows
- * the shared profile (saved places and areas, change username and password, and
- * log out). Accounts are still created elsewhere (the app or btcmap.org).
- */
-@androidx.compose.runtime.Composable
-internal fun DesktopAccountScreen(
-    api: Api,
-    db: Database,
-    settings: Settings,
-    onBack: () -> Unit,
-) {
-    var authorized by remember { mutableStateOf(settings.authorized) }
-    var username by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
-    var busy by remember { mutableStateOf(false) }
-    var error by remember { mutableStateOf<String?>(null) }
-    val scope = rememberCoroutineScope()
-
-    ScreenPage(title = "Account", onBack = onBack) {
-        if (authorized) {
-            DesktopProfile(
-                api = api,
-                db = db,
-                settings = settings,
-                onLoggedOut = { authorized = false },
-            )
-        } else {
-            Column(
-                verticalArrangement = Arrangement.spacedBy(12.dp),
-                modifier = Modifier.padding(16.dp),
-            ) {
-                OutlinedTextField(
-                    value = username,
-                    onValueChange = { username = it },
-                    label = { Text(text = "Username") },
-                    singleLine = true,
-                )
-                OutlinedTextField(
-                    value = password,
-                    onValueChange = { password = it },
-                    label = { Text(text = "Password") },
-                    singleLine = true,
-                    visualTransformation = PasswordVisualTransformation(),
-                )
-                error?.let { Text(text = it, color = MaterialTheme.colorScheme.error) }
-                Button(
-                    enabled = !busy && username.isNotBlank() && password.isNotBlank(),
-                    onClick = {
-                        busy = true
-                        error = null
-                        scope.launch {
-                            try {
-                                val response = api.signIn(
-                                    username = username.trim(),
-                                    password = password,
-                                    label = DESKTOP_TOKEN_LABEL,
-                                )
-                                withContext(Dispatchers.IO) {
-                                    settings.replaceSession(
-                                        db = db,
-                                        token = response.token,
-                                        user = response.user.toDbUser(),
-                                    )
-                                }
-                                password = ""
-                                authorized = true
-                            } catch (t: Throwable) {
-                                error = t.message ?: t.toString()
-                            } finally {
-                                busy = false
-                            }
-                        }
-                    },
-                ) {
-                    Text(text = "Sign in")
-                }
-                Text(
-                    text = "Accounts are created in the mobile app or on btcmap.org.",
-                    style = MaterialTheme.typography.bodySmall,
-                )
-            }
-        }
-    }
-}
-
-/** The label this machine's session shows up under in the account's devices. */
-private const val DESKTOP_TOKEN_LABEL = "BTC Map desktop"
 
 private const val FEED_LAT = 52.2333742
 private const val FEED_LON = 21.0711489
