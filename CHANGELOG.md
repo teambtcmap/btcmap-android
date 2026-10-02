@@ -16,6 +16,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Drop the redundant mini map from the place sheet opened from the map
 - Stop a dismissed place from reopening when returning to the map
 - Make the map honour the "Allow map rotation" setting
+- Show the soft keyboard in the login, sign-up and change-password dialogs
 
 ## [1.2.0] - 2026-09-30
 

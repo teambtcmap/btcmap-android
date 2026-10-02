@@ -3,6 +3,7 @@ package org.btcmap.auth
 import android.app.Dialog
 import android.content.DialogInterface
 import android.os.Bundle
+import android.view.WindowManager
 import androidx.annotation.StringRes
 import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.setViewTreeLifecycleOwner
@@ -83,6 +84,19 @@ internal abstract class AuthFormDialogFragment : DialogFragment() {
         }
 
         return dialog
+    }
+
+    override fun onStart() {
+        super.onStart()
+        // An AlertDialog whose custom view holds no EditText keeps
+        // FLAG_ALT_FOCUSABLE_IM, which stops the IME attaching to its window.
+        // Compose fields are not EditTexts, so clear it or the soft keyboard
+        // never appears; let the dialog resize so the focused field stays
+        // visible above the keyboard.
+        dialog?.window?.apply {
+            clearFlags(WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM)
+            setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE)
+        }
     }
 
     private fun render(errors: List<AuthError>) {
