@@ -12,6 +12,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Restore the map's OpenStreetMap attribution line at the bottom of the screen
 - Show the sync indicator above the map's marker filter buttons
 - Restore the map controls' pre-rewrite sizes, colours and positions
+- Open the place details sheet half-expanded on the map, so the map stays visible behind it
+- Drop the redundant mini map from the place sheet opened from the map
 
 ## [1.2.0] - 2026-09-30
 

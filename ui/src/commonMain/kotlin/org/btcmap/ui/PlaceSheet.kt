@@ -68,7 +68,9 @@ fun PlaceSheet(
     onDismiss: () -> Unit,
     previewMap: (@Composable () -> Unit)? = null,
 ) {
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    // Open at the half-expanded height the Views sheet used, so the map stays
+    // visible behind it; the user can drag it up to full screen.
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
     ModalBottomSheet(onDismissRequest = onDismiss, sheetState = sheetState) {
         PlaceSheetContent(
             place = place,

@@ -4,8 +4,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -41,7 +39,6 @@ import org.btcmap.comment.toAdapterItem
 import org.btcmap.db.Database
 import org.btcmap.db.table.event.Event
 import org.btcmap.db.table.place.Place
-import org.btcmap.db.table.place.toMarker
 import org.btcmap.map.EMPTY_GEOJSON
 import org.btcmap.map.EVENT_ICON
 import org.btcmap.map.EVENT_MARKER_ICON_NAME
@@ -65,7 +62,6 @@ import org.btcmap.ui.map.MarkerFilterButtons
 import org.btcmap.ui.map.MarkerKind
 import org.btcmap.ui.map.MarkerPalette
 import org.btcmap.ui.map.MerchantLayers
-import org.btcmap.ui.map.PlacePreviewMap
 import org.btcmap.ui.map.SearchActions
 import org.btcmap.ui.map.SearchOverlay
 import org.btcmap.ui.map.rememberSearchResults
@@ -601,21 +597,6 @@ fun MapScreen(
                     strings = placeSheetStrings,
                     onAction = { onPlaceAction(place, it) },
                     onDismiss = { selectedPlace = null },
-                    previewMap = {
-                        PlacePreviewMap(
-                            lat = place.lat,
-                            lon = place.lon,
-                            marker = place.toMarker(),
-                            styleUrl = styleUrl,
-                            styleJson = styleJson,
-                            palette = palette,
-                            usingOpenFreeMap = usingOpenFreeMap,
-                            iconFont = iconFont,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(160.dp),
-                        )
-                    },
                 )
             }
             MarkerFilterButtons(
