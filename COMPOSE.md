@@ -4,8 +4,8 @@ Status (2026-10-02): Phases 1 and 2 are complete (the portable core in `:shared`
 the non-map UI in Compose). Phase 3 is **most of the way there**: the Android map
 and its place sheet are the shared Compose ones, and a working **desktop app**
 runs from the same `:shared` + `:ui` code with its map, feed, settings, account,
-report and add-place screens. What is left is listed under Next steps. See
-Progress for every slice and Working notes for the pitfalls.
+report, add-place and profile screens. What is left is listed under Next steps.
+See Progress for every slice and Working notes for the pitfalls.
 
 ## Current status and next steps
 
@@ -32,11 +32,11 @@ Done and pushed:
 
 Next, in rough order of value (state at 2026-10-02):
 
-1. **Desktop polish** — what the sign-in unlocked is partly done: save and report
-   work (slices 48 and 49) and **add-place** (slice 51). Left: the **user-profile**
-   screen, report **evidence photos**, **sign-up and sign-out**, and the two sheet
-   actions that are paid in sats (**boost** and **comment**) and so need a wallet
-   flow rather than another form.
+1. **Desktop polish** — what the sign-in unlocked is mostly done: save and report
+   work (slices 48 and 49), **add-place** (slice 51) and the **profile** with
+   change-username/password and log-out (slice 52). Left: report **evidence
+   photos**, **sign-up**, and the two sheet actions that are paid in sats
+   (**boost** and **comment**) and so need a wallet flow rather than another form.
 2. **Unify the two add-photo flows** — slice 43 gave the map sheet its own copy of
    the picker, camera and upload (the helpers are shared, the launchers are not).
    It collapses when the place screen itself becomes Compose.
@@ -1626,6 +1626,27 @@ gained an `addplace` case.
 
 No version code bump: the Android app is unchanged.
 
+### Phase 3, fifty-second slice — done (the desktop profile)
+
+The Account page shows the profile when signed in, reusing the shared
+`UserProfileScreen`: the username and masked password with their edit actions,
+the saved places and areas with delete, and a log-out that clears the session and
+best-effort revokes the token server-side. Deleting a saved item refetches the
+canonical user, and the saved names are re-resolved against the local cache as
+the Android screen does. Signing out swaps the page back to the sign-in form.
+
+Change-username and change-password are **inline forms**, not dialogs: a desktop
+`Dialog` is a second window a headless Compose test cannot render, so the forms
+share the page and are driven directly. The password form applies the shared
+`AuthValidation.changePassword` rules. Sign-up is still not here.
+
+Verified headlessly: with a seeded account the `account` screenshot shows the
+username, the saved place and the localized saved area, with their edit/delete
+affordances. The screenshot mode now renders twice with a pause, so a screen that
+loads off the main thread is captured settled rather than blank.
+
+No version code bump: the Android app is unchanged.
+
 ## Working notes
 
 Durable facts and conventions for continuing the migration.
@@ -1730,14 +1751,14 @@ Durable facts and conventions for continuing the migration.
 
 ## Next
 
-Hand-off for the next session (state at 2026-10-02, tip `81dda38f`):
+Hand-off for the next session (state at 2026-10-02, tip `1fa7f8d5`):
 
 Phases 1 and 2 are complete. Phase 3 is nearly complete: the Android map and its
 place sheet are shared, and the desktop app runs its map, feed, settings, account,
-report and add-place screens from the same code. The desktop has a Compose UI
-test source set (`:desktopApp:test`). Pick up from the four items under "Next, in
-rough order of value" at the top of this file; the first is the desktop's
-user-profile screen.
+report, add-place and profile screens from the same code. The desktop has a
+Compose UI test source set (`:desktopApp:test`). Pick up from the four items under
+"Next, in rough order of value" at the top of this file; the first is report
+evidence photos on the desktop.
 
 Useful commands, all of them exercised this week:
 
@@ -1746,7 +1767,7 @@ Useful commands, all of them exercised this week:
   :app:compileDebugKotlin :app:compileDebugAndroidTestKotlin :desktopApp:test
 ./devtools app run                     # build, install, launch on emulator-5554
 ./gradlew :desktopApp:run              # the desktop window (poll for "Rendered the first map frame")
-./gradlew :desktopApp:screenshot -Pscreenshot=settings:/tmp/x.png:dark   # settings, cache, account, report, addplace
+./gradlew :desktopApp:screenshot -Pscreenshot=settings:/tmp/x.png:dark   # settings, account, report, addplace
 ```
 
 Instrumented tests are compile-checked here but not run (`AGENTS.md`); the

@@ -430,6 +430,11 @@ private fun renderScreen(spec: String) {
         }
     }
 
+    // Render once so effects start, then again after a moment: a screen that
+    // loads its data off the main thread (the profile) is blank on the first
+    // frame and settled by the second.
+    scene.render()
+    Thread.sleep(500)
     val bytes = scene.render().encodeToData(org.jetbrains.skia.EncodedImageFormat.PNG)?.bytes
     scene.close()
     requireNotNull(bytes) { "could not encode the screenshot" }
@@ -538,9 +543,9 @@ private fun relativeDate(date: String): String = runCatching {
 /**
  * The desktop's account page. It signs in with the same credentials the app
  * uses and stores the same session the rest of the app reads, so everything
- * that needs a signed-in user works once this succeeds. Accounts themselves are
- * created elsewhere (the app or btcmap.org), and signing up from here, signing
- * out, and the other account actions follow later.
+ * that needs a signed-in user works once this succeeds. When signed in it shows
+ * the shared profile (saved places and areas, change username and password, and
+ * log out). Accounts are still created elsewhere (the app or btcmap.org).
  */
 @androidx.compose.runtime.Composable
 internal fun DesktopAccountScreen(
@@ -549,29 +554,26 @@ internal fun DesktopAccountScreen(
     settings: Settings,
     onBack: () -> Unit,
 ) {
+    var authorized by remember { mutableStateOf(settings.authorized) }
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var busy by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<String?>(null) }
-    var signedInName by remember { mutableStateOf<String?>(null) }
     val scope = rememberCoroutineScope()
 
-    LaunchedEffect(settings.authorized) {
-        signedInName = if (settings.authorized) {
-            withContext(Dispatchers.IO) { db.user.select()?.name }
-        } else {
-            null
-        }
-    }
-
     ScreenPage(title = "Account", onBack = onBack) {
-        Column(
-            verticalArrangement = Arrangement.spacedBy(12.dp),
-            modifier = Modifier.padding(16.dp),
-        ) {
-            if (settings.authorized) {
-                Text(text = "Signed in as ${signedInName ?: "..."}")
-            } else {
+        if (authorized) {
+            DesktopProfile(
+                api = api,
+                db = db,
+                settings = settings,
+                onLoggedOut = { authorized = false },
+            )
+        } else {
+            Column(
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+                modifier = Modifier.padding(16.dp),
+            ) {
                 OutlinedTextField(
                     value = username,
                     onValueChange = { username = it },
@@ -606,6 +608,7 @@ internal fun DesktopAccountScreen(
                                     )
                                 }
                                 password = ""
+                                authorized = true
                             } catch (t: Throwable) {
                                 error = t.message ?: t.toString()
                             } finally {
