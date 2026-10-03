@@ -1,4 +1,4 @@
-package org.btcmap.desktop
+package org.btcmap.ui
 
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertCountEquals
@@ -13,14 +13,25 @@ import androidx.compose.ui.test.runComposeUiTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
-import org.btcmap.ui.AppTheme
 
 /**
- * The desktop add-place form. The positioning map is stubbed out (the GPU is not
- * available to the test), so what is driven here is the validation and the draft
- * the screen hands to its submit callback.
+ * The add-place form. The positioning map is stubbed out (the GPU is not
+ * available to the test), so what is driven here is the validation and the
+ * draft the screen hands to its submit callback.
  */
-class DesktopAddPlaceScreenTest {
+class AddPlaceScreenTest {
+
+    private val labels = AddPlaceLabels(
+        name = "Name",
+        category = "Category",
+        address = "Address",
+        website = "Website (optional)",
+        description = "Description (optional)",
+        required = "Required",
+        submit = "Submit place",
+        submitted = "Place submitted for review.",
+        backToMap = "Back to the map",
+    )
 
     @OptIn(ExperimentalTestApi::class)
     @Test
@@ -29,11 +40,12 @@ class DesktopAddPlaceScreenTest {
         runComposeUiTest {
             setContent {
                 AppTheme {
-                    DesktopAddPlaceScreen(
+                    AddPlaceScreen(
                         lat = 1.0,
                         lon = 2.0,
                         styleUrl = "",
                         styleJson = null,
+                        labels = labels,
                         submit = { drafts += it },
                         onBack = {},
                         map = {},
@@ -53,11 +65,12 @@ class DesktopAddPlaceScreenTest {
         runComposeUiTest {
             setContent {
                 AppTheme {
-                    DesktopAddPlaceScreen(
+                    AddPlaceScreen(
                         lat = 1.5,
                         lon = 2.5,
                         styleUrl = "",
                         styleJson = null,
+                        labels = labels,
                         submit = { drafts += it },
                         onBack = {},
                         map = {},

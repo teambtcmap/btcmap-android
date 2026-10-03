@@ -22,6 +22,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Open the desktop map at the default Curaçao view, matching the Android app, and follow the map centre in the activity feed
 - Share the boost, payment, account, report and saved-items logic between the Android and desktop apps, so the desktop gains the same request timeouts and error handling
 - Share the boost plans, saved-item name localization and database stats cards between the Android and desktop apps
+- Move the add-place, report and account screens into shared Compose UI, so the desktop and Android render the same forms
 
 ## [1.2.0] - 2026-09-30
 

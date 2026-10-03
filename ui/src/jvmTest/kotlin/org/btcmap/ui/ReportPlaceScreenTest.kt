@@ -1,4 +1,4 @@
-package org.btcmap.desktop
+package org.btcmap.ui
 
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertCountEquals
@@ -18,27 +18,41 @@ import java.io.ByteArrayOutputStream
 import javax.imageio.ImageIO
 import kotlin.test.Test
 import org.btcmap.place.MAX_REPORT_PHOTOS
+import org.btcmap.place.ReportType
 
 /**
- * The desktop report form: a reason must be chosen before it can be submitted,
- * and the evidence photos can be attached and removed up to the cap.
+ * The report form: a reason must be chosen before it can be submitted, and the
+ * evidence photos can be attached and removed up to the cap.
  */
-class DesktopReportScreenTest {
+class ReportPlaceScreenTest {
+
+    private val labels = ReportPlaceLabels(
+        intro = "Intro",
+        reasonLabel = { it.name },
+        reasonDescription = { "Description of $it" },
+        noteHint = "Additional notes (optional)",
+        addPhoto = { taken, max -> "Add photo ($taken/$max)" },
+        removePhoto = "Remove photo",
+        submit = "Submit",
+        submitted = "Report submitted.",
+        backToMap = "Back to the map",
+    )
 
     @OptIn(ExperimentalTestApi::class)
     @Test
     fun submit_staysDisabledUntilAReasonIsPicked() {
         runComposeUiTest {
             setContent {
-                DesktopReportScreen(
-                    api = testApi(),
-                    placeId = 1L,
-                    placeName = "Cafe",
-                    initialType = null,
-                    onBack = {},
-                )
+                AppTheme {
+                    ReportPlaceScreen(
+                        initialType = null,
+                        labels = labels,
+                        submit = {},
+                        onBack = {},
+                    )
+                }
             }
-            onNodeWithText("Verified - still accepts Bitcoin").assertIsDisplayed()
+            onNodeWithText(ReportType.Verified.name).assertIsDisplayed()
             onNodeWithText("Submit").assertIsNotEnabled()
             // The three reasons are the only selectable nodes, in form order.
             onAllNodes(isSelectable())[1].performClick()
@@ -51,14 +65,15 @@ class DesktopReportScreenTest {
     fun addedPhoto_showsThumbnailAndCanBeRemoved() {
         runComposeUiTest {
             setContent {
-                DesktopReportScreen(
-                    api = testApi(),
-                    placeId = 1L,
-                    placeName = "Cafe",
-                    initialType = "verified",
-                    onBack = {},
-                    pickPhotos = { listOf(pngBytes()) },
-                )
+                AppTheme {
+                    ReportPlaceScreen(
+                        initialType = "verified",
+                        labels = labels,
+                        submit = {},
+                        onBack = {},
+                        pickPhotos = { listOf(pngBytes()) },
+                    )
+                }
             }
             onNodeWithTag(REPORT_ADD_PHOTO_TAG).performScrollTo().performClick()
             waitUntil(timeoutMillis = 5_000) {
@@ -78,14 +93,15 @@ class DesktopReportScreenTest {
     fun photoLimit_isEnforced() {
         runComposeUiTest {
             setContent {
-                DesktopReportScreen(
-                    api = testApi(),
-                    placeId = 1L,
-                    placeName = "Cafe",
-                    initialType = "verified",
-                    onBack = {},
-                    pickPhotos = { List(MAX_REPORT_PHOTOS + 3) { pngBytes() } },
-                )
+                AppTheme {
+                    ReportPlaceScreen(
+                        initialType = "verified",
+                        labels = labels,
+                        submit = {},
+                        onBack = {},
+                        pickPhotos = { List(MAX_REPORT_PHOTOS + 3) { pngBytes() } },
+                    )
+                }
             }
             onNodeWithTag(REPORT_ADD_PHOTO_TAG).performScrollTo().performClick()
             waitUntil(timeoutMillis = 5_000) {

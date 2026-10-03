@@ -65,6 +65,8 @@ import org.btcmap.bundle.BundledEvents
 import org.btcmap.bundle.BundledPlaces
 import org.btcmap.db.Database
 import org.btcmap.payment.PaymentInvoice
+import org.btcmap.place.ReportType
+import org.btcmap.place.submitReport
 import org.btcmap.sync.Sync
 import org.btcmap.sync.SyncManager
 import org.btcmap.settings.KEY_AUTH_TOKEN
@@ -78,8 +80,15 @@ import org.maplibre.compose.resource.MapResourceProvider
 import org.btcmap.settings.showAttribution
 import org.btcmap.settings.verifiedFilterMinVerifiedAt
 import org.btcmap.sync.SyncState
+import org.btcmap.ui.AccountLabels
+import org.btcmap.ui.AccountScreen
+import org.btcmap.ui.AddPlaceForm
+import org.btcmap.ui.AddPlaceLabels
+import org.btcmap.ui.AddPlaceScreen
 import org.btcmap.ui.AppTheme
 import org.btcmap.ui.MapScreen
+import org.btcmap.ui.ReportPlaceLabels
+import org.btcmap.ui.ReportPlaceScreen
 import org.btcmap.ui.StatsScreen
 import java.io.File
 import java.io.InputStream
@@ -289,33 +298,45 @@ private fun runApp() = application {
                             formatDistance = { meters -> "%.1f km".format(meters / 1000) },
                         )
 
-                        Route.Report -> DesktopReportScreen(
-                            api = api,
-                            placeId = reportPlace?.first ?: 0L,
-                            placeName = reportPlace?.second ?: "",
-                            initialType = reportType,
-                            pickPhotos = reportPhotoPicker(window),
+                        Route.Report -> ScreenPage(
+                            title = reportPlace?.second?.ifBlank { "Report a place" } ?: "Report a place",
                             onBack = { route = Route.Map },
-                        )
+                        ) {
+                            ReportPlaceScreen(
+                                initialType = reportType,
+                                labels = REPORT_LABELS,
+                                submit = { draft ->
+                                    api.submitReport(placeId = reportPlace?.first ?: 0L, draft = draft)
+                                },
+                                pickPhotos = reportPhotoPicker(window),
+                                onBack = { route = Route.Map },
+                            )
+                        }
 
-                        Route.AddPlace -> DesktopAddPlaceScreen(
-                            lat = addPlace?.first ?: 0.0,
-                            lon = addPlace?.second ?: 0.0,
-                            styleUrl = HOSTED_STYLE_URL,
-                            styleJson = styleJson,
-                            submit = { draft ->
-                                api.submitPlace(
-                                    lat = draft.lat,
-                                    lon = draft.lon,
-                                    category = draft.category,
-                                    name = draft.name,
-                                    address = draft.address.takeIf { it.isNotEmpty() },
-                                    website = draft.website.takeIf { it.isNotEmpty() },
-                                    description = draft.description.takeIf { it.isNotEmpty() },
-                                )
-                            },
+                        Route.AddPlace -> ScreenPage(
+                            title = "Add a place",
                             onBack = { route = Route.Map },
-                        )
+                        ) {
+                            AddPlaceScreen(
+                                lat = addPlace?.first ?: 0.0,
+                                lon = addPlace?.second ?: 0.0,
+                                styleUrl = HOSTED_STYLE_URL,
+                                styleJson = styleJson,
+                                labels = ADD_PLACE_LABELS,
+                                submit = { draft ->
+                                    api.submitPlace(
+                                        lat = draft.lat,
+                                        lon = draft.lon,
+                                        category = draft.category,
+                                        name = draft.name,
+                                        address = draft.address.takeIf { it.isNotEmpty() },
+                                        website = draft.website.takeIf { it.isNotEmpty() },
+                                        description = draft.description.takeIf { it.isNotEmpty() },
+                                    )
+                                },
+                                onBack = { route = Route.Map },
+                            )
+                        }
 
                         Route.AddComment -> DesktopAddCommentScreen(
                             api = api,
@@ -357,12 +378,26 @@ private fun runApp() = application {
                             onBack = { route = Route.Settings },
                         )
 
-                        Route.Account -> DesktopAccountScreen(
-                            api = api,
-                            db = db,
-                            settings = settings,
+                        Route.Account -> ScreenPage(
+                            title = "Account",
                             onBack = { route = Route.Settings },
-                        )
+                        ) {
+                            AccountScreen(
+                                api = api,
+                                db = db,
+                                settings = settings,
+                                tokenLabel = DESKTOP_TOKEN_LABEL,
+                                labels = ACCOUNT_LABELS,
+                                profile = { onLoggedOut ->
+                                    DesktopProfile(
+                                        api = api,
+                                        db = db,
+                                        settings = settings,
+                                        onLoggedOut = onLoggedOut,
+                                    )
+                                },
+                            )
+                        }
 
                         Route.Feed -> ScreenPage(
                             title = "Activity",
@@ -459,24 +494,15 @@ private fun renderScreen(spec: String) {
                         onBack = {},
                     )
 
-                    "report" -> DesktopReportScreen(
-                        api = Api(
-                            httpClient = apiHttpClient(
-                                userAgent = USER_AGENT,
-                                token = { settings.getString(KEY_AUTH_TOKEN, null) },
-                                apiUrl = { API_URL.toHttpUrl() },
-                            ),
-                            baseUrl = { API_URL.toHttpUrl() },
-                            userAgent = USER_AGENT,
-                        ),
-                        placeId = 0L,
-                        placeName = "Report a place",
+                    "report" -> ReportPlaceScreen(
                         initialType = "verified",
+                        labels = REPORT_LABELS,
+                        submit = {},
                         onBack = {},
                     )
 
-                    "account" -> DesktopAccountScreen(
-                        api = Api(
+                    "account" -> {
+                        val api = Api(
                             httpClient = apiHttpClient(
                                 userAgent = USER_AGENT,
                                 token = { settings.getString(KEY_AUTH_TOKEN, null) },
@@ -484,11 +510,23 @@ private fun renderScreen(spec: String) {
                             ),
                             baseUrl = { API_URL.toHttpUrl() },
                             userAgent = USER_AGENT,
-                        ),
-                        db = db,
-                        settings = settings,
-                        onBack = {},
-                    )
+                        )
+                        AccountScreen(
+                            api = api,
+                            db = db,
+                            settings = settings,
+                            tokenLabel = DESKTOP_TOKEN_LABEL,
+                            labels = ACCOUNT_LABELS,
+                            profile = { onLoggedOut ->
+                                DesktopProfile(
+                                    api = api,
+                                    db = db,
+                                    settings = settings,
+                                    onLoggedOut = onLoggedOut,
+                                )
+                            },
+                        )
+                    }
 
                     "payment" -> InvoicePaymentSection(
                         invoice = PaymentInvoice(id = "demo", bolt11 = "lnbc1u1p3exampleinvoice"),
@@ -499,6 +537,7 @@ private fun renderScreen(spec: String) {
                         busy = false,
                         error = null,
                         submitted = false,
+                        labels = ADD_PLACE_LABELS,
                         onSubmit = { _, _, _, _, _ -> },
                         onBack = {},
                     )
@@ -695,6 +734,65 @@ private fun resourceBytes(path: String): ByteArray? =
 private fun bundledSnapshot(fileName: String): InputStream =
     Thread.currentThread().contextClassLoader.getResourceAsStream(fileName)
         ?: throw java.io.FileNotFoundException(fileName)
+
+private const val DESKTOP_TOKEN_LABEL = "BTC Map desktop"
+
+private val ACCOUNT_LABELS = AccountLabels(
+    username = "Username",
+    password = "Password",
+    confirmPassword = "Confirm password",
+    required = "Required",
+    passwordTooShort = { "At least $it characters" },
+    passwordsDoNotMatch = "Passwords do not match",
+    signIn = "Sign in",
+    createAccount = "Create account",
+    alreadyHaveAccount = "I already have an account",
+    createAnAccount = "Create an account",
+    signInHint = "Accounts can also be created in the mobile app or on btcmap.org.",
+    accountCreated = "Account created. Please sign in.",
+)
+
+private val REPORT_LABELS = ReportPlaceLabels(
+    intro = "Let editors know the current state of this place. Your report will be " +
+        "reviewed by the BTC Map community.",
+    reasonLabel = {
+        when (it) {
+            ReportType.Verified -> "Verified - still accepts Bitcoin"
+            ReportType.RefusedSats -> "Refused Bitcoin payment"
+            ReportType.OutOfBusiness -> "Out of business"
+        }
+    },
+    reasonDescription = {
+        when (it) {
+            ReportType.Verified ->
+                "You confirmed this place exists and currently accepts Bitcoin payments."
+
+            ReportType.RefusedSats ->
+                "An attempt to pay with Bitcoin on-site was refused by the merchant."
+
+            ReportType.OutOfBusiness ->
+                "The place has been permanently closed or is no longer operating."
+        }
+    },
+    noteHint = "Additional notes (optional)",
+    addPhoto = { taken, max -> "Add photo ($taken/$max)" },
+    removePhoto = "Remove photo",
+    submit = "Submit",
+    submitted = "Report submitted.",
+    backToMap = "Back to the map",
+)
+
+private val ADD_PLACE_LABELS = AddPlaceLabels(
+    name = "Name",
+    category = "Category",
+    address = "Address",
+    website = "Website (optional)",
+    description = "Description (optional)",
+    required = "Required",
+    submit = "Submit place",
+    submitted = "Place submitted for review.",
+    backToMap = "Back to the map",
+)
 
 private val PLACE_SHEET_STRINGS = org.btcmap.ui.PlaceSheetStrings(
     directions = "Directions",

@@ -1,4 +1,4 @@
-package org.btcmap.desktop
+package org.btcmap.ui
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -26,7 +26,6 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.launch
-import org.btcmap.ui.MaterialSymbol
 import org.maplibre.compose.camera.CameraPosition
 import org.maplibre.compose.map.MapEvent
 import org.maplibre.compose.map.MapUiOptions
@@ -35,14 +34,14 @@ import org.maplibre.compose.map.rememberMapState
 import org.maplibre.compose.style.BaseStyle
 import org.maplibre.spatialk.geojson.Position
 
-/** Test tags so the desktop tests can drive the form. */
+/** Test tags so a test can drive the add-place form. */
 internal const val ADD_PLACE_NAME_TAG = "add-place-name"
 internal const val ADD_PLACE_CATEGORY_TAG = "add-place-category"
 internal const val ADD_PLACE_ADDRESS_TAG = "add-place-address"
 internal const val ADD_PLACE_SUBMIT_TAG = "add-place-submit"
 
 /** The fields a new place is submitted with, positioned at the map centre. */
-internal data class AddPlaceDraft(
+data class AddPlaceDraft(
     val lat: Double,
     val lon: Double,
     val name: String,
@@ -52,24 +51,38 @@ internal data class AddPlaceDraft(
     val description: String,
 )
 
+/** The add-place form's strings, so the screen stays resource-free. */
+data class AddPlaceLabels(
+    val name: String,
+    val category: String,
+    val address: String,
+    val website: String,
+    val description: String,
+    val required: String,
+    val submit: String,
+    val submitted: String,
+    val backToMap: String,
+)
+
 private const val ADD_PLACE_ZOOM = 16.0
-private const val REQUIRED = "Required"
 
 /**
- * The desktop's add-place screen: a positioning map over the fields a new place
- * is submitted with. The location starts at the map centre the main map handed
- * over and can be adjusted by panning under the pin. Name, category and address
- * are required; the rest is optional.
+ * The add-place screen: a positioning map over the fields a new place is
+ * submitted with. The location starts at the map centre the host handed over
+ * and can be adjusted by panning under the pin. Name, category and address are
+ * required; the rest is optional.
  *
  * [submit] is injected so the screen can be driven without a server, and [map]
- * so the tests can render the form without a GPU.
+ * so a test can render the form without a GPU. The host supplies its own top
+ * bar and back affordance.
  */
 @Composable
-internal fun DesktopAddPlaceScreen(
+fun AddPlaceScreen(
     lat: Double,
     lon: Double,
     styleUrl: String,
     styleJson: String?,
+    labels: AddPlaceLabels,
     submit: suspend (AddPlaceDraft) -> Unit,
     onBack: () -> Unit,
     map: @Composable ((Double, Double) -> Unit) -> Unit = { onCenterChanged ->
@@ -88,42 +101,41 @@ internal fun DesktopAddPlaceScreen(
     var submitted by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
 
-    ScreenPage(title = "Add a place", onBack = onBack) {
-        Column(modifier = Modifier.fillMaxSize()) {
-            Box(modifier = Modifier.fillMaxWidth().height(240.dp)) {
-                map { newLat, newLon -> center = newLat to newLon }
-            }
-            AddPlaceForm(
-                busy = busy,
-                error = error,
-                submitted = submitted,
-                onSubmit = { name, category, address, website, description ->
-                    busy = true
-                    error = null
-                    val draft = AddPlaceDraft(
-                        lat = center.first,
-                        lon = center.second,
-                        name = name,
-                        category = category,
-                        address = address,
-                        website = website,
-                        description = description,
-                    )
-                    scope.launch {
-                        try {
-                            submit(draft)
-                            submitted = true
-                        } catch (t: Throwable) {
-                            error = t.message ?: t.toString()
-                        } finally {
-                            busy = false
-                        }
-                    }
-                },
-                onBack = onBack,
-                modifier = Modifier.weight(1f),
-            )
+    Column(modifier = Modifier.fillMaxSize()) {
+        Box(modifier = Modifier.fillMaxWidth().height(240.dp)) {
+            map { newLat, newLon -> center = newLat to newLon }
         }
+        AddPlaceForm(
+            busy = busy,
+            error = error,
+            submitted = submitted,
+            labels = labels,
+            onSubmit = { name, category, address, website, description ->
+                busy = true
+                error = null
+                val draft = AddPlaceDraft(
+                    lat = center.first,
+                    lon = center.second,
+                    name = name,
+                    category = category,
+                    address = address,
+                    website = website,
+                    description = description,
+                )
+                scope.launch {
+                    try {
+                        submit(draft)
+                        submitted = true
+                    } catch (t: Throwable) {
+                        error = t.message ?: t.toString()
+                    } finally {
+                        busy = false
+                    }
+                }
+            },
+            onBack = onBack,
+            modifier = Modifier.weight(1f),
+        )
     }
 }
 
@@ -132,10 +144,11 @@ internal fun DesktopAddPlaceScreen(
  * from the map so a test can drive the fields without a GPU.
  */
 @Composable
-internal fun AddPlaceForm(
+fun AddPlaceForm(
     busy: Boolean,
     error: String?,
     submitted: Boolean,
+    labels: AddPlaceLabels,
     onSubmit: (name: String, category: String, address: String, website: String, description: String) -> Unit,
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
@@ -149,9 +162,9 @@ internal fun AddPlaceForm(
 
     if (submitted) {
         Column(modifier = modifier.fillMaxWidth().padding(16.dp)) {
-            Text("Place submitted for review.")
+            Text(labels.submitted)
             Button(onClick = onBack, modifier = Modifier.padding(top = 16.dp)) {
-                Text("Back to the map")
+                Text(labels.backToMap)
             }
         }
         return
@@ -166,10 +179,10 @@ internal fun AddPlaceForm(
         OutlinedTextField(
             value = name,
             onValueChange = { name = it },
-            label = { Text("Name") },
+            label = { Text(labels.name) },
             isError = attempted && name.isBlank(),
             supportingText = if (attempted && name.isBlank()) {
-                { Text(REQUIRED) }
+                { Text(labels.required) }
             } else {
                 null
             },
@@ -182,10 +195,10 @@ internal fun AddPlaceForm(
         OutlinedTextField(
             value = category,
             onValueChange = { category = it },
-            label = { Text("Category") },
+            label = { Text(labels.category) },
             isError = attempted && category.isBlank(),
             supportingText = if (attempted && category.isBlank()) {
-                { Text(REQUIRED) }
+                { Text(labels.required) }
             } else {
                 null
             },
@@ -199,10 +212,10 @@ internal fun AddPlaceForm(
         OutlinedTextField(
             value = address,
             onValueChange = { address = it },
-            label = { Text("Address") },
+            label = { Text(labels.address) },
             isError = attempted && address.isBlank(),
             supportingText = if (attempted && address.isBlank()) {
-                { Text(REQUIRED) }
+                { Text(labels.required) }
             } else {
                 null
             },
@@ -215,7 +228,7 @@ internal fun AddPlaceForm(
         OutlinedTextField(
             value = website,
             onValueChange = { website = it },
-            label = { Text("Website (optional)") },
+            label = { Text(labels.website) },
             enabled = !busy,
             singleLine = true,
             modifier = Modifier
@@ -225,7 +238,7 @@ internal fun AddPlaceForm(
         OutlinedTextField(
             value = description,
             onValueChange = { description = it },
-            label = { Text("Description (optional)") },
+            label = { Text(labels.description) },
             enabled = !busy,
             minLines = 3,
             modifier = Modifier
@@ -258,7 +271,7 @@ internal fun AddPlaceForm(
                 .padding(top = 24.dp)
                 .testTag(ADD_PLACE_SUBMIT_TAG),
         ) {
-            Text("Submit place")
+            Text(labels.submit)
         }
     }
 }

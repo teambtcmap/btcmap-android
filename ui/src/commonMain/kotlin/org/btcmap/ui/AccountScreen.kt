@@ -1,4 +1,4 @@
-package org.btcmap.desktop
+package org.btcmap.ui
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -29,27 +29,45 @@ import org.btcmap.db.Database
 import org.btcmap.settings.Settings
 import org.btcmap.settings.authorized
 
-/** Test tags so the desktop tests can drive the account form. */
-internal const val ACCOUNT_USERNAME_TAG = "account-username"
-internal const val ACCOUNT_PASSWORD_TAG = "account-password"
-internal const val ACCOUNT_CONFIRM_TAG = "account-confirm"
-internal const val ACCOUNT_SUBMIT_TAG = "account-submit"
-internal const val ACCOUNT_TOGGLE_TAG = "account-toggle"
+/** Test tags so a test can drive the account form. */
+const val ACCOUNT_USERNAME_TAG = "account-username"
+const val ACCOUNT_PASSWORD_TAG = "account-password"
+const val ACCOUNT_CONFIRM_TAG = "account-confirm"
+const val ACCOUNT_SUBMIT_TAG = "account-submit"
+const val ACCOUNT_TOGGLE_TAG = "account-toggle"
 
-private const val REQUIRED = "Required"
+/** The account form's strings, so the screen stays resource-free. */
+data class AccountLabels(
+    val username: String,
+    val password: String,
+    val confirmPassword: String,
+    val required: String,
+    val passwordTooShort: (minLength: Int) -> String,
+    val passwordsDoNotMatch: String,
+    val signIn: String,
+    val createAccount: String,
+    val alreadyHaveAccount: String,
+    val createAnAccount: String,
+    val signInHint: String,
+    val accountCreated: String,
+)
 
 /**
- * The desktop's account page. It signs in or signs up with the same credentials
- * the app uses and stores the same session the rest of the app reads. When
- * signed in it shows the shared profile (saved places and areas, change username
- * and password, and log out).
+ * Signs in or signs up with the shared [AuthSession], and shows the shared
+ * profile once signed in.
+ *
+ * The signed-in content is the host's [profile] slot, because Android and the
+ * desktop render different profile chrome. [tokenLabel] names this device's
+ * session in the account's token list. The host supplies its own top bar.
  */
 @Composable
-internal fun DesktopAccountScreen(
+fun AccountScreen(
     api: Api,
     db: Database,
     settings: Settings,
-    onBack: () -> Unit,
+    tokenLabel: String,
+    labels: AccountLabels,
+    profile: @Composable (onLoggedOut: () -> Unit) -> Unit,
 ) {
     var authorized by remember { mutableStateOf(settings.authorized) }
     var signUp by remember { mutableStateOf(false) }
@@ -61,92 +79,87 @@ internal fun DesktopAccountScreen(
     var error by remember { mutableStateOf<String?>(null) }
     val scope = rememberCoroutineScope()
 
-    ScreenPage(title = "Account", onBack = onBack) {
-        if (authorized) {
-            DesktopProfile(
-                api = api,
-                db = db,
-                settings = settings,
-                onLoggedOut = { authorized = false },
-            )
-        } else {
-            AuthForm(
-                signUp = signUp,
-                username = username,
-                password = password,
-                confirmation = confirmation,
-                attempted = attempted,
-                busy = busy,
-                error = error,
-                onUsernameChange = { username = it },
-                onPasswordChange = { password = it },
-                onConfirmationChange = { confirmation = it },
-                onToggleMode = {
-                    signUp = !signUp
-                    attempted = false
-                    error = null
-                },
-                onSubmit = {
-                    attempted = true
-                    val errors = if (signUp) {
-                        AuthValidation.signUp(username.trim(), password, confirmation)
-                    } else {
-                        AuthValidation.signIn(username.trim(), password)
-                    }
-                    if (errors.isEmpty()) {
-                        busy = true
-                        error = null
-                        scope.launch {
-                            try {
-                                val outcome = if (signUp) {
-                                    AuthSession.signUp(
-                                        api = api,
-                                        db = db,
-                                        prefs = settings,
-                                        username = username,
-                                        password = password,
-                                        label = DESKTOP_TOKEN_LABEL,
-                                    )
-                                } else {
-                                    AuthSession.signIn(
-                                        api = api,
-                                        db = db,
-                                        prefs = settings,
-                                        username = username,
-                                        password = password,
-                                        label = DESKTOP_TOKEN_LABEL,
-                                    )
-                                }
-                                when (outcome) {
-                                    is AuthOutcome.Authenticated -> {
-                                        signUp = false
-                                        attempted = false
-                                        password = ""
-                                        confirmation = ""
-                                        authorized = true
-                                    }
-
-                                    is AuthOutcome.AccountCreated -> {
-                                        // The account exists; only its local
-                                        // session could not be established, so
-                                        // fall back to the sign-in form.
-                                        signUp = false
-                                        attempted = false
-                                        error = "Account created. Please sign in."
-                                    }
-
-                                    is AuthOutcome.Failed ->
-                                        error = outcome.error.message ?: outcome.error.toString()
-                                }
-                            } finally {
-                                busy = false
-                            }
-                        }
-                    }
-                },
-            )
-        }
+    if (authorized) {
+        profile { authorized = false }
+        return
     }
+
+    AccountAuthForm(
+        signUp = signUp,
+        username = username,
+        password = password,
+        confirmation = confirmation,
+        attempted = attempted,
+        busy = busy,
+        error = error,
+        labels = labels,
+        onUsernameChange = { username = it },
+        onPasswordChange = { password = it },
+        onConfirmationChange = { confirmation = it },
+        onToggleMode = {
+            signUp = !signUp
+            attempted = false
+            error = null
+        },
+        onSubmit = {
+            attempted = true
+            val errors = if (signUp) {
+                AuthValidation.signUp(username.trim(), password, confirmation)
+            } else {
+                AuthValidation.signIn(username.trim(), password)
+            }
+            if (errors.isEmpty()) {
+                busy = true
+                error = null
+                scope.launch {
+                    try {
+                        val outcome = if (signUp) {
+                            AuthSession.signUp(
+                                api = api,
+                                db = db,
+                                prefs = settings,
+                                username = username,
+                                password = password,
+                                label = tokenLabel,
+                            )
+                        } else {
+                            AuthSession.signIn(
+                                api = api,
+                                db = db,
+                                prefs = settings,
+                                username = username,
+                                password = password,
+                                label = tokenLabel,
+                            )
+                        }
+                        when (outcome) {
+                            is AuthOutcome.Authenticated -> {
+                                signUp = false
+                                attempted = false
+                                password = ""
+                                confirmation = ""
+                                authorized = true
+                            }
+
+                            is AuthOutcome.AccountCreated -> {
+                                // The account exists; only its local session
+                                // could not be established, so fall back to the
+                                // sign-in form.
+                                signUp = false
+                                attempted = false
+                                error = labels.accountCreated
+                            }
+
+                            is AuthOutcome.Failed ->
+                                error = outcome.error.message ?: outcome.error.toString()
+                        }
+                    } finally {
+                        busy = false
+                    }
+                }
+            }
+        },
+    )
 }
 
 /**
@@ -155,7 +168,7 @@ internal fun DesktopAccountScreen(
  * made (a too-short or mismatched password).
  */
 @Composable
-private fun AuthForm(
+private fun AccountAuthForm(
     signUp: Boolean,
     username: String,
     password: String,
@@ -163,6 +176,7 @@ private fun AuthForm(
     attempted: Boolean,
     busy: Boolean,
     error: String?,
+    labels: AccountLabels,
     onUsernameChange: (String) -> Unit,
     onPasswordChange: (String) -> Unit,
     onConfirmationChange: (String) -> Unit,
@@ -192,11 +206,11 @@ private fun AuthForm(
         OutlinedTextField(
             value = username,
             onValueChange = onUsernameChange,
-            label = { Text(text = "Username") },
+            label = { Text(text = labels.username) },
             singleLine = true,
             isError = usernameError,
             supportingText = if (usernameError) {
-                { Text(REQUIRED) }
+                { Text(labels.required) }
             } else {
                 null
             },
@@ -208,20 +222,20 @@ private fun AuthForm(
         OutlinedTextField(
             value = password,
             onValueChange = onPasswordChange,
-            label = { Text(text = "Password") },
+            label = { Text(text = labels.password) },
             singleLine = true,
             visualTransformation = PasswordVisualTransformation(),
             isError = passwordError,
             supportingText = when {
                 passwordTooShort ->
-                    { { Text("At least ${AuthValidation.MIN_PASSWORD_LENGTH} characters") } }
+                    { { Text(labels.passwordTooShort(AuthValidation.MIN_PASSWORD_LENGTH)) } }
 
                 passwordError -> {
-                    { Text(REQUIRED) }
+                    { Text(labels.required) }
                 }
 
                 signUp -> {
-                    { Text("At least ${AuthValidation.MIN_PASSWORD_LENGTH} characters") }
+                    { Text(labels.passwordTooShort(AuthValidation.MIN_PASSWORD_LENGTH)) }
                 }
 
                 else -> null
@@ -235,12 +249,12 @@ private fun AuthForm(
             OutlinedTextField(
                 value = confirmation,
                 onValueChange = onConfirmationChange,
-                label = { Text(text = "Confirm password") },
+                label = { Text(text = labels.confirmPassword) },
                 singleLine = true,
                 visualTransformation = PasswordVisualTransformation(),
                 isError = confirmationError,
                 supportingText = if (confirmationError) {
-                    { Text("Passwords do not match") }
+                    { Text(labels.passwordsDoNotMatch) }
                 } else {
                     null
                 },
@@ -258,23 +272,20 @@ private fun AuthForm(
                 .fillMaxWidth()
                 .testTag(ACCOUNT_SUBMIT_TAG),
         ) {
-            Text(text = if (signUp) "Create account" else "Sign in")
+            Text(text = if (signUp) labels.createAccount else labels.signIn)
         }
         TextButton(
             enabled = !busy,
             onClick = onToggleMode,
             modifier = Modifier.testTag(ACCOUNT_TOGGLE_TAG),
         ) {
-            Text(text = if (signUp) "I already have an account" else "Create an account")
+            Text(text = if (signUp) labels.alreadyHaveAccount else labels.createAnAccount)
         }
         if (!signUp) {
             Text(
-                text = "Accounts can also be created in the mobile app or on btcmap.org.",
+                text = labels.signInHint,
                 style = MaterialTheme.typography.bodySmall,
             )
         }
     }
 }
-
-/** The label this machine's session shows up under in the account's devices. */
-private const val DESKTOP_TOKEN_LABEL = "BTC Map desktop"
