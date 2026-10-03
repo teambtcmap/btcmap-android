@@ -1,7 +1,7 @@
 package org.btcmap.i18n
 
-import com.google.gson.JsonParser
 import org.btcmap.db.table.place.Place
+import org.btcmap.json.parseJsonObject
 import org.junit.Assert
 import org.junit.Test
 import java.time.ZonedDateTime
@@ -19,7 +19,7 @@ class PlaceTest {
         lon = 0.0,
         icon = "store",
         name = name,
-        localizedName = localizedName?.let { JsonParser.parseString(it).asJsonObject },
+        localizedName = localizedName?.let { parseJsonObject(it) },
         verifiedAt = null,
         address = null,
         openingHours = null,

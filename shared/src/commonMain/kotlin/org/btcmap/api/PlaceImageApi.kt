@@ -1,6 +1,8 @@
 package org.btcmap.api
 
-import com.google.gson.JsonObject
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.put
 import okhttp3.Request
 import org.btcmap.auth.withoutAuth
 import org.btcmap.util.toJsonArray
@@ -34,8 +36,8 @@ suspend fun Api.getPlaceImages(placeId: Long): List<PlaceImage> {
 suspend fun Api.addPlaceImage(placeId: Long, photo: ByteArray): PlaceImage {
     val url = buildUrl("v4", "places", "$placeId", "images")
 
-    val req = JsonObject().apply {
-        addProperty("data_base64", Base64.getEncoder().encodeToString(photo))
+    val req = buildJsonObject {
+        put("data_base64", Base64.getEncoder().encodeToString(photo))
     }
 
     return call(Request.Builder().post(jsonBody(req)).url(url).build()) { stream ->

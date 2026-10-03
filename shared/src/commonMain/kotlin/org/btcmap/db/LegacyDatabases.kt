@@ -1,6 +1,7 @@
 package org.btcmap.db
 
-import java.io.File
+import okio.FileSystem
+import okio.Path
 
 /**
  * Removes the databases left behind by earlier versions of the app.
@@ -18,18 +19,19 @@ object LegacyDatabases {
     private val SIDECAR_SUFFIXES = listOf("-wal", "-shm", "-journal")
 
     /** Deletes every legacy `btcmap-*.db` in [directory], keeping [current]. */
-    fun delete(directory: File, current: File) {
-        val files = directory.listFiles() ?: return
+    fun delete(fileSystem: FileSystem, directory: Path, current: Path) {
+        val files = runCatching { fileSystem.list(directory) }.getOrNull() ?: return
 
         for (file in files) {
-            if (!file.isFile) continue
-            if (file.name == current.name) continue
-            if (!file.name.startsWith(LEGACY_PREFIX)) continue
-            if (!file.name.endsWith(DB_SUFFIX)) continue
+            val name = file.name
+            if (fileSystem.metadataOrNull(file)?.isRegularFile != true) continue
+            if (name == current.name) continue
+            if (!name.startsWith(LEGACY_PREFIX)) continue
+            if (!name.endsWith(DB_SUFFIX)) continue
 
-            file.delete()
+            fileSystem.delete(file)
             SIDECAR_SUFFIXES.forEach { suffix ->
-                File(directory, file.name + suffix).delete()
+                runCatching { fileSystem.delete(directory / (name + suffix)) }
             }
         }
     }

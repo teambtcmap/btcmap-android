@@ -1,11 +1,11 @@
 package org.btcmap.api
 
-import com.google.gson.JsonParser
+import org.btcmap.json.parseJsonObject
 import org.junit.Assert
 import org.junit.Test
 
 class JsonObjectExtTest {
-    private fun obj(json: String) = JsonParser.parseString(json).asJsonObject
+    private fun obj(json: String) = parseJsonObject(json)
 
     @Test
     fun string_returnsValue() {

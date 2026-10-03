@@ -1,9 +1,12 @@
 package org.btcmap.db.table.area
 
-import com.google.gson.JsonElement
-import com.google.gson.JsonObject
-import com.google.gson.JsonParser
 import kotlin.math.abs
+import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.double
+import kotlinx.serialization.json.jsonArray
+import kotlinx.serialization.json.jsonPrimitive
+import org.btcmap.json.parseJson
 
 /**
  * An area's cached GeoJSON, resolved to the shapes a point-in-area test can
@@ -39,7 +42,7 @@ class AreaGeometry private constructor(
             val polygons = mutableListOf<PolygonRings>()
             val lines = mutableListOf<Ring>()
             if (geoJson != null) {
-                runCatching { collect(JsonParser.parseString(geoJson), polygons, lines) }
+                runCatching { collect(parseJson(geoJson), polygons, lines) }
             }
             return AreaGeometry(polygons, lines)
         }
@@ -50,16 +53,16 @@ class AreaGeometry private constructor(
             lines: MutableList<Ring>,
         ) {
             val obj = element as? JsonObject ?: return
-            when (obj.get("type")?.asString) {
-                "Feature" -> collect(obj.get("geometry"), polygons, lines)
+            when (obj["type"]?.jsonPrimitive?.content) {
+                "Feature" -> collect(obj["geometry"], polygons, lines)
                 "FeatureCollection" ->
-                    obj.getAsJsonArray("features")?.forEach { collect(it, polygons, lines) }
+                    obj["features"]?.jsonArray?.forEach { collect(it, polygons, lines) }
                 "GeometryCollection" ->
-                    obj.getAsJsonArray("geometries")?.forEach { collect(it, polygons, lines) }
-                "Polygon" -> polygons.add(rings(obj.getAsJsonArray("coordinates")))
+                    obj["geometries"]?.jsonArray?.forEach { collect(it, polygons, lines) }
+                "Polygon" -> polygons.add(rings(obj["coordinates"]?.jsonArray))
                 "MultiPolygon" ->
-                    obj.getAsJsonArray("coordinates")?.forEach { polygons.add(rings(it)) }
-                "LineString" -> lines.add(ring(obj.getAsJsonArray("coordinates")))
+                    obj["coordinates"]?.jsonArray?.forEach { polygons.add(rings(it)) }
+                "LineString" -> lines.add(ring(obj["coordinates"]?.jsonArray))
             }
         }
 
@@ -70,8 +73,11 @@ class AreaGeometry private constructor(
             (array as? Iterable<JsonElement>)?.map { position(it) }.orEmpty()
 
         private fun position(element: JsonElement): Position {
-            val coordinates = element.asJsonArray
-            return Position(lon = coordinates.get(0).asDouble, lat = coordinates.get(1).asDouble)
+            val coordinates = element.jsonArray
+            return Position(
+                lon = coordinates[0].jsonPrimitive.double,
+                lat = coordinates[1].jsonPrimitive.double,
+            )
         }
     }
 }

@@ -1,6 +1,10 @@
 package org.btcmap.api
 
-import com.google.gson.JsonObject
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
+import kotlinx.serialization.json.put
 import okhttp3.Request
 import org.btcmap.auth.withoutAuth
 import org.btcmap.util.toJsonObject
@@ -21,9 +25,9 @@ data class CreateTokenResponse(
 suspend fun Api.createUser(name: String?, password: String): User {
     val url = buildUrl("v4", "users")
 
-    val req = JsonObject().apply {
-        addProperty("password", password)
-        name?.takeIf { it.isNotBlank() }?.let { addProperty("name", it) }
+    val req = buildJsonObject {
+        put("password", password)
+        name?.takeIf { it.isNotBlank() }?.let { put("name", it) }
     }
 
     return call(
@@ -48,8 +52,8 @@ suspend fun Api.getUser(): User {
 suspend fun Api.updateUsername(username: String): User {
     val url = buildUrl("v4", "users", "me", "username")
 
-    val req = JsonObject().apply {
-        addProperty("username", username)
+    val req = buildJsonObject {
+        put("username", username)
     }
 
     return call(
@@ -65,9 +69,9 @@ suspend fun Api.updateUsername(username: String): User {
 suspend fun Api.updatePassword(oldPassword: String, newPassword: String) {
     val url = buildUrl("v4", "users", "me", "password")
 
-    val req = JsonObject().apply {
-        addProperty("old_password", oldPassword)
-        addProperty("new_password", newPassword)
+    val req = buildJsonObject {
+        put("old_password", oldPassword)
+        put("new_password", newPassword)
     }
 
     call(
@@ -85,8 +89,8 @@ suspend fun Api.signIn(
 ): CreateTokenResponse {
     val url = buildUrl("v4", "users", username, "tokens")
 
-    val req = JsonObject().apply {
-        addProperty("label", label)
+    val req = buildJsonObject {
+        put("label", label)
     }
 
     return call(
@@ -122,7 +126,7 @@ suspend fun Api.signOut(token: String) {
 
     call(
         request = Request.Builder()
-            .post(jsonBody(JsonObject()))
+            .post(jsonBody(buildJsonObject { }))
             .header("Authorization", "Bearer $token")
             .url(url)
             .build(),
@@ -134,9 +138,9 @@ private fun JsonObject.toUser(): User {
     return User(
         id = long("id"),
         name = string("name"),
-        roles = arrayOrNull("roles")?.map { it.asString } ?: emptyList(),
-        savedPlaces = arrayOrNull("saved_places")?.map { it.asJsonObject.toSavedItem() } ?: emptyList(),
-        savedAreas = arrayOrNull("saved_areas")?.map { it.asJsonObject.toSavedItem() } ?: emptyList(),
+        roles = arrayOrNull("roles")?.map { it.jsonPrimitive.content } ?: emptyList(),
+        savedPlaces = arrayOrNull("saved_places")?.map { it.jsonObject.toSavedItem() } ?: emptyList(),
+        savedAreas = arrayOrNull("saved_areas")?.map { it.jsonObject.toSavedItem() } ?: emptyList(),
     )
 }
 

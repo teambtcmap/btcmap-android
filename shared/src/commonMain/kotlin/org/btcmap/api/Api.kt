@@ -1,8 +1,8 @@
 package org.btcmap.api
 
-import com.google.gson.JsonElement
-import com.google.gson.JsonParser
 import kotlinx.coroutines.CancellationException
+import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.jsonObject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.HttpUrl
@@ -13,8 +13,9 @@ import okhttp3.RequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.Response
 import okhttp3.coroutines.executeAsync
-import java.io.IOException
-import java.io.InputStream
+import okio.BufferedSource
+import okio.IOException
+import org.btcmap.json.parseJson
 
 /**
  * Base type for every failure raised by [Api]. Coroutine cancellation is not an
@@ -90,7 +91,7 @@ class Api(
     internal suspend fun <T> call(
         request: Request,
         clearSessionOnUnauthorized: Boolean = true,
-        parse: (InputStream) -> T,
+        parse: (BufferedSource) -> T,
     ): T {
         val response = try {
             httpClient.newCall(request).executeAsync()
@@ -122,9 +123,9 @@ class Api(
                     throw exception
                 }
 
-                res.body.byteStream().use { stream ->
+                res.body.source().use { source ->
                     try {
-                        parse(stream)
+                        parse(source)
                     } catch (e: CancellationException) {
                         throw e
                     } catch (e: ApiParseException) {
@@ -150,7 +151,7 @@ class Api(
         }
 
         val errorBody = try {
-            JsonParser.parseString(body).asJsonObject
+            parseJson(body).jsonObject
         } catch (e: RuntimeException) {
             null
         }

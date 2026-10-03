@@ -1,13 +1,13 @@
 package org.btcmap.api
 
-import com.google.gson.JsonObject
+import kotlinx.serialization.json.JsonObject
 import okhttp3.HttpUrl
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import okhttp3.Request
+import okio.BufferedSource
 import org.btcmap.auth.withoutAuth
 import org.btcmap.util.toJsonArray
 import org.btcmap.util.toJsonObject
-import java.io.InputStream
 import java.time.ZonedDateTime
 import java.time.format.DateTimeParseException
 
@@ -95,6 +95,6 @@ private fun String.toApiZonedDateTime(field: String): ZonedDateTime {
     }
 }
 
-private fun InputStream.toGetEventsDeltaItems(): List<GetEventsDeltaItem> {
+private fun BufferedSource.toGetEventsDeltaItems(): List<GetEventsDeltaItem> {
     return toJsonArray().map { it.toGetEventsDeltaItem() }
 }

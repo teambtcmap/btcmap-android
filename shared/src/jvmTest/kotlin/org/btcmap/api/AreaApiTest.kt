@@ -1,6 +1,7 @@
 package org.btcmap.api
 
 import kotlinx.coroutines.test.runTest
+import kotlinx.serialization.json.jsonPrimitive
 import org.junit.Assert
 import org.junit.Test
 import java.time.ZonedDateTime
@@ -113,8 +114,8 @@ class AreaApiTest : ApiTestBase() {
         Assert.assertEquals("community", area.type)
         Assert.assertEquals("grand-paris", area.urlAlias)
         Assert.assertEquals("Greater Paris", area.description)
-        Assert.assertEquals("Большой Париж", area.localizedName!!.get("ru").asString)
-        Assert.assertEquals("Greater Paris", area.localizedDescription!!.get("en").asString)
+        Assert.assertEquals("Большой Париж", area.localizedName!!.getValue("ru").jsonPrimitive.content)
+        Assert.assertEquals("Greater Paris", area.localizedDescription!!.getValue("en").jsonPrimitive.content)
         Assert.assertEquals(2.22, area.bboxWest!!, 0.0001)
         Assert.assertEquals(48.91, area.bboxNorth!!, 0.0001)
         Assert.assertEquals(

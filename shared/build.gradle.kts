@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.kotlin.multiplatform)
     alias(libs.plugins.android.kotlin.multiplatform.library)
+    alias(libs.plugins.kotlin.serialization)
 }
 
 kotlin {
@@ -19,7 +20,11 @@ kotlin {
     sourceSets {
         commonMain.dependencies {
             implementation(libs.androidx.sqlite)
-            implementation(libs.gson)
+            // Multiplatform JSON, the Gson replacement.
+            implementation(libs.kotlinx.serialization.json)
+            implementation(libs.kotlinx.serialization.json.okio)
+            // The java.io replacement: streaming sources and file access.
+            implementation(libs.okio)
             implementation(libs.kotlinx.coroutines.core)
             implementation(libs.okhttp.brotli)
             implementation(libs.okhttp.coroutines)

@@ -1,11 +1,12 @@
 package org.btcmap.api
 
-import com.google.gson.JsonObject
+import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.put
 import okhttp3.Request
+import okio.BufferedSource
 import org.btcmap.auth.withoutAuth
 import org.btcmap.util.toJsonArray
 import org.btcmap.util.toJsonObject
-import java.io.InputStream
 import java.time.ZonedDateTime
 
 data class GetCommentsItem(
@@ -51,9 +52,9 @@ suspend fun Api.getCommentQuote(): CommentQuoteResponse {
 suspend fun Api.addComment(placeId: Long, comment: String): AddCommentResponse {
     val url = buildUrl("v4", "place-comments")
 
-    val req = JsonObject().apply {
-        addProperty("place_id", placeId.toString())
-        addProperty("comment", comment)
+    val req = buildJsonObject {
+        put("place_id", placeId.toString())
+        put("comment", comment)
     }
 
     return call(
@@ -65,7 +66,7 @@ suspend fun Api.addComment(placeId: Long, comment: String): AddCommentResponse {
     ) { it.toAddCommentResponse() }
 }
 
-private fun InputStream.toGetCommentsItems(): List<GetCommentsItem> {
+private fun BufferedSource.toGetCommentsItems(): List<GetCommentsItem> {
     return toJsonArray().map {
         GetCommentsItem(
             id = it.long("id"),
@@ -78,7 +79,7 @@ private fun InputStream.toGetCommentsItems(): List<GetCommentsItem> {
     }
 }
 
-private fun InputStream.toAddCommentResponse(): AddCommentResponse {
+private fun BufferedSource.toAddCommentResponse(): AddCommentResponse {
     val body = toJsonObject()
 
     return AddCommentResponse(

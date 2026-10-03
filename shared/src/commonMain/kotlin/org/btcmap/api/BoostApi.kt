@@ -1,6 +1,7 @@
 package org.btcmap.api
 
-import com.google.gson.JsonObject
+import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.put
 import okhttp3.Request
 import org.btcmap.auth.withoutAuth
 import org.btcmap.util.toJsonObject
@@ -33,9 +34,9 @@ suspend fun Api.getPlaceBoostQuote(): PlaceBoostQuoteResponse {
 suspend fun Api.boostPlace(placeId: Long, days: Long): PlaceBoostResponse {
     val url = buildUrl("v4", "place-boosts")
 
-    val req = JsonObject().apply {
-        addProperty("place_id", placeId.toString())
-        addProperty("days", days)
+    val req = buildJsonObject {
+        put("place_id", placeId.toString())
+        put("days", days)
     }
 
     return call(

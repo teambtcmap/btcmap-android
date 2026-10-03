@@ -7,6 +7,7 @@ import org.junit.Assert
 import org.junit.Test
 import java.time.ZonedDateTime
 import kotlinx.coroutines.test.runTest
+import kotlinx.serialization.json.jsonPrimitive
 import mockwebserver3.Dispatcher
 import mockwebserver3.MockResponse
 import mockwebserver3.RecordedRequest
@@ -744,8 +745,8 @@ class SyncTest {
         val area = db.area.selectById(7L)!!
         Assert.assertEquals("Grand Paris", area.name)
         Assert.assertEquals("Greater Paris", area.description)
-        Assert.assertEquals("Большой Париж", area.localizedName!!.get("ru").asString)
-        Assert.assertEquals("Большой Париж", area.localizedDescription!!.get("ru").asString)
+        Assert.assertEquals("Большой Париж", area.localizedName!!.getValue("ru").jsonPrimitive.content)
+        Assert.assertEquals("Большой Париж", area.localizedDescription!!.getValue("ru").jsonPrimitive.content)
         Assert.assertEquals(2.22, area.bboxWest!!, 0.0001)
         Assert.assertEquals(
             """{"type":"Point","coordinates":[2.22,48.81]}""",

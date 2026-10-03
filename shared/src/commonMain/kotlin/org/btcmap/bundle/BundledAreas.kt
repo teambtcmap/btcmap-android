@@ -1,16 +1,24 @@
+@file:OptIn(kotlinx.serialization.ExperimentalSerializationApi::class)
+
 package org.btcmap.bundle
 
-import com.google.gson.JsonObject
-import com.google.gson.stream.JsonReader
+import kotlin.time.Duration
+import kotlin.time.TimeSource
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.DecodeSequenceMode
+import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.okio.decodeBufferedSourceToSequence
+import okio.Source
+import okio.buffer
 import org.btcmap.db.Database
 import org.btcmap.db.table.area.Area
+import org.btcmap.json.btcmapJson
 import org.btcmap.util.rethrowIfCancellation
-import java.io.FileNotFoundException
-import java.io.InputStream
-import java.time.Duration
-import java.time.ZonedDateTime
+import org.btcmap.util.toZonedDateTimeOrNull
 
 /**
  * Seeds the areas table from the bundled snapshot produced by the bundler.
@@ -22,6 +30,9 @@ import java.time.ZonedDateTime
  * country chips — with the polygons they are matched against — work offline, or
  * while the server is unreachable, without downloading megabytes of geometry
  * first.
+ *
+ * The snapshot is decoded record by record from an [okio.Source], so it is
+ * never buffered whole in memory.
  */
 object BundledAreas {
     const val FILE_NAME = "bundled-areas.json"
@@ -34,18 +45,15 @@ object BundledAreas {
     )
 
     /**
-     * Seeds [db] from the snapshot produced by [openStream], unless it already
-     * holds areas.
-     *
-     * The snapshot arrives as a stream, so the seeding logic — the one-shot
-     * guard, the transactional import and the failure handling — is platform-free:
-     * the host opens the bundled asset and a test supplies an in-memory stream.
+     * Seeds [db] from the snapshot produced by [openSource], unless it already
+     * holds areas. A null [openSource] result means the optional asset is
+     * absent, which is not an error.
      */
     suspend fun import(
         db: Database,
-        openStream: () -> InputStream,
+        openSource: () -> Source?,
     ): ImportResult {
-        val startedAt = System.nanoTime()
+        val startedAt = TimeSource.Monotonic.markNow()
 
         // Seeding is intentionally a one-shot, fresh-install operation: any area
         // already stored — tombstone included — means the snapshot was imported
@@ -62,7 +70,7 @@ object BundledAreas {
                 db.area.selectCount(includeDeleted = true)
             }
             if (areasInDb > 0) {
-                return ImportResult(areasImported = 0, duration = elapsedSince(startedAt))
+                return ImportResult(areasImported = 0, duration = startedAt.elapsedNow())
             }
 
             // The whole parse runs inside one transaction so a malformed asset
@@ -70,81 +78,63 @@ object BundledAreas {
             // instead of leaving a partial seed that the count check above would
             // then treat as complete.
             withContext(Dispatchers.IO) {
-                openStream().use { stream ->
-                    stream.bufferedReader().use { reader ->
-                        val jsonReader = JsonReader(reader)
-                        db.transaction {
-                            jsonReader.beginArray()
-                            var batch = mutableListOf<Area>()
-                            while (jsonReader.hasNext()) {
-                                batch.add(jsonReader.readBundledArea())
-                                if (batch.size >= BATCH_SIZE) {
-                                    db.area.insert(batch)
-                                    areasImported += batch.size
-                                    batch = mutableListOf()
-                                }
-                            }
-                            if (batch.isNotEmpty()) {
+                val source = openSource()
+                if (source == null) {
+                    return@withContext
+                }
+
+                source.buffer().use { buffered ->
+                    db.transaction {
+                        var batch = mutableListOf<Area>()
+                        for (record in btcmapJson.decodeBufferedSourceToSequence<BundledAreaJson>(
+                            buffered,
+                            DecodeSequenceMode.ARRAY_WRAPPED,
+                        )) {
+                            batch.add(record.toArea())
+                            if (batch.size >= BATCH_SIZE) {
                                 db.area.insert(batch)
                                 areasImported += batch.size
+                                batch = mutableListOf()
                             }
-                            jsonReader.endArray()
+                        }
+                        if (batch.isNotEmpty()) {
+                            db.area.insert(batch)
+                            areasImported += batch.size
                         }
                     }
                 }
             }
-        } catch (_: FileNotFoundException) {
-            // The snapshot asset is optional; a missing file is not an error.
-            return ImportResult(areasImported = 0, duration = elapsedSince(startedAt))
         } catch (e: Exception) {
             // Only recoverable failures are swallowed: an Error must keep
             // propagating instead of being reported as a successful empty seed
             // that lets the caller continue into the sync.
             e.rethrowIfCancellation()
-            return ImportResult(areasImported = 0, duration = elapsedSince(startedAt))
+            return ImportResult(areasImported = 0, duration = startedAt.elapsedNow())
         }
 
-        return ImportResult(areasImported = areasImported, duration = elapsedSince(startedAt))
+        return ImportResult(areasImported = areasImported, duration = startedAt.elapsedNow())
     }
-
-    private fun elapsedSince(startedAtNanos: Long): Duration =
-        Duration.ofNanos(System.nanoTime() - startedAtNanos)
 }
 
-internal fun JsonReader.readBundledArea(): Area {
-    var id: Long? = null
-    var name: String? = null
-    var type: String? = null
-    var urlAlias: String? = null
-    var icon: String? = null
-    var iconWide: String? = null
-    var websiteUrl: String? = null
-    var description: String? = null
-    var localizedName: JsonObject? = null
-    var localizedDescription: JsonObject? = null
-    var bbox: List<Double>? = null
-    var geoJson: JsonObject? = null
-    var updatedAt: ZonedDateTime? = null
-    beginObject()
-    while (hasNext()) {
-        when (nextName()) {
-            "id" -> id = nextLong()
-            "name" -> name = nextStringOrNull()
-            "type" -> type = nextStringOrNull()
-            "url_alias" -> urlAlias = nextStringOrNull()
-            "icon" -> icon = nextStringOrNull()
-            "icon_wide" -> iconWide = nextStringOrNull()
-            "website_url" -> websiteUrl = nextStringOrNull()
-            "description" -> description = nextStringOrNull()
-            "localized_name" -> localizedName = nextJsonObjectOrNull()
-            "localized_description" -> localizedDescription = nextJsonObjectOrNull()
-            "bbox" -> bbox = nextDoubleListOrNull()
-            "geo_json" -> geoJson = nextJsonObjectOrNull()
-            "updated_at" -> updatedAt = nextStringOrNull()?.toZonedDateTimeOrNull()
-            else -> skipValue()
-        }
-    }
-    endObject()
+/** One area record as it appears in the bundled snapshot. */
+@Serializable
+internal class BundledAreaJson(
+    val id: Long? = null,
+    val name: String? = null,
+    val type: String? = null,
+    @SerialName("url_alias") val urlAlias: String? = null,
+    val icon: String? = null,
+    @SerialName("icon_wide") val iconWide: String? = null,
+    @SerialName("website_url") val websiteUrl: String? = null,
+    val description: String? = null,
+    @SerialName("localized_name") val localizedName: JsonElement? = null,
+    @SerialName("localized_description") val localizedDescription: JsonElement? = null,
+    val bbox: List<Double>? = null,
+    @SerialName("geo_json") val geoJson: JsonElement? = null,
+    @SerialName("updated_at") val updatedAt: String? = null,
+)
+
+internal fun BundledAreaJson.toArea(): Area {
     // Required fields must be present: defaulting them would silently seed a
     // bogus area if the snapshot format ever changes, instead of failing loudly
     // and rolling the import back. The id is resolved first so the messages for
@@ -158,7 +148,7 @@ internal fun JsonReader.readBundledArea(): Area {
     }
     // `updated_at` drives the delta sync cursor, so a malformed one must fail
     // the seed rather than silently reset the cursor to an arbitrary value.
-    val areaUpdatedAt = requireNotNull(updatedAt) {
+    val areaUpdatedAt = requireNotNull(updatedAt?.toZonedDateTimeOrNull()) {
         "bundled area $areaId is missing a parseable 'updated_at'"
     }
     // A bbox that is not exactly four numbers is treated as absent: the app
@@ -178,10 +168,10 @@ internal fun JsonReader.readBundledArea(): Area {
         bboxSouth = areaBbox?.get(1),
         bboxEast = areaBbox?.get(2),
         bboxNorth = areaBbox?.get(3),
-        geoJson = geoJson?.toString(),
+        geoJson = (geoJson as? JsonObject)?.toString(),
         updatedAt = areaUpdatedAt,
         deletedAt = null,
-        localizedName = localizedName,
-        localizedDescription = localizedDescription,
+        localizedName = localizedName as? JsonObject,
+        localizedDescription = localizedDescription as? JsonObject,
     )
 }

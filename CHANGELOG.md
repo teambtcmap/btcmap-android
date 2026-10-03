@@ -6,6 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+- Move the shared core off Gson and java.io onto kotlinx.serialization and Okio, groundwork for a future web target
 - Attach optional photo evidence when verifying or reporting a place
 - Show a place's photos on the place screen, with a fullscreen viewer
 - Let signed-in users upload photos to a place

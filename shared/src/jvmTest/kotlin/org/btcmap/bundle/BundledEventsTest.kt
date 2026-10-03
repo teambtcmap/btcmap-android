@@ -1,19 +1,16 @@
 package org.btcmap.bundle
 
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
-import com.google.gson.stream.JsonReader
+import okio.Buffer
+import okio.ForwardingSource
 import kotlinx.coroutines.test.runTest
 import org.btcmap.db.Database
 import org.btcmap.db.table.event.Event
 import org.junit.Assert
 import org.junit.Test
-import java.io.ByteArrayInputStream
-import java.io.FileNotFoundException
-import java.io.StringReader
 import java.time.ZonedDateTime
 
 class BundledEventsTest {
-    private fun reader(json: String) = JsonReader(StringReader(json))
 
     private fun createDatabase(): Database = Database(BundledSQLiteDriver(), ":memory:")
 
@@ -60,7 +57,7 @@ class BundledEventsTest {
             }
         """.trimIndent()
 
-        val event = reader(json).readBundledEvent()
+        val event = parseBundledEvent(json)
 
         Assert.assertEquals(7L, event.id)
         Assert.assertEquals(18.788, event.lat, 0.0)
@@ -86,7 +83,7 @@ class BundledEventsTest {
             }
         """.trimIndent()
 
-        val event = reader(json).readBundledEvent()
+        val event = parseBundledEvent(json)
 
         Assert.assertNull(event.website)
         Assert.assertNull(event.endsAt)
@@ -114,7 +111,7 @@ class BundledEventsTest {
 
         cases.forEach { (field, json) ->
             try {
-                reader(json).readBundledEvent()
+                parseBundledEvent(json)
                 Assert.fail("expected missing '$field' to be rejected")
             } catch (e: IllegalArgumentException) {
                 Assert.assertTrue(e.message.orEmpty().contains(field))
@@ -136,7 +133,7 @@ class BundledEventsTest {
         """.trimIndent()
 
         try {
-            reader(json).readBundledEvent()
+            parseBundledEvent(json)
             Assert.fail("expected an unparseable 'updated_at' to be rejected")
         } catch (e: IllegalArgumentException) {
             Assert.assertTrue(e.message.orEmpty().contains("updated_at"))
@@ -157,7 +154,7 @@ class BundledEventsTest {
         """.trimIndent()
 
         try {
-            reader(json).readBundledEvent()
+            parseBundledEvent(json)
             Assert.fail("expected an empty 'name' to be rejected")
         } catch (e: IllegalArgumentException) {
             Assert.assertTrue(e.message.orEmpty().contains("name"))
@@ -176,10 +173,10 @@ class BundledEventsTest {
             ]
         """.trimIndent()
 
-        val result = BundledEvents.import(db) { json.byteInputStream() }
+        val result = BundledEvents.import(db) { json.asSource() }
 
         Assert.assertEquals(2L, result.eventsImported)
-        Assert.assertFalse(result.duration.isNegative)
+        Assert.assertFalse(result.duration.isNegative())
         Assert.assertEquals(2L, db.event.selectCount())
 
         val first = db.event.selectById(1L)
@@ -202,7 +199,7 @@ class BundledEventsTest {
         var opened = false
         val result = BundledEvents.import(db) {
             opened = true
-            snapshotJson(1).byteInputStream()
+            snapshotJson(1).asSource()
         }
 
         Assert.assertEquals(0L, result.eventsImported)
@@ -217,7 +214,7 @@ class BundledEventsTest {
             listOf(event(id = 99L, deletedAt = ZonedDateTime.parse("2026-05-01T00:00:00Z"))),
         )
 
-        val result = BundledEvents.import(db) { snapshotJson(2).byteInputStream() }
+        val result = BundledEvents.import(db) { snapshotJson(2).asSource() }
 
         Assert.assertEquals(0L, result.eventsImported)
         Assert.assertEquals(1L, db.event.selectCount(includeDeleted = true))
@@ -227,9 +224,9 @@ class BundledEventsTest {
     @Test
     fun import_isIdempotentAcrossRepeatedCalls() = runTest {
         val db = createDatabase()
-        BundledEvents.import(db) { snapshotJson(2).byteInputStream() }
+        BundledEvents.import(db) { snapshotJson(2).asSource() }
 
-        val second = BundledEvents.import(db) { snapshotJson(5).byteInputStream() }
+        val second = BundledEvents.import(db) { snapshotJson(5).asSource() }
 
         Assert.assertEquals(0L, second.eventsImported)
         Assert.assertEquals(2L, db.event.selectCount())
@@ -239,7 +236,7 @@ class BundledEventsTest {
     fun import_emptySnapshotSeedsNothing() = runTest {
         val db = createDatabase()
 
-        val result = BundledEvents.import(db) { "[]".byteInputStream() }
+        val result = BundledEvents.import(db) { "[]".asSource() }
 
         Assert.assertEquals(0L, result.eventsImported)
         Assert.assertEquals(0L, db.event.selectCount())
@@ -250,7 +247,7 @@ class BundledEventsTest {
         val db = createDatabase()
         val count = BundledEvents.BATCH_SIZE + 1
 
-        val result = BundledEvents.import(db) { snapshotJson(count).byteInputStream() }
+        val result = BundledEvents.import(db) { snapshotJson(count).asSource() }
 
         Assert.assertEquals(count.toLong(), result.eventsImported)
         Assert.assertEquals(count.toLong(), db.event.selectCount())
@@ -261,14 +258,15 @@ class BundledEventsTest {
     fun import_closesTheStream() = runTest {
         val db = createDatabase()
         var closed = false
-        val stream = object : ByteArrayInputStream(snapshotJson(1).toByteArray()) {
+        val source = Buffer().writeUtf8(snapshotJson(1))
+        val closing = object : ForwardingSource(source) {
             override fun close() {
                 closed = true
                 super.close()
             }
         }
 
-        BundledEvents.import(db) { stream }
+        BundledEvents.import(db) { closing }
 
         Assert.assertTrue("the snapshot stream must be closed", closed)
     }
@@ -279,7 +277,7 @@ class BundledEventsTest {
     fun import_missingAssetIsNotAnError() = runTest {
         val db = createDatabase()
 
-        val result = BundledEvents.import(db) { throw FileNotFoundException("no asset") }
+        val result = BundledEvents.import(db) { null }
 
         Assert.assertEquals(0L, result.eventsImported)
         Assert.assertEquals(0L, db.event.selectCount())
@@ -296,7 +294,7 @@ class BundledEventsTest {
             ]
         """.trimIndent()
 
-        val result = BundledEvents.import(db) { json.byteInputStream() }
+        val result = BundledEvents.import(db) { json.asSource() }
 
         Assert.assertEquals(0L, result.eventsImported)
         Assert.assertEquals("a partial seed must not survive a parse failure", 0L, db.event.selectCount())
@@ -307,7 +305,7 @@ class BundledEventsTest {
         val db = createDatabase()
         val json = """[{"id":1,"lat":1.0,"lon":2.0,"name":"One"},"""
 
-        val result = BundledEvents.import(db) { json.byteInputStream() }
+        val result = BundledEvents.import(db) { json.asSource() }
 
         Assert.assertEquals(0L, result.eventsImported)
         Assert.assertEquals(0L, db.event.selectCount())
@@ -317,11 +315,11 @@ class BundledEventsTest {
     fun import_canBeRetriedAfterAFailedImport() = runTest {
         val db = createDatabase()
         BundledEvents.import(db) {
-            """[{"id":1,"lat":1.0,"lon":2.0}]""".byteInputStream()
+            """[{"id":1,"lat":1.0,"lon":2.0}]""".asSource()
         }
         Assert.assertEquals(0L, db.event.selectCount())
 
-        val result = BundledEvents.import(db) { snapshotJson(2).byteInputStream() }
+        val result = BundledEvents.import(db) { snapshotJson(2).asSource() }
 
         Assert.assertEquals(2L, result.eventsImported)
         Assert.assertEquals(2L, db.event.selectCount())

@@ -1,7 +1,7 @@
 package org.btcmap.db.table.place
 
 import androidx.sqlite.SQLiteStatement
-import com.google.gson.JsonObject
+import kotlinx.serialization.json.JsonObject
 import okhttp3.HttpUrl
 import org.btcmap.db.getHttpUrlOrNull
 import org.btcmap.db.getJsonObjectOrNull

@@ -4,13 +4,14 @@ import androidx.sqlite.SQLiteConnection
 import androidx.sqlite.SQLiteDriver
 import androidx.sqlite.execSQL
 import kotlin.use
+import okio.Path.Companion.toPath
 import org.btcmap.db.table.area.AreaQueries
 import org.btcmap.db.table.comment.CommentQueries
 import org.btcmap.db.table.event.EventQueries
 import org.btcmap.db.table.place.PlaceQueries
 import org.btcmap.db.table.preference.PreferenceQueries
 import org.btcmap.db.table.user.UserStore
-import java.io.File
+import org.btcmap.io.platformFileSystem
 
 class Database(driver: SQLiteDriver, val path: String) {
     companion object {
@@ -120,10 +121,16 @@ class Database(driver: SQLiteDriver, val path: String) {
      */
     private fun initialize(driver: SQLiteDriver, path: String): SQLiteConnection {
         if (path != MEMORY_PATH) {
-            val file = File(path)
-            if (file.exists() && isDiscardable(readUserVersion(driver, path))) {
-                file.delete()
-                SIDECAR_SUFFIXES.forEach { suffix -> File("$path$suffix").delete() }
+            val fileSystem = platformFileSystem
+            if (fileSystem != null) {
+                val file = path.toPath()
+                if (fileSystem.exists(file) && isDiscardable(readUserVersion(driver, path))) {
+                    fileSystem.delete(file)
+                    SIDECAR_SUFFIXES.forEach { suffix ->
+                        val sidecar = "$path$suffix".toPath()
+                        if (fileSystem.exists(sidecar)) fileSystem.delete(sidecar)
+                    }
+                }
             }
         }
         return driver.open(path)

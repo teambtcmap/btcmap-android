@@ -11,6 +11,7 @@ import androidx.lifecycle.repeatOnLifecycle
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import okio.source
 import org.btcmap.R
 import org.btcmap.bundle.BundledAreas
 import org.btcmap.bundle.BundledComments
@@ -89,7 +90,9 @@ class DbStatsFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             try {
                 val reads = withContext(Dispatchers.IO) {
-                    readBundles(BUNDLES) { fileName -> context.assets.open(fileName) }
+                    readBundles(BUNDLES) { fileName ->
+                        runCatching { context.assets.open(fileName).source() }.getOrNull()
+                    }
                 }
                 _binding?.statsContent?.bundles = reads.stats
                 reads.failures.forEach { showError(it) }

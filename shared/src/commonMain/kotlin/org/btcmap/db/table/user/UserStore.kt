@@ -1,7 +1,7 @@
 package org.btcmap.db.table.user
 
-import com.google.gson.Gson
 import org.btcmap.db.table.preference.PreferenceQueries
+import org.btcmap.json.btcmapJson
 
 /**
  * Stores the signed-in user as a single JSON value under [KEY] in the
@@ -13,10 +13,9 @@ import org.btcmap.db.table.preference.PreferenceQueries
  * one transaction.
  */
 class UserStore(private val preference: PreferenceQueries) {
-    private val gson = Gson()
 
     fun insert(user: User) {
-        preference.upsert(KEY, gson.toJson(user))
+        preference.upsert(KEY, btcmapJson.encodeToString(user))
     }
 
     fun select(): User? {
@@ -24,7 +23,7 @@ class UserStore(private val preference: PreferenceQueries) {
         // Corrupt or pre-format JSON is treated as absent, like a missing
         // session, instead of throwing out of settings preload (which swallows
         // it) or a screen that assumes a signed-in user.
-        return runCatching { gson.fromJson(json, User::class.java) }.getOrNull()
+        return runCatching { btcmapJson.decodeFromString<User>(json) }.getOrNull()
     }
 
     fun delete() {

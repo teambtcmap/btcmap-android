@@ -17,7 +17,7 @@ class ApiTest : ApiTestBase() {
         enqueueJson("""{"value":42}""")
 
         val result = api().call(Request.Builder().url(server.url("/x")).build()) { stream ->
-            stream.bufferedReader().readText()
+            stream.readUtf8()
         }
 
         Assert.assertEquals("""{"value":42}""", result)
@@ -28,7 +28,7 @@ class ApiTest : ApiTestBase() {
         enqueueJson("""{"message":"place is closed"}""", code = 400)
 
         try {
-            api().call(Request.Builder().url(server.url("/x")).build()) { it.bufferedReader().readText() }
+            api().call(Request.Builder().url(server.url("/x")).build()) { it.readUtf8() }
             Assert.fail("Expected ApiException")
         } catch (e: ApiException) {
             Assert.assertEquals(400, e.code)
@@ -53,7 +53,7 @@ class ApiTest : ApiTestBase() {
         enqueueJson("""{"code":"invalid_input","message":"days out of range"}""", code = 400)
 
         try {
-            api().call(Request.Builder().url(server.url("/x")).build()) { it.bufferedReader().readText() }
+            api().call(Request.Builder().url(server.url("/x")).build()) { it.readUtf8() }
             Assert.fail("Expected ApiException")
         } catch (e: ApiException) {
             Assert.assertEquals(400, e.code)
@@ -67,7 +67,7 @@ class ApiTest : ApiTestBase() {
         enqueueJson("boom", code = 500)
 
         try {
-            api().call(Request.Builder().url(server.url("/x")).build()) { it.bufferedReader().readText() }
+            api().call(Request.Builder().url(server.url("/x")).build()) { it.readUtf8() }
             Assert.fail("Expected ApiException")
         } catch (e: ApiException) {
             Assert.assertEquals(500, e.code)
@@ -80,7 +80,7 @@ class ApiTest : ApiTestBase() {
         enqueueJson("", code = 503)
 
         try {
-            api().call(Request.Builder().url(server.url("/x")).build()) { it.bufferedReader().readText() }
+            api().call(Request.Builder().url(server.url("/x")).build()) { it.readUtf8() }
             Assert.fail("Expected ApiException")
         } catch (e: ApiException) {
             Assert.assertEquals(503, e.code)
@@ -100,7 +100,7 @@ class ApiTest : ApiTestBase() {
         )
 
         try {
-            api.call(authorizedRequest()) { it.bufferedReader().readText() }
+            api.call(authorizedRequest()) { it.readUtf8() }
             Assert.fail("Expected ApiException")
         } catch (e: ApiException) {
             Assert.assertEquals(401, e.code)
@@ -121,7 +121,7 @@ class ApiTest : ApiTestBase() {
         )
 
         try {
-            api.call(authorizedRequest()) { it.bufferedReader().readText() }
+            api.call(authorizedRequest()) { it.readUtf8() }
             Assert.fail("Expected ApiException")
         } catch (e: ApiException) {
             Assert.assertEquals(401, e.code)
@@ -144,7 +144,7 @@ class ApiTest : ApiTestBase() {
         )
 
         try {
-            api.call(Request.Builder().url(server.url("/x")).build()) { it.bufferedReader().readText() }
+            api.call(Request.Builder().url(server.url("/x")).build()) { it.readUtf8() }
             Assert.fail("Expected ApiException")
         } catch (e: ApiException) {
             Assert.assertEquals(401, e.code)
@@ -169,7 +169,7 @@ class ApiTest : ApiTestBase() {
         )
 
         try {
-            api.call(authorizedRequest()) { it.bufferedReader().readText() }
+            api.call(authorizedRequest()) { it.readUtf8() }
             Assert.fail("Expected ApiException")
         } catch (e: ApiException) {
             Assert.assertEquals(401, e.code)
@@ -185,7 +185,7 @@ class ApiTest : ApiTestBase() {
         val api = Api(httpClient = OkHttpClient(), baseUrl = { url })
 
         try {
-            api.call(Request.Builder().url(url).build()) { it.bufferedReader().readText() }
+            api.call(Request.Builder().url(url).build()) { it.readUtf8() }
             Assert.fail("Expected ApiTransportException")
         } catch (e: ApiTransportException) {
             Assert.assertTrue(e.cause is IOException)
@@ -237,7 +237,7 @@ class ApiTest : ApiTestBase() {
         )
 
         try {
-            api.call(Request.Builder().url(server.url("/x")).build()) { it.bufferedReader().readText() }
+            api.call(Request.Builder().url(server.url("/x")).build()) { it.readUtf8() }
             Assert.fail("Expected ApiException")
         } catch (e: ApiException) {
             Assert.assertEquals(500, e.code)

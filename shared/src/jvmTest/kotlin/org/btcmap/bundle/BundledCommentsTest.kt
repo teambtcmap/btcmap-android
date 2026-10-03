@@ -1,19 +1,16 @@
 package org.btcmap.bundle
 
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
-import com.google.gson.stream.JsonReader
+import okio.Buffer
+import okio.ForwardingSource
 import kotlinx.coroutines.test.runTest
 import org.btcmap.db.Database
 import org.btcmap.db.table.comment.Comment
 import org.junit.Assert
 import org.junit.Test
-import java.io.ByteArrayInputStream
-import java.io.FileNotFoundException
-import java.io.StringReader
 import java.time.ZonedDateTime
 
 class BundledCommentsTest {
-    private fun reader(json: String) = JsonReader(StringReader(json))
 
     private fun createDatabase(): Database = Database(BundledSQLiteDriver(), ":memory:")
 
@@ -54,7 +51,7 @@ class BundledCommentsTest {
             }
         """.trimIndent()
 
-        val comment = reader(json).readBundledComment()
+        val comment = parseBundledComment(json)
 
         Assert.assertEquals(42L, comment.id)
         Assert.assertEquals(7L, comment.placeId)
@@ -85,7 +82,7 @@ class BundledCommentsTest {
 
         cases.forEach { (field, json) ->
             try {
-                reader(json).readBundledComment()
+                parseBundledComment(json)
                 Assert.fail("expected missing '$field' to be rejected")
             } catch (e: IllegalArgumentException) {
                 Assert.assertTrue(e.message.orEmpty().contains(field))
@@ -106,7 +103,7 @@ class BundledCommentsTest {
         """.trimIndent()
 
         try {
-            reader(json).readBundledComment()
+            parseBundledComment(json)
             Assert.fail("expected an unparseable 'updated_at' to be rejected")
         } catch (e: IllegalArgumentException) {
             Assert.assertTrue(e.message.orEmpty().contains("updated_at"))
@@ -126,7 +123,7 @@ class BundledCommentsTest {
         """.trimIndent()
 
         try {
-            reader(json).readBundledComment()
+            parseBundledComment(json)
             Assert.fail("expected an empty 'text' to be rejected")
         } catch (e: IllegalArgumentException) {
             Assert.assertTrue(e.message.orEmpty().contains("text"))
@@ -145,10 +142,10 @@ class BundledCommentsTest {
             ]
         """.trimIndent()
 
-        val result = BundledComments.import(db) { json.byteInputStream() }
+        val result = BundledComments.import(db) { json.asSource() }
 
         Assert.assertEquals(2L, result.commentsImported)
-        Assert.assertFalse(result.duration.isNegative)
+        Assert.assertFalse(result.duration.isNegative())
         Assert.assertEquals(2L, db.comment.selectCount())
 
         val comments = db.comment.selectByPlaceId(7L)
@@ -167,7 +164,7 @@ class BundledCommentsTest {
         var opened = false
         val result = BundledComments.import(db) {
             opened = true
-            snapshotJson(1).byteInputStream()
+            snapshotJson(1).asSource()
         }
 
         Assert.assertEquals(0L, result.commentsImported)
@@ -182,7 +179,7 @@ class BundledCommentsTest {
             listOf(comment(id = 99L, deletedAt = ZonedDateTime.parse("2026-05-01T00:00:00Z"))),
         )
 
-        val result = BundledComments.import(db) { snapshotJson(2).byteInputStream() }
+        val result = BundledComments.import(db) { snapshotJson(2).asSource() }
 
         Assert.assertEquals(0L, result.commentsImported)
         Assert.assertEquals(1L, db.comment.selectCount(includeDeleted = true))
@@ -192,9 +189,9 @@ class BundledCommentsTest {
     @Test
     fun import_isIdempotentAcrossRepeatedCalls() = runTest {
         val db = createDatabase()
-        BundledComments.import(db) { snapshotJson(2).byteInputStream() }
+        BundledComments.import(db) { snapshotJson(2).asSource() }
 
-        val second = BundledComments.import(db) { snapshotJson(5).byteInputStream() }
+        val second = BundledComments.import(db) { snapshotJson(5).asSource() }
 
         Assert.assertEquals(0L, second.commentsImported)
         Assert.assertEquals(2L, db.comment.selectCount())
@@ -204,7 +201,7 @@ class BundledCommentsTest {
     fun import_emptySnapshotSeedsNothing() = runTest {
         val db = createDatabase()
 
-        val result = BundledComments.import(db) { "[]".byteInputStream() }
+        val result = BundledComments.import(db) { "[]".asSource() }
 
         Assert.assertEquals(0L, result.commentsImported)
         Assert.assertEquals(0L, db.comment.selectCount())
@@ -215,7 +212,7 @@ class BundledCommentsTest {
         val db = createDatabase()
         val count = BundledComments.BATCH_SIZE + 1
 
-        val result = BundledComments.import(db) { snapshotJson(count).byteInputStream() }
+        val result = BundledComments.import(db) { snapshotJson(count).asSource() }
 
         Assert.assertEquals(count.toLong(), result.commentsImported)
         Assert.assertEquals(count.toLong(), db.comment.selectCount())
@@ -226,14 +223,15 @@ class BundledCommentsTest {
     fun import_closesTheStream() = runTest {
         val db = createDatabase()
         var closed = false
-        val stream = object : ByteArrayInputStream(snapshotJson(1).toByteArray()) {
+        val source = Buffer().writeUtf8(snapshotJson(1))
+        val closing = object : ForwardingSource(source) {
             override fun close() {
                 closed = true
                 super.close()
             }
         }
 
-        BundledComments.import(db) { stream }
+        BundledComments.import(db) { closing }
 
         Assert.assertTrue("the snapshot stream must be closed", closed)
     }
@@ -244,7 +242,7 @@ class BundledCommentsTest {
     fun import_missingAssetIsNotAnError() = runTest {
         val db = createDatabase()
 
-        val result = BundledComments.import(db) { throw FileNotFoundException("no asset") }
+        val result = BundledComments.import(db) { null }
 
         Assert.assertEquals(0L, result.commentsImported)
         Assert.assertEquals(0L, db.comment.selectCount())
@@ -261,7 +259,7 @@ class BundledCommentsTest {
             ]
         """.trimIndent()
 
-        val result = BundledComments.import(db) { json.byteInputStream() }
+        val result = BundledComments.import(db) { json.asSource() }
 
         Assert.assertEquals(0L, result.commentsImported)
         Assert.assertEquals("a partial seed must not survive a parse failure", 0L, db.comment.selectCount())
@@ -272,7 +270,7 @@ class BundledCommentsTest {
         val db = createDatabase()
         val json = """[{"id":1,"place_id":7,"text":"One"},"""
 
-        val result = BundledComments.import(db) { json.byteInputStream() }
+        val result = BundledComments.import(db) { json.asSource() }
 
         Assert.assertEquals(0L, result.commentsImported)
         Assert.assertEquals(0L, db.comment.selectCount())
@@ -282,11 +280,11 @@ class BundledCommentsTest {
     fun import_canBeRetriedAfterAFailedImport() = runTest {
         val db = createDatabase()
         BundledComments.import(db) {
-            """[{"id":1,"place_id":7,"text":"One"}]""".byteInputStream()
+            """[{"id":1,"place_id":7,"text":"One"}]""".asSource()
         }
         Assert.assertEquals(0L, db.comment.selectCount())
 
-        val result = BundledComments.import(db) { snapshotJson(2).byteInputStream() }
+        val result = BundledComments.import(db) { snapshotJson(2).asSource() }
 
         Assert.assertEquals(2L, result.commentsImported)
         Assert.assertEquals(2L, db.comment.selectCount())

@@ -31,3 +31,7 @@ include(":app")
 include(":shared")
 include(":ui")
 include(":desktopApp")
+
+// Throwaway spike proving the KMP-clean replacement stack compiles and runs on
+// wasmJs. Not part of the app; delete once the migration is done.
+include(":webspike")

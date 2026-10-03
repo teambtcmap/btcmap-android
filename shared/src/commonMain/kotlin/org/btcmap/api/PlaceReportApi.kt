@@ -1,7 +1,10 @@
 package org.btcmap.api
 
-import com.google.gson.JsonArray
-import com.google.gson.JsonObject
+import kotlinx.serialization.json.buildJsonArray
+import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.jsonPrimitive
+import kotlinx.serialization.json.long
+import kotlinx.serialization.json.put
 import okhttp3.Request
 import org.btcmap.util.toJsonObject
 import java.util.Base64
@@ -20,20 +23,20 @@ suspend fun Api.reportPlace(
 ): ReportPlaceResponse {
     val url = buildUrl("v4", "place-reports")
 
-    val extra = JsonObject().apply {
-        addProperty("origin", userAgent)
-        comment?.takeIf { it.isNotBlank() }?.let { addProperty("comment", it) }
+    val extra = buildJsonObject {
+        put("origin", userAgent)
+        comment?.takeIf { it.isNotBlank() }?.let { put("comment", it) }
     }
 
-    val req = JsonObject().apply {
-        addProperty("place_id", placeId)
-        addProperty("type", type)
-        add("extra_fields", extra)
+    val req = buildJsonObject {
+        put("place_id", placeId)
+        put("type", type)
+        put("extra_fields", extra)
         if (photos.isNotEmpty()) {
-            add("photos", JsonArray().apply {
+            put("photos", buildJsonArray {
                 photos.forEach { photo ->
-                    add(JsonObject().apply {
-                        addProperty("data_base64", Base64.getEncoder().encodeToString(photo))
+                    add(buildJsonObject {
+                        put("data_base64", Base64.getEncoder().encodeToString(photo))
                     })
                 }
             })
@@ -51,7 +54,7 @@ suspend fun Api.reportPlace(
         ReportPlaceResponse(
             id = body.long("id"),
             origin = body.string("origin"),
-            photoIds = body.arrayOrNull("photo_ids")?.map { it.asLong }.orEmpty(),
+            photoIds = body.arrayOrNull("photo_ids")?.map { it.jsonPrimitive.long }.orEmpty(),
         )
     }
 }

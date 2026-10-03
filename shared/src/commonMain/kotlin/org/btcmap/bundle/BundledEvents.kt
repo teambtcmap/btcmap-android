@@ -1,17 +1,23 @@
+@file:OptIn(kotlinx.serialization.ExperimentalSerializationApi::class)
+
 package org.btcmap.bundle
 
-import com.google.gson.stream.JsonReader
+import kotlin.time.Duration
+import kotlin.time.TimeSource
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import okhttp3.HttpUrl
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.DecodeSequenceMode
+import kotlinx.serialization.json.okio.decodeBufferedSourceToSequence
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
+import okio.Source
+import okio.buffer
 import org.btcmap.db.Database
 import org.btcmap.db.table.event.Event
+import org.btcmap.json.btcmapJson
 import org.btcmap.util.rethrowIfCancellation
-import java.io.FileNotFoundException
-import java.io.InputStream
-import java.time.Duration
-import java.time.ZonedDateTime
+import org.btcmap.util.toZonedDateTimeOrNull
 
 /**
  * Seeds the event table from the bundled snapshot produced by the bundler.
@@ -20,6 +26,9 @@ import java.time.ZonedDateTime
  * fetches the few that changed since the snapshot was generated, and events are
  * searchable offline. It contains only events that had not started when it was
  * generated, matching what the screens display; the delta keeps the rest fresh.
+ *
+ * The snapshot is decoded record by record from an [okio.Source], so it is
+ * never buffered whole in memory.
  */
 object BundledEvents {
     const val FILE_NAME = "bundled-events.json"
@@ -32,18 +41,15 @@ object BundledEvents {
     )
 
     /**
-     * Seeds [db] from the snapshot produced by [openStream], unless it already
-     * holds events.
-     *
-     * The snapshot arrives as a stream, so the seeding logic — the one-shot
-     * guard, the transactional import and the failure handling — is platform-free:
-     * the host opens the bundled asset and a test supplies an in-memory stream.
+     * Seeds [db] from the snapshot produced by [openSource], unless it already
+     * holds events. A null [openSource] result means the optional asset is
+     * absent, which is not an error.
      */
     suspend fun import(
         db: Database,
-        openStream: () -> InputStream,
+        openSource: () -> Source?,
     ): ImportResult {
-        val startedAt = System.nanoTime()
+        val startedAt = TimeSource.Monotonic.markNow()
 
         // Seeding is intentionally a one-shot, fresh-install operation: any row
         // already stored means the snapshot was imported or live data was
@@ -60,7 +66,7 @@ object BundledEvents {
                 db.event.selectCount(includeDeleted = true)
             }
             if (eventsInDb > 0) {
-                return ImportResult(eventsImported = 0, duration = elapsedSince(startedAt))
+                return ImportResult(eventsImported = 0, duration = startedAt.elapsedNow())
             }
 
             // The whole parse runs inside one transaction so a malformed asset
@@ -68,71 +74,58 @@ object BundledEvents {
             // instead of leaving a partial seed that the count check above would
             // then treat as complete.
             withContext(Dispatchers.IO) {
-                openStream().use { stream ->
-                    stream.bufferedReader().use { reader ->
-                        val jsonReader = JsonReader(reader)
-                        db.transaction {
-                            jsonReader.beginArray()
-                            var batch = mutableListOf<Event>()
-                            while (jsonReader.hasNext()) {
-                                batch.add(jsonReader.readBundledEvent())
-                                if (batch.size >= BATCH_SIZE) {
-                                    db.event.insert(batch)
-                                    eventsImported += batch.size
-                                    batch = mutableListOf()
-                                }
-                            }
-                            if (batch.isNotEmpty()) {
+                val source = openSource()
+                if (source == null) {
+                    return@withContext
+                }
+
+                source.buffer().use { buffered ->
+                    db.transaction {
+                        var batch = mutableListOf<Event>()
+                        for (record in btcmapJson.decodeBufferedSourceToSequence<BundledEventJson>(
+                            buffered,
+                            DecodeSequenceMode.ARRAY_WRAPPED,
+                        )) {
+                            batch.add(record.toEvent())
+                            if (batch.size >= BATCH_SIZE) {
                                 db.event.insert(batch)
                                 eventsImported += batch.size
+                                batch = mutableListOf()
                             }
-                            jsonReader.endArray()
+                        }
+                        if (batch.isNotEmpty()) {
+                            db.event.insert(batch)
+                            eventsImported += batch.size
                         }
                     }
                 }
             }
-        } catch (_: FileNotFoundException) {
-            // The snapshot asset is optional; a missing file is not an error.
-            return ImportResult(eventsImported = 0, duration = elapsedSince(startedAt))
         } catch (e: Exception) {
             // Only recoverable failures are swallowed: an Error must keep
             // propagating instead of being reported as a successful empty seed
             // that lets the caller continue into the sync.
             e.rethrowIfCancellation()
-            return ImportResult(eventsImported = 0, duration = elapsedSince(startedAt))
+            return ImportResult(eventsImported = 0, duration = startedAt.elapsedNow())
         }
 
-        return ImportResult(eventsImported = eventsImported, duration = elapsedSince(startedAt))
+        return ImportResult(eventsImported = eventsImported, duration = startedAt.elapsedNow())
     }
-
-    private fun elapsedSince(startedAtNanos: Long): Duration =
-        Duration.ofNanos(System.nanoTime() - startedAtNanos)
 }
 
-internal fun JsonReader.readBundledEvent(): Event {
-    var id: Long? = null
-    var lat: Double? = null
-    var lon: Double? = null
-    var name: String? = null
-    var website: HttpUrl? = null
-    var startsAt: ZonedDateTime? = null
-    var endsAt: ZonedDateTime? = null
-    var updatedAt: ZonedDateTime? = null
-    beginObject()
-    while (hasNext()) {
-        when (nextName()) {
-            "id" -> id = nextLong()
-            "lat" -> lat = nextDouble()
-            "lon" -> lon = nextDouble()
-            "name" -> name = nextStringOrNull()
-            "website" -> website = nextStringOrNull()?.toHttpUrlOrNull()
-            "starts_at" -> startsAt = nextStringOrNull()?.toZonedDateTimeOrNull()
-            "ends_at" -> endsAt = nextStringOrNull()?.toZonedDateTimeOrNull()
-            "updated_at" -> updatedAt = nextStringOrNull()?.toZonedDateTimeOrNull()
-            else -> skipValue()
-        }
-    }
-    endObject()
+/** One event record as it appears in the bundled snapshot. */
+@Serializable
+internal class BundledEventJson(
+    val id: Long? = null,
+    val lat: Double? = null,
+    val lon: Double? = null,
+    val name: String? = null,
+    val website: String? = null,
+    @SerialName("starts_at") val startsAt: String? = null,
+    @SerialName("ends_at") val endsAt: String? = null,
+    @SerialName("updated_at") val updatedAt: String? = null,
+)
+
+internal fun BundledEventJson.toEvent(): Event {
     // Required fields must be present: defaulting them would silently seed a
     // bogus event if the snapshot format ever changes, instead of failing
     // loudly and rolling the import back. The id is resolved first so the
@@ -141,12 +134,12 @@ internal fun JsonReader.readBundledEvent(): Event {
     val eventLat = requireNotNull(lat) { "bundled event $eventId is missing 'lat'" }
     val eventLon = requireNotNull(lon) { "bundled event $eventId is missing 'lon'" }
     val eventName = requireNotNull(name) { "bundled event $eventId is missing 'name'" }
-    val eventStartsAt = requireNotNull(startsAt) {
+    val eventStartsAt = requireNotNull(startsAt?.toZonedDateTimeOrNull()) {
         "bundled event $eventId is missing a parseable 'starts_at'"
     }
     // `updated_at` drives the delta sync cursor, so a malformed one must fail
     // the seed rather than silently reset the cursor to an arbitrary value.
-    val eventUpdatedAt = requireNotNull(updatedAt) {
+    val eventUpdatedAt = requireNotNull(updatedAt?.toZonedDateTimeOrNull()) {
         "bundled event $eventId is missing a parseable 'updated_at'"
     }
     require(eventName.isNotEmpty()) { "bundled event $eventId has an empty 'name'" }
@@ -155,9 +148,9 @@ internal fun JsonReader.readBundledEvent(): Event {
         lat = eventLat,
         lon = eventLon,
         name = eventName,
-        website = website,
+        website = website?.toHttpUrlOrNull(),
         startsAt = eventStartsAt,
-        endsAt = endsAt,
+        endsAt = endsAt?.toZonedDateTimeOrNull(),
         updatedAt = eventUpdatedAt,
         deletedAt = null,
     )

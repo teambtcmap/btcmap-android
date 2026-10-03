@@ -1,20 +1,18 @@
 package org.btcmap.bundle
 
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
-import com.google.gson.JsonParser
-import com.google.gson.stream.JsonReader
+import okio.Buffer
+import okio.ForwardingSource
+import org.btcmap.json.parseJson
+import org.btcmap.json.parseJsonObject
 import kotlinx.coroutines.test.runTest
 import org.btcmap.db.Database
 import org.btcmap.db.table.area.Area
 import org.junit.Assert
 import org.junit.Test
-import java.io.ByteArrayInputStream
-import java.io.FileNotFoundException
-import java.io.StringReader
 import java.time.ZonedDateTime
 
 class BundledAreasTest {
-    private fun reader(json: String) = JsonReader(StringReader(json))
 
     private fun createDatabase(): Database = Database(BundledSQLiteDriver(), ":memory:")
 
@@ -72,7 +70,7 @@ class BundledAreasTest {
             }
         """.trimIndent()
 
-        val area = reader(json).readBundledArea()
+        val area = parseBundledArea(json)
 
         Assert.assertEquals(42L, area.id)
         Assert.assertEquals("Grand Paris", area.name)
@@ -89,11 +87,11 @@ class BundledAreasTest {
         Assert.assertEquals("https://btcmap.org/community/grand-paris", area.websiteUrl)
         Assert.assertEquals("A community", area.description)
         Assert.assertEquals(
-            JsonParser.parseString("""{"en":"Grand Paris","ru":"Большой Париж"}"""),
+            parseJsonObject("""{"en":"Grand Paris","ru":"Большой Париж"}"""),
             area.localizedName,
         )
         Assert.assertEquals(
-            JsonParser.parseString("""{"en":"A community"}"""),
+            parseJsonObject("""{"en":"A community"}"""),
             area.localizedDescription,
         )
         Assert.assertEquals(2.22, area.bboxWest!!, 0.0)
@@ -101,10 +99,10 @@ class BundledAreasTest {
         Assert.assertEquals(2.47, area.bboxEast!!, 0.0)
         Assert.assertEquals(48.91, area.bboxNorth!!, 0.0)
         Assert.assertEquals(
-            JsonParser.parseString(
+            parseJsonObject(
                 """{"type":"Polygon","coordinates":[[[0.0,0.0],[1.0,0.0],[1.0,1.0],[0.0,0.0]]]}""",
             ),
-            JsonParser.parseString(area.geoJson),
+            parseJson(area.geoJson!!),
         )
         Assert.assertEquals(ZonedDateTime.parse("2026-03-01T12:00:00Z"), area.updatedAt)
         Assert.assertNull(area.deletedAt)
@@ -123,7 +121,7 @@ class BundledAreasTest {
             }
         """.trimIndent()
 
-        val area = reader(json).readBundledArea()
+        val area = parseBundledArea(json)
 
         Assert.assertNull(area.icon)
         Assert.assertNull(area.iconWide)
@@ -151,7 +149,7 @@ class BundledAreasTest {
             }
         """.trimIndent()
 
-        val area = reader(json).readBundledArea()
+        val area = parseBundledArea(json)
 
         Assert.assertNull(area.bboxWest)
         Assert.assertNull(area.bboxNorth)
@@ -179,7 +177,7 @@ class BundledAreasTest {
 
         cases.forEach { (field, json) ->
             try {
-                reader(json).readBundledArea()
+                parseBundledArea(json)
                 Assert.fail("expected missing '$field' to be rejected")
             } catch (e: IllegalArgumentException) {
                 Assert.assertTrue(e.message.orEmpty().contains(field))
@@ -201,7 +199,7 @@ class BundledAreasTest {
         """.trimIndent()
 
         try {
-            reader(json).readBundledArea()
+            parseBundledArea(json)
             Assert.fail("expected an unparseable 'updated_at' to be rejected")
         } catch (e: IllegalArgumentException) {
             Assert.assertTrue(e.message.orEmpty().contains("updated_at"))
@@ -222,7 +220,7 @@ class BundledAreasTest {
             }
         """.trimIndent()
 
-        Assert.assertNull(reader(json).readBundledArea().geoJson)
+        Assert.assertNull(parseBundledArea(json).geoJson)
     }
 
     @Test
@@ -240,7 +238,7 @@ class BundledAreasTest {
             }
         """.trimIndent()
 
-        val area = reader(json).readBundledArea()
+        val area = parseBundledArea(json)
 
         Assert.assertNull(area.localizedName)
         Assert.assertNull(area.localizedDescription)
@@ -258,10 +256,10 @@ class BundledAreasTest {
             ]
         """.trimIndent()
 
-        val result = BundledAreas.import(db) { json.byteInputStream() }
+        val result = BundledAreas.import(db) { json.asSource() }
 
         Assert.assertEquals(2L, result.areasImported)
-        Assert.assertFalse(result.duration.isNegative)
+        Assert.assertFalse(result.duration.isNegative())
         Assert.assertEquals(2L, db.area.selectCount())
 
         val first = db.area.selectById(1L)
@@ -274,7 +272,7 @@ class BundledAreasTest {
         Assert.assertEquals(4.0, first.bboxNorth!!, 0.0)
         Assert.assertNotNull(first.geoJson)
         Assert.assertEquals(
-            JsonParser.parseString("""{"en":"One"}"""),
+            parseJsonObject("""{"en":"One"}"""),
             first.localizedName,
         )
         Assert.assertEquals(ZonedDateTime.parse("2026-03-01T12:00:00Z"), first.updatedAt)
@@ -295,7 +293,7 @@ class BundledAreasTest {
         var opened = false
         val result = BundledAreas.import(db) {
             opened = true
-            snapshotJson(1).byteInputStream()
+            snapshotJson(1).asSource()
         }
 
         Assert.assertEquals(0L, result.areasImported)
@@ -311,7 +309,7 @@ class BundledAreasTest {
             listOf(area(id = 99L, deletedAt = ZonedDateTime.parse("2026-05-01T00:00:00Z"))),
         )
 
-        val result = BundledAreas.import(db) { snapshotJson(2).byteInputStream() }
+        val result = BundledAreas.import(db) { snapshotJson(2).asSource() }
 
         Assert.assertEquals(0L, result.areasImported)
         Assert.assertEquals(1L, db.area.selectCount(includeDeleted = true))
@@ -323,9 +321,9 @@ class BundledAreasTest {
     @Test
     fun import_isIdempotentAcrossRepeatedCalls() = runTest {
         val db = createDatabase()
-        BundledAreas.import(db) { snapshotJson(2).byteInputStream() }
+        BundledAreas.import(db) { snapshotJson(2).asSource() }
 
-        val second = BundledAreas.import(db) { snapshotJson(5).byteInputStream() }
+        val second = BundledAreas.import(db) { snapshotJson(5).asSource() }
 
         Assert.assertEquals(0L, second.areasImported)
         Assert.assertEquals(2L, db.area.selectCount())
@@ -336,7 +334,7 @@ class BundledAreasTest {
     fun import_emptySnapshotSeedsNothing() = runTest {
         val db = createDatabase()
 
-        val result = BundledAreas.import(db) { "[]".byteInputStream() }
+        val result = BundledAreas.import(db) { "[]".asSource() }
 
         Assert.assertEquals(0L, result.areasImported)
         Assert.assertEquals(0L, db.area.selectCount())
@@ -347,7 +345,7 @@ class BundledAreasTest {
         val db = createDatabase()
         val count = BundledAreas.BATCH_SIZE + 1
 
-        val result = BundledAreas.import(db) { snapshotJson(count).byteInputStream() }
+        val result = BundledAreas.import(db) { snapshotJson(count).asSource() }
 
         Assert.assertEquals(count.toLong(), result.areasImported)
         Assert.assertEquals(count.toLong(), db.area.selectCount())
@@ -360,14 +358,15 @@ class BundledAreasTest {
     fun import_closesTheStream() = runTest {
         val db = createDatabase()
         var closed = false
-        val stream = object : ByteArrayInputStream(snapshotJson(1).toByteArray()) {
+        val source = Buffer().writeUtf8(snapshotJson(1))
+        val closing = object : ForwardingSource(source) {
             override fun close() {
                 closed = true
                 super.close()
             }
         }
 
-        BundledAreas.import(db) { stream }
+        BundledAreas.import(db) { closing }
 
         Assert.assertTrue("the snapshot stream must be closed", closed)
     }
@@ -378,7 +377,7 @@ class BundledAreasTest {
     fun import_missingAssetIsNotAnError() = runTest {
         val db = createDatabase()
 
-        val result = BundledAreas.import(db) { throw FileNotFoundException("no asset") }
+        val result = BundledAreas.import(db) { null }
 
         Assert.assertEquals(0L, result.areasImported)
         Assert.assertEquals(0L, db.area.selectCount())
@@ -395,7 +394,7 @@ class BundledAreasTest {
             ]
         """.trimIndent()
 
-        val result = BundledAreas.import(db) { json.byteInputStream() }
+        val result = BundledAreas.import(db) { json.asSource() }
 
         Assert.assertEquals(0L, result.areasImported)
         Assert.assertEquals("a partial seed must not survive a parse failure", 0L, db.area.selectCount())
@@ -406,7 +405,7 @@ class BundledAreasTest {
         val db = createDatabase()
         val json = """[{"id":1,"name":"One","type":"community"},"""
 
-        val result = BundledAreas.import(db) { json.byteInputStream() }
+        val result = BundledAreas.import(db) { json.asSource() }
 
         Assert.assertEquals(0L, result.areasImported)
         Assert.assertEquals(0L, db.area.selectCount())
@@ -416,11 +415,11 @@ class BundledAreasTest {
     fun import_canBeRetriedAfterAFailedImport() = runTest {
         val db = createDatabase()
         BundledAreas.import(db) {
-            """[{"id":1,"name":"One","type":"community"}]""".byteInputStream()
+            """[{"id":1,"name":"One","type":"community"}]""".asSource()
         }
         Assert.assertEquals(0L, db.area.selectCount())
 
-        val result = BundledAreas.import(db) { snapshotJson(2).byteInputStream() }
+        val result = BundledAreas.import(db) { snapshotJson(2).asSource() }
 
         Assert.assertEquals(2L, result.areasImported)
         Assert.assertEquals(2L, db.area.selectCount())

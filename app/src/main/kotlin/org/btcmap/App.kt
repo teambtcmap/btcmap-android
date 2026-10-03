@@ -12,6 +12,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import okio.Path.Companion.toPath
+import okio.Source
+import okio.source
 import org.btcmap.api.Api
 import org.btcmap.api.apiHttpClient
 import org.btcmap.api.signOut
@@ -21,6 +24,7 @@ import org.btcmap.bundle.BundledEvents
 import org.btcmap.bundle.BundledPlaces
 import org.btcmap.db.Database
 import org.btcmap.db.LegacyDatabases
+import org.btcmap.io.platformFileSystem
 import org.btcmap.ui.ImageStatsEventListener
 import org.btcmap.ui.map.OfflinePacks
 import org.btcmap.settings.apiUrl
@@ -74,15 +78,33 @@ class App : Application(), SingletonImageLoader.Factory {
         SyncManager(
             sync = { sync },
             seedPlaces = { onBatch ->
-                BundledPlaces.import(db, onBatch) { assets.open(BundledPlaces.FILE_NAME) }.placesImported
+                BundledPlaces.import(db, onBatch) { openBundledSnapshot(BundledPlaces.FILE_NAME) }
+                    .placesImported
             },
-            seedEvents = { BundledEvents.import(db) { assets.open(BundledEvents.FILE_NAME) }.eventsImported },
+            seedEvents = {
+                BundledEvents.import(db) { openBundledSnapshot(BundledEvents.FILE_NAME) }.eventsImported
+            },
             seedComments = {
-                BundledComments.import(db) { assets.open(BundledComments.FILE_NAME) }.commentsImported
+                BundledComments.import(db) { openBundledSnapshot(BundledComments.FILE_NAME) }
+                    .commentsImported
             },
-            seedAreas = { BundledAreas.import(db) { assets.open(BundledAreas.FILE_NAME) }.areasImported },
+            seedAreas = {
+                BundledAreas.import(db) { openBundledSnapshot(BundledAreas.FILE_NAME) }.areasImported
+            },
         )
     }
+
+    /**
+     * Opens a bundled snapshot asset, or returns null when it is absent. The
+     * snapshot is an optional offline fallback, so a missing asset is not an
+     * error.
+     */
+    internal fun openBundledSnapshot(name: String): Source? =
+        try {
+            assets.open(name).source()
+        } catch (_: java.io.IOException) {
+            null
+        }
 
     val api: Api
         get() = apiForTesting ?: defaultApi
@@ -195,7 +217,12 @@ class App : Application(), SingletonImageLoader.Factory {
         // before the first screen, so it stays off the main thread.
         ioScope.launch {
             try {
-                databasePath.parentFile?.let { LegacyDatabases.delete(it, databasePath) }
+                val fileSystem = platformFileSystem
+                val legacyPath = databasePath.absolutePath.toPath()
+                val parent = legacyPath.parent
+                if (fileSystem != null && parent != null) {
+                    LegacyDatabases.delete(fileSystem, parent, legacyPath)
+                }
             } catch (t: Throwable) {
                 t.rethrowIfCancellation()
             }

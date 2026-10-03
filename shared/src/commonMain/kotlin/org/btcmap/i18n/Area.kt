@@ -1,6 +1,6 @@
 package org.btcmap.i18n
 
-import com.google.gson.JsonObject
+import kotlinx.serialization.json.JsonObject
 import org.btcmap.db.table.area.Area
 import org.btcmap.db.table.area.SearchArea
 import java.util.Locale

@@ -1,6 +1,6 @@
 package org.btcmap.api
 
-import com.google.gson.JsonPrimitive
+import kotlinx.serialization.json.JsonPrimitive
 import okhttp3.Request
 import org.btcmap.util.toJsonLongArray
 

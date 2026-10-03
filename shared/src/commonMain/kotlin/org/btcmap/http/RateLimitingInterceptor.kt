@@ -2,7 +2,7 @@ package org.btcmap.http
 
 import okhttp3.Interceptor
 import okhttp3.Response
-import java.io.IOException
+import okio.IOException
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeParseException

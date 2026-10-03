@@ -1,6 +1,7 @@
 package org.btcmap.api
 
 import kotlinx.coroutines.test.runTest
+import kotlinx.serialization.json.jsonPrimitive
 import org.junit.Assert
 import org.junit.Test
 import java.time.ZonedDateTime
@@ -32,7 +33,7 @@ class PlaceApiTest : ApiTestBase() {
         Assert.assertEquals(2.5, place.lon, 0.0)
         Assert.assertEquals("cafe", place.icon)
         Assert.assertEquals("Cafe", place.name)
-        Assert.assertEquals("Kaffee", place.localizedName!!.get("de").asString)
+        Assert.assertEquals("Kaffee", place.localizedName!!.getValue("de").jsonPrimitive.content)
         Assert.assertEquals("2026-01-02T03:04:05Z", place.updatedAt)
         Assert.assertEquals("https://app.example", place.requiredAppUrl)
         Assert.assertEquals("2026-02-01T00:00:00Z", place.boostedUntil)

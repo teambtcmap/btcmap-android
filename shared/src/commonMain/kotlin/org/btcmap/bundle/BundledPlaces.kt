@@ -1,21 +1,29 @@
+@file:OptIn(kotlinx.serialization.ExperimentalSerializationApi::class)
+
 package org.btcmap.bundle
 
 import androidx.sqlite.execSQL
-import com.google.gson.JsonObject
-import com.google.gson.stream.JsonReader
+import kotlin.time.Duration
+import kotlin.time.TimeSource
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import okhttp3.HttpUrl
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.DecodeSequenceMode
+import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.okio.decodeBufferedSourceToSequence
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
+import okio.Source
+import okio.buffer
 import org.btcmap.api.toVerifiedAt
 import org.btcmap.db.Database
 import org.btcmap.db.table.place.CREATE_INDEXES
 import org.btcmap.db.table.place.INDEX_NAMES
 import org.btcmap.db.table.place.Place
+import org.btcmap.json.btcmapJson
 import org.btcmap.util.rethrowIfCancellation
-import java.io.FileNotFoundException
-import java.io.InputStream
-import java.time.Duration
+import org.btcmap.util.toZonedDateTimeOrNull
 import java.time.ZonedDateTime
 import java.time.format.DateTimeParseException
 
@@ -30,6 +38,9 @@ import java.time.format.DateTimeParseException
  * delta. The map stays fully usable offline, or while the server is
  * unreachable and the delta cannot be fetched, because every field a place
  * screen reads is already present.
+ *
+ * The snapshot is decoded record by record from an [okio.Source], so it is
+ * never buffered whole in memory.
  */
 object BundledPlaces {
     const val FILE_NAME = "bundled-places.json"
@@ -39,12 +50,6 @@ object BundledPlaces {
      * places committed so far while the rest of the snapshot is still parsing.
      */
     internal const val BATCH_SIZE = 5_000
-
-    /**
-     * The snapshot is read in a few large chunks rather than the 8 KiB default,
-     * which cuts the number of UTF-8 decodes over the ~13 MB file.
-     */
-    private const val READ_BUFFER_SIZE = 1 shl 16
 
     /**
      * Where the seed records its progress in the preference table. A marker is
@@ -62,25 +67,24 @@ object BundledPlaces {
     )
 
     /**
-     * Seeds the places table from the snapshot produced by [openStream], unless
+     * Seeds the places table from the snapshot produced by [openSource], unless
      * it has already been seeded, reporting the running number of imported
      * places through [onBatch] after each committed batch.
+     *
+     * [openSource] returns null when the snapshot asset is absent, which is not
+     * an error: the snapshot is an optional offline fallback.
      *
      * The import commits in batches so the caller can surface the rows that have
      * landed instead of waiting for the whole snapshot, and it records progress
      * in the preference table so an import interrupted by a crash is retried
      * rather than mistaken for a finished one.
-     *
-     * The snapshot arrives as a stream, so the seeding logic itself is
-     * platform-free: the host opens the bundled asset and a test supplies an
-     * in-memory stream.
      */
     suspend fun import(
         db: Database,
         onBatch: (Long) -> Unit = {},
-        openStream: () -> InputStream,
+        openSource: () -> Source?,
     ): ImportResult {
-        val startedAt = System.nanoTime()
+        val startedAt = TimeSource.Monotonic.markNow()
 
         // Seeding is intentionally a one-shot, fresh-install operation: once it
         // has run, a stale bundle must never overwrite rows that sync has since
@@ -93,42 +97,46 @@ object BundledPlaces {
         var seedingStarted = false
         try {
             if (withContext(Dispatchers.IO) { alreadySeeded(db) }) {
-                return ImportResult(placesImported = 0, duration = elapsedSince(startedAt))
+                return ImportResult(placesImported = 0, duration = startedAt.elapsedNow())
             }
 
             withContext(Dispatchers.IO) {
                 seedingStarted = true
                 db.preference.upsert(SEED_STATE_KEY, SEED_IN_PROGRESS)
 
-                openStream().use { stream ->
-                    stream.reader(Charsets.UTF_8).buffered(READ_BUFFER_SIZE).use { reader ->
-                        val jsonReader = JsonReader(reader)
-                        // The indexes are rebuilt once on the finished table:
-                        // maintaining the updated_at expression index and the
-                        // bounds index for every seeded row costs more than one
-                        // pass over the table. Until they exist the map's
-                        // viewport read scans the partially filled table, which
-                        // is cheap at this size and lets it draw each batch.
-                        dropPlaceIndexes(db)
-                        try {
-                            jsonReader.beginArray()
-                            var batch = mutableListOf<Place>()
-                            while (jsonReader.hasNext()) {
-                                batch.add(jsonReader.readBundledPlace())
-                                if (batch.size >= BATCH_SIZE) {
-                                    placesImported += insertBatch(db, batch)
-                                    onBatch(placesImported)
-                                    batch = mutableListOf()
-                                }
-                            }
-                            if (batch.isNotEmpty()) {
+                val source = openSource()
+                if (source == null) {
+                    discardPartialSeed(db)
+                    return@withContext
+                }
+
+                source.buffer().use { buffered ->
+                    // The indexes are rebuilt once on the finished table:
+                    // maintaining the updated_at expression index and the
+                    // bounds index for every seeded row costs more than one
+                    // pass over the table. Until they exist the map's viewport
+                    // read scans the partially filled table, which is cheap at
+                    // this size and lets it draw each batch.
+                    dropPlaceIndexes(db)
+                    try {
+                        var batch = mutableListOf<Place>()
+                        for (record in btcmapJson.decodeBufferedSourceToSequence<BundledPlaceJson>(
+                            buffered,
+                            DecodeSequenceMode.ARRAY_WRAPPED,
+                        )) {
+                            batch.add(record.toPlace())
+                            if (batch.size >= BATCH_SIZE) {
                                 placesImported += insertBatch(db, batch)
                                 onBatch(placesImported)
+                                batch = mutableListOf()
                             }
-                            jsonReader.endArray()
-                        } finally {
-                            createPlaceIndexes(db)
                         }
+                        if (batch.isNotEmpty()) {
+                            placesImported += insertBatch(db, batch)
+                            onBatch(placesImported)
+                        }
+                    } finally {
+                        createPlaceIndexes(db)
                     }
                 }
 
@@ -140,10 +148,6 @@ object BundledPlaces {
                     db.preference.delete(SEED_STATE_KEY)
                 }
             }
-        } catch (_: FileNotFoundException) {
-            // The snapshot asset is optional; a missing file is not an error.
-            if (seedingStarted) discardPartialSeed(db)
-            return ImportResult(placesImported = 0, duration = elapsedSince(startedAt))
         } catch (e: Exception) {
             // Only recoverable failures are swallowed: an Error must keep
             // propagating instead of being reported as a successful empty seed
@@ -152,11 +156,10 @@ object BundledPlaces {
             // table instead of treating a partial seed as done.
             e.rethrowIfCancellation()
             if (seedingStarted) discardPartialSeed(db)
-            return ImportResult(placesImported = 0, duration = elapsedSince(startedAt))
+            return ImportResult(placesImported = 0, duration = startedAt.elapsedNow())
         }
 
-        val duration = elapsedSince(startedAt)
-        return ImportResult(placesImported = placesImported, duration = duration)
+        return ImportResult(placesImported = placesImported, duration = startedAt.elapsedNow())
     }
 
     /**
@@ -214,63 +217,36 @@ object BundledPlaces {
             t.rethrowIfCancellation()
         }
     }
-
-    private fun elapsedSince(startedAtNanos: Long): Duration =
-        Duration.ofNanos(System.nanoTime() - startedAtNanos)
 }
 
-internal fun JsonReader.readBundledPlace(): Place {
-    var id: Long? = null
-    var lat: Double? = null
-    var lon: Double? = null
-    var icon: String? = null
-    var name: String? = null
-    var localizedName: JsonObject? = null
-    var updatedAt: ZonedDateTime? = null
-    var verifiedAt: ZonedDateTime? = null
-    var address: String? = null
-    var openingHours: String? = null
-    var phone: String? = null
-    var website: HttpUrl? = null
-    var email: String? = null
-    var twitter: HttpUrl? = null
-    var facebook: HttpUrl? = null
-    var instagram: HttpUrl? = null
-    var line: HttpUrl? = null
-    var requiredAppUrl: HttpUrl? = null
-    var boostedUntil: ZonedDateTime? = null
-    var comments: Long? = null
-    var telegram: HttpUrl? = null
-    var osmId: String? = null
-    beginObject()
-    while (hasNext()) {
-        when (nextName()) {
-            "id" -> id = nextLong()
-            "lat" -> lat = nextDouble()
-            "lon" -> lon = nextDouble()
-            "icon" -> icon = nextString()
-            "name" -> name = nextStringOrNull()
-            "localized_name" -> localizedName = nextJsonObjectOrNull()
-            "updated_at" -> updatedAt = nextStringOrNull()?.toZonedDateTimeOrNull()
-            "verified_at" -> verifiedAt = nextStringOrNull()?.toVerifiedAtOrNull()
-            "address" -> address = nextStringOrNull()
-            "opening_hours" -> openingHours = nextStringOrNull()
-            "phone" -> phone = nextStringOrNull()
-            "website" -> website = nextStringOrNull()?.toHttpUrlOrNull()
-            "email" -> email = nextStringOrNull()
-            "twitter" -> twitter = nextStringOrNull()?.toHttpUrlOrNull()
-            "facebook" -> facebook = nextStringOrNull()?.toHttpUrlOrNull()
-            "instagram" -> instagram = nextStringOrNull()?.toHttpUrlOrNull()
-            "line" -> line = nextStringOrNull()?.toHttpUrlOrNull()
-            "required_app_url" -> requiredAppUrl = nextStringOrNull()?.toHttpUrlOrNull()
-            "boosted_until" -> boostedUntil = nextStringOrNull()?.toZonedDateTimeOrNull()
-            "comments" -> comments = nextLongOrNull()
-            "telegram" -> telegram = nextStringOrNull()?.toHttpUrlOrNull()
-            "osm_id" -> osmId = nextStringOrNull()
-            else -> skipValue()
-        }
-    }
-    endObject()
+/** One place record as it appears in the bundled snapshot. */
+@Serializable
+internal class BundledPlaceJson(
+    val id: Long? = null,
+    val lat: Double? = null,
+    val lon: Double? = null,
+    val icon: String? = null,
+    val name: String? = null,
+    @SerialName("localized_name") val localizedName: JsonElement? = null,
+    @SerialName("updated_at") val updatedAt: String? = null,
+    @SerialName("verified_at") val verifiedAt: String? = null,
+    val address: String? = null,
+    @SerialName("opening_hours") val openingHours: String? = null,
+    val phone: String? = null,
+    val website: String? = null,
+    val email: String? = null,
+    val twitter: String? = null,
+    val facebook: String? = null,
+    val instagram: String? = null,
+    val line: String? = null,
+    @SerialName("required_app_url") val requiredAppUrl: String? = null,
+    @SerialName("boosted_until") val boostedUntil: String? = null,
+    val comments: Long? = null,
+    val telegram: String? = null,
+    @SerialName("osm_id") val osmId: String? = null,
+)
+
+internal fun BundledPlaceJson.toPlace(): Place {
     // Required fields must be present: defaulting them would silently seed a
     // bogus place (for example id 0 at Null Island) if the snapshot format ever
     // changes, instead of failing loudly and rolling the import back. The id is
@@ -282,7 +258,7 @@ internal fun JsonReader.readBundledPlace(): Place {
     val placeIcon = requireNotNull(icon) { "bundled place $placeId is missing 'icon'" }
     // `updated_at` drives the delta sync cursor, so a malformed one must fail
     // the seed rather than silently reset the cursor to an arbitrary value.
-    val placeUpdatedAt = requireNotNull(updatedAt) {
+    val placeUpdatedAt = requireNotNull(updatedAt?.toZonedDateTimeOrNull()) {
         "bundled place $placeId is missing a parseable 'updated_at'"
     }
     // Coordinates are range-checked here as well as by the bundler: the asset is
@@ -299,21 +275,21 @@ internal fun JsonReader.readBundledPlace(): Place {
         lon = placeLon,
         icon = placeIcon,
         name = name,
-        localizedName = localizedName,
-        verifiedAt = verifiedAt,
+        localizedName = localizedName as? JsonObject,
+        verifiedAt = verifiedAt?.toVerifiedAtOrNull(),
         address = address,
         openingHours = openingHours,
         phone = phone,
-        website = website,
+        website = website?.toHttpUrlOrNull(),
         email = email,
-        twitter = twitter,
-        facebook = facebook,
-        instagram = instagram,
-        line = line,
-        requiredAppUrl = requiredAppUrl,
-        boostedUntil = boostedUntil,
+        twitter = twitter?.toHttpUrlOrNull(),
+        facebook = facebook?.toHttpUrlOrNull(),
+        instagram = instagram?.toHttpUrlOrNull(),
+        line = line?.toHttpUrlOrNull(),
+        requiredAppUrl = requiredAppUrl?.toHttpUrlOrNull(),
+        boostedUntil = boostedUntil?.toZonedDateTimeOrNull(),
         comments = comments,
-        telegram = telegram,
+        telegram = telegram?.toHttpUrlOrNull(),
         osmId = osmId,
     )
 }

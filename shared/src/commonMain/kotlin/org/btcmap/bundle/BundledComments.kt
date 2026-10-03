@@ -1,16 +1,23 @@
+@file:OptIn(kotlinx.serialization.ExperimentalSerializationApi::class)
+
 package org.btcmap.bundle
 
-import com.google.gson.stream.JsonReader
+import kotlin.time.Duration
+import kotlin.time.TimeSource
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.DecodeSequenceMode
+import kotlinx.serialization.json.okio.decodeBufferedSourceToSequence
+import okio.Source
+import okio.buffer
 import org.btcmap.db.Database
 import org.btcmap.db.table.comment.Comment
+import org.btcmap.json.btcmapJson
 import org.btcmap.sync.reportSyncFailure
 import org.btcmap.util.rethrowIfCancellation
-import java.io.FileNotFoundException
-import java.io.InputStream
-import java.time.Duration
-import java.time.ZonedDateTime
+import org.btcmap.util.toZonedDateTimeOrNull
 
 /**
  * Seeds the comment table from the bundled snapshot produced by the bundler.
@@ -19,6 +26,9 @@ import java.time.ZonedDateTime
  * `updated_at` and the first sync only fetches the few that changed since the
  * snapshot was generated. A place's comments are then readable offline, or
  * while the server is unreachable, instead of showing nothing.
+ *
+ * The snapshot is decoded record by record from an [okio.Source], so it is
+ * never buffered whole in memory.
  */
 object BundledComments {
     const val FILE_NAME = "bundled-comments.json"
@@ -31,18 +41,15 @@ object BundledComments {
     )
 
     /**
-     * Seeds [db] from the snapshot produced by [openStream], unless it already
-     * holds comments.
-     *
-     * The snapshot arrives as a stream, so the seeding logic — the one-shot
-     * guard, the transactional import and the failure handling — is platform-free:
-     * the host opens the bundled asset and a test supplies an in-memory stream.
+     * Seeds [db] from the snapshot produced by [openSource], unless it already
+     * holds comments. A null [openSource] result means the optional asset is
+     * absent, which is not an error.
      */
     suspend fun import(
         db: Database,
-        openStream: () -> InputStream,
+        openSource: () -> Source?,
     ): ImportResult {
-        val startedAt = System.nanoTime()
+        val startedAt = TimeSource.Monotonic.markNow()
 
         // Seeding is intentionally a one-shot, fresh-install operation: any row
         // already stored means the snapshot was imported or live data was
@@ -59,7 +66,7 @@ object BundledComments {
                 db.comment.selectCount(includeDeleted = true)
             }
             if (commentsInDb > 0) {
-                return ImportResult(commentsImported = 0, duration = elapsedSince(startedAt))
+                return ImportResult(commentsImported = 0, duration = startedAt.elapsedNow())
             }
 
             // The whole parse runs inside one transaction so a malformed asset
@@ -67,32 +74,32 @@ object BundledComments {
             // instead of leaving a partial seed that the count check above would
             // then treat as complete.
             withContext(Dispatchers.IO) {
-                openStream().use { stream ->
-                    stream.bufferedReader().use { reader ->
-                        val jsonReader = JsonReader(reader)
-                        db.transaction {
-                            jsonReader.beginArray()
-                            var batch = mutableListOf<Comment>()
-                            while (jsonReader.hasNext()) {
-                                batch.add(jsonReader.readBundledComment())
-                                if (batch.size >= BATCH_SIZE) {
-                                    db.comment.insert(batch)
-                                    commentsImported += batch.size
-                                    batch = mutableListOf()
-                                }
-                            }
-                            if (batch.isNotEmpty()) {
+                val source = openSource()
+                if (source == null) {
+                    return@withContext
+                }
+
+                source.buffer().use { buffered ->
+                    db.transaction {
+                        var batch = mutableListOf<Comment>()
+                        for (record in btcmapJson.decodeBufferedSourceToSequence<BundledCommentJson>(
+                            buffered,
+                            DecodeSequenceMode.ARRAY_WRAPPED,
+                        )) {
+                            batch.add(record.toComment())
+                            if (batch.size >= BATCH_SIZE) {
                                 db.comment.insert(batch)
                                 commentsImported += batch.size
+                                batch = mutableListOf()
                             }
-                            jsonReader.endArray()
+                        }
+                        if (batch.isNotEmpty()) {
+                            db.comment.insert(batch)
+                            commentsImported += batch.size
                         }
                     }
                 }
             }
-        } catch (_: FileNotFoundException) {
-            // The snapshot asset is optional; a missing file is not an error.
-            return ImportResult(commentsImported = 0, duration = elapsedSince(startedAt))
         } catch (e: Exception) {
             // Only recoverable failures are swallowed: an Error must keep
             // propagating instead of being reported as a successful empty seed
@@ -101,34 +108,24 @@ object BundledComments {
             // missing or empty snapshot.
             e.rethrowIfCancellation()
             reportSyncFailure(e)
-            return ImportResult(commentsImported = 0, duration = elapsedSince(startedAt))
+            return ImportResult(commentsImported = 0, duration = startedAt.elapsedNow())
         }
 
-        return ImportResult(commentsImported = commentsImported, duration = elapsedSince(startedAt))
+        return ImportResult(commentsImported = commentsImported, duration = startedAt.elapsedNow())
     }
-
-    private fun elapsedSince(startedAtNanos: Long): Duration =
-        Duration.ofNanos(System.nanoTime() - startedAtNanos)
 }
 
-internal fun JsonReader.readBundledComment(): Comment {
-    var id: Long? = null
-    var placeId: Long? = null
-    var text: String? = null
-    var createdAt: ZonedDateTime? = null
-    var updatedAt: ZonedDateTime? = null
-    beginObject()
-    while (hasNext()) {
-        when (nextName()) {
-            "id" -> id = nextLong()
-            "place_id" -> placeId = nextLong()
-            "text" -> text = nextStringOrNull()
-            "created_at" -> createdAt = nextStringOrNull()?.toZonedDateTimeOrNull()
-            "updated_at" -> updatedAt = nextStringOrNull()?.toZonedDateTimeOrNull()
-            else -> skipValue()
-        }
-    }
-    endObject()
+/** One comment record as it appears in the bundled snapshot. */
+@Serializable
+internal class BundledCommentJson(
+    val id: Long? = null,
+    @SerialName("place_id") val placeId: Long? = null,
+    val text: String? = null,
+    @SerialName("created_at") val createdAt: String? = null,
+    @SerialName("updated_at") val updatedAt: String? = null,
+)
+
+internal fun BundledCommentJson.toComment(): Comment {
     // Required fields must be present: defaulting them would silently seed a
     // bogus comment if the snapshot format ever changes, instead of failing
     // loudly and rolling the import back. The id is resolved first so the
@@ -136,12 +133,12 @@ internal fun JsonReader.readBundledComment(): Comment {
     val commentId = requireNotNull(id) { "bundled comment is missing 'id'" }
     val commentPlaceId = requireNotNull(placeId) { "bundled comment $commentId is missing 'place_id'" }
     val commentText = requireNotNull(text) { "bundled comment $commentId is missing 'text'" }
-    val commentCreatedAt = requireNotNull(createdAt) {
+    val commentCreatedAt = requireNotNull(createdAt?.toZonedDateTimeOrNull()) {
         "bundled comment $commentId is missing a parseable 'created_at'"
     }
     // `updated_at` drives the delta sync cursor, so a malformed one must fail
     // the seed rather than silently reset the cursor to an arbitrary value.
-    val commentUpdatedAt = requireNotNull(updatedAt) {
+    val commentUpdatedAt = requireNotNull(updatedAt?.toZonedDateTimeOrNull()) {
         "bundled comment $commentId is missing a parseable 'updated_at'"
     }
     require(commentText.isNotEmpty()) { "bundled comment $commentId has an empty 'text'" }

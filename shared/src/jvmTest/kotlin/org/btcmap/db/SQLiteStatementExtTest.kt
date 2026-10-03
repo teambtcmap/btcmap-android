@@ -2,6 +2,8 @@ package org.btcmap.db
 
 import androidx.sqlite.SQLiteStatement
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
+import kotlinx.serialization.json.int
+import kotlinx.serialization.json.jsonPrimitive
 import org.junit.Assert
 import org.junit.Test
 
@@ -13,7 +15,7 @@ class SQLiteStatementExtTest {
             val json = stmt.getJsonObjectOrNull(0)
 
             Assert.assertNotNull(json)
-            Assert.assertEquals(1, json!!.get("a").asInt)
+            Assert.assertEquals(1, json!!.getValue("a").jsonPrimitive.int)
         }
     }
 

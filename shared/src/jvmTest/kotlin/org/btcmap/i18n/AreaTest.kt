@@ -1,7 +1,7 @@
 package org.btcmap.i18n
 
-import com.google.gson.JsonParser
 import org.btcmap.db.table.area.Area
+import org.btcmap.json.parseJsonObject
 import org.junit.Assert
 import org.junit.Test
 import java.util.Locale
@@ -27,8 +27,8 @@ class AreaTest {
         bboxEast = null,
         bboxNorth = null,
         geoJson = null,
-        localizedName = localizedName?.let { JsonParser.parseString(it).asJsonObject },
-        localizedDescription = localizedDescription?.let { JsonParser.parseString(it).asJsonObject },
+        localizedName = localizedName?.let { parseJsonObject(it) },
+        localizedDescription = localizedDescription?.let { parseJsonObject(it) },
     )
 
     private fun <T> withLocale(language: String, block: () -> T): T {

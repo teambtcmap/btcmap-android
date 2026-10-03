@@ -1,10 +1,13 @@
 package org.btcmap.update
 
-import com.google.gson.JsonParser
+import kotlinx.serialization.json.int
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.coroutines.executeAsync
+import org.btcmap.json.parseJson
 
 /** A published build newer than the one running. */
 data class AvailableUpdate(
@@ -38,10 +41,10 @@ object UpdateCheck {
         val json = httpClient.newCall(Request.Builder().url(manifestUrl.toHttpUrl()).build())
             .executeAsync().use { it.body.string().trim() }
 
-        val latest = JsonParser.parseString(json).asJsonObject
-        val latestVersionCode = latest.get("code").asInt
-        val latestVersionName = latest.get("name").asString
-        val url = latest.get("url").asString
+        val latest = parseJson(json).jsonObject
+        val latestVersionCode = latest["code"]!!.jsonPrimitive.int
+        val latestVersionName = latest["name"]!!.jsonPrimitive.content
+        val url = latest["url"]!!.jsonPrimitive.content
 
         if (!isUpdateAvailable(currentVersionCode, latestVersionCode, isDebugBuild)) return null
 

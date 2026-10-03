@@ -1,9 +1,9 @@
 package org.btcmap.api
 
 import okhttp3.Request
+import okio.BufferedSource
 import org.btcmap.auth.withoutAuth
 import org.btcmap.util.toJsonArray
-import java.io.InputStream
 
 data class ActivityFeedItem(
     val type: String,
@@ -53,7 +53,7 @@ suspend fun Api.getActivity(
     return call(Request.Builder().withoutAuth().url(url).build()) { it.toActivityFeedItems() }
 }
 
-private fun InputStream.toActivityFeedItems(): List<ActivityFeedItem> {
+private fun BufferedSource.toActivityFeedItems(): List<ActivityFeedItem> {
     return toJsonArray().map {
         ActivityFeedItem(
             type = it.string("type"),

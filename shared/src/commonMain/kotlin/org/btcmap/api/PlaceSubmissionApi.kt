@@ -1,6 +1,7 @@
 package org.btcmap.api
 
-import com.google.gson.JsonObject
+import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.put
 import okhttp3.Request
 import org.btcmap.util.toJsonObject
 
@@ -19,18 +20,18 @@ suspend fun Api.submitPlace(
 ): SubmitPlaceResponse {
     val url = buildUrl("v4", "place-submissions")
 
-    val req = JsonObject().apply {
-        addProperty("lat", lat)
-        addProperty("lon", lon)
-        addProperty("category", category)
-        addProperty("name", name)
-        val extra = JsonObject().apply {
-            addProperty("origin", userAgent)
-            address?.takeIf { it.isNotBlank() }?.let { addProperty("address", it) }
-            website?.takeIf { it.isNotBlank() }?.let { addProperty("website", it) }
-            description?.takeIf { it.isNotBlank() }?.let { addProperty("description", it) }
+    val req = buildJsonObject {
+        put("lat", lat)
+        put("lon", lon)
+        put("category", category)
+        put("name", name)
+        val extra = buildJsonObject {
+            put("origin", userAgent)
+            address?.takeIf { it.isNotBlank() }?.let { put("address", it) }
+            website?.takeIf { it.isNotBlank() }?.let { put("website", it) }
+            description?.takeIf { it.isNotBlank() }?.let { put("description", it) }
         }
-        add("extra_fields", extra)
+        put("extra_fields", extra)
     }
 
     return call(

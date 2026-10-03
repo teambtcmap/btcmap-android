@@ -1,9 +1,10 @@
 package org.btcmap.api
 
+import kotlinx.serialization.json.jsonObject
 import okhttp3.Request
+import okio.BufferedSource
 import org.btcmap.auth.withoutAuth
 import org.btcmap.util.toJsonObject
-import java.io.InputStream
 
 data class GetPlaceIssuesItem(
     val elementOsmType: String,
@@ -26,11 +27,11 @@ suspend fun Api.getPlaceIssues(areaId: Long, limit: Long = 50): GetPlaceIssuesRe
     return call(Request.Builder().withoutAuth().url(url).build()) { it.toGetPlaceIssuesResponse() }
 }
 
-private fun InputStream.toGetPlaceIssuesResponse(): GetPlaceIssuesResponse {
+private fun BufferedSource.toGetPlaceIssuesResponse(): GetPlaceIssuesResponse {
     val body = toJsonObject()
 
     val issues = body.arrayOrNull("requested_issues")?.map { element ->
-        val item = element.asJsonObject
+        val item = element.jsonObject
         GetPlaceIssuesItem(
             elementOsmType = item.string("element_osm_type"),
             elementOsmId = item.long("element_osm_id"),

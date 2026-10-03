@@ -1,13 +1,13 @@
 package org.btcmap.i18n
 
-import com.google.gson.JsonObject
-import com.google.gson.JsonParser
+import kotlinx.serialization.json.JsonObject
+import org.btcmap.json.parseJsonObject
 import org.junit.Assert
 import org.junit.Test
 
 class JsonObjectTest {
 
-    private fun json(text: String): JsonObject = JsonParser.parseString(text).asJsonObject
+    private fun json(text: String): JsonObject = parseJsonObject(text)
 
     @Test
     fun stringAt_returnsTheString() {

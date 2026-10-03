@@ -1,7 +1,7 @@
 package org.btcmap.db.table.area
 
 import androidx.sqlite.SQLiteStatement
-import com.google.gson.JsonObject
+import kotlinx.serialization.json.JsonObject
 import org.btcmap.db.getDoubleOrNull
 import org.btcmap.db.getJsonObjectOrNull
 import org.btcmap.db.getTextOrNull

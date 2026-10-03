@@ -1,10 +1,11 @@
 package org.btcmap.db
 
 import androidx.sqlite.SQLiteStatement
-import com.google.gson.JsonObject
-import com.google.gson.JsonParser
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.jsonObject
 import okhttp3.HttpUrl
 import okhttp3.HttpUrl.Companion.toHttpUrl
+import org.btcmap.json.parseJson
 import java.time.ZonedDateTime
 
 fun SQLiteStatement.bindTextOrNull(index: Int, value: String?) {
@@ -59,4 +60,4 @@ fun SQLiteStatement.getJsonObjectOrNull(index: Int): JsonObject? =
     // A malformed value is treated as absent rather than thrown out of a read
     // (the map and preview screens render straight from these projections).
     if (isNull(index)) null
-    else runCatching { JsonParser.parseString(getText(index)).asJsonObject }.getOrNull()
+    else runCatching { parseJson(getText(index)).jsonObject }.getOrNull()

@@ -1,8 +1,10 @@
 package org.btcmap.db
 
+import okio.FileSystem
+import okio.Path
+import okio.Path.Companion.toPath
 import org.junit.Assert
 import org.junit.Test
-import java.io.File
 import java.nio.file.Files
 
 class LegacyDatabasesTest {
@@ -16,13 +18,13 @@ class LegacyDatabasesTest {
         file(directory, "btcmap-2025-11-06.db-wal")
         file(directory, "btcmap-v2.db-journal")
 
-        LegacyDatabases.delete(directory, current)
+        LegacyDatabases.delete(FileSystem.SYSTEM, directory, current)
 
-        Assert.assertTrue(current.exists())
-        Assert.assertFalse(dated.exists())
-        Assert.assertFalse(versioned.exists())
-        Assert.assertFalse(File(directory, "btcmap-2025-11-06.db-wal").exists())
-        Assert.assertFalse(File(directory, "btcmap-v2.db-journal").exists())
+        Assert.assertTrue(FileSystem.SYSTEM.exists(current))
+        Assert.assertFalse(FileSystem.SYSTEM.exists(dated))
+        Assert.assertFalse(FileSystem.SYSTEM.exists(versioned))
+        Assert.assertFalse(FileSystem.SYSTEM.exists(directory / "btcmap-2025-11-06.db-wal"))
+        Assert.assertFalse(FileSystem.SYSTEM.exists(directory / "btcmap-v2.db-journal"))
     }
 
     @Test
@@ -32,11 +34,11 @@ class LegacyDatabasesTest {
         val wal = file(directory, "btcmap.db-wal")
         val shm = file(directory, "btcmap.db-shm")
 
-        LegacyDatabases.delete(directory, current)
+        LegacyDatabases.delete(FileSystem.SYSTEM, directory, current)
 
-        Assert.assertTrue(current.exists())
-        Assert.assertTrue(wal.exists())
-        Assert.assertTrue(shm.exists())
+        Assert.assertTrue(FileSystem.SYSTEM.exists(current))
+        Assert.assertTrue(FileSystem.SYSTEM.exists(wal))
+        Assert.assertTrue(FileSystem.SYSTEM.exists(shm))
     }
 
     @Test
@@ -46,22 +48,22 @@ class LegacyDatabasesTest {
         val unrelated = file(directory, "notes.txt")
         val otherDatabase = file(directory, "coins.db")
 
-        LegacyDatabases.delete(directory, current)
+        LegacyDatabases.delete(FileSystem.SYSTEM, directory, current)
 
-        Assert.assertTrue(unrelated.exists())
-        Assert.assertTrue(otherDatabase.exists())
+        Assert.assertTrue(FileSystem.SYSTEM.exists(unrelated))
+        Assert.assertTrue(FileSystem.SYSTEM.exists(otherDatabase))
     }
 
     @Test
     fun delete_isANoOpWhenTheDirectoryDoesNotExist() {
-        val directory = File("/tmp/btcmap-missing-${System.nanoTime()}")
+        val directory = "/tmp/btcmap-missing-legacy".toPath()
 
-        LegacyDatabases.delete(directory, File(directory, "btcmap.db"))
+        LegacyDatabases.delete(FileSystem.SYSTEM, directory, directory / "btcmap.db")
     }
 
-    private fun tempDirectory(): File =
-        Files.createTempDirectory("btcmap-legacy").toFile().apply { deleteOnExit() }
+    private fun tempDirectory(): Path =
+        Files.createTempDirectory("btcmap-legacy").toAbsolutePath().toString().toPath()
 
-    private fun file(directory: File, name: String): File =
-        File(directory, name).apply { writeBytes(byteArrayOf(1)) }
+    private fun file(directory: Path, name: String): Path =
+        (directory / name).also { FileSystem.SYSTEM.write(it) { writeByte(1) } }
 }

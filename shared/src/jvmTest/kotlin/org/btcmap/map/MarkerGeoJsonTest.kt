@@ -1,7 +1,10 @@
 package org.btcmap.map
 
-import com.google.gson.JsonParser
+import kotlinx.serialization.json.jsonArray
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
 import org.btcmap.db.table.place.Marker
+import org.btcmap.json.parseJson
 import org.junit.Assert
 import org.junit.Test
 import java.time.ZonedDateTime
@@ -82,10 +85,10 @@ class MarkerGeoJsonTest {
 
         val json = listOf(marker(boostedUntil = null, icon = icon)).toMarkerGeoJson(now)
 
-        val properties = JsonParser.parseString(json).asJsonObject
-            .getAsJsonArray("features")[0].asJsonObject
-            .getAsJsonObject("properties")
-        Assert.assertEquals(icon, properties.get("iconId").asString)
+        val properties = parseJson(json).jsonObject
+            .getValue("features").jsonArray[0].jsonObject
+            .getValue("properties").jsonObject
+        Assert.assertEquals(icon, properties.getValue("iconId").jsonPrimitive.content)
     }
 
     private fun marker(

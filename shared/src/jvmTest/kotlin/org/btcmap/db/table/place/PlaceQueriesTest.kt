@@ -1,7 +1,7 @@
 package org.btcmap.db.table.place
 
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
-import com.google.gson.JsonParser
+import org.btcmap.json.parseJsonObject
 import org.btcmap.db.Database
 import org.btcmap.i18n.getSearchableNames
 import org.btcmap.search.nameMatchRank
@@ -238,7 +238,7 @@ class PlaceQueriesTest {
     fun selectBySearchString_matchesLocalizedName() {
         val db = createDatabase()
         val place = createPlace(id = 1L, name = "Bakery").copy(
-            localizedName = JsonParser.parseString("""{"ru":"Пекарня"}""").asJsonObject
+            localizedName = parseJsonObject("""{"ru":"Пекарня"}""")
         )
         db.place.insert(listOf(place))
 
@@ -252,7 +252,7 @@ class PlaceQueriesTest {
     fun selectBySearchString_matchesRawLocalizedNameJsonAsASuperset() {
         val db = createDatabase()
         val place = createPlace(id = 1L, name = "Bakery").copy(
-            localizedName = JsonParser.parseString("""{"ru":"Пекарня"}""").asJsonObject
+            localizedName = parseJsonObject("""{"ru":"Пекарня"}""")
         )
         db.place.insert(listOf(place))
 

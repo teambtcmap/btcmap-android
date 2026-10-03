@@ -1,11 +1,11 @@
 package org.btcmap.api
 
-import com.google.gson.JsonObject
+import kotlinx.serialization.json.JsonObject
 import okhttp3.Request
+import okio.BufferedSource
 import org.btcmap.auth.withoutAuth
 import org.btcmap.util.toJsonArray
 import org.btcmap.util.toJsonObject
-import java.io.InputStream
 import java.time.ZonedDateTime
 
 private val placeFields = listOf(
@@ -110,7 +110,7 @@ suspend fun Api.savePlace(id: Long): List<Long> = saveItem("places", id)
 
 suspend fun Api.removeSavedPlace(id: Long): List<Long> = removeSavedItem("places", id)
 
-private fun InputStream.toGetPlacesItems(): List<GetPlacesItem> {
+private fun BufferedSource.toGetPlacesItems(): List<GetPlacesItem> {
     return toJsonArray().map { it.toGetPlacesItem() }
 }
 

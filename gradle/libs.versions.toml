@@ -51,6 +51,20 @@ material = "1.14.0"
 # Modern HTTP client
 # https://github.com/square/okhttp/blob/master/CHANGELOG.md
 okhttp = "5.5.0"
+
+## KMP-clean libraries for the web-target spike (see webspike/)
+# Multiplatform HTTP client, the OkHttp replacement on web
+# https://ktor.io/
+ktor = "3.6.0"
+# Multiplatform JSON, the Gson replacement on web
+# https://github.com/Kotlin/kotlinx.serialization/releases
+kotlinx-serialization = "1.11.0"
+# Multiplatform date/time, the java.time replacement on web
+# https://github.com/Kotlin/kotlinx-datetime/releases
+kotlinx-datetime = "0.8.0"
+# Multiplatform IO, the java.io replacement on web
+# https://square.github.io/okio/
+okio = "3.18.2"
 # MapLibre for Compose Multiplatform (shared map, Phase 3)
 # https://github.com/maplibre/maplibre-compose/releases
 maplibre-compose = "0.19.0"
@@ -61,9 +75,6 @@ zxing = "3.5.0"
 # Image loading
 # https://github.com/coil-kt/coil/releases
 coil = "3.6.3"
-# JSON parsing
-# https://github.com/google/gson/releases
-gson = "2.14.0"
 # https://developer.android.com/jetpack/androidx/releases/test
 android-test-junit = "1.3.0"
 # https://developer.android.com/jetpack/androidx/releases/test
@@ -110,7 +121,18 @@ coil = { group = "io.coil-kt.coil3", name = "coil", version.ref = "coil" }
 coil-compose = { group = "io.coil-kt.coil3", name = "coil-compose", version.ref = "coil" }
 coil-network = { group = "io.coil-kt.coil3", name = "coil-network-okhttp", version.ref = "coil" }
 coil-svg = { group = "io.coil-kt.coil3", name = "coil-svg", version.ref = "coil" }
-gson = { group = "com.google.code.gson", name = "gson", version.ref = "gson" }
+
+# KMP-clean replacements used by the webspike module.
+ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
+ktor-client-cio = { module = "io.ktor:ktor-client-cio", version.ref = "ktor" }
+ktor-client-js = { module = "io.ktor:ktor-client-js", version.ref = "ktor" }
+ktor-client-mock = { module = "io.ktor:ktor-client-mock", version.ref = "ktor" }
+ktor-serialization-kotlinx-json = { module = "io.ktor:ktor-serialization-kotlinx-json", version.ref = "ktor" }
+kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinx-serialization" }
+kotlinx-serialization-json-okio = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json-okio", version.ref = "kotlinx-serialization" }
+kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinx-datetime" }
+okio = { module = "com.squareup.okio:okio", version.ref = "okio" }
+androidx-sqlite-web = { module = "androidx.sqlite:sqlite-web", version.ref = "androidx-sqlite" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 mockwebserver = { module = "com.squareup.okhttp3:mockwebserver3-junit4", version.ref = "okhttp" }
 androidx-compose-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4", version.ref = "androidx-compose" }
@@ -122,5 +144,6 @@ android-application = { id = "com.android.application", version.ref = "agp" }
 # AGP 9 no longer supports `com.android.library` alongside the KMP plugin.
 android-kotlin-multiplatform-library = { id = "com.android.kotlin.multiplatform.library", version.ref = "agp" }
 kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
+kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 jetbrains-compose = { id = "org.jetbrains.compose", version.ref = "compose-plugin" }
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }

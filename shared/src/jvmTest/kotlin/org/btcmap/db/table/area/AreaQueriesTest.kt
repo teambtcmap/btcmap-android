@@ -1,7 +1,7 @@
 package org.btcmap.db.table.area
 
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
-import com.google.gson.JsonParser
+import org.btcmap.json.parseJsonObject
 import org.btcmap.db.Database
 import org.junit.Assert
 import org.junit.Test
@@ -58,9 +58,9 @@ class AreaQueriesTest {
     fun insert_and_selectLocalizedMaps() {
         val db = createDatabase()
         val nameTranslations =
-            JsonParser.parseString("""{"en":"Grand Paris","ru":"Большой Париж"}""").asJsonObject
+            parseJsonObject("""{"en":"Grand Paris","ru":"Большой Париж"}""")
         val descriptionTranslations =
-            JsonParser.parseString("""{"en":"Greater Paris"}""").asJsonObject
+            parseJsonObject("""{"en":"Greater Paris"}""")
 
         db.area.insert(
             listOf(
@@ -185,7 +185,7 @@ class AreaQueriesTest {
         db.area.insert(
             listOf(
                 area(1L, name = "Grand Paris").copy(
-                    localizedName = JsonParser.parseString("""{"ru":"Большой Париж"}""").asJsonObject
+                    localizedName = parseJsonObject("""{"ru":"Большой Париж"}""")
                 )
             )
         )
@@ -202,7 +202,7 @@ class AreaQueriesTest {
         db.area.insert(
             listOf(
                 area(1L, name = "Grand Paris").copy(
-                    localizedName = JsonParser.parseString("""{"ru":"Большой Париж"}""").asJsonObject
+                    localizedName = parseJsonObject("""{"ru":"Большой Париж"}""")
                 )
             )
         )

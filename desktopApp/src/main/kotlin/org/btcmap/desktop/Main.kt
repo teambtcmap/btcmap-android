@@ -117,8 +117,9 @@ import org.btcmap.ui.UserProfileLabels
 import org.btcmap.ui.areaChipPalette
 import org.btcmap.ui.markerPalette
 import java.io.File
-import java.io.InputStream
 import java.net.URLDecoder
+import okio.Source
+import okio.source
 
 /**
  * The desktop entry point. This stage opens the app database and settings in a
@@ -808,14 +809,12 @@ private fun resourceBytes(path: String): ByteArray? =
     Thread.currentThread().contextClassLoader.getResourceAsStream(path)?.readBytes()
 
 /**
- * Opens a bundled snapshot resource. A missing resource throws
- * [java.io.FileNotFoundException], the same signal a missing Android asset
- * gives, which the shared seeders treat as an absent optional snapshot rather
- * than an error.
+ * Opens a bundled snapshot resource, or returns null when it is absent. The
+ * shared seeders treat a missing optional snapshot as absent rather than an
+ * error.
  */
-private fun bundledSnapshot(fileName: String): InputStream =
-    Thread.currentThread().contextClassLoader.getResourceAsStream(fileName)
-        ?: throw java.io.FileNotFoundException(fileName)
+private fun bundledSnapshot(fileName: String): Source? =
+    Thread.currentThread().contextClassLoader.getResourceAsStream(fileName)?.source()
 
 private val INVOICE_LABELS = InvoicePaymentLabels(
     qrDescription = "Lightning invoice QR code",

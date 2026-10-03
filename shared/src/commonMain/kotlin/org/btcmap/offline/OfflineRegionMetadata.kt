@@ -1,6 +1,7 @@
 package org.btcmap.offline
 
-import com.google.gson.Gson
+import kotlinx.serialization.Serializable
+import org.btcmap.json.btcmapJson
 
 /**
  * The bytes stored alongside an offline region so the app can tell which area
@@ -10,6 +11,7 @@ import com.google.gson.Gson
  * metadata, so this is the only link between a pack and an [org.btcmap.db.table.area.Area].
  * Storing it here avoids a database migration.
  */
+@Serializable
 data class OfflineRegionMetadata(
     val areaId: Long,
     val areaName: String,
@@ -17,10 +19,8 @@ data class OfflineRegionMetadata(
     val maxZoom: Int,
 )
 
-private val gson = Gson()
-
 fun OfflineRegionMetadata.toBytes(): ByteArray =
-    gson.toJson(this).toByteArray(Charsets.UTF_8)
+    btcmapJson.encodeToString(this).toByteArray(Charsets.UTF_8)
 
 /**
  * Parses [bytes] written by [toBytes]. Returns null for metadata this app did
@@ -30,27 +30,30 @@ fun OfflineRegionMetadata.toBytes(): ByteArray =
 fun parseOfflineRegionMetadata(bytes: ByteArray?): OfflineRegionMetadata? {
     val json = bytes?.toString(Charsets.UTF_8) ?: return null
     val parsed =
-        runCatching { gson.fromJson(json, OfflineRegionMetadataJson::class.java) }.getOrNull()
+        runCatching { btcmapJson.decodeFromString<OfflineRegionMetadataJson>(json) }.getOrNull()
             ?: return null
+    val areaId = parsed.areaId ?: return null
     val areaName = parsed.areaName ?: return null
     val styleUrl = parsed.styleUrl ?: return null
-    if (parsed.areaId <= 0L) return null
+    val maxZoom = parsed.maxZoom ?: return null
+    if (areaId <= 0L) return null
     // The download dialog only ever writes a selectable maximum zoom, so a value
     // outside that range means foreign or corrupt metadata.
-    if (parsed.maxZoom !in 1..OfflineRegionEstimates.MAX_SELECTABLE_MAX_ZOOM) return null
+    if (maxZoom !in 1..OfflineRegionEstimates.MAX_SELECTABLE_MAX_ZOOM) return null
     return OfflineRegionMetadata(
-        areaId = parsed.areaId,
+        areaId = areaId,
         areaName = areaName,
         styleUrl = styleUrl,
-        maxZoom = parsed.maxZoom,
+        maxZoom = maxZoom,
     )
 }
 
 // Nullable so a partially written or foreign payload is rejected rather than
 // silently producing a metadata object with null fields.
+@Serializable
 private data class OfflineRegionMetadataJson(
-    val areaId: Long = 0L,
+    val areaId: Long? = null,
     val areaName: String? = null,
     val styleUrl: String? = null,
-    val maxZoom: Int = 0,
+    val maxZoom: Int? = null,
 )

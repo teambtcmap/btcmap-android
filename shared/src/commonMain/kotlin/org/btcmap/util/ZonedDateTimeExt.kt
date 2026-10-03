@@ -1,8 +1,23 @@
 package org.btcmap.util
 
 import java.time.ZonedDateTime
+import java.time.format.DateTimeParseException
 
 fun String.toZonedDateTime() = ZonedDateTime.parse(this)
+
+/**
+ * Parses a bundled timestamp, returning null when it is unparseable.
+ *
+ * Only display-only timestamps are optional like this; a malformed value must
+ * not roll back a whole snapshot and leave the map empty, so it degrades to
+ * null exactly like a missing field.
+ */
+fun String.toZonedDateTimeOrNull(): ZonedDateTime? =
+    try {
+        ZonedDateTime.parse(this)
+    } catch (_: DateTimeParseException) {
+        null
+    }
 
 /**
  * Whether an event starting at this instant is still upcoming relative to

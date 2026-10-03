@@ -1,20 +1,17 @@
 package org.btcmap.bundle
 
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
-import com.google.gson.JsonParser
-import com.google.gson.stream.JsonReader
+import okio.Buffer
+import okio.ForwardingSource
+import org.btcmap.json.parseJsonObject
 import kotlinx.coroutines.test.runTest
 import org.btcmap.db.Database
 import org.btcmap.db.table.place.Place
 import org.junit.Assert
 import org.junit.Test
-import java.io.ByteArrayInputStream
-import java.io.FileNotFoundException
-import java.io.StringReader
 import java.time.ZonedDateTime
 
 class BundledPlacesTest {
-    private fun reader(json: String) = JsonReader(StringReader(json))
 
     private fun createDatabase(): Database = Database(BundledSQLiteDriver(), ":memory:")
 
@@ -72,7 +69,7 @@ class BundledPlacesTest {
             }
         """.trimIndent()
 
-        val place = reader(json).readBundledPlace()
+        val place = parseBundledPlace(json)
 
         Assert.assertEquals(42L, place.id)
         Assert.assertEquals(1.5, place.lat, 0.0)
@@ -113,9 +110,9 @@ class BundledPlacesTest {
             }
         """.trimIndent()
 
-        val place = reader(json).readBundledPlace()
+        val place = parseBundledPlace(json)
 
-        Assert.assertEquals(JsonParser.parseString("""{"en":"Shop","de":"Laden"}"""), place.localizedName)
+        Assert.assertEquals(parseJsonObject("""{"en":"Shop","de":"Laden"}"""), place.localizedName)
         Assert.assertEquals(
             ZonedDateTime.parse("2026-01-15T00:00:00Z"),
             place.verifiedAt,
@@ -164,7 +161,7 @@ class BundledPlacesTest {
             }
         """.trimIndent()
 
-        val place = reader(json).readBundledPlace()
+        val place = parseBundledPlace(json)
 
         Assert.assertNull(place.name)
         Assert.assertNull(place.localizedName)
@@ -180,7 +177,7 @@ class BundledPlacesTest {
         val json =
             """{"id":1,"lat":0.0,"lon":0.0,"icon":"store","updated_at":"2026-03-01T12:00:00Z"}"""
 
-        val place = reader(json).readBundledPlace()
+        val place = parseBundledPlace(json)
 
         Assert.assertNull(place.name)
         Assert.assertNull(place.comments)
@@ -204,7 +201,7 @@ class BundledPlacesTest {
             }
         """.trimIndent()
 
-        val place = reader(json).readBundledPlace()
+        val place = parseBundledPlace(json)
 
         Assert.assertNull(place.verifiedAt)
         Assert.assertNull(place.boostedUntil)
@@ -224,7 +221,7 @@ class BundledPlacesTest {
 
         cases.forEach { (field, json) ->
             try {
-                reader(json).readBundledPlace()
+                parseBundledPlace(json)
                 Assert.fail("expected missing '$field' to be rejected")
             } catch (e: IllegalArgumentException) {
                 Assert.assertTrue(e.message.orEmpty().contains(field))
@@ -237,7 +234,7 @@ class BundledPlacesTest {
         val json = """{"id":1,"lat":0.0,"lon":0.0,"icon":"store","updated_at":"not-a-date"}"""
 
         try {
-            reader(json).readBundledPlace()
+            parseBundledPlace(json)
             Assert.fail("expected an unparseable 'updated_at' to be rejected")
         } catch (e: IllegalArgumentException) {
             Assert.assertTrue(e.message.orEmpty().contains("updated_at"))
@@ -247,7 +244,7 @@ class BundledPlacesTest {
     @Test
     fun readBundledPlace_missingIdMessageNeverNamesANullId() {
         try {
-            reader("""{"lat":0.0,"lon":0.0,"icon":"store"}""").readBundledPlace()
+            parseBundledPlace("""{"lat":0.0,"lon":0.0,"icon":"store"}""")
             Assert.fail("expected missing 'id' to be rejected")
         } catch (e: IllegalArgumentException) {
             Assert.assertFalse(e.message.orEmpty().contains("null"))
@@ -257,7 +254,7 @@ class BundledPlacesTest {
     @Test
     fun readBundledPlace_missingRequiredFieldAfterIdNamesThePlace() {
         try {
-            reader("""{"id":7,"lon":0.0,"icon":"store"}""").readBundledPlace()
+            parseBundledPlace("""{"id":7,"lon":0.0,"icon":"store"}""")
             Assert.fail("expected missing 'lat' to be rejected")
         } catch (e: IllegalArgumentException) {
             Assert.assertTrue(e.message.orEmpty().contains("7"))
@@ -275,7 +272,7 @@ class BundledPlacesTest {
 
         cases.forEach { json ->
             try {
-                reader(json).readBundledPlace()
+                parseBundledPlace(json)
                 Assert.fail("expected out-of-range coordinates in $json to be rejected")
             } catch (e: IllegalArgumentException) {
                 Assert.assertTrue(e.message.orEmpty().contains("outside"))
@@ -286,7 +283,7 @@ class BundledPlacesTest {
     @Test
     fun readBundledPlace_rejectsEmptyIcon() {
         try {
-            reader("""{"id":1,"lat":0.0,"lon":0.0,"icon":"","updated_at":"2026-03-01T12:00:00Z"}""").readBundledPlace()
+            parseBundledPlace("""{"id":1,"lat":0.0,"lon":0.0,"icon":"","updated_at":"2026-03-01T12:00:00Z"}""")
             Assert.fail("expected an empty 'icon' to be rejected")
         } catch (e: IllegalArgumentException) {
             Assert.assertTrue(e.message.orEmpty().contains("icon"))
@@ -297,7 +294,7 @@ class BundledPlacesTest {
     fun readBundledPlace_treatsUnparseableBoostedUntilAsMissing() {
         val json = """{"id":1,"lat":0.0,"lon":0.0,"icon":"store","updated_at":"2026-03-01T12:00:00Z","boosted_until":"not-a-date"}"""
 
-        val place = reader(json).readBundledPlace()
+        val place = parseBundledPlace(json)
 
         Assert.assertNull(place.boostedUntil)
         Assert.assertNotNull(place.id)
@@ -315,10 +312,10 @@ class BundledPlacesTest {
             ]
         """.trimIndent()
 
-        val result = BundledPlaces.import(db) { json.byteInputStream() }
+        val result = BundledPlaces.import(db) { json.asSource() }
 
         Assert.assertEquals(2L, result.placesImported)
-        Assert.assertFalse(result.duration.isNegative)
+        Assert.assertFalse(result.duration.isNegative())
         Assert.assertEquals(2L, db.place.selectCount())
 
         val first = db.place.selectById(1L)
@@ -347,7 +344,7 @@ class BundledPlacesTest {
         var opened = false
         val result = BundledPlaces.import(db) {
             opened = true
-            snapshotJson(1).byteInputStream()
+            snapshotJson(1).asSource()
         }
 
         Assert.assertEquals(0L, result.placesImported)
@@ -363,7 +360,7 @@ class BundledPlacesTest {
             listOf(place(id = 99L, deletedAt = ZonedDateTime.parse("2026-05-01T00:00:00Z"))),
         )
 
-        val result = BundledPlaces.import(db) { snapshotJson(2).byteInputStream() }
+        val result = BundledPlaces.import(db) { snapshotJson(2).asSource() }
 
         Assert.assertEquals(0L, result.placesImported)
         Assert.assertEquals(1L, db.place.selectCount(includeDeleted = true))
@@ -374,9 +371,9 @@ class BundledPlacesTest {
     @Test
     fun import_isIdempotentAcrossRepeatedCalls() = runTest {
         val db = createDatabase()
-        BundledPlaces.import(db) { snapshotJson(2).byteInputStream() }
+        BundledPlaces.import(db) { snapshotJson(2).asSource() }
 
-        val second = BundledPlaces.import(db) { snapshotJson(5).byteInputStream() }
+        val second = BundledPlaces.import(db) { snapshotJson(5).asSource() }
 
         Assert.assertEquals(0L, second.placesImported)
         Assert.assertEquals(2L, db.place.selectCount())
@@ -390,7 +387,7 @@ class BundledPlacesTest {
         val totals = mutableListOf<Long>()
 
         BundledPlaces.import(db, onBatch = { totals += it }) {
-            snapshotJson(count).byteInputStream()
+            snapshotJson(count).asSource()
         }
 
         Assert.assertEquals(
@@ -411,7 +408,7 @@ class BundledPlacesTest {
         db.place.insert(listOf(place(id = 99L)))
         db.preference.upsert(BundledPlaces.SEED_STATE_KEY, BundledPlaces.SEED_IN_PROGRESS)
 
-        val result = BundledPlaces.import(db) { snapshotJson(2).byteInputStream() }
+        val result = BundledPlaces.import(db) { snapshotJson(2).asSource() }
 
         Assert.assertEquals(2L, result.placesImported)
         Assert.assertEquals(2L, db.place.selectCount())
@@ -422,7 +419,7 @@ class BundledPlacesTest {
     fun import_emptySnapshotSeedsNothing() = runTest {
         val db = createDatabase()
 
-        val result = BundledPlaces.import(db) { "[]".byteInputStream() }
+        val result = BundledPlaces.import(db) { "[]".asSource() }
 
         Assert.assertEquals(0L, result.placesImported)
         Assert.assertEquals(0L, db.place.selectCount())
@@ -433,7 +430,7 @@ class BundledPlacesTest {
         val db = createDatabase()
         val count = BundledPlaces.BATCH_SIZE + 1
 
-        val result = BundledPlaces.import(db) { snapshotJson(count).byteInputStream() }
+        val result = BundledPlaces.import(db) { snapshotJson(count).asSource() }
 
         Assert.assertEquals(count.toLong(), result.placesImported)
         Assert.assertEquals(count.toLong(), db.place.selectCount())
@@ -446,14 +443,15 @@ class BundledPlacesTest {
     fun import_closesTheStream() = runTest {
         val db = createDatabase()
         var closed = false
-        val stream = object : ByteArrayInputStream(snapshotJson(1).toByteArray()) {
+        val source = Buffer().writeUtf8(snapshotJson(1))
+        val closing = object : ForwardingSource(source) {
             override fun close() {
                 closed = true
                 super.close()
             }
         }
 
-        BundledPlaces.import(db) { stream }
+        BundledPlaces.import(db) { closing }
 
         Assert.assertTrue("the snapshot stream must be closed", closed)
     }
@@ -464,7 +462,7 @@ class BundledPlacesTest {
     fun import_missingAssetIsNotAnError() = runTest {
         val db = createDatabase()
 
-        val result = BundledPlaces.import(db) { throw FileNotFoundException("no asset") }
+        val result = BundledPlaces.import(db) { null }
 
         Assert.assertEquals(0L, result.placesImported)
         Assert.assertEquals(0L, db.place.selectCount())
@@ -476,7 +474,7 @@ class BundledPlacesTest {
         // The first entry is valid, the second is missing its required icon.
         val json = """[{"id":1,"lat":1.0,"lon":2.0,"icon":"store","updated_at":"2026-03-01T12:00:00Z"},{"id":2,"lat":3.0,"lon":4.0}]"""
 
-        val result = BundledPlaces.import(db) { json.byteInputStream() }
+        val result = BundledPlaces.import(db) { json.asSource() }
 
         Assert.assertEquals(0L, result.placesImported)
         Assert.assertEquals("a partial seed must not survive a parse failure", 0L, db.place.selectCount())
@@ -487,7 +485,7 @@ class BundledPlacesTest {
         val db = createDatabase()
         val json = """[{"id":1,"lat":1.0,"lon":2.0,"icon":"store"},"""
 
-        val result = BundledPlaces.import(db) { json.byteInputStream() }
+        val result = BundledPlaces.import(db) { json.asSource() }
 
         Assert.assertEquals(0L, result.placesImported)
         Assert.assertEquals(0L, db.place.selectCount())
@@ -497,11 +495,11 @@ class BundledPlacesTest {
     fun import_canBeRetriedAfterAFailedImport() = runTest {
         val db = createDatabase()
         BundledPlaces.import(db) {
-            """[{"id":1,"lat":1.0,"lon":2.0}]""".byteInputStream()
+            """[{"id":1,"lat":1.0,"lon":2.0}]""".asSource()
         }
         Assert.assertEquals(0L, db.place.selectCount())
 
-        val result = BundledPlaces.import(db) { snapshotJson(2).byteInputStream() }
+        val result = BundledPlaces.import(db) { snapshotJson(2).asSource() }
 
         Assert.assertEquals(2L, result.placesImported)
         Assert.assertEquals(2L, db.place.selectCount())
@@ -512,7 +510,7 @@ class BundledPlacesTest {
         val db = createDatabase()
         val json = """[{"id":1,"lat":1.0,"lon":2.0,"icon":"store","updated_at":"2026-03-01T12:00:00Z","boosted_until":"not-a-date"}]"""
 
-        val result = BundledPlaces.import(db) { json.byteInputStream() }
+        val result = BundledPlaces.import(db) { json.asSource() }
 
         Assert.assertEquals(1L, result.placesImported)
         Assert.assertEquals(1L, db.place.selectCount())

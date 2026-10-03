@@ -1,11 +1,11 @@
 package org.btcmap.api
 
-import com.google.gson.JsonObject
+import kotlinx.serialization.json.JsonObject
 import okhttp3.Request
+import okio.BufferedSource
 import org.btcmap.auth.withoutAuth
 import org.btcmap.util.toJsonArray
 import org.btcmap.util.toJsonObject
-import java.io.InputStream
 import java.time.ZonedDateTime
 import java.util.Locale
 
@@ -117,6 +117,6 @@ private fun JsonObject.toGetAreasDeltaItem(): GetAreasDeltaItem {
     )
 }
 
-private fun InputStream.toGetAreasDeltaItems(): List<GetAreasDeltaItem> {
+private fun BufferedSource.toGetAreasDeltaItems(): List<GetAreasDeltaItem> {
     return toJsonArray().map { it.toGetAreasDeltaItem() }
 }

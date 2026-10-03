@@ -1,34 +1,41 @@
 package org.btcmap.api
 
-import com.google.gson.JsonArray
-import com.google.gson.JsonElement
-import com.google.gson.JsonObject
-import com.google.gson.JsonPrimitive
+import kotlinx.serialization.json.JsonArray
+import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.JsonNull
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.double
+import kotlinx.serialization.json.int
+import kotlinx.serialization.json.jsonArray
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
+import kotlinx.serialization.json.long
 
-fun JsonObject.string(name: String): String = required(name) { it.asString }
+fun JsonObject.string(name: String): String = required(name) { it.jsonPrimitive.content }
 
-fun JsonObject.long(name: String): Long = required(name) { it.asLong }
+fun JsonObject.long(name: String): Long = required(name) { it.jsonPrimitive.long }
 
-fun JsonObject.double(name: String): Double = required(name) { it.asDouble }
+fun JsonObject.double(name: String): Double = required(name) { it.jsonPrimitive.double }
 
-fun JsonObject.int(name: String): Int = required(name) { it.asInt }
+fun JsonObject.int(name: String): Int = required(name) { it.jsonPrimitive.int }
 
-fun JsonObject.obj(name: String): JsonObject = required(name) { it.asJsonObject }
+fun JsonObject.obj(name: String): JsonObject = required(name) { it.jsonObject }
 
-fun JsonObject.stringOrNull(name: String): String? = optional(name) { it.asString }
+fun JsonObject.stringOrNull(name: String): String? = optional(name) { it.jsonPrimitive.content }
 
 fun JsonObject.nonBlankStringOrNull(name: String): String? = stringOrNull(name)?.ifBlank { null }
 
-fun JsonObject.longOrNull(name: String): Long? = optional(name) { it.asLong }
+fun JsonObject.longOrNull(name: String): Long? = optional(name) { it.jsonPrimitive.long }
 
-fun JsonObject.doubleOrNull(name: String): Double? = optional(name) { it.asDouble }
+fun JsonObject.doubleOrNull(name: String): Double? = optional(name) { it.jsonPrimitive.double }
 
-fun JsonObject.objectOrNull(name: String): JsonObject? = optional(name) { it.asJsonObject }
+fun JsonObject.objectOrNull(name: String): JsonObject? = optional(name) { it.jsonObject }
 
-fun JsonObject.arrayOrNull(name: String): JsonArray? = optional(name) { it.asJsonArray }
+fun JsonObject.arrayOrNull(name: String): JsonArray? = optional(name) { it.jsonArray }
 
 fun JsonObject.doubleArrayOrNull(name: String): List<Double>? =
-    optional(name) { element -> element.asJsonArray.map { it.asDouble } }
+    optional(name) { element -> element.jsonArray.map { it.jsonPrimitive.double } }
 
 private inline fun <T> JsonObject.required(name: String, get: (JsonElement) -> T): T {
     val element = valueOrNull(name)
@@ -54,19 +61,16 @@ private inline fun <T> read(name: String, element: JsonElement, get: (JsonElemen
     }
 }
 
-private fun JsonObject.valueOrNull(name: String) = get(name)?.takeUnless { it.isJsonNull }
+private fun JsonObject.valueOrNull(name: String) = get(name)?.takeUnless { it is JsonNull }
 
-private fun JsonElement.typeName(): String {
-    if (isJsonObject) return "object"
-    if (isJsonArray) return "array"
-    if (isJsonPrimitive) {
-        val primitive = this as JsonPrimitive
-        return when {
-            primitive.isString -> "string"
-            primitive.isNumber -> "number"
-            primitive.isBoolean -> "boolean"
-            else -> "primitive"
-        }
+private fun JsonElement.typeName(): String = when (this) {
+    is JsonObject -> "object"
+    is JsonArray -> "array"
+    is JsonNull -> "null"
+    is JsonPrimitive -> when {
+        isString -> "string"
+        content == "true" || content == "false" -> "boolean"
+        else -> "number"
     }
-    return "null"
+    else -> "primitive"
 }

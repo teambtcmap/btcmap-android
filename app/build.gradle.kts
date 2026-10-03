@@ -27,7 +27,7 @@ android {
         targetSdk {
             version = release(37)
         }
-        versionCode = 243
+        versionCode = 244
         versionName = "1.2.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -142,7 +142,6 @@ dependencies {
     implementation(libs.coil)
     implementation(libs.coil.network)
     implementation(libs.coil.svg)
-    implementation(libs.gson)
 
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)

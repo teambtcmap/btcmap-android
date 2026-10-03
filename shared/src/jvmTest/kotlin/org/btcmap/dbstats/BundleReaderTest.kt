@@ -1,9 +1,8 @@
 package org.btcmap.dbstats
 
+import org.btcmap.bundle.asSource
 import org.junit.Assert
 import org.junit.Test
-import java.io.ByteArrayInputStream
-import java.io.FileNotFoundException
 import java.util.concurrent.CancellationException
 
 class BundleReaderTest {
@@ -19,7 +18,7 @@ class BundleReaderTest {
         """.trimIndent().toByteArray()
 
         val stats = BundleReader.read("assets/bundled-places.json") {
-            ByteArrayInputStream(bytes)
+            bytes.asSource()
         }
 
         Assert.assertNotNull(stats)
@@ -42,7 +41,7 @@ class BundleReaderTest {
         """.trimIndent().toByteArray()
 
         val stats = BundleReader.read("assets/bundled-places.json") {
-            ByteArrayInputStream(bytes)
+            bytes.asSource()
         }
 
         Assert.assertNotNull(stats)
@@ -56,7 +55,7 @@ class BundleReaderTest {
         val bytes = "[{\"id\": 1}]\n".toByteArray()
 
         val stats = BundleReader.read("assets/bundled-places.json") {
-            ByteArrayInputStream(bytes)
+            bytes.asSource()
         }
 
         Assert.assertNotNull(stats)
@@ -68,7 +67,7 @@ class BundleReaderTest {
         val bytes = """[{"id": 1}]""".toByteArray()
 
         val stats = BundleReader.read("assets/bundled-places.json") {
-            ByteArrayInputStream(bytes)
+            bytes.asSource()
         }
 
         Assert.assertNotNull(stats)
@@ -78,7 +77,7 @@ class BundleReaderTest {
     @Test
     fun read_returnsNullWhenTheAssetIsMissing() {
         val stats = BundleReader.read("assets/bundled-places.json") {
-            throw FileNotFoundException()
+            null
         }
 
         Assert.assertNull(stats)
@@ -98,7 +97,7 @@ class BundleReaderTest {
         )
 
         val reads = readBundles(bundles) { fileName ->
-            ByteArrayInputStream(assets.getValue(fileName))
+            assets.getValue(fileName).asSource()
         }
 
         Assert.assertTrue(reads.failures.isEmpty())
@@ -112,7 +111,7 @@ class BundleReaderTest {
     @Test
     fun readBundles_skipsAMissingSnapshotWithoutFailing() {
         val reads = readBundles(mapOf("place" to "bundled-places.json")) {
-            throw FileNotFoundException()
+            null
         }
 
         Assert.assertTrue(reads.stats.isEmpty())
@@ -128,7 +127,7 @@ class BundleReaderTest {
 
         val reads = readBundles(bundles) { fileName ->
             if (fileName == "bundled-comments.json") throw IllegalStateException("bad snapshot")
-            ByteArrayInputStream("""[{"id": 1}]""".toByteArray())
+            """[{"id": 1}]""".asSource()
         }
 
         Assert.assertEquals(setOf("place"), reads.stats.keys)
