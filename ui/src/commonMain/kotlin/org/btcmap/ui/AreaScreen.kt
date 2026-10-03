@@ -4,8 +4,11 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
@@ -24,9 +27,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
+import coil3.compose.AsyncImage
 import org.btcmap.api.GetEventsItem
 import org.btcmap.area.AreaIssues
 import org.btcmap.area.AreaPlaceIssue
@@ -55,6 +61,9 @@ const val AREA_OFFLINE_STATUS_TAG = "area-offline-status"
 const val AREA_OFFLINE_PROGRESS_TAG = "area-offline-progress"
 const val AREA_OFFLINE_DOWNLOAD_TAG = "area-offline-download"
 const val AREA_OFFLINE_DELETE_TAG = "area-offline-delete"
+
+/** How tall the area body's header image is when a host passes one. */
+private val AREA_HEADER_HEIGHT = 200.dp
 
 /** The area body's strings and formatters, resolved by the host. */
 data class AreaStrings(
@@ -118,6 +127,12 @@ fun AreaScreen(
     onJoinUs: () -> Unit,
     onDownload: () -> Unit,
     onDelete: () -> Unit,
+    /**
+     * The area's header image, drawn at the top of the body for hosts without
+     * the Android collapsing toolbar, which shows it itself. Null hides it, as
+     * on Android.
+     */
+    headerImageUrl: String? = null,
     offlineDialog: AreaOfflineDialog? = null,
     onDismissOfflineDialog: () -> Unit = {},
     onConfirmOfflineDownload: (maxZoom: Int) -> Unit = {},
@@ -134,6 +149,19 @@ fun AreaScreen(
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 16.dp),
     ) {
+        headerImageUrl?.let { url ->
+            AsyncImage(
+                model = url,
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(AREA_HEADER_HEIGHT)
+                    .clip(RoundedCornerShape(12.dp)),
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+        }
+
         DescriptionSection(description = description, strings = strings)
 
         websiteText?.let { WebsiteRow(it) }
@@ -240,6 +268,9 @@ private fun DescriptionSection(description: String?, strings: AreaStrings) {
     )
     TextButton(
         onClick = { expanded = !expanded },
+        // The default button padding would indent the label past the body text
+        // it sits under, so drop it and keep the button aligned to the column.
+        contentPadding = PaddingValues(0.dp),
         modifier = Modifier.testTag(AREA_READ_MORE_TAG),
     ) {
         Text(if (expanded) strings.collapse else strings.readMore)

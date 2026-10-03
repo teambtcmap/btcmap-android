@@ -649,6 +649,7 @@ private fun DesktopAreaScreen(
         val loaded = area
         when {
             loaded != null -> AreaScreen(
+                headerImageUrl = loaded.iconWide ?: loaded.icon,
                 description = loaded.getLocalizedDescription(),
                 websiteText = loaded.websiteUrl.takeIf { it.isNotBlank() }?.let(::websiteDisplayText),
                 boostedMerchants = boostedMerchants,

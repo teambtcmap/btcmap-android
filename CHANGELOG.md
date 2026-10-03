@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+- Show the area's header image on the desktop area screen
+- Align the area screen's Read more/Collapse button with the text above it
 - Open the desktop map's area chips and search results on the shared area and event screens
 - Fix a crash when an area screen renders a boosted merchant's expiry date
 - Fix a crash when the map loads places and events whose API timestamp omits the zero seconds (`2025-02-03T00:00Z`)
