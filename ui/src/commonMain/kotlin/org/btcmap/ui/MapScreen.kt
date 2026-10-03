@@ -144,9 +144,9 @@ fun MapScreen(
      * it is the map's own overlay rather than a fixed part of it.
      */
     showAttribution: Boolean = true,
-    /** Whether the sync spinner is shown above the map controls. */
+    /** Whether the sync spinner is shown above the marker filter buttons. */
     syncVisible: Boolean = false,
-    /** Whether the update button is shown above the map controls. */
+    /** Whether the update button is shown above the marker filter buttons. */
     updateVisible: Boolean = false,
     onUpdateClick: () -> Unit = {},
     /**
@@ -577,42 +577,6 @@ fun MapScreen(
                     .align(Alignment.BottomEnd)
                     .padding(end = 24.dp, bottom = MAP_CONTROLS_BOTTOM),
             ) {
-                if (syncVisible) {
-                    val transition = rememberInfiniteTransition()
-                    val angle by transition.animateFloat(
-                        initialValue = 0f,
-                        targetValue = 360f,
-                        animationSpec = infiniteRepeatable(
-                            animation = tween(durationMillis = 1000, easing = LinearEasing),
-                        ),
-                    )
-                    FilledTonalIconButton(
-                        onClick = {},
-                        colors = controlColors,
-                        // The sync indicator is dimmed, as the Views button was,
-                        // so it reads as a status rather than a control.
-                        modifier = Modifier.size(AREA_CHIP_SIZE).alpha(0.3f),
-                    ) {
-                        MaterialSymbol(
-                            glyph = "sync",
-                            contentDescription = null,
-                            modifier = Modifier.rotate(angle),
-                        )
-                    }
-                }
-                if (updateVisible) {
-                    FilledTonalIconButton(
-                        onClick = onUpdateClick,
-                        colors = controlColors,
-                        modifier = Modifier.size(AREA_CHIP_SIZE),
-                    ) {
-                        MaterialSymbol(
-                            glyph = "warning",
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.error,
-                        )
-                    }
-                }
                 AreaChips(
                     areas = areas,
                     apiUrl = apiUrl,
@@ -674,17 +638,63 @@ fun MapScreen(
                     },
                 )
             }
-            MarkerFilterButtons(
-                selected = markerKind,
-                onSelect = { markerKind = it },
-                palette = areaChipPalette,
+            // The sync and update indicators sit above the marker filter, as the
+            // Views button group did before the map swap, so they share a column
+            // with it and leave the filter's position untouched.
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                // Like the filter buttons, the sync and update indicators are
+                // 40dp circles whose 48dp touch targets pad them by 4dp, so 8dp
+                // here reads as MAP_CONTROLS_GAP on screen.
+                verticalArrangement = Arrangement.spacedBy(MAP_CONTROLS_GAP - 8.dp),
                 modifier = Modifier
                     .align(Alignment.BottomStart)
                     // The filter buttons' touch targets extend 4dp below their
                     // circles, so lift the group by that much to line their
                     // visual bottoms up with the round buttons on the right.
                     .padding(start = 24.dp, bottom = MAP_CONTROLS_BOTTOM - FILTER_BUTTON_INSET),
-            )
+            ) {
+                if (syncVisible) {
+                    val transition = rememberInfiniteTransition()
+                    val angle by transition.animateFloat(
+                        initialValue = 0f,
+                        targetValue = 360f,
+                        animationSpec = infiniteRepeatable(
+                            animation = tween(durationMillis = 1000, easing = LinearEasing),
+                        ),
+                    )
+                    FilledTonalIconButton(
+                        onClick = {},
+                        colors = controlColors,
+                        // The sync indicator is dimmed, as the Views button was,
+                        // so it reads as a status rather than a control.
+                        modifier = Modifier.alpha(0.3f),
+                    ) {
+                        MaterialSymbol(
+                            glyph = "sync",
+                            contentDescription = null,
+                            modifier = Modifier.rotate(angle),
+                        )
+                    }
+                }
+                if (updateVisible) {
+                    FilledTonalIconButton(
+                        onClick = onUpdateClick,
+                        colors = controlColors,
+                    ) {
+                        MaterialSymbol(
+                            glyph = "warning",
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.error,
+                        )
+                    }
+                }
+                MarkerFilterButtons(
+                    selected = markerKind,
+                    onSelect = { markerKind = it },
+                    palette = areaChipPalette,
+                )
+            }
             SearchOverlay(
                 query = searchQuery,
                 onQueryChange = { searchQuery = it },
@@ -708,8 +718,7 @@ private val ATTRIBUTION_BOTTOM = 32.dp
 
 /**
  * How far the side panels sit above the bottom: just clear of the attribution
- * line, as the Views button groups did before the map swap. The sync indicator
- * in the Android host clears the filter panel from this same offset.
+ * line, as the Views button groups did before the map swap.
  */
 private val MAP_CONTROLS_BOTTOM = ATTRIBUTION_BOTTOM + 20.dp
 
