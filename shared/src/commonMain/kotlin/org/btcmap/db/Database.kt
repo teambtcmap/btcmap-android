@@ -169,7 +169,7 @@ class Database(driver: SQLiteDriver, val path: String) {
                 }
             }
         }
-        return driver.open(path)
+        return openDatabaseConnection(driver, path)
     }
 
     /**

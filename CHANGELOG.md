@@ -6,6 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+- Fix a crash from concurrent database access, caused by the multiplatform database refactor dropping the shared connection's serialization lock
 - Add a WebAssembly (wasmJs) target to the shared core, moving its database layer onto a suspending API
 - Move the shared locale, number-formatting, locking and dispatcher services onto multiplatform code, groundwork for a future web target
 - Move the shared date/time handling off java.time onto kotlinx-datetime, groundwork for a future web target
