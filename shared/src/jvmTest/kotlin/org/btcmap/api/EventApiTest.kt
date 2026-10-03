@@ -132,6 +132,23 @@ class EventApiTest : ApiTestBase() {
         }
     }
 
+    @Test
+    fun getEvents_parsesStartsAtWithOmittedZeroSeconds() = runTest {
+        // The API's RFC 3339 form drops the seconds when they are zero, and an
+        // event with no start date is exactly the epoch, `1970-01-01T00:00Z`.
+        enqueueJson(
+            """
+            [
+                {"id":1,"lat":1.0,"lon":2.0,"name":"Epoch","starts_at":"1970-01-01T00:00Z","updated_at":"2024-01-01T10:00:00Z"}
+            ]
+            """.trimIndent()
+        )
+
+        val events = api().getEvents(SINCE, 1000)
+
+        Assert.assertEquals(Instant.parse("1970-01-01T00:00:00Z"), events[0].startsAt)
+    }
+
     private companion object {
         val SINCE: Instant = Instant.parse("1970-01-01T00:00:00Z")
 

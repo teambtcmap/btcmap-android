@@ -4,6 +4,7 @@ import io.ktor.http.HttpMethod
 import io.ktor.http.Url
 import kotlin.time.Instant
 import kotlinx.serialization.json.JsonObject
+import org.btcmap.util.toInstant
 import org.btcmap.util.toJsonArray
 import org.btcmap.util.toJsonObject
 import org.btcmap.util.toUrlOrNull
@@ -88,7 +89,7 @@ private fun JsonObject.toGetEventsDeltaItem(): GetEventsDeltaItem {
 
 private fun String.toApiInstant(field: String): Instant {
     return try {
-        Instant.parse(this)
+        toInstant()
     } catch (e: RuntimeException) {
         throw ApiParseException("Field '$field' is not a valid ISO 8601 datetime", e)
     }

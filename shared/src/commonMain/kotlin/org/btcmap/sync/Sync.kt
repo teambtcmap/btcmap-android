@@ -196,8 +196,8 @@ private fun GetCommentsItem.toComment(): Comment = Comment(
     id = id,
     placeId = placeId,
     comment = comment,
-    createdAt = Instant.parse(createdAt),
-    updatedAt = Instant.parse(updatedAt),
+    createdAt = createdAt.toInstant(),
+    updatedAt = updatedAt.toInstant(),
     deletedAt = deletedAt?.toInstant(),
 )
 
@@ -209,7 +209,7 @@ private fun GetEventsDeltaItem.toEvent(): Event = Event(
     website = website,
     startsAt = startsAt,
     endsAt = endsAt,
-    updatedAt = Instant.parse(updatedAt),
+    updatedAt = updatedAt.toInstant(),
     deletedAt = deletedAt?.toInstant(),
 )
 
@@ -227,7 +227,7 @@ private fun GetAreasDeltaItem.toArea(): Area = Area(
     bboxEast = bboxEast,
     bboxNorth = bboxNorth,
     geoJson = geoJson,
-    updatedAt = Instant.parse(updatedAt),
+    updatedAt = updatedAt.toInstant(),
     deletedAt = deletedAt?.toInstant(),
     localizedName = localizedName,
     localizedDescription = localizedDescription,
@@ -257,9 +257,9 @@ fun reportSyncFailure(t: Throwable) {
  */
 internal fun nextUpdatedAtCursor(timestamps: List<String>, pageSize: Long): Instant? {
     if (timestamps.size.toLong() < pageSize) {
-        return timestamps.maxOf { Instant.parse(it) }
+        return timestamps.maxOf { it.toInstant() }
     }
 
-    val distinct = timestamps.map { Instant.parse(it) }.distinct().sorted()
+    val distinct = timestamps.map { it.toInstant() }.distinct().sorted()
     return distinct.getOrNull(distinct.size - 2)
 }

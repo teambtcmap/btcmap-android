@@ -42,7 +42,7 @@ fun String.toVerifiedAt(): Instant {
     // keeps a full timestamp from paying for a thrown and caught parse
     // exception, which costs far more than the parse itself.
     return if (contains('T')) {
-        Instant.parse(this)
+        toInstant()
     } else {
         LocalDate.parse(this).atStartOfDayIn(TimeZone.UTC)
     }

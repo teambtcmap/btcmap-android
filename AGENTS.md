@@ -204,7 +204,8 @@ Shares `:shared` and `:ui`; it opens the shared database under `$BTCMAP_HOME` or
 
 - `screenshot` renders one screen headlessly to a PNG; today's screens are
   `settings`, `account`, `report`, `addplace` and `payment` (the map needs a real
-  window and GPU, so it is not one of them).
+  window and GPU, so it is not one of them). The third spec field is optional
+  (`dark`/`light`).
 - When asked to run or restart the window, **never run `:desktopApp:run` in the
   foreground and never `sleep`/poll waiting for it to start**. `run` blocks for
   the life of the window, so launch it detached with its output in a named log,
@@ -221,8 +222,22 @@ Shares `:shared` and `:ui`; it opens the shared database under `$BTCMAP_HOME` or
   `pgrep -f "org.btcmap.desktop.MainK[t]" | xargs -r kill` (the brackets keep the
   pattern from matching the shell). Do this before a restart so only one instance
   is ever open.
-- A window screenshot captures the whole screen, so focus the window first; the
-  third spec field is optional (`dark`/`light`).
+- The running app is an XWayland client (Compose Desktop's Skiko renderer is
+  X11-only on Linux), so X11 tools see it even though the session is Wayland.
+  Find its window with `xdotool search --name "BTC Map"`; the client window
+  carries the app's PID in `_NET_WM_PID` (a separate window owned by
+  `mutter-x11-frames` is only the frame and shadow). `xdotool getwindowgeometry
+  <id>` gives the client area in physical pixels — add `_NET_FRAME_EXTENTS`'s top
+  for the GNOME title bar — and on this 2×-scale display the logical size is
+  physical/2. The map logs the same extent as `MapExtent(logical=..., physical=...,
+  scale=...)` on the first frame of a render session.
+- Capture the window with ImageMagick, which reads the XWayland window directly
+  and includes the OpenGL map content: `import -window <id> /tmp/opencode/x.png`
+  (client area only, no decorations). This is the reliable path here — `grim`
+  fails (GNOME does not implement `wlr-screencopy`) and the GNOME Shell D-Bus
+  `ScreenshotArea` rejects the call. A native Wayland window (e.g. Loupe, the
+  image viewer) does not appear in the X11 window list, so `import` cannot
+  capture it.
 - Input cannot be injected into the window here: it is an XWayland client and
   GNOME leaves its pointer virtual, so verify a screen by booting into it with a
   temporary route and screenshotting.
