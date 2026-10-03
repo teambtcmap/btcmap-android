@@ -11,24 +11,13 @@ import java.time.format.DateTimeParseException
 import java.util.Date
 import java.util.concurrent.TimeUnit
 
-/** Identity of a feed row, so a click can be mapped back to its item. */
-internal fun ActivityFeedItem.feedKey(): String = "$type:$placeId:$date"
-
 /**
  * Renders a feed item's icon (a Material Symbols ligature), subtitle and
  * relative date, resolving the Android resources here so the shared screen
- * stays resource-free.
+ * stays resource-free. The icon and the row key come from [iconGlyph] and
+ * [feedKey] in `:shared`.
  */
 internal fun ActivityFeedItem.toRow(context: Context): ActivityFeedRow {
-    val icon = when (type) {
-        ActivityFeedItem.TYPE_PLACE_ADDED -> "add_location"
-        ActivityFeedItem.TYPE_PLACE_UPDATED -> "edit"
-        ActivityFeedItem.TYPE_PLACE_BOOSTED -> "rocket_launch"
-        ActivityFeedItem.TYPE_PLACE_COMMENTED -> "comment"
-        ActivityFeedItem.TYPE_PLACE_DELETED -> "delete"
-        else -> "place"
-    }
-
     val subtitle = when (type) {
         ActivityFeedItem.TYPE_PLACE_BOOSTED -> durationDays?.let {
             context.resources.getQuantityString(
@@ -47,7 +36,7 @@ internal fun ActivityFeedItem.toRow(context: Context): ActivityFeedRow {
 
     return ActivityFeedRow(
         key = feedKey(),
-        icon = icon,
+        icon = iconGlyph(),
         placeName = placeName.orEmpty(),
         subtitle = subtitle,
         date = relativeTime(context, date),

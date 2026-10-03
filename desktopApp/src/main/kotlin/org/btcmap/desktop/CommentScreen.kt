@@ -9,6 +9,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -16,11 +17,13 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import kotlinx.coroutines.launch
 import org.btcmap.api.Api
 import org.btcmap.api.addComment
 import org.btcmap.api.awaitPaidInvoice
 import org.btcmap.api.getCommentQuote
+import org.btcmap.payment.InvoicePaymentFlow
+import org.btcmap.payment.PaymentEvent
+import org.btcmap.payment.PaymentInvoice
 import org.btcmap.ui.AddCommentForm
 import org.btcmap.ui.AddCommentLabels
 import org.btcmap.ui.AddCommentUiState
@@ -40,7 +43,8 @@ private val COMMENT_LABELS = AddCommentLabels(
 
 /**
  * The desktop's add-comment screen: the shared form, the fee quote, and the
- * Lightning invoice the comment is paid with. The comment is posted by the
+ * Lightning invoice the comment is paid with. The quote, order and invoice
+ * state come from the shared [InvoicePaymentFlow]; the comment is posted by the
  * server once the invoice is paid, which the poll below watches for.
  */
 @Composable
@@ -50,38 +54,37 @@ internal fun DesktopAddCommentScreen(
     placeName: String,
     onBack: () -> Unit,
 ) {
-    var quoteSat by remember { mutableStateOf<Long?>(null) }
-    var loadingQuote by remember { mutableStateOf(true) }
-    var quoteFailed by remember { mutableStateOf(false) }
-    var ordering by remember { mutableStateOf(false) }
-    var invoice by remember { mutableStateOf<Invoice?>(null) }
-    var submitted by remember { mutableStateOf(false) }
-    var error by remember { mutableStateOf<String?>(null) }
     val scope = rememberCoroutineScope()
+    val flow = remember(api, placeId) {
+        InvoicePaymentFlow(
+            quoteLoader = { api.getCommentQuote() },
+            scope = scope,
+        )
+    }
+    val state by flow.state.collectAsState()
+    var submitted by remember { mutableStateOf(false) }
+    var quoteFailed by remember { mutableStateOf(false) }
+    var error by remember { mutableStateOf<String?>(null) }
 
-    suspend fun loadQuote() {
-        loadingQuote = true
-        quoteFailed = false
-        try {
-            quoteSat = api.getCommentQuote().quoteSat
-        } catch (t: Throwable) {
-            t.rethrowIfCancellation()
-            quoteFailed = true
-        } finally {
-            loadingQuote = false
+    LaunchedEffect(flow) { flow.loadQuote() }
+
+    LaunchedEffect(flow) {
+        flow.events.collect { event ->
+            when (event) {
+                is PaymentEvent.QuoteFailed -> quoteFailed = true
+                else -> error = event.error.message ?: event.error.toString()
+            }
         }
     }
 
-    LaunchedEffect(Unit) { loadQuote() }
-
-    LaunchedEffect(invoice?.id) {
-        val id = invoice?.id ?: return@LaunchedEffect
+    LaunchedEffect(state.invoice?.id) {
+        val id = state.invoice?.id ?: return@LaunchedEffect
         try {
             api.awaitPaidInvoice(id)
             submitted = true
         } catch (t: Throwable) {
             t.rethrowIfCancellation()
-            error = t.message ?: t.toString()
+            flow.reportPaymentFailure(t)
         }
     }
 
@@ -101,29 +104,24 @@ internal fun DesktopAddCommentScreen(
 
             AddCommentForm(
                 state = AddCommentUiState(
-                    quote = quoteSat?.let(::formatSat),
-                    loadingQuote = loadingQuote,
-                    quoteFailed = quoteFailed && invoice == null,
-                    inputEnabled = invoice == null && !ordering,
-                    actionsEnabled = quoteSat != null && !loadingQuote && !ordering && invoice == null,
-                    ordering = ordering,
-                    showContinue = invoice == null,
+                    quote = state.quote?.quoteSat?.let(::formatSat),
+                    loadingQuote = state.loadingQuote,
+                    quoteFailed = quoteFailed && state.invoice == null,
+                    inputEnabled = state.inputEnabled,
+                    actionsEnabled = state.actionsEnabled,
+                    ordering = state.ordering,
+                    showContinue = state.invoice == null,
                     labels = COMMENT_LABELS,
                 ),
-                onRetry = { scope.launch { loadQuote() } },
+                onRetry = {
+                    quoteFailed = false
+                    flow.loadQuote()
+                },
                 onContinue = { text ->
-                    ordering = true
                     error = null
-                    scope.launch {
-                        try {
-                            val response = api.addComment(placeId = placeId, comment = text)
-                            invoice = Invoice(id = response.invoiceId, bolt11 = response.invoice)
-                        } catch (t: Throwable) {
-                            t.rethrowIfCancellation()
-                            error = t.message ?: t.toString()
-                        } finally {
-                            ordering = false
-                        }
+                    flow.order {
+                        val response = api.addComment(placeId = placeId, comment = text)
+                        PaymentInvoice(id = response.invoiceId, bolt11 = response.invoice)
                     }
                 },
             )
@@ -136,10 +134,10 @@ internal fun DesktopAddCommentScreen(
                 )
             }
 
-            invoice?.let {
+            state.invoice?.let {
                 InvoicePaymentSection(
                     invoice = it,
-                    onStartOver = { invoice = null },
+                    onStartOver = flow::startOver,
                     modifier = Modifier.padding(top = 16.dp),
                 )
             }

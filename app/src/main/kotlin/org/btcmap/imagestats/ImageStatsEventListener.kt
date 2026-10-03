@@ -1,6 +1,7 @@
 package org.btcmap.imagestats
 
 import coil3.EventListener
+import coil3.decode.DataSource
 import coil3.request.ErrorResult
 import coil3.request.ImageRequest
 import coil3.request.SuccessResult
@@ -24,7 +25,7 @@ class ImageStatsEventListener : EventListener() {
     }
 
     override fun onSuccess(request: ImageRequest, result: SuccessResult) {
-        ImageLoadStats.recordSuccess(result.dataSource, durationNanos())
+        ImageLoadStats.recordSuccess(result.dataSource.toLoadSource(), durationNanos())
     }
 
     override fun onError(request: ImageRequest, result: ErrorResult) {
@@ -38,6 +39,17 @@ class ImageStatsEventListener : EventListener() {
     private fun durationNanos(): Long {
         val start = startNanos
         return if (start == 0L) 0L else System.nanoTime() - start
+    }
+
+    /**
+     * Coil's source as the shared counter's bucket. `MEMORY` covers images that
+     * were already decoded in memory outside the cache; either way the load did
+     * not hit disk or the network.
+     */
+    private fun DataSource.toLoadSource(): ImageLoadSource = when (this) {
+        DataSource.MEMORY_CACHE, DataSource.MEMORY -> ImageLoadSource.Memory
+        DataSource.DISK -> ImageLoadSource.Disk
+        DataSource.NETWORK -> ImageLoadSource.Network
     }
 
     companion object Factory : EventListener.Factory {

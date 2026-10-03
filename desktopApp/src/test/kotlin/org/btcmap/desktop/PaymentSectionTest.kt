@@ -9,6 +9,7 @@ import androidx.compose.ui.test.runComposeUiTest
 import kotlin.test.Test
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
+import org.btcmap.payment.PaymentInvoice
 import org.btcmap.ui.AppTheme
 
 /**
@@ -23,7 +24,7 @@ class PaymentSectionTest {
         runComposeUiTest {
             setContent {
                 AppTheme {
-                    InvoicePaymentSection(invoice = Invoice("id", BOLT11), onStartOver = {})
+                    InvoicePaymentSection(invoice = PaymentInvoice("id", BOLT11), onStartOver = {})
                 }
             }
             onNodeWithText("Pay").assertIsDisplayed()
@@ -40,7 +41,7 @@ class PaymentSectionTest {
             setContent {
                 AppTheme {
                     InvoicePaymentSection(
-                        invoice = Invoice("id", BOLT11),
+                        invoice = PaymentInvoice("id", BOLT11),
                         onStartOver = { discarded = true },
                     )
                 }

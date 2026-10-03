@@ -17,6 +17,7 @@ import java.awt.image.BufferedImage
 import java.io.ByteArrayOutputStream
 import javax.imageio.ImageIO
 import kotlin.test.Test
+import org.btcmap.place.MAX_REPORT_PHOTOS
 
 /**
  * The desktop report form: a reason must be chosen before it can be submitted,

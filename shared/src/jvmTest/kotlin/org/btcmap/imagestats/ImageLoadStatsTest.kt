@@ -1,6 +1,5 @@
 package org.btcmap.imagestats
 
-import coil3.decode.DataSource
 import java.util.concurrent.TimeUnit
 import org.junit.Assert
 import org.junit.Before
@@ -32,11 +31,11 @@ class ImageLoadStatsTest {
     }
 
     @Test
-    fun recordSuccess_bucketsByDataSource() {
-        ImageLoadStats.recordSuccess(DataSource.MEMORY_CACHE, 0)
-        ImageLoadStats.recordSuccess(DataSource.MEMORY, 0)
-        ImageLoadStats.recordSuccess(DataSource.DISK, 0)
-        ImageLoadStats.recordSuccess(DataSource.NETWORK, 0)
+    fun recordSuccess_bucketsBySource() {
+        ImageLoadStats.recordSuccess(ImageLoadSource.Memory, 0)
+        ImageLoadStats.recordSuccess(ImageLoadSource.Memory, 0)
+        ImageLoadStats.recordSuccess(ImageLoadSource.Disk, 0)
+        ImageLoadStats.recordSuccess(ImageLoadSource.Network, 0)
 
         val counters = ImageLoadStats.snapshot()
         Assert.assertEquals(2L, counters.memoryCacheHits)
@@ -57,8 +56,8 @@ class ImageLoadStatsTest {
     @Test
     fun snapshot_averagesLoadDuration() {
         val tenMillis = TimeUnit.MILLISECONDS.toNanos(10)
-        ImageLoadStats.recordSuccess(DataSource.NETWORK, tenMillis)
-        ImageLoadStats.recordSuccess(DataSource.NETWORK, tenMillis * 3)
+        ImageLoadStats.recordSuccess(ImageLoadSource.Network, tenMillis)
+        ImageLoadStats.recordSuccess(ImageLoadSource.Network, tenMillis * 3)
 
         Assert.assertEquals(20L, ImageLoadStats.snapshot().averageLoadMillis)
     }
@@ -66,7 +65,7 @@ class ImageLoadStatsTest {
     @Test
     fun averageLoad_ignoresErrorsAndCancels() {
         val tenMillis = TimeUnit.MILLISECONDS.toNanos(10)
-        ImageLoadStats.recordSuccess(DataSource.NETWORK, tenMillis)
+        ImageLoadStats.recordSuccess(ImageLoadSource.Network, tenMillis)
         ImageLoadStats.recordError()
         ImageLoadStats.recordCancel()
 
@@ -76,9 +75,9 @@ class ImageLoadStatsTest {
     @Test
     fun averageLoad_skipsLoadsWithoutAStartTime() {
         val tenMillis = TimeUnit.MILLISECONDS.toNanos(10)
-        ImageLoadStats.recordSuccess(DataSource.NETWORK, tenMillis)
-        ImageLoadStats.recordSuccess(DataSource.NETWORK, tenMillis)
-        ImageLoadStats.recordSuccess(DataSource.NETWORK, 0)
+        ImageLoadStats.recordSuccess(ImageLoadSource.Network, tenMillis)
+        ImageLoadStats.recordSuccess(ImageLoadSource.Network, tenMillis)
+        ImageLoadStats.recordSuccess(ImageLoadSource.Network, 0)
 
         Assert.assertEquals(10L, ImageLoadStats.snapshot().averageLoadMillis)
     }
@@ -86,8 +85,8 @@ class ImageLoadStatsTest {
     @Test
     fun cacheHitRate_ignoresIncompleteLoads() {
         ImageLoadStats.recordStart()
-        ImageLoadStats.recordSuccess(DataSource.MEMORY_CACHE, 0)
-        ImageLoadStats.recordSuccess(DataSource.NETWORK, 0)
+        ImageLoadStats.recordSuccess(ImageLoadSource.Memory, 0)
+        ImageLoadStats.recordSuccess(ImageLoadSource.Network, 0)
 
         Assert.assertEquals(50, ImageLoadStats.snapshot().cacheHitRatePercent)
     }
@@ -102,7 +101,7 @@ class ImageLoadStatsTest {
     @Test
     fun reset_clearsCounters() {
         ImageLoadStats.recordStart()
-        ImageLoadStats.recordSuccess(DataSource.NETWORK, 1)
+        ImageLoadStats.recordSuccess(ImageLoadSource.Network, 1)
 
         ImageLoadStats.reset()
 

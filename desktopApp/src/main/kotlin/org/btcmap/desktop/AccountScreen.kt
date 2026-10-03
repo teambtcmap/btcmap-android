@@ -19,14 +19,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import org.btcmap.api.Api
-import org.btcmap.api.createUser
-import org.btcmap.api.signIn
-import org.btcmap.api.toDbUser
 import org.btcmap.auth.AuthError
+import org.btcmap.auth.AuthOutcome
+import org.btcmap.auth.AuthSession
 import org.btcmap.auth.AuthValidation
 import org.btcmap.db.Database
 import org.btcmap.settings.Settings
@@ -101,18 +98,46 @@ internal fun DesktopAccountScreen(
                         error = null
                         scope.launch {
                             try {
-                                if (signUp) {
-                                    signUpAndStore(api, db, settings, username, password)
-                                    signUp = false
-                                    attempted = false
+                                val outcome = if (signUp) {
+                                    AuthSession.signUp(
+                                        api = api,
+                                        db = db,
+                                        prefs = settings,
+                                        username = username,
+                                        password = password,
+                                        label = DESKTOP_TOKEN_LABEL,
+                                    )
                                 } else {
-                                    signInAndStore(api, db, settings, username, password)
+                                    AuthSession.signIn(
+                                        api = api,
+                                        db = db,
+                                        prefs = settings,
+                                        username = username,
+                                        password = password,
+                                        label = DESKTOP_TOKEN_LABEL,
+                                    )
                                 }
-                                password = ""
-                                confirmation = ""
-                                authorized = true
-                            } catch (t: Throwable) {
-                                error = t.message ?: t.toString()
+                                when (outcome) {
+                                    is AuthOutcome.Authenticated -> {
+                                        signUp = false
+                                        attempted = false
+                                        password = ""
+                                        confirmation = ""
+                                        authorized = true
+                                    }
+
+                                    is AuthOutcome.AccountCreated -> {
+                                        // The account exists; only its local
+                                        // session could not be established, so
+                                        // fall back to the sign-in form.
+                                        signUp = false
+                                        attempted = false
+                                        error = "Account created. Please sign in."
+                                    }
+
+                                    is AuthOutcome.Failed ->
+                                        error = outcome.error.message ?: outcome.error.toString()
+                                }
                             } finally {
                                 busy = false
                             }
@@ -248,53 +273,6 @@ private fun AuthForm(
                 style = MaterialTheme.typography.bodySmall,
             )
         }
-    }
-}
-
-/** Signs in and stores the session. */
-private suspend fun signInAndStore(
-    api: Api,
-    db: Database,
-    settings: Settings,
-    username: String,
-    password: String,
-) {
-    val response = api.signIn(username = username.trim(), password = password, label = DESKTOP_TOKEN_LABEL)
-    withContext(Dispatchers.IO) {
-        settings.replaceSession(db = db, token = response.token, user = response.user.toDbUser())
-    }
-}
-
-/**
- * Creates the account and signs in with it, storing the session. Creation and
- * sign-in are separate calls, and a failed creation is ambiguous (the account
- * may exist if the response was lost), so the sign-in also tells the two apart:
- * when creation succeeded but the sign-in failed, the caller falls back to the
- * sign-in form instead of retrying a sign-up that would fail as "already taken".
- */
-private suspend fun signUpAndStore(
-    api: Api,
-    db: Database,
-    settings: Settings,
-    username: String,
-    password: String,
-) {
-    val requested = username.trim()
-    var name = requested
-    var created = false
-    try {
-        name = api.createUser(name = requested, password = password).name
-        created = true
-    } catch (t: Throwable) {
-        // The sign-in below decides whether the account exists.
-    }
-
-    try {
-        signInAndStore(api, db, settings, name, password)
-    } catch (t: Throwable) {
-        // The account exists but the session could not be established; the
-        // message sends the user to the sign-in form rather than into a retry.
-        throw if (created) Exception("Account created. Please sign in.") else t
     }
 }
 

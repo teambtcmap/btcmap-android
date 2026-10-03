@@ -1,9 +1,7 @@
 package org.btcmap.payment
 
 import androidx.lifecycle.SavedStateHandle
-import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.btcmap.MainDispatcherRule
@@ -11,6 +9,11 @@ import org.junit.Assert
 import org.junit.Rule
 import org.junit.Test
 
+/**
+ * The Android glue around the shared [InvoicePaymentFlow]: the pending invoice
+ * must survive process death through the fragment's [SavedStateHandle]. The
+ * state machine itself is covered by `InvoicePaymentFlowTest` in `:shared`.
+ */
 @OptIn(ExperimentalCoroutinesApi::class)
 class InvoicePaymentViewModelTest {
 
@@ -19,186 +22,13 @@ class InvoicePaymentViewModelTest {
 
     private val invoice = PaymentInvoice(id = "inv-1", bolt11 = "lnbc1...")
 
-    private fun viewModel(
-        quoteLoader: suspend () -> String = { "quote" },
-        savedStateHandle: SavedStateHandle = SavedStateHandle(),
-    ) = InvoicePaymentViewModel(quoteLoader, savedStateHandle)
-
-    @Test
-    fun initialState_waitsForQuoteButAllowsInput() = runTest(mainDispatcherRule.dispatcher) {
-        val model = viewModel()
-
-        Assert.assertTrue(model.state.value.loadingQuote)
-        Assert.assertFalse(model.state.value.actionsEnabled)
-        Assert.assertTrue(model.state.value.inputEnabled)
-    }
-
-    @Test
-    fun loadQuote_publishesQuoteAndEnablesActions() = runTest(mainDispatcherRule.dispatcher) {
-        val model = viewModel()
-
-        model.loadQuote()
-        advanceUntilIdle()
-
-        Assert.assertEquals("quote", model.state.value.quote)
-        Assert.assertFalse(model.state.value.loadingQuote)
-        Assert.assertTrue(model.state.value.actionsEnabled)
-        Assert.assertTrue(model.state.value.inputEnabled)
-    }
-
-    @Test
-    fun loadQuote_onlyLoadsOnce() = runTest(mainDispatcherRule.dispatcher) {
-        var calls = 0
-        val model = viewModel(quoteLoader = { calls++; "quote" })
-
-        model.loadQuote()
-        model.loadQuote()
-        advanceUntilIdle()
-
-        Assert.assertEquals(1, calls)
-    }
-
-    @Test
-    fun loadQuote_failureEmitsEventAndStopsLoading() = runTest(mainDispatcherRule.dispatcher) {
-        val error = IllegalStateException("boom")
-        val model = viewModel(quoteLoader = { throw error })
-
-        model.loadQuote()
-        advanceUntilIdle()
-
-        Assert.assertNull(model.state.value.quote)
-        Assert.assertFalse(model.state.value.loadingQuote)
-        Assert.assertFalse(model.state.value.actionsEnabled)
-
-        val event = model.events.first()
-        Assert.assertTrue(event is PaymentEvent.QuoteFailed)
-        Assert.assertSame(error, (event as PaymentEvent.QuoteFailed).error)
-    }
-
-    @Test
-    fun loadQuote_canBeRetriedAfterFailure() = runTest(mainDispatcherRule.dispatcher) {
-        var calls = 0
-        val model = viewModel(
-            quoteLoader = {
-                calls++
-                if (calls == 1) throw IllegalStateException("boom")
-                "quote"
-            },
-        )
-
-        model.loadQuote()
-        advanceUntilIdle()
-        Assert.assertFalse(model.state.value.loadingQuote)
-        Assert.assertNull(model.state.value.quote)
-
-        model.loadQuote()
-        Assert.assertTrue(
-            "a retry shows the loading state again",
-            model.state.value.loadingQuote,
-        )
-        advanceUntilIdle()
-
-        Assert.assertEquals("quote", model.state.value.quote)
-        Assert.assertFalse(model.state.value.loadingQuote)
-        Assert.assertTrue(model.state.value.actionsEnabled)
-        Assert.assertEquals(2, calls)
-    }
-
-    @Test
-    fun order_publishesInvoiceAndLocksControls() = runTest(mainDispatcherRule.dispatcher) {
-        val model = viewModel()
-        model.loadQuote()
-        advanceUntilIdle()
-
-        model.order { invoice }
-        advanceUntilIdle()
-
-        Assert.assertEquals(invoice, model.state.value.invoice)
-        Assert.assertFalse(model.state.value.ordering)
-        Assert.assertFalse(model.state.value.actionsEnabled)
-        Assert.assertFalse(model.state.value.inputEnabled)
-    }
-
-    @Test
-    fun order_locksControlsWhileInFlight() = runTest(mainDispatcherRule.dispatcher) {
-        val gate = CompletableDeferred<Unit>()
-        val model = viewModel()
-        model.loadQuote()
-        advanceUntilIdle()
-
-        model.order {
-            gate.await()
-            invoice
-        }
-        advanceUntilIdle()
-
-        Assert.assertTrue(model.state.value.ordering)
-        Assert.assertFalse(model.state.value.actionsEnabled)
-        Assert.assertFalse(model.state.value.inputEnabled)
-
-        gate.complete(Unit)
-        advanceUntilIdle()
-
-        Assert.assertEquals(invoice, model.state.value.invoice)
-    }
-
-    @Test
-    fun order_isIgnoredOnceAnInvoiceExists() = runTest(mainDispatcherRule.dispatcher) {
-        val orders = mutableListOf<Int>()
-        val model = viewModel()
-        model.loadQuote()
-        advanceUntilIdle()
-
-        model.order { orders.add(1); invoice }
-        advanceUntilIdle()
-        model.order { orders.add(2); invoice }
-        advanceUntilIdle()
-
-        Assert.assertEquals(listOf(1), orders)
-        Assert.assertEquals(invoice, model.state.value.invoice)
-    }
-
-    @Test
-    fun order_isIgnoredBeforeTheQuoteLoads() = runTest(mainDispatcherRule.dispatcher) {
-        val orders = mutableListOf<Int>()
-        val model = viewModel()
-
-        model.order { orders.add(1); invoice }
-        advanceUntilIdle()
-
-        Assert.assertTrue("no order without a quote", orders.isEmpty())
-        Assert.assertNull(model.state.value.invoice)
-    }
-
-    @Test
-    fun order_canBeRetriedAfterFailure() = runTest(mainDispatcherRule.dispatcher) {
-        var calls = 0
-        val model = viewModel()
-        model.loadQuote()
-        advanceUntilIdle()
-
-        model.order {
-            calls++
-            if (calls == 1) throw IllegalStateException("boom")
-            invoice
-        }
-        advanceUntilIdle()
-
-        Assert.assertNull(model.state.value.invoice)
-        Assert.assertTrue(model.state.value.actionsEnabled)
-        Assert.assertTrue(model.events.first() is PaymentEvent.OrderFailed)
-
-        model.order { calls++; invoice }
-        advanceUntilIdle()
-
-        Assert.assertEquals(invoice, model.state.value.invoice)
-        Assert.assertEquals(2, calls)
-    }
+    private fun viewModel(savedStateHandle: SavedStateHandle) =
+        InvoicePaymentViewModel({ "quote" }, savedStateHandle)
 
     @Test
     fun order_persistsTheInvoiceForProcessDeath() = runTest(mainDispatcherRule.dispatcher) {
         val savedStateHandle = SavedStateHandle()
-        val model = viewModel(savedStateHandle = savedStateHandle)
+        val model = viewModel(savedStateHandle)
         model.loadQuote()
         advanceUntilIdle()
 
@@ -206,26 +36,25 @@ class InvoicePaymentViewModelTest {
         advanceUntilIdle()
 
         // A new view model stands in for the process being recreated.
-        val restored = viewModel(savedStateHandle = savedStateHandle)
+        val restored = viewModel(savedStateHandle)
         restored.loadQuote()
         advanceUntilIdle()
 
         Assert.assertEquals(invoice, restored.state.value.invoice)
         Assert.assertFalse(restored.state.value.actionsEnabled)
-        Assert.assertFalse(restored.state.value.inputEnabled)
     }
 
     @Test
     fun restoredInvoice_isNotOrderedAgain() = runTest(mainDispatcherRule.dispatcher) {
         val savedStateHandle = SavedStateHandle()
-        val model = viewModel(savedStateHandle = savedStateHandle)
+        val model = viewModel(savedStateHandle)
         model.loadQuote()
         advanceUntilIdle()
         model.order { invoice }
         advanceUntilIdle()
 
         val orders = mutableListOf<Int>()
-        val restored = viewModel(savedStateHandle = savedStateHandle)
+        val restored = viewModel(savedStateHandle)
         restored.loadQuote()
         advanceUntilIdle()
 
@@ -233,56 +62,20 @@ class InvoicePaymentViewModelTest {
         advanceUntilIdle()
 
         Assert.assertTrue("a restored invoice must not be ordered again", orders.isEmpty())
-        Assert.assertEquals(invoice, restored.state.value.invoice)
     }
 
     @Test
-    fun startOver_clearsTheInvoiceAndAllowsReorder() = runTest(mainDispatcherRule.dispatcher) {
+    fun startOver_clearsThePersistedInvoice() = runTest(mainDispatcherRule.dispatcher) {
         val savedStateHandle = SavedStateHandle()
-        val model = viewModel(savedStateHandle = savedStateHandle)
+        val model = viewModel(savedStateHandle)
         model.loadQuote()
         advanceUntilIdle()
         model.order { invoice }
         advanceUntilIdle()
 
         model.startOver()
-        advanceUntilIdle()
-
-        Assert.assertNull(model.state.value.invoice)
-        Assert.assertTrue(model.state.value.actionsEnabled)
-        Assert.assertTrue(model.state.value.inputEnabled)
 
         // The discarded invoice must not come back after a process restart.
-        Assert.assertNull(viewModel(savedStateHandle = savedStateHandle).state.value.invoice)
-
-        model.order { invoice }
-        advanceUntilIdle()
-
-        Assert.assertEquals(invoice, model.state.value.invoice)
-    }
-
-    @Test
-    fun startOver_doesNothingWithoutAnInvoice() = runTest(mainDispatcherRule.dispatcher) {
-        val model = viewModel()
-        model.loadQuote()
-        advanceUntilIdle()
-
-        model.startOver()
-        advanceUntilIdle()
-
-        Assert.assertNull(model.state.value.invoice)
-        Assert.assertTrue(model.state.value.actionsEnabled)
-    }
-
-    @Test
-    fun reportPaymentFailure_emitsEvent() = runTest(mainDispatcherRule.dispatcher) {
-        val error = IllegalStateException("payment polling failed")
-        val model = viewModel()
-
-        model.reportPaymentFailure(error)
-
-        val event = model.events.first()
-        Assert.assertTrue(event is PaymentEvent.PaymentFailed)
-        Assert.assertSame(error, (event as PaymentEvent.PaymentFailed).error)
+        Assert.assertNull(viewModel(savedStateHandle).state.value.invoice)
     }
 }

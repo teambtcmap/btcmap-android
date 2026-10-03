@@ -21,16 +21,12 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.launch
 import org.btcmap.R
 import org.btcmap.api
-import org.btcmap.api.reportPlace
 import org.btcmap.databinding.ReportPhotoItemBinding
 import org.btcmap.databinding.ReportPlaceFragmentBinding
 import org.btcmap.util.createPhotoCaptureTarget
 import org.btcmap.util.encodePhoto
 import org.btcmap.util.rethrowIfCancellation
 import java.io.File
-
-/** Mirrors the API's per-report evidence photo cap so the UI can enforce it. */
-private const val MAX_PHOTOS = 5
 
 class ReportPlaceFragment : Fragment() {
 
@@ -62,7 +58,7 @@ class ReportPlaceFragment : Fragment() {
     private val binding get() = _binding!!
 
     private val pickPhotos = registerForActivityResult(
-        ActivityResultContracts.PickMultipleVisualMedia(MAX_PHOTOS),
+        ActivityResultContracts.PickMultipleVisualMedia(MAX_REPORT_PHOTOS),
     ) { uris ->
         if (uris.isNotEmpty()) addPhotos(uris)
     }
@@ -99,11 +95,11 @@ class ReportPlaceFragment : Fragment() {
             if (!submitting) binding.btnSubmit.isEnabled = checkedId != View.NO_ID
         }
 
-        when (args.defaultType) {
-            "verified" -> binding.reportType.check(R.id.typeVerified)
-            "refused_sats" -> binding.reportType.check(R.id.typeRefusedSats)
-            "out_of_business" -> binding.reportType.check(R.id.typeOutOfBusiness)
-            else -> Unit
+        when (ReportType.fromValue(args.defaultType)) {
+            ReportType.Verified -> binding.reportType.check(R.id.typeVerified)
+            ReportType.RefusedSats -> binding.reportType.check(R.id.typeRefusedSats)
+            ReportType.OutOfBusiness -> binding.reportType.check(R.id.typeOutOfBusiness)
+            null -> Unit
         }
 
         binding.btnAddPhoto.setOnClickListener { showAddPhotoDialog() }
@@ -159,7 +155,7 @@ class ReportPlaceFragment : Fragment() {
             return
         }
 
-        val remaining = MAX_PHOTOS - photos.size
+        val remaining = MAX_REPORT_PHOTOS - photos.size
         if (remaining <= 0) {
             cleanupFile?.delete()
             showToast(R.string.report_photo_limit)
@@ -234,29 +230,27 @@ class ReportPlaceFragment : Fragment() {
 
     private fun updatePhotoControls() {
         if (_binding == null) return
-        binding.btnAddPhoto.isEnabled = !submitting && !encoding && photos.size < MAX_PHOTOS
+        binding.btnAddPhoto.isEnabled = !submitting && !encoding && photos.size < MAX_REPORT_PHOTOS
         removeButtons.forEach { it.isEnabled = !submitting }
     }
 
     private fun submit() {
         val type = when (binding.reportType.checkedRadioButtonId) {
-            R.id.typeVerified -> "verified"
-            R.id.typeRefusedSats -> "refused_sats"
-            R.id.typeOutOfBusiness -> "out_of_business"
+            R.id.typeVerified -> ReportType.Verified
+            R.id.typeRefusedSats -> ReportType.RefusedSats
+            R.id.typeOutOfBusiness -> ReportType.OutOfBusiness
             else -> return
         }
 
-        val comment = binding.comment.text?.toString()?.trim().orEmpty()
+        val note = binding.comment.text?.toString().orEmpty()
 
         setFormEnabled(false)
 
         viewLifecycleOwner.lifecycleScope.launch {
             try {
-                api().reportPlace(
+                api().submitReport(
                     placeId = args.placeId,
-                    type = type,
-                    comment = comment.takeIf { it.isNotEmpty() },
-                    photos = photos.toList(),
+                    draft = ReportDraft(type = type, note = note, photos = photos.toList()),
                 )
                 withResumed {
                     Toast.makeText(

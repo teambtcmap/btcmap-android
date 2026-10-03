@@ -1,16 +1,26 @@
 package org.btcmap.imagestats
 
-import coil3.decode.DataSource
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicLong
 
 /**
+ * Where a successful image load was served from.
+ *
+ * The image library's own source enum is folded onto this one by the host, so
+ * the counters do not depend on the image library.
+ */
+enum class ImageLoadSource {
+    Memory,
+    Disk,
+    Network,
+}
+
+/**
  * Process-wide counters for image loads.
  *
- * Coil's image pipeline is otherwise opaque, so [ImageStatsEventListener]
- * records every load here and the image stats screen reads the totals. The
- * counters are updated from Coil's decoder and fetcher threads, hence the
- * atomics.
+ * The image pipeline is otherwise opaque, so the host's listener records every
+ * load here and the image stats screen reads the totals. The counters are
+ * updated from decoder and fetcher threads, hence the atomics.
  */
 object ImageLoadStats {
 
@@ -35,13 +45,11 @@ object ImageLoadStats {
      * what it is meant to describe, and a cancelled load is often short, so
      * counting it would pull the average down misleadingly.
      */
-    fun recordSuccess(dataSource: DataSource, durationNanos: Long) {
-        when (dataSource) {
-            // MEMORY covers images that were already decoded in memory outside
-            // the cache; either way the load did not hit disk or the network.
-            DataSource.MEMORY_CACHE, DataSource.MEMORY -> memoryCacheHits.incrementAndGet()
-            DataSource.DISK -> diskCacheHits.incrementAndGet()
-            DataSource.NETWORK -> networkLoads.incrementAndGet()
+    fun recordSuccess(source: ImageLoadSource, durationNanos: Long) {
+        when (source) {
+            ImageLoadSource.Memory -> memoryCacheHits.incrementAndGet()
+            ImageLoadSource.Disk -> diskCacheHits.incrementAndGet()
+            ImageLoadSource.Network -> networkLoads.incrementAndGet()
         }
         // A non-positive duration means the listener never saw the load start,
         // so there is nothing to average; skip it rather than count an instant.
@@ -80,7 +88,7 @@ object ImageLoadStats {
     }
 
     /** Clears every counter, for tests. */
-    internal fun reset() {
+    fun reset() {
         requests.set(0)
         memoryCacheHits.set(0)
         diskCacheHits.set(0)

@@ -30,15 +30,13 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.btcmap.api.Api
-import org.btcmap.api.getUser
-import org.btcmap.api.removeSavedArea
-import org.btcmap.api.removeSavedPlace
 import org.btcmap.api.signOut
 import org.btcmap.api.toDbUser
 import org.btcmap.api.updatePassword
 import org.btcmap.api.updateUsername
 import org.btcmap.auth.AuthError
 import org.btcmap.auth.AuthValidation
+import org.btcmap.saved.SavedItems
 import org.btcmap.db.Database
 import org.btcmap.db.table.user.User
 import org.btcmap.i18n.getLocalizedName
@@ -174,15 +172,13 @@ internal fun DesktopProfile(
                 },
                 onDeletePlace = { id ->
                     scope.launch {
-                        api.removeSavedPlace(id)
-                        cacheUser(api, db)
+                        SavedItems.removePlace(api, db, id)
                         reload()
                     }
                 },
                 onDeleteArea = { id ->
                     scope.launch {
-                        api.removeSavedArea(id)
-                        cacheUser(api, db)
+                        SavedItems.removeArea(api, db, id)
                         reload()
                     }
                 },
@@ -410,17 +406,6 @@ private suspend fun changeUsername(api: Api, db: Database, name: String) {
                     savedAreas = existing?.savedAreas ?: updated.savedAreas,
                 ),
             )
-        }
-    }
-}
-
-/** Caches the canonical user the endpoint returns. */
-private suspend fun cacheUser(api: Api, db: Database) {
-    val user = api.getUser().toDbUser()
-    withContext(Dispatchers.IO) {
-        db.transaction {
-            db.user.delete()
-            db.user.insert(user)
         }
     }
 }

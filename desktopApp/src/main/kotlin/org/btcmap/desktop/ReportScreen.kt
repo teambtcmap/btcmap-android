@@ -36,34 +36,30 @@ import androidx.compose.ui.res.loadImageBitmap
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import org.btcmap.api.Api
-import org.btcmap.api.reportPlace
+import org.btcmap.place.MAX_REPORT_PHOTOS
+import org.btcmap.place.ReportDraft
+import org.btcmap.place.ReportType
+import org.btcmap.place.submitReport
 import org.btcmap.ui.MaterialSymbol
-
-/** The evidence-photo cap, mirroring the API's per-report limit. */
-internal const val MAX_REPORT_PHOTOS = 5
 
 /** Test tags for the report form's photo controls. */
 internal const val REPORT_ADD_PHOTO_TAG = "report-add-photo"
 internal const val REPORT_PHOTO_TAG_PREFIX = "report-photo-"
 internal const val REPORT_PHOTO_REMOVE_TAG_PREFIX = "report-photo-remove-"
 
-private val REPORT_TYPES = listOf(
-    Triple(
-        "verified",
-        "Verified - still accepts Bitcoin",
-        "You confirmed this place exists and currently accepts Bitcoin payments.",
-    ),
-    Triple(
-        "refused_sats",
-        "Refused Bitcoin payment",
-        "An attempt to pay with Bitcoin on-site was refused by the merchant.",
-    ),
-    Triple(
-        "out_of_business",
-        "Out of business",
-        "The place has been permanently closed or is no longer operating.",
-    ),
-)
+/** The desktop's label for a shared report reason. */
+private fun ReportType.label(): String = when (this) {
+    ReportType.Verified -> "Verified - still accepts Bitcoin"
+    ReportType.RefusedSats -> "Refused Bitcoin payment"
+    ReportType.OutOfBusiness -> "Out of business"
+}
+
+/** The desktop's description for a shared report reason. */
+private fun ReportType.description(): String = when (this) {
+    ReportType.Verified -> "You confirmed this place exists and currently accepts Bitcoin payments."
+    ReportType.RefusedSats -> "An attempt to pay with Bitcoin on-site was refused by the merchant."
+    ReportType.OutOfBusiness -> "The place has been permanently closed or is no longer operating."
+}
 
 /**
  * The desktop's report form for a place: the same three reasons the app offers,
@@ -82,7 +78,7 @@ internal fun DesktopReportScreen(
     onBack: () -> Unit,
     pickPhotos: suspend () -> List<ByteArray> = { emptyList() },
 ) {
-    var type by remember { mutableStateOf(initialType) }
+    var type by remember { mutableStateOf(ReportType.fromValue(initialType)) }
     var note by remember { mutableStateOf("") }
     val photos = remember { mutableStateListOf<ByteArray>() }
     var busy by remember { mutableStateOf(false) }
@@ -109,13 +105,13 @@ internal fun DesktopReportScreen(
                 style = MaterialTheme.typography.bodyMedium,
             )
 
-            REPORT_TYPES.forEach { (value, label, description) ->
+            ReportType.entries.forEach { option ->
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    RadioButton(selected = type == value, onClick = { type = value })
+                    RadioButton(selected = type == option, onClick = { type = option })
                     Column(modifier = Modifier.padding(start = 4.dp)) {
-                        Text(text = label)
+                        Text(text = option.label())
                         Text(
-                            text = description,
+                            text = option.description(),
                             style = MaterialTheme.typography.bodySmall,
                         )
                     }
@@ -190,11 +186,9 @@ internal fun DesktopReportScreen(
                     error = null
                     scope.launch {
                         try {
-                            api.reportPlace(
+                            api.submitReport(
                                 placeId = placeId,
-                                type = reason,
-                                comment = note.trim().takeIf { it.isNotEmpty() },
-                                photos = photos.toList(),
+                                draft = ReportDraft(type = reason, note = note, photos = photos.toList()),
                             )
                             submitted = true
                         } catch (t: Throwable) {

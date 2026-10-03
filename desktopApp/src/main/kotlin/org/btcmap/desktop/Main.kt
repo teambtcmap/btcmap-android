@@ -26,12 +26,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import kotlinx.coroutines.withContext
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.Dispatchers
 import androidx.compose.runtime.rememberCoroutineScope
 import org.btcmap.api.ActivityFeedItem
 import org.btcmap.api.getActivity
+import org.btcmap.feed.feedKey
+import org.btcmap.feed.iconGlyph
 import org.btcmap.map.DEFAULT_MAP_CENTER_LAT
 import org.btcmap.map.DEFAULT_MAP_CENTER_LON
 import org.btcmap.map.DEFAULT_MAP_ZOOM
@@ -57,16 +57,14 @@ import org.btcmap.api.Api
 import org.btcmap.api.signIn
 import org.btcmap.api.submitPlace
 import org.btcmap.ui.PlaceAction
-import org.btcmap.api.savePlace
-import org.btcmap.api.removeSavedPlace
-import org.btcmap.api.getUser
-import org.btcmap.api.toDbUser
 import org.btcmap.api.apiHttpClient
+import org.btcmap.saved.SavedItems
 import org.btcmap.bundle.BundledAreas
 import org.btcmap.bundle.BundledComments
 import org.btcmap.bundle.BundledEvents
 import org.btcmap.bundle.BundledPlaces
 import org.btcmap.db.Database
+import org.btcmap.payment.PaymentInvoice
 import org.btcmap.sync.Sync
 import org.btcmap.sync.SyncManager
 import org.btcmap.settings.KEY_AUTH_TOKEN
@@ -170,7 +168,7 @@ private fun runApp() = application {
                     var reportType by remember { mutableStateOf<String?>(null) }
                     var bookmarked by remember { mutableStateOf(false) }
                     LaunchedEffect(selectedPlaceId) {
-                        bookmarked = selectedPlaceId?.let { isPlaceSaved(db, it) } ?: false
+                        bookmarked = selectedPlaceId?.let { SavedItems.isPlaceSaved(db, it) } ?: false
                     }
                     // The place a feed row asked the map to show. Leaving the
                     // map disposes it and coming back rebuilds it, so opening a
@@ -258,8 +256,8 @@ private fun runApp() = application {
                                     PlaceAction.ToggleBookmark -> {
                                         if (settings.authorized) {
                                             scope.launch {
-                                                toggleSavedPlace(api, db, place.id)
-                                                bookmarked = isPlaceSaved(db, place.id)
+                                                SavedItems.togglePlace(api, db, place.id, place.name.orEmpty())
+                                                bookmarked = SavedItems.isPlaceSaved(db, place.id)
                                             }
                                         } else {
                                             route = Route.Account
@@ -493,7 +491,7 @@ private fun renderScreen(spec: String) {
                     )
 
                     "payment" -> InvoicePaymentSection(
-                        invoice = Invoice(id = "demo", bolt11 = "lnbc1u1p3exampleinvoice"),
+                        invoice = PaymentInvoice(id = "demo", bolt11 = "lnbc1u1p3exampleinvoice"),
                         onStartOver = {},
                     )
 
@@ -585,15 +583,6 @@ private suspend fun areaAliases(db: Database, lat: Double, lon: Double): List<St
 
 /** A feed item as a row, with the labels spelled out for the desktop. */
 private fun ActivityFeedItem.toRow(): ActivityFeedRow {
-    val icon = when (type) {
-        ActivityFeedItem.TYPE_PLACE_ADDED -> "add_location"
-        ActivityFeedItem.TYPE_PLACE_UPDATED -> "edit"
-        ActivityFeedItem.TYPE_PLACE_BOOSTED -> "rocket_launch"
-        ActivityFeedItem.TYPE_PLACE_COMMENTED -> "comment"
-        ActivityFeedItem.TYPE_PLACE_DELETED -> "delete"
-        else -> "place"
-    }
-
     val subtitle = when (type) {
         ActivityFeedItem.TYPE_PLACE_BOOSTED -> durationDays?.let { "Boosted for $it days" }.orEmpty()
         ActivityFeedItem.TYPE_PLACE_COMMENTED -> comment.orEmpty()
@@ -604,8 +593,8 @@ private fun ActivityFeedItem.toRow(): ActivityFeedRow {
     }
 
     return ActivityFeedRow(
-        key = "$type:$placeId:$date",
-        icon = icon,
+        key = feedKey(),
+        icon = iconGlyph(),
         placeName = placeName.orEmpty(),
         subtitle = subtitle,
         date = relativeDate(date),
@@ -621,32 +610,6 @@ private fun relativeDate(date: String): String = runCatching {
         else -> "$days days ago"
     }
 }.getOrDefault(date)
-
-/**
- * Whether the account has the place saved. The saved places live in the cached
- * user row, which the sync and the save action both keep current.
- */
-private suspend fun isPlaceSaved(db: Database, placeId: Long): Boolean =
-    withContext(Dispatchers.IO) {
-        db.user.select()?.savedPlaces?.any { it.id == placeId }
-    } ?: false
-
-/**
- * Saves or unsaves the place and caches the canonical list the endpoint
- * returns. The whole user is refetched, which is also what the app does when a
- * saved id is neither cached nor named.
- */
-private suspend fun toggleSavedPlace(api: Api, db: Database, placeId: Long) {
-    if (isPlaceSaved(db, placeId)) api.removeSavedPlace(placeId) else api.savePlace(placeId)
-
-    val user = api.getUser().toDbUser()
-    withContext(Dispatchers.IO) {
-        db.transaction {
-            db.user.delete()
-            db.user.insert(user)
-        }
-    }
-}
 
 private const val API_URL = "https://api.btcmap.org"
 private const val USER_AGENT = "btcmap-desktop"

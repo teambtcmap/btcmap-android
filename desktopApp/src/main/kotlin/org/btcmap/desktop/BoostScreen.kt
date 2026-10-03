@@ -9,6 +9,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -16,12 +17,13 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import kotlinx.coroutines.launch
 import org.btcmap.api.Api
 import org.btcmap.api.PlaceBoostQuoteResponse
 import org.btcmap.api.awaitPaidInvoice
 import org.btcmap.api.boostPlace
 import org.btcmap.api.getPlaceBoostQuote
+import org.btcmap.payment.InvoicePaymentFlow
+import org.btcmap.payment.PaymentInvoice
 import org.btcmap.ui.BoostForm
 import org.btcmap.ui.BoostFormUiState
 import org.btcmap.ui.BoostOption
@@ -46,8 +48,10 @@ private fun BoostDuration.priceSat(quote: PlaceBoostQuoteResponse): Long = when 
 
 /**
  * The desktop's boost screen: the fee quote, the duration choices and the
- * Lightning invoice the boost is paid with. The boost is applied by the server
- * once the invoice is paid, which the poll below watches for.
+ * Lightning invoice the boost is paid with. The quote, order and invoice state
+ * come from the shared [InvoicePaymentFlow], so it behaves exactly like the
+ * app; the boost is applied by the server once the invoice is paid, which the
+ * poll below watches for.
  */
 @Composable
 internal fun DesktopBoostScreen(
@@ -56,36 +60,33 @@ internal fun DesktopBoostScreen(
     placeName: String,
     onBack: () -> Unit,
 ) {
-    var quote by remember { mutableStateOf<PlaceBoostQuoteResponse?>(null) }
-    var loadingQuote by remember { mutableStateOf(true) }
-    var ordering by remember { mutableStateOf(false) }
-    var invoice by remember { mutableStateOf<Invoice?>(null) }
+    val scope = rememberCoroutineScope()
+    val flow = remember(api, placeId) {
+        InvoicePaymentFlow(
+            quoteLoader = { api.getPlaceBoostQuote() },
+            scope = scope,
+        )
+    }
+    val state by flow.state.collectAsState()
     var submitted by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<String?>(null) }
-    val scope = rememberCoroutineScope()
 
-    suspend fun loadQuote() {
-        loadingQuote = true
-        try {
-            quote = api.getPlaceBoostQuote()
-        } catch (t: Throwable) {
-            t.rethrowIfCancellation()
-            error = t.message ?: t.toString()
-        } finally {
-            loadingQuote = false
+    LaunchedEffect(flow) { flow.loadQuote() }
+
+    LaunchedEffect(flow) {
+        flow.events.collect { event ->
+            error = event.error.message ?: event.error.toString()
         }
     }
 
-    LaunchedEffect(Unit) { loadQuote() }
-
-    LaunchedEffect(invoice?.id) {
-        val id = invoice?.id ?: return@LaunchedEffect
+    LaunchedEffect(state.invoice?.id) {
+        val id = state.invoice?.id ?: return@LaunchedEffect
         try {
             api.awaitPaidInvoice(id)
             submitted = true
         } catch (t: Throwable) {
             t.rethrowIfCancellation()
-            error = t.message ?: t.toString()
+            flow.reportPaymentFailure(t)
         }
     }
 
@@ -104,7 +105,7 @@ internal fun DesktopBoostScreen(
             }
 
             val options = BOOST_DURATIONS.map { duration ->
-                val price = quote?.let { formatSat(duration.priceSat(it)) }
+                val price = state.quote?.let { formatSat(duration.priceSat(it)) }
                 BoostOption(
                     key = duration.key,
                     label = price?.let { "${duration.label} - $it" } ?: duration.label,
@@ -119,24 +120,16 @@ internal fun DesktopBoostScreen(
                     options = options,
                     continueLabel = "Continue",
                     selectedKey = DEFAULT_BOOST_KEY,
-                    optionsEnabled = quote != null && !ordering && invoice == null,
-                    actionsEnabled = quote != null && !loadingQuote && !ordering && invoice == null,
-                    showContinue = invoice == null,
+                    optionsEnabled = state.quote != null && !state.ordering && state.invoice == null,
+                    actionsEnabled = state.actionsEnabled,
+                    showContinue = state.invoice == null,
                 ),
                 onContinue = { key ->
                     BOOST_DURATIONS.firstOrNull { it.key == key }?.let { duration ->
-                        ordering = true
                         error = null
-                        scope.launch {
-                            try {
-                                val response = api.boostPlace(placeId = placeId, days = duration.days)
-                                invoice = Invoice(id = response.invoiceId, bolt11 = response.invoice)
-                            } catch (t: Throwable) {
-                                t.rethrowIfCancellation()
-                                error = t.message ?: t.toString()
-                            } finally {
-                                ordering = false
-                            }
+                        flow.order {
+                            val response = api.boostPlace(placeId = placeId, days = duration.days)
+                            PaymentInvoice(id = response.invoiceId, bolt11 = response.invoice)
                         }
                     }
                 },
@@ -150,10 +143,10 @@ internal fun DesktopBoostScreen(
                 )
             }
 
-            invoice?.let {
+            state.invoice?.let {
                 InvoicePaymentSection(
                     invoice = it,
-                    onStartOver = { invoice = null },
+                    onStartOver = flow::startOver,
                     modifier = Modifier.padding(top = 16.dp),
                 )
             }

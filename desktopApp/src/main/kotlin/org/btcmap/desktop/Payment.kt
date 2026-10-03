@@ -23,6 +23,7 @@ import androidx.compose.ui.unit.dp
 import com.google.zxing.BarcodeFormat
 import com.google.zxing.EncodeHintType
 import com.google.zxing.MultiFormatWriter
+import org.btcmap.payment.PaymentInvoice
 import org.btcmap.ui.InvoicePayment
 import org.btcmap.ui.InvoicePaymentLabels
 import java.awt.image.BufferedImage
@@ -30,9 +31,6 @@ import java.text.NumberFormat
 
 /** Test tags for the payment section's start-over confirmation. */
 internal const val PAYMENT_DISCARD_TAG = "payment-discard"
-
-/** A Lightning invoice the user can pay, with the id the poll watches. */
-internal data class Invoice(val id: String, val bolt11: String)
 
 private const val QR_SIZE = 512
 
@@ -51,7 +49,7 @@ private val INVOICE_LABELS = InvoicePaymentLabels(
  */
 @Composable
 internal fun InvoicePaymentSection(
-    invoice: Invoice,
+    invoice: PaymentInvoice,
     onStartOver: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
