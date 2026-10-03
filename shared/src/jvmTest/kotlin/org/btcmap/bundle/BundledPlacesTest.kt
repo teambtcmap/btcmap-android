@@ -306,7 +306,7 @@ class BundledPlacesTest {
     // --- seeding ----------------------------------------------------------------
 
     @Test
-    fun importFrom_seedsEmptyDatabaseWithBundledRows() = runTest {
+    fun import_seedsEmptyDatabaseWithBundledRows() = runTest {
         val db = createDatabase()
         val json = """
             [
@@ -315,7 +315,7 @@ class BundledPlacesTest {
             ]
         """.trimIndent()
 
-        val result = BundledPlaces.importFrom(db) { json.byteInputStream() }
+        val result = BundledPlaces.import(db) { json.byteInputStream() }
 
         Assert.assertEquals(2L, result.placesImported)
         Assert.assertFalse(result.duration.isNegative)
@@ -340,12 +340,12 @@ class BundledPlacesTest {
     }
 
     @Test
-    fun importFrom_skipsWhenDatabaseAlreadyHasPlaces() = runTest {
+    fun import_skipsWhenDatabaseAlreadyHasPlaces() = runTest {
         val db = createDatabase()
         db.place.insert(listOf(place(id = 99L)))
 
         var opened = false
-        val result = BundledPlaces.importFrom(db) {
+        val result = BundledPlaces.import(db) {
             opened = true
             snapshotJson(1).byteInputStream()
         }
@@ -357,13 +357,13 @@ class BundledPlacesTest {
     }
 
     @Test
-    fun importFrom_skipsWhenDatabaseHoldsOnlyTombstones() = runTest {
+    fun import_skipsWhenDatabaseHoldsOnlyTombstones() = runTest {
         val db = createDatabase()
         db.place.insert(
             listOf(place(id = 99L, deletedAt = ZonedDateTime.parse("2026-05-01T00:00:00Z"))),
         )
 
-        val result = BundledPlaces.importFrom(db) { snapshotJson(2).byteInputStream() }
+        val result = BundledPlaces.import(db) { snapshotJson(2).byteInputStream() }
 
         Assert.assertEquals(0L, result.placesImported)
         Assert.assertEquals(1L, db.place.selectCount(includeDeleted = true))
@@ -372,11 +372,11 @@ class BundledPlacesTest {
     }
 
     @Test
-    fun importFrom_isIdempotentAcrossRepeatedCalls() = runTest {
+    fun import_isIdempotentAcrossRepeatedCalls() = runTest {
         val db = createDatabase()
-        BundledPlaces.importFrom(db) { snapshotJson(2).byteInputStream() }
+        BundledPlaces.import(db) { snapshotJson(2).byteInputStream() }
 
-        val second = BundledPlaces.importFrom(db) { snapshotJson(5).byteInputStream() }
+        val second = BundledPlaces.import(db) { snapshotJson(5).byteInputStream() }
 
         Assert.assertEquals(0L, second.placesImported)
         Assert.assertEquals(2L, db.place.selectCount())
@@ -384,12 +384,12 @@ class BundledPlacesTest {
     }
 
     @Test
-    fun importFrom_reportsProgressAfterEachCommittedBatch() = runTest {
+    fun import_reportsProgressAfterEachCommittedBatch() = runTest {
         val db = createDatabase()
         val count = BundledPlaces.BATCH_SIZE * 2 + 3
         val totals = mutableListOf<Long>()
 
-        BundledPlaces.importFrom(db, onBatch = { totals += it }) {
+        BundledPlaces.import(db, onBatch = { totals += it }) {
             snapshotJson(count).byteInputStream()
         }
 
@@ -404,14 +404,14 @@ class BundledPlacesTest {
     }
 
     @Test
-    fun importFrom_restartsAnInterruptedSeedInsteadOfTrustingItsRows() = runTest {
+    fun import_restartsAnInterruptedSeedInsteadOfTrustingItsRows() = runTest {
         val db = createDatabase()
         // A previous import committed one batch and was killed before it could
         // mark itself complete.
         db.place.insert(listOf(place(id = 99L)))
         db.preference.upsert(BundledPlaces.SEED_STATE_KEY, BundledPlaces.SEED_IN_PROGRESS)
 
-        val result = BundledPlaces.importFrom(db) { snapshotJson(2).byteInputStream() }
+        val result = BundledPlaces.import(db) { snapshotJson(2).byteInputStream() }
 
         Assert.assertEquals(2L, result.placesImported)
         Assert.assertEquals(2L, db.place.selectCount())
@@ -419,21 +419,21 @@ class BundledPlacesTest {
     }
 
     @Test
-    fun importFrom_emptySnapshotSeedsNothing() = runTest {
+    fun import_emptySnapshotSeedsNothing() = runTest {
         val db = createDatabase()
 
-        val result = BundledPlaces.importFrom(db) { "[]".byteInputStream() }
+        val result = BundledPlaces.import(db) { "[]".byteInputStream() }
 
         Assert.assertEquals(0L, result.placesImported)
         Assert.assertEquals(0L, db.place.selectCount())
     }
 
     @Test
-    fun importFrom_importsEveryRowAcrossBatchBoundaries() = runTest {
+    fun import_importsEveryRowAcrossBatchBoundaries() = runTest {
         val db = createDatabase()
         val count = BundledPlaces.BATCH_SIZE + 1
 
-        val result = BundledPlaces.importFrom(db) { snapshotJson(count).byteInputStream() }
+        val result = BundledPlaces.import(db) { snapshotJson(count).byteInputStream() }
 
         Assert.assertEquals(count.toLong(), result.placesImported)
         Assert.assertEquals(count.toLong(), db.place.selectCount())
@@ -443,7 +443,7 @@ class BundledPlacesTest {
     }
 
     @Test
-    fun importFrom_closesTheStream() = runTest {
+    fun import_closesTheStream() = runTest {
         val db = createDatabase()
         var closed = false
         val stream = object : ByteArrayInputStream(snapshotJson(1).toByteArray()) {
@@ -453,7 +453,7 @@ class BundledPlacesTest {
             }
         }
 
-        BundledPlaces.importFrom(db) { stream }
+        BundledPlaces.import(db) { stream }
 
         Assert.assertTrue("the snapshot stream must be closed", closed)
     }
@@ -461,58 +461,58 @@ class BundledPlacesTest {
     // --- failure handling -------------------------------------------------------
 
     @Test
-    fun importFrom_missingAssetIsNotAnError() = runTest {
+    fun import_missingAssetIsNotAnError() = runTest {
         val db = createDatabase()
 
-        val result = BundledPlaces.importFrom(db) { throw FileNotFoundException("no asset") }
+        val result = BundledPlaces.import(db) { throw FileNotFoundException("no asset") }
 
         Assert.assertEquals(0L, result.placesImported)
         Assert.assertEquals(0L, db.place.selectCount())
     }
 
     @Test
-    fun importFrom_malformedAssetRollsBackTheWholeSeed() = runTest {
+    fun import_malformedAssetRollsBackTheWholeSeed() = runTest {
         val db = createDatabase()
         // The first entry is valid, the second is missing its required icon.
         val json = """[{"id":1,"lat":1.0,"lon":2.0,"icon":"store","updated_at":"2026-03-01T12:00:00Z"},{"id":2,"lat":3.0,"lon":4.0}]"""
 
-        val result = BundledPlaces.importFrom(db) { json.byteInputStream() }
+        val result = BundledPlaces.import(db) { json.byteInputStream() }
 
         Assert.assertEquals(0L, result.placesImported)
         Assert.assertEquals("a partial seed must not survive a parse failure", 0L, db.place.selectCount())
     }
 
     @Test
-    fun importFrom_invalidJsonRollsBackTheWholeSeed() = runTest {
+    fun import_invalidJsonRollsBackTheWholeSeed() = runTest {
         val db = createDatabase()
         val json = """[{"id":1,"lat":1.0,"lon":2.0,"icon":"store"},"""
 
-        val result = BundledPlaces.importFrom(db) { json.byteInputStream() }
+        val result = BundledPlaces.import(db) { json.byteInputStream() }
 
         Assert.assertEquals(0L, result.placesImported)
         Assert.assertEquals(0L, db.place.selectCount())
     }
 
     @Test
-    fun importFrom_canBeRetriedAfterAFailedImport() = runTest {
+    fun import_canBeRetriedAfterAFailedImport() = runTest {
         val db = createDatabase()
-        BundledPlaces.importFrom(db) {
+        BundledPlaces.import(db) {
             """[{"id":1,"lat":1.0,"lon":2.0}]""".byteInputStream()
         }
         Assert.assertEquals(0L, db.place.selectCount())
 
-        val result = BundledPlaces.importFrom(db) { snapshotJson(2).byteInputStream() }
+        val result = BundledPlaces.import(db) { snapshotJson(2).byteInputStream() }
 
         Assert.assertEquals(2L, result.placesImported)
         Assert.assertEquals(2L, db.place.selectCount())
     }
 
     @Test
-    fun importFrom_badBoostedUntilDoesNotDiscardTheSeed() = runTest {
+    fun import_badBoostedUntilDoesNotDiscardTheSeed() = runTest {
         val db = createDatabase()
         val json = """[{"id":1,"lat":1.0,"lon":2.0,"icon":"store","updated_at":"2026-03-01T12:00:00Z","boosted_until":"not-a-date"}]"""
 
-        val result = BundledPlaces.importFrom(db) { json.byteInputStream() }
+        val result = BundledPlaces.import(db) { json.byteInputStream() }
 
         Assert.assertEquals(1L, result.placesImported)
         Assert.assertEquals(1L, db.place.selectCount())

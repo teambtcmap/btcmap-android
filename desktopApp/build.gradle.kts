@@ -14,21 +14,27 @@ kotlin {
     jvmToolchain(25)
 }
 
-// The icon font and map styles are Android assets; copy them in as resources so
-// the packaged app carries them instead of reading them from the sources.
-val bundleMapAssets by tasks.registering(Copy::class) {
+// The Android assets the desktop app reuses: the icon font, the map styles and
+// the bundled data snapshots. They are copied in as resources so the packaged
+// app carries them instead of reading them from the sources.
+val bundleAndroidAssets by tasks.registering(Copy::class) {
     from(rootProject.file("app/src/main/assets")) {
         include("material-symbols-*.ttf")
         rename { "material-symbols.ttf" }
     }
+    // The snapshots let the desktop seed its database offline, as Android does,
+    // instead of pulling the whole delta history on first run.
+    from(rootProject.file("app/src/main/assets")) {
+        include("bundled-*.json")
+    }
     from(rootProject.file("app/src/main/assets/map-styles")) {
         into("map-styles")
     }
-    into(layout.buildDirectory.dir("generated/map-assets"))
+    into(layout.buildDirectory.dir("generated/android-assets"))
 }
 
 sourceSets.main {
-    resources.srcDir(bundleMapAssets)
+    resources.srcDir(bundleAndroidAssets)
 }
 
 // The run task launches the project's toolchain, so it needs the Java 25 one

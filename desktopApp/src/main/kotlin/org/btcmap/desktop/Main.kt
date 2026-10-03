@@ -32,6 +32,9 @@ import kotlinx.coroutines.Dispatchers
 import androidx.compose.runtime.rememberCoroutineScope
 import org.btcmap.api.ActivityFeedItem
 import org.btcmap.api.getActivity
+import org.btcmap.map.DEFAULT_MAP_CENTER_LAT
+import org.btcmap.map.DEFAULT_MAP_CENTER_LON
+import org.btcmap.map.DEFAULT_MAP_ZOOM
 import org.btcmap.map.MapAreasController
 import org.btcmap.ui.ActivityFeedRow
 import org.btcmap.ui.ActivityFeedScreen
@@ -59,6 +62,10 @@ import org.btcmap.api.removeSavedPlace
 import org.btcmap.api.getUser
 import org.btcmap.api.toDbUser
 import org.btcmap.api.apiHttpClient
+import org.btcmap.bundle.BundledAreas
+import org.btcmap.bundle.BundledComments
+import org.btcmap.bundle.BundledEvents
+import org.btcmap.bundle.BundledPlaces
 import org.btcmap.db.Database
 import org.btcmap.sync.Sync
 import org.btcmap.sync.SyncManager
@@ -77,6 +84,7 @@ import org.btcmap.ui.AppTheme
 import org.btcmap.ui.MapScreen
 import org.btcmap.ui.StatsScreen
 import java.io.File
+import java.io.InputStream
 import java.net.URLDecoder
 
 /**
@@ -99,8 +107,9 @@ private fun runApp() = application {
     val db = home.database()
     val settings = home.settings(db).apply { preload() }
 
-    // The desktop app has no bundled snapshot to seed from, so the sync pulls
-    // the whole delta history on first run.
+    // The bundled snapshots are on the classpath (see the build file), so the
+    // desktop seeds offline like Android and the first sync only fetches the
+    // delta since the snapshot was generated.
     val api = Api(
         httpClient = apiHttpClient(
             userAgent = USER_AGENT,
@@ -112,10 +121,14 @@ private fun runApp() = application {
     )
     val syncManager = SyncManager(
         sync = { Sync(api, db) },
-        seedPlaces = { 0L },
-        seedEvents = { 0L },
-        seedComments = { 0L },
-        seedAreas = { 0L },
+        seedPlaces = { onBatch ->
+            BundledPlaces.import(db, onBatch) { bundledSnapshot(BundledPlaces.FILE_NAME) }.placesImported
+        },
+        seedEvents = { BundledEvents.import(db) { bundledSnapshot(BundledEvents.FILE_NAME) }.eventsImported },
+        seedComments = {
+            BundledComments.import(db) { bundledSnapshot(BundledComments.FILE_NAME) }.commentsImported
+        },
+        seedAreas = { BundledAreas.import(db) { bundledSnapshot(BundledAreas.FILE_NAME) }.areasImported },
     )
 
     val iconFont = loadIconFont()
@@ -163,6 +176,11 @@ private fun runApp() = application {
                     // map disposes it and coming back rebuilds it, so opening a
                     // row always lands on the map with that place selected.
                     var feedPlaceId by remember { mutableStateOf<Long?>(null) }
+                    // Where the map is looking, tracked so the feed lists the
+                    // areas the user is actually around rather than a fixed
+                    // point. Starts at the shared default view.
+                    var mapCenterLat by remember { mutableStateOf(DEFAULT_MAP_CENTER_LAT) }
+                    var mapCenterLon by remember { mutableStateOf(DEFAULT_MAP_CENTER_LON) }
                     // Where the add-place screen was opened from the map.
                     var addPlace by remember { mutableStateOf<Pair<Double, Double>?>(null) }
                     // The place a boost or comment payment screen is for.
@@ -182,9 +200,9 @@ private fun runApp() = application {
                             openPlaceId = feedPlaceId,
                             styleUrl = HOSTED_STYLE_URL,
                             styleJson = styleJson,
-                            initialLat = 52.2333742,
-                            initialLon = 21.0711489,
-                            initialZoom = 13.0,
+                            initialLat = DEFAULT_MAP_CENTER_LAT,
+                            initialLon = DEFAULT_MAP_CENTER_LON,
+                            initialZoom = DEFAULT_MAP_ZOOM,
                             // The user's verification window and colour choices
                             // come from the shared settings, so the desktop map
                             // honours the same screen Android does.
@@ -266,6 +284,10 @@ private fun runApp() = application {
                             },
                             onSelectEvent = {},
                             onSelectArea = {},
+                            onCameraIdle = { lat, lon, _ ->
+                                mapCenterLat = lat
+                                mapCenterLon = lon
+                            },
                             formatDistance = { meters -> "%.1f km".format(meters / 1000) },
                         )
 
@@ -348,7 +370,12 @@ private fun runApp() = application {
                             title = "Activity",
                             onBack = { route = Route.Map },
                         ) {
-                            DesktopFeedScreen(api = api, db = db) { placeId ->
+                            DesktopFeedScreen(
+                                api = api,
+                                db = db,
+                                lat = mapCenterLat,
+                                lon = mapCenterLon,
+                            ) { placeId ->
                                 feedPlaceId = placeId
                                 route = Route.Map
                             }
@@ -497,22 +524,23 @@ private fun renderScreen(spec: String) {
 }
 
 /**
- * The shared activity feed for the areas containing the map's starting point.
- * The desktop has no selected place or area of its own yet, so it asks the
- * shared area lookup for the ones around [FEED_LAT]/[FEED_LON].
- */
-@androidx.compose.runtime.Composable
-/**
- * The shared activity feed for the areas around the map's starting point. A row
+ * The shared activity feed for the areas around the map at [lat]/[lon]. A row
  * is about a place, so opening one hands its id back to the map.
  */
-private fun DesktopFeedScreen(api: Api, db: Database, onOpenPlace: (Long) -> Unit) {
+@androidx.compose.runtime.Composable
+private fun DesktopFeedScreen(
+    api: Api,
+    db: Database,
+    lat: Double,
+    lon: Double,
+    onOpenPlace: (Long) -> Unit,
+) {
     var attempt by remember { mutableStateOf(0) }
     var state by remember { mutableStateOf<ActivityFeedState>(ActivityFeedState.Loading) }
 
-    LaunchedEffect(attempt) {
+    LaunchedEffect(attempt, lat, lon) {
         state = ActivityFeedState.Loading
-        state = loadFeed(api, db)
+        state = loadFeed(api, db, lat, lon)
     }
 
     ActivityFeedScreen(
@@ -525,8 +553,8 @@ private fun DesktopFeedScreen(api: Api, db: Database, onOpenPlace: (Long) -> Uni
 /** The feed's row keys are "type:placeId:date", so a row names the place it is about. */
 private fun placeIdOf(key: String): Long? = key.split(':').getOrNull(1)?.toLongOrNull()
 
-private suspend fun loadFeed(api: Api, db: Database): ActivityFeedState {
-    val aliases = areaAliases(db)
+private suspend fun loadFeed(api: Api, db: Database, lat: Double, lon: Double): ActivityFeedState {
+    val aliases = areaAliases(db, lat, lon)
     if (aliases.isEmpty()) {
         return ActivityFeedState.Empty("No area found for the feed.", retryable = true)
     }
@@ -543,10 +571,10 @@ private suspend fun loadFeed(api: Api, db: Database): ActivityFeedState {
     }
 }
 
-private suspend fun areaAliases(db: Database): List<String> {
+private suspend fun areaAliases(db: Database, lat: Double, lon: Double): List<String> {
     val controller = MapAreasController(db)
     return try {
-        controller.load(FEED_LAT, FEED_LON)
+        controller.load(lat, lon)
         withTimeoutOrNull(5_000) { controller.areas.first { it.isNotEmpty() } }
             ?.map { it.urlAlias }
             ?: emptyList()
@@ -593,9 +621,6 @@ private fun relativeDate(date: String): String = runCatching {
         else -> "$days days ago"
     }
 }.getOrDefault(date)
-
-private const val FEED_LAT = 52.2333742
-private const val FEED_LON = 21.0711489
 
 /**
  * Whether the account has the place saved. The saved places live in the cached
@@ -698,6 +723,15 @@ private fun bundledStyleJson(assetPath: String): String {
 private fun resourceBytes(path: String): ByteArray? =
     Thread.currentThread().contextClassLoader.getResourceAsStream(path)?.readBytes()
 
+/**
+ * Opens a bundled snapshot resource. A missing resource throws
+ * [java.io.FileNotFoundException], the same signal a missing Android asset
+ * gives, which the shared seeders treat as an absent optional snapshot rather
+ * than an error.
+ */
+private fun bundledSnapshot(fileName: String): InputStream =
+    Thread.currentThread().contextClassLoader.getResourceAsStream(fileName)
+        ?: throw java.io.FileNotFoundException(fileName)
 
 private val PLACE_SHEET_STRINGS = org.btcmap.ui.PlaceSheetStrings(
     directions = "Directions",

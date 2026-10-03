@@ -1,6 +1,5 @@
 package org.btcmap.bundle
 
-import android.content.Context
 import androidx.sqlite.execSQL
 import com.google.gson.JsonObject
 import com.google.gson.stream.JsonReader
@@ -33,7 +32,7 @@ import java.time.format.DateTimeParseException
  * screen reads is already present.
  */
 object BundledPlaces {
-    internal const val FILE_NAME = "bundled-places.json"
+    const val FILE_NAME = "bundled-places.json"
 
     /**
      * Rows inserted per commit. Small enough that the map can query and draw the
@@ -63,28 +62,20 @@ object BundledPlaces {
     )
 
     /**
-     * Seeds the places table from the bundled snapshot, reporting the running
-     * number of imported places through [onBatch] after each committed batch.
-     */
-    suspend fun import(
-        ctx: Context,
-        db: Database,
-        onBatch: (Long) -> Unit = {},
-    ): ImportResult = importFrom(db, onBatch) { ctx.assets.open(FILE_NAME) }
-
-    /**
-     * Seeds [db] from the snapshot produced by [openStream], unless it has
-     * already been seeded.
+     * Seeds the places table from the snapshot produced by [openStream], unless
+     * it has already been seeded, reporting the running number of imported
+     * places through [onBatch] after each committed batch.
      *
      * The import commits in batches so the caller can surface the rows that have
      * landed instead of waiting for the whole snapshot, and it records progress
      * in the preference table so an import interrupted by a crash is retried
      * rather than mistaken for a finished one.
      *
-     * Kept separate from [import] so the seeding logic is testable without an
-     * Android [Context] or a real asset.
+     * The snapshot arrives as a stream, so the seeding logic itself is
+     * platform-free: the host opens the bundled asset and a test supplies an
+     * in-memory stream.
      */
-    internal suspend fun importFrom(
+    suspend fun import(
         db: Database,
         onBatch: (Long) -> Unit = {},
         openStream: () -> InputStream,

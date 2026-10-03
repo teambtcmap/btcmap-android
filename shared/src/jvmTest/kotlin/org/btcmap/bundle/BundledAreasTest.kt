@@ -249,7 +249,7 @@ class BundledAreasTest {
     // --- seeding ----------------------------------------------------------------
 
     @Test
-    fun importFrom_seedsEmptyDatabaseWithBundledRows() = runTest {
+    fun import_seedsEmptyDatabaseWithBundledRows() = runTest {
         val db = createDatabase()
         val json = """
             [
@@ -258,7 +258,7 @@ class BundledAreasTest {
             ]
         """.trimIndent()
 
-        val result = BundledAreas.importFrom(db) { json.byteInputStream() }
+        val result = BundledAreas.import(db) { json.byteInputStream() }
 
         Assert.assertEquals(2L, result.areasImported)
         Assert.assertFalse(result.duration.isNegative)
@@ -288,12 +288,12 @@ class BundledAreasTest {
     }
 
     @Test
-    fun importFrom_skipsWhenDatabaseAlreadyHasAreas() = runTest {
+    fun import_skipsWhenDatabaseAlreadyHasAreas() = runTest {
         val db = createDatabase()
         db.area.insert(listOf(area(id = 99L)))
 
         var opened = false
-        val result = BundledAreas.importFrom(db) {
+        val result = BundledAreas.import(db) {
             opened = true
             snapshotJson(1).byteInputStream()
         }
@@ -305,13 +305,13 @@ class BundledAreasTest {
     }
 
     @Test
-    fun importFrom_skipsWhenDatabaseHoldsOnlyTombstones() = runTest {
+    fun import_skipsWhenDatabaseHoldsOnlyTombstones() = runTest {
         val db = createDatabase()
         db.area.insert(
             listOf(area(id = 99L, deletedAt = ZonedDateTime.parse("2026-05-01T00:00:00Z"))),
         )
 
-        val result = BundledAreas.importFrom(db) { snapshotJson(2).byteInputStream() }
+        val result = BundledAreas.import(db) { snapshotJson(2).byteInputStream() }
 
         Assert.assertEquals(0L, result.areasImported)
         Assert.assertEquals(1L, db.area.selectCount(includeDeleted = true))
@@ -321,11 +321,11 @@ class BundledAreasTest {
     }
 
     @Test
-    fun importFrom_isIdempotentAcrossRepeatedCalls() = runTest {
+    fun import_isIdempotentAcrossRepeatedCalls() = runTest {
         val db = createDatabase()
-        BundledAreas.importFrom(db) { snapshotJson(2).byteInputStream() }
+        BundledAreas.import(db) { snapshotJson(2).byteInputStream() }
 
-        val second = BundledAreas.importFrom(db) { snapshotJson(5).byteInputStream() }
+        val second = BundledAreas.import(db) { snapshotJson(5).byteInputStream() }
 
         Assert.assertEquals(0L, second.areasImported)
         Assert.assertEquals(2L, db.area.selectCount())
@@ -333,21 +333,21 @@ class BundledAreasTest {
     }
 
     @Test
-    fun importFrom_emptySnapshotSeedsNothing() = runTest {
+    fun import_emptySnapshotSeedsNothing() = runTest {
         val db = createDatabase()
 
-        val result = BundledAreas.importFrom(db) { "[]".byteInputStream() }
+        val result = BundledAreas.import(db) { "[]".byteInputStream() }
 
         Assert.assertEquals(0L, result.areasImported)
         Assert.assertEquals(0L, db.area.selectCount())
     }
 
     @Test
-    fun importFrom_importsEveryRowAcrossBatchBoundaries() = runTest {
+    fun import_importsEveryRowAcrossBatchBoundaries() = runTest {
         val db = createDatabase()
         val count = BundledAreas.BATCH_SIZE + 1
 
-        val result = BundledAreas.importFrom(db) { snapshotJson(count).byteInputStream() }
+        val result = BundledAreas.import(db) { snapshotJson(count).byteInputStream() }
 
         Assert.assertEquals(count.toLong(), result.areasImported)
         Assert.assertEquals(count.toLong(), db.area.selectCount())
@@ -357,7 +357,7 @@ class BundledAreasTest {
     }
 
     @Test
-    fun importFrom_closesTheStream() = runTest {
+    fun import_closesTheStream() = runTest {
         val db = createDatabase()
         var closed = false
         val stream = object : ByteArrayInputStream(snapshotJson(1).toByteArray()) {
@@ -367,7 +367,7 @@ class BundledAreasTest {
             }
         }
 
-        BundledAreas.importFrom(db) { stream }
+        BundledAreas.import(db) { stream }
 
         Assert.assertTrue("the snapshot stream must be closed", closed)
     }
@@ -375,17 +375,17 @@ class BundledAreasTest {
     // --- failure handling -------------------------------------------------------
 
     @Test
-    fun importFrom_missingAssetIsNotAnError() = runTest {
+    fun import_missingAssetIsNotAnError() = runTest {
         val db = createDatabase()
 
-        val result = BundledAreas.importFrom(db) { throw FileNotFoundException("no asset") }
+        val result = BundledAreas.import(db) { throw FileNotFoundException("no asset") }
 
         Assert.assertEquals(0L, result.areasImported)
         Assert.assertEquals(0L, db.area.selectCount())
     }
 
     @Test
-    fun importFrom_malformedAssetRollsBackTheWholeSeed() = runTest {
+    fun import_malformedAssetRollsBackTheWholeSeed() = runTest {
         val db = createDatabase()
         // The first entry is valid, the second is missing its required name.
         val json = """
@@ -395,32 +395,32 @@ class BundledAreasTest {
             ]
         """.trimIndent()
 
-        val result = BundledAreas.importFrom(db) { json.byteInputStream() }
+        val result = BundledAreas.import(db) { json.byteInputStream() }
 
         Assert.assertEquals(0L, result.areasImported)
         Assert.assertEquals("a partial seed must not survive a parse failure", 0L, db.area.selectCount())
     }
 
     @Test
-    fun importFrom_invalidJsonRollsBackTheWholeSeed() = runTest {
+    fun import_invalidJsonRollsBackTheWholeSeed() = runTest {
         val db = createDatabase()
         val json = """[{"id":1,"name":"One","type":"community"},"""
 
-        val result = BundledAreas.importFrom(db) { json.byteInputStream() }
+        val result = BundledAreas.import(db) { json.byteInputStream() }
 
         Assert.assertEquals(0L, result.areasImported)
         Assert.assertEquals(0L, db.area.selectCount())
     }
 
     @Test
-    fun importFrom_canBeRetriedAfterAFailedImport() = runTest {
+    fun import_canBeRetriedAfterAFailedImport() = runTest {
         val db = createDatabase()
-        BundledAreas.importFrom(db) {
+        BundledAreas.import(db) {
             """[{"id":1,"name":"One","type":"community"}]""".byteInputStream()
         }
         Assert.assertEquals(0L, db.area.selectCount())
 
-        val result = BundledAreas.importFrom(db) { snapshotJson(2).byteInputStream() }
+        val result = BundledAreas.import(db) { snapshotJson(2).byteInputStream() }
 
         Assert.assertEquals(2L, result.areasImported)
         Assert.assertEquals(2L, db.area.selectCount())

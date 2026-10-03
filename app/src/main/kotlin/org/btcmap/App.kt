@@ -59,8 +59,9 @@ class App : Application(), SingletonImageLoader.Factory {
 
     /**
      * The sync manager the screens observe. The app-scoped default seeds the
-     * database from the bundled snapshots, which is the only Android-specific
-     * part of the sync: [SyncManager] itself only sees the seed results.
+     * database from the bundled snapshots. The seeders live in `:shared`; only
+     * opening the bundled assets is Android-specific, and [SyncManager] itself
+     * only sees the seed results.
      *
      * Read through a getter so the `*ForTesting` overrides above still apply
      * whenever the manager is built.
@@ -73,10 +74,14 @@ class App : Application(), SingletonImageLoader.Factory {
     private val defaultSyncManager: SyncManager by lazy {
         SyncManager(
             sync = { sync },
-            seedPlaces = { onBatch -> BundledPlaces.import(this, db, onBatch).placesImported },
-            seedEvents = { BundledEvents.import(this, db).eventsImported },
-            seedComments = { BundledComments.import(this, db).commentsImported },
-            seedAreas = { BundledAreas.import(this, db).areasImported },
+            seedPlaces = { onBatch ->
+                BundledPlaces.import(db, onBatch) { assets.open(BundledPlaces.FILE_NAME) }.placesImported
+            },
+            seedEvents = { BundledEvents.import(db) { assets.open(BundledEvents.FILE_NAME) }.eventsImported },
+            seedComments = {
+                BundledComments.import(db) { assets.open(BundledComments.FILE_NAME) }.commentsImported
+            },
+            seedAreas = { BundledAreas.import(db) { assets.open(BundledAreas.FILE_NAME) }.areasImported },
         )
     }
 

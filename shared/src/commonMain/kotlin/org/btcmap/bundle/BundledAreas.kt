@@ -1,6 +1,5 @@
 package org.btcmap.bundle
 
-import android.content.Context
 import com.google.gson.JsonObject
 import com.google.gson.stream.JsonReader
 import kotlinx.coroutines.Dispatchers
@@ -25,7 +24,7 @@ import java.time.ZonedDateTime
  * first.
  */
 object BundledAreas {
-    internal const val FILE_NAME = "bundled-areas.json"
+    const val FILE_NAME = "bundled-areas.json"
 
     internal const val BATCH_SIZE = 1_000
 
@@ -34,18 +33,15 @@ object BundledAreas {
         val duration: Duration,
     )
 
-    suspend fun import(ctx: Context, db: Database): ImportResult =
-        importFrom(db) { ctx.assets.open(FILE_NAME) }
-
     /**
      * Seeds [db] from the snapshot produced by [openStream], unless it already
      * holds areas.
      *
-     * Kept separate from [import] so the seeding logic — the one-shot guard, the
-     * transactional import and the failure handling — is testable without an
-     * Android [Context] or a real asset.
+     * The snapshot arrives as a stream, so the seeding logic — the one-shot
+     * guard, the transactional import and the failure handling — is platform-free:
+     * the host opens the bundled asset and a test supplies an in-memory stream.
      */
-    internal suspend fun importFrom(
+    suspend fun import(
         db: Database,
         openStream: () -> InputStream,
     ): ImportResult {

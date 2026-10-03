@@ -18,6 +18,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Make the map honour the "Allow map rotation" setting
 - Show the soft keyboard in the login, sign-up and change-password dialogs
 - Bring the desktop settings screen to parity with Android, adding map style, colours, verification filter and database stats
+- Seed the desktop app from the bundled snapshots, so it works offline on first run instead of downloading the whole history
+- Open the desktop map at the default Curaçao view, matching the Android app, and follow the map centre in the activity feed
 
 ## [1.2.0] - 2026-09-30
 
