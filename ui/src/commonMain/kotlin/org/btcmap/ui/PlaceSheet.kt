@@ -21,7 +21,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.IconButton
@@ -39,6 +38,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import org.btcmap.comment.CommentsAdapterItem
@@ -50,11 +50,17 @@ import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 
+/** Test tags for the place body's action buttons. */
+const val PLACE_VERIFY_TAG = "place-verify"
+const val PLACE_REPORT_TAG = "place-report"
+const val PLACE_BOOST_TAG = "place-boost"
+const val PLACE_COMMENTS_TAG = "place-comments"
+const val PLACE_ADD_COMMENT_TAG = "place-add-comment"
+const val PLACE_ADD_PHOTO_TAG = "place-add-photo"
+
 /**
- * The place details shown when a marker is selected, the first stage of the
- * `PlaceFragment` bottom sheet: the name, the verification state, the contact
- * details and the main actions. The photos, the preview map and the inline
- * comment list are still to come.
+ * The place details shown when a marker is selected, the map's place sheet: the
+ * name, the verification state, the contact details and the main actions.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -72,7 +78,7 @@ fun PlaceSheet(
     // visible behind it; the user can drag it up to full screen.
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
     ModalBottomSheet(onDismissRequest = onDismiss, sheetState = sheetState) {
-        PlaceSheetContent(
+        PlaceDetails(
             place = place,
             comments = comments,
             photos = photos,
@@ -80,19 +86,27 @@ fun PlaceSheet(
             strings = strings,
             onAction = onAction,
             previewMap = previewMap,
+            showHeader = true,
         )
     }
 }
 
+/**
+ * The place's scrollable body: its preview map, verification state, contact
+ * details, photos, comments and actions. Shared by the map's [PlaceSheet] and
+ * the standalone place screen, which supplies its own top bar and therefore
+ * hides [showHeader]'s name row and overflow menu.
+ */
 @Composable
-private fun PlaceSheetContent(
+fun PlaceDetails(
     place: Place,
     comments: List<CommentsAdapterItem>,
     photos: List<String>,
     bookmarked: Boolean,
     strings: PlaceSheetStrings,
     onAction: (PlaceAction) -> Unit,
-    previewMap: (@Composable () -> Unit)?,
+    previewMap: (@Composable () -> Unit)? = null,
+    showHeader: Boolean = true,
 ) {
     Column(
         modifier = Modifier
@@ -100,23 +114,25 @@ private fun PlaceSheetContent(
             .verticalScroll(rememberScrollState())
             .padding(bottom = 32.dp),
     ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(start = 16.dp, end = 8.dp),
-        ) {
-            Text(
-                text = place.getLocalizedName(),
-                style = MaterialTheme.typography.headlineSmall,
-                modifier = Modifier.weight(1f),
-            )
-            PlaceOverflowMenu(
-                place = place,
-                bookmarked = bookmarked,
-                strings = strings,
-                onAction = onAction,
-            )
+        if (showHeader) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 16.dp, end = 8.dp),
+            ) {
+                Text(
+                    text = place.getLocalizedName(),
+                    style = MaterialTheme.typography.headlineSmall,
+                    modifier = Modifier.weight(1f),
+                )
+                PlaceOverflowMenu(
+                    place = place,
+                    bookmarked = bookmarked,
+                    strings = strings,
+                    onAction = onAction,
+                )
+            }
         }
 
         previewMap?.invoke()
@@ -215,7 +231,8 @@ private fun PlaceSheetContent(
             onClick = { onAction(PlaceAction.AddPhoto) },
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 4.dp),
+                .padding(horizontal = 16.dp, vertical = 4.dp)
+                .testTag(PLACE_ADD_PHOTO_TAG),
         ) {
             Text(text = strings.addPhoto)
         }
@@ -223,14 +240,18 @@ private fun PlaceSheetContent(
         ActionRow(
             startLabel = strings.verify,
             onStart = { onAction(PlaceAction.Verify) },
+            startTag = PLACE_VERIFY_TAG,
             endLabel = strings.report,
             onEnd = { onAction(PlaceAction.Report) },
+            endTag = PLACE_REPORT_TAG,
         )
         ActionRow(
             startLabel = strings.boost,
             onStart = { onAction(PlaceAction.Boost) },
+            startTag = PLACE_BOOST_TAG,
             endLabel = strings.comments(place.comments ?: 0),
             onEnd = { onAction(PlaceAction.Comments) },
+            endTag = PLACE_COMMENTS_TAG,
         )
 
         if (comments.isNotEmpty()) {
@@ -242,7 +263,8 @@ private fun PlaceSheetContent(
             onClick = { onAction(PlaceAction.AddComment) },
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 4.dp),
+                .padding(horizontal = 16.dp, vertical = 4.dp)
+                .testTag(PLACE_ADD_COMMENT_TAG),
         ) {
             Text(text = strings.addComment)
         }
@@ -322,17 +344,29 @@ private fun InfoRow(
 private fun ActionRow(
     startLabel: String,
     onStart: () -> Unit,
+    startTag: String? = null,
     endLabel: String,
     onEnd: () -> Unit,
+    endTag: String? = null,
 ) {
     Row(
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
     ) {
-        OutlinedButton(onClick = onStart, modifier = Modifier.weight(1f)) {
+        OutlinedButton(
+            onClick = onStart,
+            modifier = Modifier
+                .weight(1f)
+                .then(if (startTag != null) Modifier.testTag(startTag) else Modifier),
+        ) {
             Text(text = startLabel, maxLines = 1)
         }
-        OutlinedButton(onClick = onEnd, modifier = Modifier.weight(1f)) {
+        OutlinedButton(
+            onClick = onEnd,
+            modifier = Modifier
+                .weight(1f)
+                .then(if (endTag != null) Modifier.testTag(endTag) else Modifier),
+        ) {
             Text(text = endLabel, maxLines = 1)
         }
     }

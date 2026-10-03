@@ -6,17 +6,17 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.lifecycleScope
 import coil3.SingletonImageLoader
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import org.btcmap.R
 import org.btcmap.databinding.ImageStatsFragmentBinding
-import org.btcmap.util.iconTypeface
-import org.btcmap.util.rethrowIfCancellation
 import org.btcmap.util.showError
 
+/**
+ * The image stats screen: a toolbar over the shared
+ * [org.btcmap.ui.ImageStatsPage], which reads Coil's caches and the load
+ * counters and renders the cards. This fragment only supplies the loader, the
+ * home directory and the labels.
+ */
 class ImageStatsFragment : Fragment() {
 
     private var _binding: ImageStatsFragmentBinding? = null
@@ -38,49 +38,24 @@ class ImageStatsFragment : Fragment() {
         binding.topAppBar.setOnMenuItemClickListener { item ->
             when (item.itemId) {
                 R.id.refresh -> {
-                    refresh()
+                    binding.imageStatsContent.refreshKey++
                     true
                 }
                 else -> false
             }
         }
 
-        binding.statsList.iconTypeface = iconTypeface
-
-        refresh()
+        val content = binding.imageStatsContent
+        content.imageLoader = SingletonImageLoader.get(requireContext().applicationContext)
+        content.homeDirectory = requireContext().dataDir.path
+        content.labels = labels()
+        content.iconTypeface = org.btcmap.util.iconTypeface
+        content.onError = { showError(it) }
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
-    }
-
-    /**
-     * Re-reads both caches and the load counters and shows the result. Called
-     * once when the screen opens and again whenever the refresh action is
-     * tapped, since the snapshot otherwise goes stale while the screen stays
-     * open.
-     */
-    private fun refresh() {
-        val appContext = requireContext().applicationContext
-        val homeDirectory = requireContext().dataDir.path
-        val statsList = binding.statsList
-        viewLifecycleOwner.lifecycleScope.launch {
-            try {
-                // Reading the caches can initialize them and touch the disk, so
-                // keep it off the main thread.
-                val cache = withContext(Dispatchers.IO) {
-                    ImageCacheStatsReader(
-                        imageLoader = SingletonImageLoader.get(appContext),
-                        homeDirectory = homeDirectory,
-                    ).read()
-                }
-                statsList.sections = imageStatsSections(cache, ImageLoadStats.snapshot(), labels())
-            } catch (e: Throwable) {
-                e.rethrowIfCancellation()
-                showError(e)
-            }
-        }
     }
 
     /** The Android labels and byte formatting for the shared image stats cards. */

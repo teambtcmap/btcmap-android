@@ -13,16 +13,14 @@
         <com.google.android.material.appbar.MaterialToolbar
             android:id="@+id/topAppBar"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:minHeight="?attr/actionBarSize"
+            android:layout_height="?attr/actionBarSize"
             app:menu="@menu/image_stats"
-            app:navigationIcon="?attr/homeAsUpIndicator"
-            app:title="@string/image_stats" />
+            app:navigationIcon="?attr/homeAsUpIndicator" />
 
     </com.google.android.material.appbar.AppBarLayout>
 
-    <org.btcmap.ui.StatsComposeView
-        android:id="@+id/statsList"
+    <org.btcmap.ui.ImageStatsComposeView
+        android:id="@+id/imageStatsContent"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:layout_behavior="@string/appbar_scrolling_view_behavior" />

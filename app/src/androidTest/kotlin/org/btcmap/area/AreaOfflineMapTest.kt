@@ -1,6 +1,12 @@
 package org.btcmap.area
 
 import android.view.View
+import androidx.compose.ui.test.assertCountEquals
+import androidx.compose.ui.test.assertTextContains
+import androidx.compose.ui.test.junit4.createEmptyComposeRule
+import androidx.compose.ui.test.onAllNodesWithTag
+import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.core.view.isVisible
 import androidx.test.core.app.ActivityScenario
 import androidx.test.espresso.Espresso.onView
@@ -17,15 +23,22 @@ import org.btcmap.R
 import org.btcmap.offline.OfflineAreaState
 import org.btcmap.settings.MapStyle
 import org.btcmap.settings.mapStyle
+import org.btcmap.ui.AREA_OFFLINE_DELETE_TAG
+import org.btcmap.ui.AREA_OFFLINE_DOWNLOAD_TAG
+import org.btcmap.ui.AREA_OFFLINE_STATUS_TAG
+import org.btcmap.ui.AREA_OFFLINE_TAG
 import org.btcmap.util.waitUntilOnMain
 import org.hamcrest.Matchers.containsString
-import org.hamcrest.Matchers.not
 import org.junit.Assert
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
 class AreaOfflineMapTest : AreaScreenTest() {
+
+    @get:Rule
+    val composeTestRule = createEmptyComposeRule()
 
     @Test
     fun areaWithBoundingBox_showsToolbarDownloadAndHidesPanel() {
@@ -36,7 +49,7 @@ class AreaOfflineMapTest : AreaScreenTest() {
             waitUntilOnMain { !area.requireView().findViewById<View>(R.id.loading).isVisible }
 
             onView(withId(R.id.download)).check(matches(isDisplayed()))
-            Assert.assertFalse(area.requireView().findViewById<View>(R.id.offline_map).isVisible)
+            composeTestRule.onNodeWithTag(AREA_OFFLINE_TAG).assertDoesNotExist()
         }
     }
 
@@ -51,7 +64,7 @@ class AreaOfflineMapTest : AreaScreenTest() {
             waitUntilOnMain { !area.requireView().findViewById<View>(R.id.loading).isVisible }
 
             onView(withId(R.id.download)).check(doesNotExist())
-            Assert.assertFalse(area.requireView().findViewById<View>(R.id.offline_map).isVisible)
+            composeTestRule.onNodeWithTag(AREA_OFFLINE_TAG).assertDoesNotExist()
         }
     }
 
@@ -83,12 +96,10 @@ class AreaOfflineMapTest : AreaScreenTest() {
 
             injectState(scenario, OfflineAreaState.Failed("boom"))
 
-            waitUntilOnMain {
-                fragment.requireView().findViewById<View>(R.id.offline_map_delete).isVisible
-            }
-            onView(withId(R.id.offline_map_download)).check(matches(isDisplayed()))
-            onView(withId(R.id.offline_map_status))
-                .check(matches(withText(containsString("boom"))))
+            composeTestRule.waitUntil { hasTag(AREA_OFFLINE_DELETE_TAG) }
+            composeTestRule.onNodeWithTag(AREA_OFFLINE_DOWNLOAD_TAG).assertExists()
+            composeTestRule.onNodeWithTag(AREA_OFFLINE_STATUS_TAG)
+                .assertTextContains("boom", substring = true)
         }
     }
 
@@ -103,11 +114,9 @@ class AreaOfflineMapTest : AreaScreenTest() {
 
             injectState(scenario, completeState(styleUrl = LIBERTY_STYLE_URL))
 
-            waitUntilOnMain {
-                fragment.requireView().findViewById<View>(R.id.offline_map_delete).isVisible
-            }
-            onView(withId(R.id.offline_map_status))
-                .check(matches(withText(containsString("different map style"))))
+            composeTestRule.waitUntil { hasTag(AREA_OFFLINE_DELETE_TAG) }
+            composeTestRule.onAllNodesWithText("different map style", substring = true)
+                .assertCountEquals(1)
         }
     }
 
@@ -124,13 +133,14 @@ class AreaOfflineMapTest : AreaScreenTest() {
 
             injectState(scenario, completeState(styleUrl = AUTO_LIGHT_STYLE_URL))
 
-            waitUntilOnMain {
-                fragment.requireView().findViewById<View>(R.id.offline_map_delete).isVisible
-            }
-            onView(withId(R.id.offline_map_status))
-                .check(matches(withText(not(containsString("different map style")))))
+            composeTestRule.waitUntil { hasTag(AREA_OFFLINE_DELETE_TAG) }
+            composeTestRule.onAllNodesWithText("different map style", substring = true)
+                .assertCountEquals(0)
         }
     }
+
+    private fun hasTag(tag: String): Boolean =
+        composeTestRule.onAllNodesWithTag(tag).fetchSemanticsNodes().isNotEmpty()
 
     /**
      * Publishes a pack state without going near MapLibre or the network: the

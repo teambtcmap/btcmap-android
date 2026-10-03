@@ -1,24 +1,39 @@
 package org.btcmap.area
 
 import android.view.View
-import android.view.ViewGroup
-import android.widget.Button
-import android.widget.TextView
 import androidx.appcompat.widget.Toolbar
+import androidx.compose.ui.test.assertTextContains
+import androidx.compose.ui.test.junit4.createEmptyComposeRule
+import androidx.compose.ui.test.onAllNodesWithTag
+import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.performClick
 import androidx.core.view.isVisible
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.btcmap.Activity
 import org.btcmap.R
 import org.btcmap.db.table.place.Place
 import org.btcmap.event.EventFragment
+import org.btcmap.ui.AREA_BOOSTED_CARD_TAG
+import org.btcmap.ui.AREA_BOOSTED_TITLE_TAG
+import org.btcmap.ui.AREA_DESCRIPTION_TAG
+import org.btcmap.ui.AREA_EVENTS_TITLE_TAG
+import org.btcmap.ui.AREA_EVENT_CARD_TAG
+import org.btcmap.ui.AREA_ISSUES_TITLE_TAG
+import org.btcmap.ui.AREA_ISSUE_CARD_TAG
+import org.btcmap.ui.AREA_READ_MORE_TAG
+import org.btcmap.ui.AREA_WEBSITE_TAG
 import org.btcmap.util.waitUntilOnMain
 import org.junit.Assert
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import java.time.ZonedDateTime
 
 @RunWith(AndroidJUnit4::class)
 class AreaContentTest : AreaScreenTest() {
+
+    @get:Rule
+    val composeTestRule = createEmptyComposeRule()
 
     @Test
     fun loadSuccess_showsTitleDescriptionAndWebsite() {
@@ -29,21 +44,18 @@ class AreaContentTest : AreaScreenTest() {
             waitUntilOnMain { !area.view().findViewById<View>(R.id.loading).isVisible }
 
             scenario.onActivity {
-                val view = area.view()
                 Assert.assertEquals(
                     "Grand Paris",
-                    view.findViewById<Toolbar>(R.id.toolbar).title,
+                    area.view().findViewById<Toolbar>(R.id.toolbar).title,
                 )
-                Assert.assertEquals(
-                    "Greater Paris",
-                    view.findViewById<TextView>(R.id.description).text.toString(),
-                )
-                Assert.assertEquals(
-                    "btcmap.org/community/grand-paris",
-                    view.findViewById<TextView>(R.id.website).text.toString(),
-                )
-                Assert.assertTrue(view.findViewById<View>(R.id.content).isVisible)
+                Assert.assertTrue(area.view().findViewById<View>(R.id.content).isVisible)
             }
+
+            composeTestRule.waitUntil { hasTag(AREA_DESCRIPTION_TAG) }
+            composeTestRule.onNodeWithTag(AREA_DESCRIPTION_TAG)
+                .assertTextContains("Greater Paris")
+            composeTestRule.onNodeWithTag(AREA_WEBSITE_TAG)
+                .assertTextContains("btcmap.org/community/grand-paris")
         }
     }
 
@@ -54,10 +66,9 @@ class AreaContentTest : AreaScreenTest() {
 
         withArea { _, area ->
             waitUntilOnMain { !area.view().findViewById<View>(R.id.loading).isVisible }
+            composeTestRule.waitUntil { hasTag(AREA_DESCRIPTION_TAG) }
 
-            Assert.assertFalse(
-                area.view().findViewById<View>(R.id.description_expand).isVisible,
-            )
+            composeTestRule.onNodeWithTag(AREA_READ_MORE_TAG).assertDoesNotExist()
         }
     }
 
@@ -68,27 +79,23 @@ class AreaContentTest : AreaScreenTest() {
             listOf(area(description = "First paragraph.\n\nSecond paragraph.")),
         )
 
-        withArea { scenario, area ->
+        withArea { _, area ->
             waitUntilOnMain { !area.view().findViewById<View>(R.id.loading).isVisible }
+            composeTestRule.waitUntil { hasTag(AREA_READ_MORE_TAG) }
 
-            scenario.onActivity {
-                val description = area.view().findViewById<TextView>(R.id.description)
-                val expand = area.view().findViewById<Button>(R.id.description_expand)
-                Assert.assertTrue(expand.isVisible)
-                Assert.assertEquals("First paragraph.", description.text.toString())
-                Assert.assertEquals("Read more", expand.text.toString())
+            composeTestRule.onNodeWithTag(AREA_DESCRIPTION_TAG)
+                .assertTextContains("First paragraph.")
+            composeTestRule.onNodeWithTag(AREA_READ_MORE_TAG).assertTextContains("Read more")
 
-                expand.performClick()
-                Assert.assertEquals(
-                    "First paragraph.\n\nSecond paragraph.",
-                    description.text.toString(),
-                )
-                Assert.assertEquals("Collapse", expand.text.toString())
+            composeTestRule.onNodeWithTag(AREA_READ_MORE_TAG).performClick()
+            composeTestRule.onNodeWithTag(AREA_DESCRIPTION_TAG)
+                .assertTextContains("First paragraph.\n\nSecond paragraph.")
+            composeTestRule.onNodeWithTag(AREA_READ_MORE_TAG).assertTextContains("Collapse")
 
-                expand.performClick()
-                Assert.assertEquals("First paragraph.", description.text.toString())
-                Assert.assertEquals("Read more", expand.text.toString())
-            }
+            composeTestRule.onNodeWithTag(AREA_READ_MORE_TAG).performClick()
+            composeTestRule.onNodeWithTag(AREA_DESCRIPTION_TAG)
+                .assertTextContains("First paragraph.")
+            composeTestRule.onNodeWithTag(AREA_READ_MORE_TAG).assertTextContains("Read more")
         }
     }
 
@@ -104,21 +111,12 @@ class AreaContentTest : AreaScreenTest() {
             ),
         )
 
-        withArea { scenario, area ->
-            waitUntilOnMain { area.eventsContainer().childCount == 2 }
+        withArea { _, area ->
+            composeTestRule.waitUntil { eventCount() == 2 }
 
-            scenario.onActivity {
-                val container = area.eventsContainer()
-                Assert.assertEquals(
-                    "Sooner",
-                    container.getChildAt(0).findViewById<TextView>(R.id.title).text.toString(),
-                )
-                Assert.assertEquals(
-                    "Later",
-                    container.getChildAt(1).findViewById<TextView>(R.id.title).text.toString(),
-                )
-                Assert.assertTrue(area.view().findViewById<View>(R.id.events_title).isVisible)
-            }
+            eventCards()[0].assertTextContains("Sooner")
+            eventCards()[1].assertTextContains("Later")
+            composeTestRule.onNodeWithTag(AREA_EVENTS_TITLE_TAG).assertExists()
         }
     }
 
@@ -130,8 +128,7 @@ class AreaContentTest : AreaScreenTest() {
         withArea { _, area ->
             waitUntilOnMain { !area.view().findViewById<View>(R.id.loading).isVisible }
 
-            Assert.assertFalse(area.view().findViewById<View>(R.id.events_title).isVisible)
-            Assert.assertFalse(area.eventsContainer().isVisible)
+            composeTestRule.onNodeWithTag(AREA_EVENTS_TITLE_TAG).assertDoesNotExist()
         }
     }
 
@@ -144,14 +141,12 @@ class AreaContentTest : AreaScreenTest() {
         )
 
         withArea { scenario, area ->
-            waitUntilOnMain { area.eventsContainer().childCount == 1 }
+            composeTestRule.waitUntil { eventCount() == 1 }
 
             lateinit var activity: Activity
             scenario.onActivity { activity = it }
 
-            scenario.onActivity {
-                area.eventsContainer().getChildAt(0).performClick()
-            }
+            composeTestRule.onNodeWithTag(AREA_EVENT_CARD_TAG).performClick()
 
             waitUntilOnMain {
                 activity.supportFragmentManager
@@ -172,29 +167,14 @@ class AreaContentTest : AreaScreenTest() {
         databaseRule.db.area.insert(listOf(area()))
         databaseRule.db.place.insert(listOf(place(osmId = "node:987654321", icon = "local_atm")))
 
-        withArea { scenario, area ->
-            waitUntilOnMain { area.issuesContainer().childCount == 2 }
+        withArea { _, area ->
+            composeTestRule.waitUntil { issueCount() == 2 }
 
-            scenario.onActivity {
-                Assert.assertEquals(
-                    "Issues (2 of 5)",
-                    area.view().findViewById<TextView>(R.id.issues_title).text.toString(),
-                )
-                val first = area.issuesContainer().getChildAt(0)
-                Assert.assertEquals(
-                    "Bitcoin ATM",
-                    first.findViewById<TextView>(R.id.title).text.toString(),
-                )
-                Assert.assertEquals(
-                    "Missing icon",
-                    first.findViewById<TextView>(R.id.subtitle).text.toString(),
-                )
-                val second = area.issuesContainer().getChildAt(1)
-                Assert.assertEquals(
-                    "Outdated, needs verification",
-                    second.findViewById<TextView>(R.id.subtitle).text.toString(),
-                )
-            }
+            composeTestRule.onNodeWithTag(AREA_ISSUES_TITLE_TAG)
+                .assertTextContains("Issues (2 of 5)")
+            issueCards()[0].assertTextContains("Bitcoin ATM")
+            issueCards()[0].assertTextContains("Missing icon")
+            issueCards()[1].assertTextContains("Outdated, needs verification")
         }
     }
 
@@ -208,20 +188,12 @@ class AreaContentTest : AreaScreenTest() {
         )
         databaseRule.db.area.insert(listOf(area()))
 
-        withArea { scenario, area ->
-            waitUntilOnMain { area.issuesContainer().childCount == 1 }
+        withArea { _, area ->
+            composeTestRule.waitUntil { issueCount() == 1 }
 
-            scenario.onActivity {
-                Assert.assertEquals(
-                    "Issues (1)",
-                    area.view().findViewById<TextView>(R.id.issues_title).text.toString(),
-                )
-                Assert.assertEquals(
-                    "Not verified",
-                    area.issuesContainer().getChildAt(0)
-                        .findViewById<TextView>(R.id.subtitle).text.toString(),
-                )
-            }
+            composeTestRule.onNodeWithTag(AREA_ISSUES_TITLE_TAG)
+                .assertTextContains("Issues (1)")
+            issueCards()[0].assertTextContains("Not verified")
         }
     }
 
@@ -236,21 +208,11 @@ class AreaContentTest : AreaScreenTest() {
         )
         databaseRule.db.area.insert(listOf(area()))
 
-        withArea { scenario, area ->
-            waitUntilOnMain { area.issuesContainer().childCount == 2 }
+        withArea { _, area ->
+            composeTestRule.waitUntil { issueCount() == 2 }
 
-            scenario.onActivity {
-                Assert.assertEquals(
-                    "Invalid value for name",
-                    area.issuesContainer().getChildAt(0)
-                        .findViewById<TextView>(R.id.subtitle).text.toString(),
-                )
-                Assert.assertEquals(
-                    "Unknown issue",
-                    area.issuesContainer().getChildAt(1)
-                        .findViewById<TextView>(R.id.subtitle).text.toString(),
-                )
-            }
+            issueCards()[0].assertTextContains("Invalid value for name")
+            issueCards()[1].assertTextContains("Unknown issue")
         }
     }
 
@@ -262,8 +224,7 @@ class AreaContentTest : AreaScreenTest() {
         withArea { _, area ->
             waitUntilOnMain { !area.view().findViewById<View>(R.id.loading).isVisible }
 
-            Assert.assertFalse(area.view().findViewById<View>(R.id.issues_header).isVisible)
-            Assert.assertFalse(area.issuesContainer().isVisible)
+            composeTestRule.onNodeWithTag(AREA_ISSUES_TITLE_TAG).assertDoesNotExist()
         }
     }
 
@@ -330,19 +291,11 @@ class AreaContentTest : AreaScreenTest() {
             ),
         )
 
-        withArea { scenario, area ->
-            waitUntilOnMain { area.boostedContainer().childCount == 1 }
+        withArea { _, area ->
+            composeTestRule.waitUntil { boostedCount() == 1 }
 
-            scenario.onActivity {
-                Assert.assertTrue(
-                    area.view().findViewById<View>(R.id.boosted_merchants_title).isVisible,
-                )
-                Assert.assertEquals(
-                    "Boosted Cafe",
-                    area.boostedContainer().getChildAt(0)
-                        .findViewById<TextView>(R.id.title).text.toString(),
-                )
-            }
+            composeTestRule.onNodeWithTag(AREA_BOOSTED_TITLE_TAG).assertExists()
+            boostedCards()[0].assertTextContains("Boosted Cafe")
         }
     }
 
@@ -357,23 +310,26 @@ class AreaContentTest : AreaScreenTest() {
         withArea { _, area ->
             waitUntilOnMain { !area.view().findViewById<View>(R.id.loading).isVisible }
 
-            Assert.assertFalse(
-                area.view().findViewById<View>(R.id.boosted_merchants_title).isVisible,
-            )
-            Assert.assertFalse(area.boostedContainer().isVisible)
+            composeTestRule.onNodeWithTag(AREA_BOOSTED_TITLE_TAG).assertDoesNotExist()
         }
     }
 
+    private fun hasTag(tag: String): Boolean =
+        composeTestRule.onAllNodesWithTag(tag).fetchSemanticsNodes().isNotEmpty()
+
+    private fun eventCards() = composeTestRule.onAllNodesWithTag(AREA_EVENT_CARD_TAG)
+
+    private fun eventCount() = eventCards().fetchSemanticsNodes().size
+
+    private fun issueCards() = composeTestRule.onAllNodesWithTag(AREA_ISSUE_CARD_TAG)
+
+    private fun issueCount() = issueCards().fetchSemanticsNodes().size
+
+    private fun boostedCards() = composeTestRule.onAllNodesWithTag(AREA_BOOSTED_CARD_TAG)
+
+    private fun boostedCount() = boostedCards().fetchSemanticsNodes().size
+
     private fun AreaFragment.view(): View = requireView()
-
-    private fun AreaFragment.eventsContainer(): ViewGroup =
-        view().findViewById(R.id.upcoming_events_container)
-
-    private fun AreaFragment.issuesContainer(): ViewGroup =
-        view().findViewById(R.id.issues_container)
-
-    private fun AreaFragment.boostedContainer(): ViewGroup =
-        view().findViewById(R.id.boosted_merchants_container)
 
     private fun place(
         osmId: String,

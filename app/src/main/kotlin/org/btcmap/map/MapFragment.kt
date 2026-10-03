@@ -53,6 +53,7 @@ import org.btcmap.place.btcmapUrl
 import org.btcmap.place.osmEditUrl
 import org.btcmap.place.osmMapUrl
 import org.btcmap.place.PlacePhotoUploader
+import org.btcmap.place.placeSheetStrings
 import org.btcmap.place.osmUrl
 import org.btcmap.saved.isPlaceSaved
 import org.btcmap.saved.toggleSavedPlace
@@ -80,7 +81,6 @@ import org.btcmap.settings.verifiedFilterMinVerifiedAt
 import org.btcmap.sync.SyncState
 import org.btcmap.syncController
 import org.btcmap.ui.PlaceAction
-import org.btcmap.ui.PlaceSheetStrings
 import org.btcmap.ui.map.SearchActions
 import org.btcmap.ui.map.bundledStyleJsonFor
 import org.btcmap.util.DeepLink
@@ -214,33 +214,7 @@ class MapFragment : Fragment() {
             areaChipButtonColor = Color(prefs.buttonBackgroundColor(requireContext()))
             areaChipIconColor = Color(prefs.buttonIconColor(requireContext()))
             areaChipBorderColor = Color(prefs.buttonBorderColor(requireContext()))
-            placeSheetStrings = PlaceSheetStrings(
-                directions = getString(R.string.directions),
-                share = getString(R.string.share),
-                viewOnBtcmap = getString(R.string.view_on_btcmap),
-                viewOnOsm = getString(R.string.view_on_osm),
-                editOnOsm = getString(R.string.edit_on_osm),
-                notVerified = getString(R.string.not_verified),
-                verificationWarningTitle = getString(R.string.verification_warning_title),
-                verificationWarningOutdated = getString(R.string.verification_warning_outdated),
-                verificationWarningNotVerified = getString(R.string.verification_warning_not_verified),
-                ok = getString(android.R.string.ok),
-                companionWarning = { getString(R.string.companion_warning, it) },
-                verify = getString(R.string.btn_verify),
-                report = getString(R.string.btn_report),
-                boost = getString(R.string.boost),
-                comments = { count ->
-                    if (count == 0L) {
-                        getString(R.string.comments)
-                    } else {
-                        getString(R.string.comments_d, count.toInt())
-                    }
-                },
-                commentsTitle = { count -> getString(R.string.comments_d, count.toInt()) },
-                addComment = getString(R.string.add_comment),
-                save = getString(R.string.save),
-                addPhoto = getString(R.string.add_photo),
-            )
+            placeSheetStrings = requireContext().placeSheetStrings()
             showAttribution = prefs.showAttribution
             attributionText = getString(R.string.osm_attribution)
             attributionTextColor = Color(

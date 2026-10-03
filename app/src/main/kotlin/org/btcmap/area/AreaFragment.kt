@@ -7,6 +7,8 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.compose.ui.graphics.Color as ComposeColor
+import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
@@ -14,6 +16,8 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isVisible
 import androidx.core.view.updatePadding
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.commit
+import androidx.fragment.app.replace
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
@@ -24,24 +28,37 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.btcmap.Activity
 import org.btcmap.R
-import org.btcmap.sync.SyncEvent
+import org.btcmap.api
+import org.btcmap.api.GetEventsItem
 import org.btcmap.auth.registerAuthResultListener
 import org.btcmap.auth.showAuthDialog
 import org.btcmap.db
 import org.btcmap.db.table.area.Area
 import org.btcmap.databinding.AreaFragmentBinding
+import org.btcmap.event.EventFragment
+import org.btcmap.event.toBundle
 import org.btcmap.i18n.getLocalizedDescription
 import org.btcmap.i18n.getLocalizedName
 import org.btcmap.saved.isAreaSaved
 import org.btcmap.saved.toggleSavedArea
 import org.btcmap.settings.authorized
 import org.btcmap.settings.prefs
+import org.btcmap.sync.SyncEvent
 import org.btcmap.syncController
+import org.btcmap.util.iconTypeface
 import org.btcmap.util.openInBrowser
 import org.btcmap.util.rethrowIfCancellation
 import org.btcmap.util.showError
 
+/**
+ * The area screen: a collapsing Views toolbar over the shared
+ * [org.btcmap.ui.AreaScreen] body, which renders the description, the website,
+ * the offline map panel and the boosted merchant, event and place issue
+ * sections. This fragment owns the toolbar and loads the area and its sections
+ * through the shared [AreaSections].
+ */
 class AreaFragment : Fragment() {
 
     private val areaId by lazy {
@@ -66,8 +83,6 @@ class AreaFragment : Fragment() {
 
     private var offlineMap: AreaOfflineMapController? = null
 
-    private var sections: AreaSectionsController? = null
-
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -81,7 +96,6 @@ class AreaFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         offlineMap = AreaOfflineMapController(this, binding)
-        sections = AreaSectionsController(this, binding)
 
         // Events are read from the local cache, so a background sync that
         // changes them makes this section stale; re-render when it does instead
@@ -90,7 +104,7 @@ class AreaFragment : Fragment() {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 syncController().events.collect { event ->
                     if (event == SyncEvent.EventsChanged) {
-                        loadedArea?.let { sections?.loadEvents(it, reportErrors = false) }
+                        loadedArea?.let { loadEvents(it, reportErrors = false) }
                     }
                 }
             }
@@ -123,13 +137,25 @@ class AreaFragment : Fragment() {
         binding.toolbar.menu.findItem(R.id.save).isEnabled = false
         binding.toolbar.menu.findItem(R.id.download).isVisible = false
 
-        binding.issuesHelp.setOnClickListener {
-            openInBrowser(JOIN_US_URL.toUri())
-        }
-
+        setUpContent()
         initInsets()
         initCollapsingToolbar()
         loadArea()
+    }
+
+    /** Hands the shared body everything it needs from this host. */
+    private fun setUpContent() {
+        val typeface = iconTypeface
+
+        binding.areaContent.apply {
+            strings = requireContext().areaStrings()
+            bitcoinOrange = ComposeColor(ContextCompat.getColor(requireContext(), R.color.bitcoin_orange))
+            iconTypeface = typeface
+            onOpenPlace = { placeId -> (activity as? Activity)?.openPlace(placeId) }
+            onOpenEvent = { event -> navigateToEvent(event) }
+            onOpenIssue = { issue -> openIssue(issue) }
+            onJoinUs = { openInBrowser(JOIN_US_URL.toUri()) }
+        }
     }
 
     private fun loadArea() {
@@ -149,24 +175,75 @@ class AreaFragment : Fragment() {
             offlineMap?.bind(area)
             binding.loading.isVisible = false
             binding.content.isVisible = true
-
-            sections?.loadBoostedMerchants(area)
-            sections?.loadEvents(area)
-            sections?.loadPlaceIssues(areaId)
         }
     }
 
     private fun renderArea(area: Area) {
         areaName = area.getLocalizedName()
-        binding.toolbar.title = area.getLocalizedName()
+        binding.toolbar.title = areaName
+
         val headerImage = area.iconWide ?: area.icon
         binding.icon.isVisible = headerImage != null
         binding.icon.load(headerImage)
         updateToolbarContentColor()
-        renderDescription(area.getLocalizedDescription())
-        binding.website.text = websiteDisplayText(area.websiteUrl)
+
+        binding.areaContent.apply {
+            description = area.getLocalizedDescription()
+            websiteText = websiteDisplayText(area.websiteUrl)
+        }
+
         binding.toolbar.menu.findItem(R.id.save).isEnabled = true
         updateBookmarkIcon()
+
+        loadBoostedMerchants(area)
+        loadEvents(area)
+        loadPlaceIssues(area.id)
+    }
+
+    private fun loadBoostedMerchants(area: Area) {
+        viewLifecycleOwner.lifecycleScope.launch {
+            try {
+                val places = withContext(Dispatchers.IO) { AreaSections.boostedMerchants(db(), area) }
+                _binding?.areaContent?.boostedMerchants = places
+            } catch (e: Throwable) {
+                // The section is secondary: when it cannot be read, leave it
+                // hidden rather than interrupting the area screen.
+                e.rethrowIfCancellation()
+            }
+        }
+    }
+
+    /**
+     * Loads the area's upcoming events. [reportErrors] is false when re-running
+     * after a background sync: a refresh that fails must not interrupt the screen
+     * with an error dialog the user did not ask for.
+     */
+    private fun loadEvents(area: Area, reportErrors: Boolean = true) {
+        viewLifecycleOwner.lifecycleScope.launch {
+            try {
+                val events = withContext(Dispatchers.IO) { AreaSections.events(db(), area) }
+                _binding?.areaContent?.events = events
+            } catch (e: Throwable) {
+                e.rethrowIfCancellation()
+                if (reportErrors) showError(e)
+            }
+        }
+    }
+
+    private fun loadPlaceIssues(areaId: Long) {
+        viewLifecycleOwner.lifecycleScope.launch {
+            try {
+                val issues = withContext(Dispatchers.IO) {
+                    AreaSections.placeIssues(api(), db(), areaId)
+                }
+                _binding?.areaContent?.issues = issues
+            } catch (e: Throwable) {
+                // The issues list is secondary: when it cannot be fetched
+                // (typically offline) leave the section hidden rather than
+                // interrupting the area screen, which is fully usable offline.
+                e.rethrowIfCancellation()
+            }
+        }
     }
 
     private fun onSaveClicked() {
@@ -193,6 +270,21 @@ class AreaFragment : Fragment() {
         }
     }
 
+    private fun navigateToEvent(event: GetEventsItem) {
+        requireActivity().supportFragmentManager.commit {
+            setReorderingAllowed(true)
+            replace<EventFragment>(R.id.fragmentContainerView, null, event.toBundle())
+            addToBackStack(null)
+        }
+    }
+
+    private fun openIssue(issue: AreaPlaceIssue) {
+        openInBrowser(
+            "https://www.openstreetmap.org/edit?${issue.elementOsmType}=${issue.elementOsmId}"
+                .toUri(),
+        )
+    }
+
     private fun showLoadError() {
         MaterialAlertDialogBuilder(requireContext())
             .setTitle(R.string.error)
@@ -204,30 +296,6 @@ class AreaFragment : Fragment() {
                 parentFragmentManager.popBackStack()
             }
             .show()
-    }
-
-    private fun renderDescription(description: String?) {
-        val paragraphs = descriptionParagraphs(description)
-        binding.description.isVisible = description != null
-
-        if (paragraphs.size <= 1) {
-            binding.description.text = description
-            binding.descriptionExpand.isVisible = false
-            return
-        }
-
-        var expanded = false
-        binding.description.text = paragraphs.first()
-        binding.descriptionExpand.isVisible = true
-        binding.descriptionExpand.setText(R.string.read_more)
-        binding.descriptionExpand.setOnClickListener {
-            expanded = !expanded
-            binding.description.text =
-                if (expanded) paragraphs.joinToString("\n\n") else paragraphs.first()
-            binding.descriptionExpand.setText(
-                if (expanded) R.string.collapse else R.string.read_more
-            )
-        }
     }
 
     override fun onStart() {
@@ -242,7 +310,6 @@ class AreaFragment : Fragment() {
                 .isAppearanceLightStatusBars = !isNightMode()
         }
         offlineMap = null
-        sections = null
         loadedArea = null
         _binding = null
     }

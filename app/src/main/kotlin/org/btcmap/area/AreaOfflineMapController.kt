@@ -26,12 +26,14 @@ import org.btcmap.settings.offlineStyleUrl
 import org.btcmap.settings.prefs
 
 /**
- * Drives the offline-map section of the area screen: the toolbar download
- * action, the zoom/size dialog and the progress panel.
+ * Drives the offline-map part of the area screen: the toolbar download action,
+ * the zoom/size dialog it and the panel's download button open, and the
+ * progress the shared [org.btcmap.ui.AreaScreen] renders.
  *
  * Kept out of [AreaFragment] so the screen only wires the area content. The
  * controller owns the [Area] the toolbar action needs, set by [bind], and
- * collects the download state for as long as the view is resumed.
+ * collects the download state for as long as the view is resumed, pushing it
+ * into the Compose body.
  */
 internal class AreaOfflineMapController(
     private val fragment: Fragment,
@@ -46,8 +48,16 @@ internal class AreaOfflineMapController(
         binding.toolbar.menu.findItem(R.id.download).isVisible = bounds != null
         if (bounds == null) return
 
-        binding.offlineMapDownload.setOnClickListener { showDialog(area, bounds) }
-        binding.offlineMapDelete.setOnClickListener { confirmDelete(area) }
+        binding.areaContent.apply {
+            onDownload = { showDialog(area, bounds) }
+            onDelete = { confirmDelete(area) }
+            // The shared panel only needs to know whether a downloaded pack is
+            // still on the selected style's family.
+            offlineStyleMatches = { downloadedStyleUrl ->
+                offlineStyleFamily(downloadedStyleUrl) ==
+                    offlineStyleFamily(prefs.mapStyle.offlineStyleUrl(fragment.requireContext()))
+            }
+        }
 
         fragment.viewLifecycleOwner.lifecycleScope.launch {
             fragment.viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
@@ -65,74 +75,13 @@ internal class AreaOfflineMapController(
     }
 
     private fun renderState(state: OfflineAreaState?) {
-        val context = fragment.context ?: return
         val resolved = state ?: OfflineAreaState.None
 
-        // The toolbar button is the only offline affordance until a download is
-        // started or finished; the panel is reserved for progress and result.
-        binding.offlineMap.isVisible = resolved !is OfflineAreaState.None
+        // The panel lives in the Compose body; only the toolbar button's
+        // enabled state is set here, alongside the panel's state.
+        binding.areaContent.offlineState = resolved
         binding.toolbar.menu.findItem(R.id.download).isEnabled =
             resolved !is OfflineAreaState.Downloading
-        if (resolved is OfflineAreaState.None) return
-
-        val downloading = resolved is OfflineAreaState.Downloading
-        binding.offlineMapProgress.isVisible = downloading
-        binding.offlineMapDownload.isVisible = !downloading
-        // A failed pack can be replaced with Download or removed outright;
-        // without this it could only be cleaned up by downloading again.
-        binding.offlineMapDelete.isVisible =
-            resolved is OfflineAreaState.Complete || resolved is OfflineAreaState.Failed
-        binding.offlineMapDownload.text = fragment.getString(
-            if (resolved is OfflineAreaState.Complete) {
-                R.string.offline_map_download_again
-            } else {
-                R.string.offline_map_download
-            },
-        )
-
-        val status = when (resolved) {
-            OfflineAreaState.None -> ""
-
-            is OfflineAreaState.Downloading -> {
-                val size = Formatter.formatFileSize(context, resolved.completedBytes)
-                val progress = resolved.progress
-                if (progress == null) {
-                    binding.offlineMapProgress.isIndeterminate = true
-                    fragment.getString(R.string.offline_map_status_downloading, size)
-                } else {
-                    binding.offlineMapProgress.isIndeterminate = false
-                    val percent = (progress * 100).toInt().coerceIn(0, 100)
-                    binding.offlineMapProgress.progress = percent
-                    fragment.getString(
-                        R.string.offline_map_status_downloading_progress,
-                        percent,
-                        size,
-                    )
-                }
-            }
-
-            is OfflineAreaState.Complete -> {
-                val size = Formatter.formatFileSize(context, resolved.bytes)
-                val downloaded = fragment.getString(
-                    R.string.offline_map_status_downloaded,
-                    size,
-                    OfflineRegionEstimates.MIN_ZOOM,
-                    resolved.maxZoom,
-                )
-                val currentFamily = offlineStyleFamily(prefs.mapStyle.offlineStyleUrl(context))
-                if (offlineStyleFamily(resolved.styleUrl) == currentFamily) {
-                    downloaded
-                } else {
-                    downloaded + "\n" + fragment.getString(R.string.offline_map_style_mismatch)
-                }
-            }
-
-            is OfflineAreaState.Failed ->
-                fragment.getString(R.string.offline_map_status_failed, resolved.message)
-        }
-
-        binding.offlineMapStatus.isVisible = status.isNotEmpty()
-        binding.offlineMapStatus.text = status
     }
 
     private fun showDialog(area: Area, bounds: OfflineBounds) {

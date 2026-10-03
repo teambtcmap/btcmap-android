@@ -1,6 +1,9 @@
-package org.btcmap.imagestats
+package org.btcmap.ui
 
 import coil3.ImageLoader
+import org.btcmap.imagestats.ImageCacheStats
+import org.btcmap.imagestats.ImageDiskCacheStats
+import org.btcmap.imagestats.ImageMemoryCacheStats
 import org.btcmap.util.abbreviateHome
 
 /**

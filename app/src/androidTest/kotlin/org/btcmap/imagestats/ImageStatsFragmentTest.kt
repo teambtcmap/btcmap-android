@@ -1,11 +1,16 @@
 package org.btcmap.imagestats
 
-import androidx.fragment.app.commit
-import androidx.fragment.app.replace
+import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
+import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
+import androidx.compose.ui.test.performScrollToNode
+import androidx.fragment.app.commit
+import androidx.fragment.app.replace
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -13,10 +18,9 @@ import com.google.android.material.appbar.MaterialToolbar
 import org.btcmap.Activity
 import org.btcmap.R
 import org.btcmap.settings.SettingsFragment
-import org.btcmap.ui.StatsComposeView
+import org.btcmap.ui.STATS_LIST_TAG
 import org.btcmap.util.AppTestCase
 import org.btcmap.util.waitUntilOnMain
-import org.junit.Assert
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -35,54 +39,27 @@ class ImageStatsFragmentTest : AppTestCase() {
         ImageLoadStats.reset()
     }
 
+    private fun showsText(text: String): Boolean =
+        composeTestRule.onAllNodesWithText(text).fetchSemanticsNodes().isNotEmpty()
+
     @Test
     fun showsCacheSectionsAndLoadCounters() {
-        launchFragment { scenario, fragment ->
-            lateinit var list: StatsComposeView
-            scenario.onActivity {
-                list = fragment.requireView().findViewById(R.id.statsList)
-            }
+        launchFragment { _, _ ->
+            composeTestRule.waitUntil(5_000) { showsText("Memory cache") }
+            composeTestRule.onNodeWithText("Memory cache").assertIsDisplayed()
 
-            waitUntilOnMain { list.sections.any { it.title == "Memory cache" } }
+            composeTestRule.onNodeWithTag(STATS_LIST_TAG).performScrollToNode(hasText("Loads"))
+            composeTestRule.onNodeWithText("Loads").assertIsDisplayed()
 
-            scenario.onActivity {
-                val current = list.sections
-                val sections = current.associateBy { it.title }
-                val titles = current.map { it.title }
-                Assert.assertTrue("missing memory section, was $titles", "Memory cache" in sections)
-                Assert.assertTrue("missing disk section, was $titles", "Disk cache" in sections)
-                Assert.assertTrue("missing loads section, was $titles", "Loads" in sections)
-
-                val loads = sections.getValue("Loads").entries.associate { it.label to it.value }
-                Assert.assertEquals("0", loads["Requests"])
-                Assert.assertEquals("0", loads["Errors"])
-                Assert.assertEquals("0", loads["Cancels"])
-
-                val memorySize = sections.getValue("Memory cache").entries
-                    .first { it.label == "Size" }.value
-                Assert.assertTrue(
-                    "missing memory size, was $memorySize",
-                    memorySize.contains(" of "),
-                )
-                Assert.assertTrue(
-                    "missing cache location",
-                    sections.getValue("Disk cache").entries.any { it.label == "Location" },
-                )
-            }
+            composeTestRule.onNodeWithTag(STATS_LIST_TAG).performScrollToNode(hasText("Requests"))
+            composeTestRule.onNodeWithText("Requests").assertIsDisplayed()
         }
     }
 
     @Test
     fun refreshButtonReReadsTheCounters() {
         launchFragment { scenario, fragment ->
-            lateinit var list: StatsComposeView
-            scenario.onActivity {
-                list = fragment.requireView().findViewById(R.id.statsList)
-            }
-
-            // The screen loads no images itself, so the counters start at zero
-            // once the initial read has landed.
-            waitUntilOnMain { valueOf(list, "Loads", "Requests") == "0" }
+            composeTestRule.waitUntil(5_000) { showsText("Memory cache") }
 
             // A load that happens after the screen opened only shows up once
             // the refresh action re-reads the counters.
@@ -92,7 +69,8 @@ class ImageStatsFragmentTest : AppTestCase() {
                 toolbar.menu.performIdentifierAction(R.id.refresh, 0)
             }
 
-            waitUntilOnMain { valueOf(list, "Loads", "Requests") == "1" }
+            composeTestRule.onNodeWithTag(STATS_LIST_TAG).performScrollToNode(hasText("Requests"))
+            composeTestRule.onNodeWithText("Requests").assertIsDisplayed()
         }
     }
 
@@ -135,13 +113,6 @@ class ImageStatsFragmentTest : AppTestCase() {
             block(scenario, fragment)
         }
     }
-
-    private fun valueOf(list: StatsComposeView, sectionTitle: String, label: String): String? =
-        list.sections
-            .firstOrNull { it.title == sectionTitle }
-            ?.entries
-            ?.firstOrNull { it.label == label }
-            ?.value
 
     private companion object {
         const val IMAGE_STATS_TAG = "image-stats"

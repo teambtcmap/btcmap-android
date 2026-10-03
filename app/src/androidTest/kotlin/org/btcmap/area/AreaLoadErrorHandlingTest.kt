@@ -1,8 +1,9 @@
 package org.btcmap.area
 
 import android.view.View
-import android.view.ViewGroup
 import androidx.appcompat.widget.Toolbar
+import androidx.compose.ui.test.junit4.createEmptyComposeRule
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.core.view.isVisible
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.action.ViewActions.click
@@ -16,11 +17,15 @@ import org.btcmap.R
 import org.btcmap.util.waitUntil
 import org.btcmap.util.waitUntilOnMain
 import org.junit.Assert
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
 class AreaLoadErrorHandlingTest : AreaScreenTest() {
+
+    @get:Rule
+    val composeTestRule = createEmptyComposeRule()
 
     @Test
     fun loadSuccess_hidesLoadingIndicatorAndShowsContent() {
@@ -116,10 +121,8 @@ class AreaLoadErrorHandlingTest : AreaScreenTest() {
             waitUntilOnMain {
                 !area.requireView().findViewById<View>(R.id.loading).isVisible
             }
-            waitUntilOnMain {
-                area.requireView()
-                    .findViewById<ViewGroup>(R.id.upcoming_events_container)
-                    .childCount == 1
+            composeTestRule.waitUntil {
+                composeTestRule.onAllNodesWithText("Meetup").fetchSemanticsNodes().isNotEmpty()
             }
 
             Assert.assertTrue(

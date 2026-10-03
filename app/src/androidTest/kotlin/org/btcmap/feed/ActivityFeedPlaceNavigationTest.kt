@@ -1,7 +1,6 @@
 package org.btcmap.feed
 
 import android.os.Bundle
-import android.view.View
 import androidx.appcompat.widget.Toolbar
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
 import androidx.compose.ui.test.onNodeWithText
@@ -20,6 +19,7 @@ import org.btcmap.R
 import org.btcmap.db.table.place.Place
 import org.btcmap.place.PlaceFragment
 import org.btcmap.ui.ActivityFeedComposeView
+import org.btcmap.ui.PlaceComposeView
 import org.btcmap.util.AppTestCase
 import org.btcmap.util.waitUntil
 import org.btcmap.util.waitUntilOnMain
@@ -110,9 +110,12 @@ class ActivityFeedPlaceNavigationTest : AppTestCase() {
                         place.requireArguments().getLong(PlaceFragment.ARG_PLACE_ID),
                     )
                     Assert.assertEquals(
-                        "A place opened outside the map shows its own preview map",
-                        View.VISIBLE,
-                        place.requireView().findViewById<View>(R.id.map).visibility,
+                        "A place opened outside the map fills the shared body",
+                        1L,
+                        place.requireView()
+                            .findViewById<PlaceComposeView>(R.id.placeContent)
+                            .place
+                            ?.id,
                     )
                 }
             }

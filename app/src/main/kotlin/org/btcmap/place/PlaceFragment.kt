@@ -1,37 +1,18 @@
 package org.btcmap.place
 
-import android.annotation.SuppressLint
 import android.content.ActivityNotFoundException
 import android.content.ComponentName
 import android.content.Intent
-import android.content.res.ColorStateList
-import android.graphics.drawable.Drawable
 import android.os.Bundle
-import android.text.SpannableString
-import android.text.Spanned
-import android.text.format.DateUtils
-import android.text.style.UnderlineSpan
-import android.text.style.URLSpan
-import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.LinearLayout
 import android.widget.TextView
-import androidx.annotation.StringRes
-import androidx.appcompat.content.res.AppCompatResources
-import androidx.compose.ui.graphics.Color
 import androidx.appcompat.widget.Toolbar
-import androidx.core.graphics.drawable.DrawableCompat
 import androidx.browser.customtabs.CustomTabsClient
 import androidx.browser.customtabs.CustomTabsIntent
+import androidx.compose.ui.graphics.Color
 import androidx.core.net.toUri
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
-import androidx.core.view.isVisible
-import androidx.core.view.updateLayoutParams
-import androidx.core.view.updatePadding
-import androidx.core.widget.TextViewCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.commit
 import androidx.fragment.app.replace
@@ -39,41 +20,24 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.lifecycle.withResumed
-import androidx.recyclerview.widget.ConcatAdapter
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.transition.TransitionManager
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.btcmap.Activity
+import org.btcmap.R
 import org.btcmap.api
-import org.btcmap.api.getPlaceCoordinates
 import org.btcmap.api.getPlaceImages
 import org.btcmap.api.placeImageUrl
 import org.btcmap.app
-import org.btcmap.boost.BoostFragment
-import org.btcmap.db.table.place.Place
-import org.btcmap.db.table.place.toMarker
-import org.btcmap.map.markerImageName
-import org.btcmap.settings.prefs
-import org.btcmap.comment.AddCommentFragment
-import org.btcmap.comment.CommentsAdapter
-import org.btcmap.comment.commentDateFormatter
-import org.btcmap.comment.toAdapterItem
-import org.btcmap.comment.CommentsFragment
-import org.btcmap.util.iconTypeface
-import org.btcmap.util.showError
-import org.btcmap.map.getErrorColor
-import org.btcmap.map.getOnSurfaceColor
-import org.btcmap.openinghours.OpeningHours
-import org.btcmap.openinghours.toOpeningHours
-import org.btcmap.R
-import org.btcmap.sync.SyncEvent
 import org.btcmap.auth.registerAuthResultListener
 import org.btcmap.auth.showAuthDialog
+import org.btcmap.boost.BoostFragment
+import org.btcmap.comment.AddCommentFragment
+import org.btcmap.comment.CommentsFragment
+import org.btcmap.comment.commentDateFormatter
+import org.btcmap.comment.toAdapterItem
 import org.btcmap.db
+import org.btcmap.db.table.place.Place
 import org.btcmap.databinding.PlaceFragmentBinding
 import org.btcmap.i18n.getLocalizedName
 import org.btcmap.saved.isPlaceSaved
@@ -86,20 +50,29 @@ import org.btcmap.settings.boostedMarkerIconColor
 import org.btcmap.settings.mapStyle
 import org.btcmap.settings.markerBackgroundColor
 import org.btcmap.settings.markerIconColor
+import org.btcmap.settings.prefs
 import org.btcmap.settings.uri
+import org.btcmap.sync.SyncEvent
 import org.btcmap.syncController
+import org.btcmap.ui.PlaceAction
+import org.btcmap.util.iconTypeface
 import org.btcmap.util.openInBrowser
 import org.btcmap.util.rethrowIfCancellation
-import java.time.LocalDate
-import java.time.ZonedDateTime
-import kotlin.math.abs
+import org.btcmap.util.showError
 
+/**
+ * The standalone place screen, opened outside the map (today from the activity
+ * feed): a Views top bar over the shared [org.btcmap.ui.PlaceDetails] body, which
+ * renders the preview map, the contact details, the photos, the comments and the
+ * actions. This fragment loads the place and routes the actions the Compose body
+ * and the toolbar raise.
+ */
 class PlaceFragment : Fragment() {
 
     companion object {
         /**
-         * Marks a standalone place screen: one opened outside the map's bottom
-         * sheet. It carries the place to show and turns on the preview map.
+         * Marks a standalone place screen: it carries the place to show when the
+         * screen was not handed one directly.
          */
         const val ARG_PLACE_ID = "place_id"
 
@@ -112,22 +85,10 @@ class PlaceFragment : Fragment() {
         private const val AUTH_ACTION_OPEN_REPORT = "open-report"
         private const val AUTH_ACTION_ADD_PHOTO = "add-photo"
 
-        /**
-         * How many comments the place screen previews inline. A place's full
-         * list is unbounded, so the preview query is capped here to keep the
-         * sheet's RecyclerView from inflating with every comment; the comments
-         * button shows the total and opens them all.
-         */
-        private const val COMMENTS_PREVIEW_LIMIT = 3L
-
         /** The thumbnail strip asks the API for small, square renditions. */
-        private const val PHOTO_THUMBNAIL_SIZE = 320
+        private const val PHOTO_SIZE = 320
 
-        /** The fullscreen viewer asks for a larger rendition of the same photo. */
-        private const val PHOTO_FULL_SIZE = 1600
-
-
-        /** A place screen with its own preview map, not hosted by the map. */
+        /** A place screen from a place id, e.g. a tapped activity-feed row. */
         fun create(placeId: Long): PlaceFragment {
             return PlaceFragment().apply {
                 arguments = Bundle().apply { putLong(ARG_PLACE_ID, placeId) }
@@ -139,16 +100,17 @@ class PlaceFragment : Fragment() {
 
     private var placeName = ""
 
-    private lateinit var commentsAdapter: CommentsAdapter
+    /** The place's OpenStreetMap page, or null when it has no OSM id. */
+    private var osmUrl: String? = null
 
-    private var commentsJob: Job? = null
+    /** The place's OpenStreetMap editor page, or null when it has no OSM id. */
+    private var osmEditUrl: String? = null
 
-    private lateinit var photosAdapter: PlacePhotosAdapter
+    private val requestedPlaceId: Long
+        get() = arguments?.getLong(ARG_PLACE_ID, 0L) ?: 0L
 
-    private var photosJob: Job? = null
-
-    /** The place whose photos the strip currently belongs to, or null. */
-    private var renderedPhotosPlaceId: Long? = null
+    private var _binding: PlaceFragmentBinding? = null
+    private val binding get() = _binding!!
 
     private val photoUploader = PlacePhotoUploader(
         fragment = this,
@@ -165,27 +127,10 @@ class PlaceFragment : Fragment() {
         onError = { showError(it) },
     )
 
-    private var previewPlace: Place? = null
-    private var previewLat: Double? = null
-    private var previewLon: Double? = null
-
-    /** The place's OpenStreetMap page, or null when it has no OSM id. */
-    private var osmUrl: String? = null
-
-    /** The place's OpenStreetMap editor page, or null when it has no OSM id. */
-    private var osmEditUrl: String? = null
-
-    private val isStandalone: Boolean
-        get() = arguments?.containsKey(ARG_PLACE_ID) == true
-
-    private val requestedPlaceId: Long
-        get() = arguments?.getLong(ARG_PLACE_ID, 0L) ?: 0L
-
-    private var _binding: PlaceFragmentBinding? = null
-    private val binding get() = _binding!!
-
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?,
     ): View {
         _binding = PlaceFragmentBinding.inflate(inflater, container, false)
         return binding.root
@@ -211,64 +156,22 @@ class PlaceFragment : Fragment() {
             }
         }
 
+        binding.toolbar.setNavigationOnClickListener {
+            parentFragmentManager.popBackStack()
+        }
         binding.toolbar.setOnMenuItemClickListener {
             when (it.itemId) {
-                R.id.directions -> {
-                    // Read the coordinates off the main thread: the shared
-                    // connection's lock can stall a read behind a background
-                    // sync write, and this handler runs on the main thread.
-                    viewLifecycleOwner.lifecycleScope.launch {
-                        val place = withContext(Dispatchers.IO) { db().place.selectById(placeId) }
-                            ?: return@launch
-                        val uri = "geo:${place.lat},${place.lon}?q=${place.getLocalizedName()}".toUri()
-                        val intent = Intent(Intent.ACTION_VIEW, uri)
-                        requireContext().startActivity(Intent.createChooser(intent, null))
-                    }
-                }
-
-                R.id.share -> {
-                    val uri = "https://btcmap.org/merchant/$placeId".toUri()
-                    val intent = Intent(Intent.ACTION_SEND).apply {
-                        putExtra(Intent.EXTRA_TEXT, uri.toString())
-                        type = "text/plain"
-                    }
-                    requireContext().startActivity(Intent.createChooser(intent, null))
-                }
-
+                R.id.directions -> openDirections()
+                R.id.share -> share()
                 R.id.view_on_btcmap -> openOnBtcmap()
-
                 R.id.view_on_osm -> openOnOpenStreetMap()
-
                 R.id.edit_on_osm -> openOsmEditor()
-
                 R.id.save -> onSaveClicked()
             }
-
             true
         }
 
-        binding.outdated.typeface = iconTypeface
-        binding.outdated.setTextColor(requireContext().getErrorColor())
-
-        binding.companionWarning.setTextColor(requireContext().getErrorColor())
-        TextViewCompat.setCompoundDrawableTintList(
-            binding.companionWarning,
-            ColorStateList.valueOf(requireContext().getErrorColor()),
-        )
-
-        commentsAdapter = CommentsAdapter()
-        binding.commentsList.layoutManager = LinearLayoutManager(requireContext())
-        binding.commentsList.adapter = commentsAdapter
-
-        photosAdapter = PlacePhotosAdapter { index -> showPhotoViewer(index) }
-        binding.photosList.layoutManager =
-            LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
-        binding.photosList.adapter = ConcatAdapter(
-            photosAdapter,
-            PlacePhotoAddAdapter { requestAddPhoto() },
-        )
-
-        binding.addPhoto.setOnClickListener { requestAddPhoto() }
+        setUpContent()
 
         // The place is read from the local cache, so a deep link opened while
         // the row is still the pre-sync copy (or any background sync that
@@ -283,107 +186,41 @@ class PlaceFragment : Fragment() {
             }
         }
 
-        if (isStandalone) {
-            setUpStandalone(savedInstanceState)
-        }
+        loadPlace()
     }
 
-    /**
-     * A standalone place screen is not hosted by the map, so it owns a small
-     * preview map of its own and needs its own back affordance: in the map's
-     * bottom sheet the sheet handles back.
-     *
-     * The preview map is a MapView, which consumes touch events itself, so it
-     * needs an explicit touch listener rather than a click listener.
-     */
-    @SuppressLint("ClickableViewAccessibility")
-    private fun setUpStandalone(savedInstanceState: Bundle?) {
-        // The map's bottom sheet positions the toolbar itself, but a standalone
-        // screen owns the status bar inset or the toolbar slides under it.
-        ViewCompat.setOnApplyWindowInsetsListener(binding.root) { _, windowInsets ->
-            val top = windowInsets.getInsets(WindowInsetsCompat.Type.statusBars()).top
-            val vertical = resources.getDimensionPixelSize(R.dimen.place_toolbar_vertical_padding)
-            binding.toolbar.updatePadding(top = top + vertical, bottom = vertical)
-            WindowInsetsCompat.CONSUMED
-        }
+    /** Hands the shared body everything it needs from this host. */
+    private fun setUpContent() {
+        val styleUrl = app().mapStyleUriForTesting ?: prefs.mapStyle.uri(requireContext())
+        // Read before apply(): inside it, the name would resolve to the view's
+        // own property instead of the icon font built from the assets.
+        val typeface = iconTypeface
 
-        binding.toolbar.setNavigationOnClickListener {
-            parentFragmentManager.popBackStack()
-        }
-        binding.toolbar.navigationIcon = homeAsUpIndicator()
-
-        binding.map.visibility = View.VISIBLE
-        renderSmallMap()
-        loadStandalonePlace()
-    }
-
-    private fun homeAsUpIndicator(): Drawable? {
-        val value = TypedValue()
-        val resolved = requireContext().theme.resolveAttribute(
-            androidx.appcompat.R.attr.homeAsUpIndicator,
-            value,
-            true,
-        )
-        return if (resolved) {
-            AppCompatResources.getDrawable(requireContext(), value.resourceId)
-        } else {
-            null
-        }
-    }
-
-
-    private fun styleUri(): String {
-        return app().mapStyleUriForTesting ?: prefs.mapStyle.uri(requireContext())
-    }
-
-
-    /** Points the preview map at the place, with its marker when it is known. */
-    private fun renderSmallMap() {
-        val binding = _binding ?: return
-        val lat = previewLat ?: return
-        val lon = previewLon ?: return
-
-        binding.map.apply {
-            this.lat = lat
-            this.lon = lon
-            marker = previewPlace?.toMarker()
-            styleUrl = styleUri()
+        binding.placeContent.apply {
+            this.styleUrl = styleUrl
+            usingOpenFreeMap = app().mapStyleUriForTesting == null
             markerBackgroundColor = Color(prefs.markerBackgroundColor(requireContext()))
             markerIconColor = Color(prefs.markerIconColor(requireContext()))
             boostedMarkerBackgroundColor = Color(prefs.boostedMarkerBackgroundColor())
             boostedMarkerIconColor = Color(prefs.boostedMarkerIconColor())
             markerBadgeBackgroundColor = Color(prefs.badgeBackgroundColor(requireContext()))
             markerBadgeTextColor = Color(prefs.badgeTextColor(requireContext()))
-            usingOpenFreeMap = app().mapStyleUriForTesting == null
-            iconTypeface = org.btcmap.util.iconTypeface
-            onClick = { (activity as? Activity)?.openPlace(requestedPlaceId) }
+            iconTypeface = typeface
+            strings = requireContext().placeSheetStrings()
+            onAction = { action -> onPlaceAction(action) }
+            onPreviewMapClick = { (activity as? Activity)?.openPlace(requestedPlaceId) }
         }
     }
 
-    private fun loadStandalonePlace() {
+    private fun loadPlace() {
         val requestedId = requestedPlaceId
         if (requestedId <= 0L) return
 
         viewLifecycleOwner.lifecycleScope.launch {
             val place = withContext(Dispatchers.IO) { db().place.selectById(requestedId) }
-            if (place != null) {
-                setPlace(place)
-                return@launch
-            }
-
-            // The place may not have synced yet. Fall back to its coordinates so
-            // the preview map still shows where it is, like a deep link does.
-            val coordinates = try {
-                withContext(Dispatchers.IO) { api().getPlaceCoordinates(requestedId) }
-            } catch (t: Throwable) {
-                t.rethrowIfCancellation()
-                null
-            } ?: return@launch
-
-            previewPlace = null
-            previewLat = coordinates.lat
-            previewLon = coordinates.lon
-            renderSmallMap()
+                ?: return@launch
+            if (_binding == null) return@launch
+            setPlace(place)
         }
     }
 
@@ -401,6 +238,80 @@ class PlaceFragment : Fragment() {
             val place = withContext(Dispatchers.IO) { db().place.selectById(id) } ?: return@launch
             if (_binding == null) return@launch
             setPlace(place)
+        }
+    }
+
+    fun setPlace(place: Place) {
+        placeId = place.id
+        placeName = place.getLocalizedName()
+
+        binding.toolbar.title = placeName
+        binding.toolbar.setSingleLine(false)
+
+        osmUrl = place.osmUrl()
+        binding.toolbar.menu.findItem(R.id.view_on_osm)?.isVisible = osmUrl != null
+        osmEditUrl = place.osmEditUrl()
+        binding.toolbar.menu.findItem(R.id.edit_on_osm)?.isVisible = osmEditUrl != null
+
+        binding.placeContent.place = place
+
+        updateBookmarkIcon()
+        renderComments(place.id)
+        renderPhotos(place.id)
+    }
+
+    /**
+     * Loads a place's comments off the main thread and shows them in the body.
+     * Comments are synced globally, so the local table can be much larger than
+     * one place's comments; reading it on the UI thread would block the frame.
+     */
+    private fun renderComments(placeId: Long) {
+        viewLifecycleOwner.lifecycleScope.launch {
+            val items = withContext(Dispatchers.IO) {
+                val formatter = commentDateFormatter()
+                db().comment.selectByPlaceId(placeId).map { it.toAdapterItem(formatter) }
+            }
+            _binding?.placeContent?.comments = items
+        }
+    }
+
+    /**
+     * Loads a place's photos off the main thread and shows them in the
+     * thumbnail strip. Most places have none; a failed fetch leaves the section
+     * empty rather than interrupting the screen.
+     */
+    private fun renderPhotos(placeId: Long) {
+        viewLifecycleOwner.lifecycleScope.launch {
+            val photos = try {
+                withContext(Dispatchers.IO) {
+                    api().getPlaceImages(placeId).map { image ->
+                        api().placeImageUrl(
+                            placeId = placeId,
+                            imageId = image.id,
+                            width = PHOTO_SIZE,
+                            height = PHOTO_SIZE,
+                        )
+                    }
+                }
+            } catch (t: Throwable) {
+                t.rethrowIfCancellation()
+                emptyList()
+            }
+
+            _binding?.placeContent?.photos = photos
+        }
+    }
+
+    private fun onPlaceAction(action: PlaceAction) {
+        when (action) {
+            PlaceAction.Verify -> openReport(defaultType = "verified")
+            PlaceAction.Report -> openReport(defaultType = null)
+            PlaceAction.Boost -> openBoost()
+            PlaceAction.Comments -> openCommentsOrAdd()
+            PlaceAction.AddComment -> openAddComment()
+            PlaceAction.AddPhoto -> requestAddPhoto()
+            // The rest are raised by the top bar, not the body.
+            else -> {}
         }
     }
 
@@ -428,402 +339,26 @@ class PlaceFragment : Fragment() {
         }
     }
 
-    override fun onStart() {
-        super.onStart()
-    }
-
-    override fun onResume() {
-        super.onResume()
-    }
-
-    override fun onPause() {
-        super.onPause()
-    }
-
-    override fun onStop() {
-        super.onStop()
-    }
-
-    override fun onLowMemory() {
-        super.onLowMemory()
-    }
-
-    override fun onSaveInstanceState(outState: Bundle) {
-        super.onSaveInstanceState(outState)
-    }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        photoUploader.hideUploading()
-        _binding = null
-    }
-
-    fun setPlace(place: Place) {
-        placeId = place.id
-        placeName = place.getLocalizedName()
-
-        binding.toolbar.title = place.getLocalizedName()
-        binding.toolbar.setSingleLine(false)
-
-        osmUrl = place.osmUrl()
-        binding.toolbar.menu.findItem(R.id.view_on_osm)?.isVisible = osmUrl != null
-        osmEditUrl = place.osmEditUrl()
-        binding.toolbar.menu.findItem(R.id.edit_on_osm)?.isVisible = osmEditUrl != null
-
-        updateBookmarkIcon()
-
-        if (place.requiredAppUrl != null) {
-            binding.companionWarning.isVisible = true
-            binding.companionWarning.setTextColor(requireContext().getErrorColor())
-            binding.companionWarning.text =
-                getString(R.string.companion_warning, place.requiredAppUrl.toString().trimEnd('/'))
-        } else {
-            binding.companionWarning.isVisible = false
-        }
-
-        val verifiedAt = place.verifiedAt
-        if (verifiedAt != null) {
-            val date = DateUtils.getRelativeDateTimeString(
-                requireContext(),
-                verifiedAt.toLocalDate().toEpochDay() * 24 * 3600 * 1000,
-                DateUtils.SECOND_IN_MILLIS,
-                DateUtils.WEEK_IN_MILLIS,
-                0,
-            ).split(",").first()
-
-            binding.lastVerified.text = date
-
-            if (verifiedAt.isAfter(ZonedDateTime.now().minusYears(1))) {
-                binding.lastVerified.isVisible = true
-                binding.lastVerified.setTextColor(requireContext().getOnSurfaceColor())
-                binding.lastVerified.setOnClickListener(null)
-                binding.outdated.isVisible = false
-                binding.outdated.setOnClickListener(null)
-            } else {
-                binding.lastVerified.isVisible = true
-                binding.lastVerified.setTextColor(requireContext().getErrorColor())
-                binding.lastVerified.setOnClickListener {
-                    showVerificationWarning(R.string.verification_warning_outdated)
-                }
-                binding.outdated.isVisible = true
-                binding.outdated.setOnClickListener {
-                    showVerificationWarning(R.string.verification_warning_outdated)
-                }
-            }
-        } else {
-            binding.lastVerified.isVisible = true
-            binding.lastVerified.text = getString(R.string.not_verified)
-            binding.lastVerified.setTextColor(requireContext().getErrorColor())
-            binding.lastVerified.setOnClickListener {
-                showVerificationWarning(R.string.verification_warning_not_verified)
-            }
-            binding.outdated.isVisible = true
-            binding.outdated.setOnClickListener {
-                showVerificationWarning(R.string.verification_warning_not_verified)
-            }
-        }
-
-        binding.address.text = place.address
-        binding.address.isVisible = !place.address.isNullOrBlank()
-
-        binding.phone.text = place.phone
-        binding.phone.isVisible = !place.phone.isNullOrBlank()
-
-        binding.website.text = place.website.toString().replace("https://", "").trimEnd('/')
-        binding.website.isVisible = place.website != null
-
-        if (place.twitter == null) {
-            binding.twitter.isVisible = false
-        } else {
-            binding.twitter.isVisible = true
-            binding.twitter.text =
-                place.twitter.toString().replace("https://twitter.com/", "").trim('@')
-            binding.twitter.styleAsLink()
-            binding.twitter.setOnClickListener {
-                val intent = Intent(Intent.ACTION_VIEW)
-                intent.data = place.twitter.toString().toUri()
-                startActivity(intent)
-            }
-        }
-
-        if (place.telegram == null) {
-            binding.telegram.isVisible = false
-        } else {
-            binding.telegram.isVisible = true
-            binding.telegram.text = place.telegram.toString().replace("https://t.me/", "")
-            binding.telegram.styleAsLink()
-            binding.telegram.setOnClickListener {
-                val intent = Intent(Intent.ACTION_VIEW)
-                intent.data = place.telegram.toString().toUri()
-                startActivity(intent)
-            }
-        }
-
-        val line = place.line
-        if (line == null) {
-            binding.line.isVisible = false
-        } else {
-            binding.line.isVisible = true
-            if (line.queryParameter("accountId").isNullOrBlank()) {
-                binding.line.text = line.toString().replace("https://line.me/R/ti/p/@", "")
-            } else {
-                binding.line.text = line.queryParameter("accountId")
-            }
-            binding.line.styleAsLink()
-            binding.line.setOnClickListener {
-                val intent = Intent(Intent.ACTION_VIEW)
-                intent.data = line.toString().toUri()
-                startActivity(intent)
-            }
-        }
-
-        if (place.facebook == null) {
-            binding.facebook.isVisible = false
-        } else {
-            binding.facebook.isVisible = true
-            var text =
-                place.facebook.toString().replace("https://www.facebook.com/people/", "")
-                    .replace("https://www.facebook.com/p/", "")
-                    .replace("https://www.facebook.com/", "")
-                    .replace("https://facebook.com/", "").trimEnd('/')
-            if (text.contains("/") && text.split("/").size == 2) {
-                text = text.split("/").first()
-            }
-            binding.facebook.text = text
-            binding.facebook.styleAsLink()
-            binding.facebook.setOnClickListener {
-                val intent = Intent(Intent.ACTION_VIEW)
-                intent.data = place.facebook.toString().toUri()
-                startActivity(intent)
-            }
-        }
-
-        if (place.instagram == null) {
-            binding.instagram.isVisible = false
-        } else {
-            binding.instagram.isVisible = true
-            binding.instagram.text =
-                place.instagram.toString().replace("https://www.instagram.com/", "")
-                    .replace("https://instagram.com/", "").trim('@', '/')
-            binding.instagram.styleAsLink()
-            binding.instagram.setOnClickListener {
-                val intent = Intent(Intent.ACTION_VIEW)
-                intent.data = place.instagram.toString().toUri()
-                startActivity(intent)
-            }
-        }
-
-        binding.email.text = place.email
-        binding.email.isVisible = place.email != null
-
-        val openingHours = place.openingHours?.toOpeningHours()
-        binding.openingHours.text = when {
-            openingHours != null -> openingHours.toEmphasizedString(
-                closedLabel = getString(R.string.opening_hours_closed),
-                aroundTheClockLabel = getString(R.string.opening_hours_open_24_7),
-            )
-
-            else -> place.openingHours
-        }
-        binding.openingHours.isVisible = !place.openingHours.isNullOrBlank()
-
-        binding.btnVerify.setOnClickListener {
-            openReport(defaultType = "verified")
-        }
-
-        binding.btnReport.setOnClickListener {
-            openReport(defaultType = null)
-        }
-
-        binding.comments.setOnClickListener {
+    private fun updateBookmarkIcon() {
+        if (prefs.authorized) {
             viewLifecycleOwner.lifecycleScope.launch {
-                val hasComments = withContext(Dispatchers.IO) {
-                    db().comment.selectCountByPlaceId(place.id) > 0
-                }
-
-                if (hasComments) {
-                    openComments()
-                } else {
-                    openAddComment()
-                }
-            }
-        }
-
-        binding.boost.setOnClickListener {
-            requireActivity().supportFragmentManager.commit {
-                setReorderingAllowed(true)
-                replace<BoostFragment>(
-                    R.id.fragmentContainerView, null, Bundle().apply {
-                        putLong("place_id", place.id)
-                        putString("place_name", placeName)
-                    }
-                )
-                addToBackStack(null)
-            }
-        }
-
-        binding.addComment.setOnClickListener { openAddComment() }
-
-        binding.comments.isEnabled = true
-        renderComments(place.id)
-        renderPhotos(place.id)
-
-        previewPlace = place
-        previewLat = place.lat
-        previewLon = place.lon
-        renderSmallMap()
-    }
-
-    /**
-     * The parsed week as a multi-line string with today's line underlined, so
-     * the current day stands out. A week that collapses to a single line has no
-     * day to emphasize and is returned as-is.
-     */
-    private fun OpeningHours.toEmphasizedString(
-        closedLabel: String,
-        aroundTheClockLabel: String,
-    ): CharSequence {
-        val display = toDisplayString(
-            closedLabel = closedLabel,
-            aroundTheClockLabel = aroundTheClockLabel,
-        )
-        val lineIndex = todayLineIndex(LocalDate.now().dayOfWeek) ?: return display
-
-        val lines = display.split('\n')
-        val start = lines.take(lineIndex).sumOf { it.length + 1 }
-        val end = start + lines[lineIndex].length
-
-        return SpannableString(display).apply {
-            setSpan(UnderlineSpan(), start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
-        }
-    }
-
-    /**
-     * Loads a place's comments off the main thread and shows them in the
-     * preview list and the comments button.
-     *
-     * Comments are synced globally, so the local table can be much larger than
-     * one place's comments; reading it on the UI thread would block the frame.
-     * The preview query only reads the newest few, and the total is a separate
-     * count so the button can still label the full number.
-     */
-    private fun renderComments(placeId: Long) {
-        commentsJob?.cancel()
-        commentsJob = viewLifecycleOwner.lifecycleScope.launch {
-            val (comments, total) = withContext(Dispatchers.IO) {
-                db().comment.selectByPlaceId(placeId, COMMENTS_PREVIEW_LIMIT) to
-                    db().comment.selectCountByPlaceId(placeId)
-            }
-
-            val binding = _binding ?: return@launch
-
-            binding.commentsTitle.text = getString(R.string.comments_d, total)
-            binding.commentsTitle.isVisible = total > 0
-            binding.comments.text = if (total == 0L) {
-                getString(R.string.comment)
-            } else {
-                getString(R.string.comments_d, total)
-            }
-            // The top button opens the add screen when there is nothing to list,
-            // so the bottom button would be a duplicate; it only appears once
-            // there are comments to sit under.
-            binding.addComment.isVisible = total > 0
-            val formatter = commentDateFormatter()
-            commentsAdapter.submitList(comments.map { it.toAdapterItem(formatter) })
-        }
-    }
-
-    /**
-     * Loads a place's photos off the main thread and shows them in the thumbnail
-     * strip. Most places have none, so the whole section stays hidden until at
-     * least one image arrives; a failed fetch leaves it hidden rather than
-     * interrupting the screen.
-     */
-    private fun renderPhotos(placeId: Long) {
-        photosJob?.cancel()
-
-        // Switching to a different place must not leave the previous place's
-        // photos on screen, even for a frame, so hide the whole section until
-        // the new place's list is committed. A reload of the same place keeps
-        // its strip up to avoid flicker.
-        if (renderedPhotosPlaceId != placeId) {
-            renderedPhotosPlaceId = placeId
-            _binding?.let {
-                it.photosList.isVisible = false
-                it.addPhoto.isVisible = false
-            }
-        }
-
-        photosJob = viewLifecycleOwner.lifecycleScope.launch {
-            val api = api()
-
-            val photos = try {
-                withContext(Dispatchers.IO) {
-                    api.getPlaceImages(placeId).map { image ->
-                        PlacePhoto(
-                            id = image.id,
-                            thumbnailUrl = api.placeImageUrl(
-                                placeId = placeId,
-                                imageId = image.id,
-                                width = PHOTO_THUMBNAIL_SIZE,
-                                height = PHOTO_THUMBNAIL_SIZE,
-                            ),
-                            fullUrl = api.placeImageUrl(
-                                placeId = placeId,
-                                imageId = image.id,
-                                width = PHOTO_FULL_SIZE,
-                            ),
+                try {
+                    val saved = isPlaceSaved(placeId)
+                    withResumed {
+                        _binding?.placeContent?.bookmarked = saved
+                        binding.toolbar.menu.findItem(R.id.save).setIcon(
+                            if (saved) R.drawable.icon_bookmark_check else R.drawable.icon_bookmark,
                         )
                     }
-                }
-            } catch (t: Throwable) {
-                t.rethrowIfCancellation()
-                emptyList()
-            }
-
-            if (_binding == null) return@launch
-
-            // With photos, the strip ends in an add tile; without any, the same
-            // spot shows a full-width add button so the affordance stays there.
-            // Reveal only once the new list is committed, so the previous
-            // place's rows cannot flash while the diff is applied.
-            photosAdapter.submitList(photos) {
-                val binding = _binding
-                if (binding != null) {
-                    val hasPhotos = photos.isNotEmpty()
-                    val showList = hasPhotos
-                    val showAdd = !hasPhotos
-                    val wasListVisible = binding.photosList.isVisible
-
-                    if (wasListVisible != showList ||
-                        binding.addPhoto.isVisible != showAdd
-                    ) {
-                        // Animate the row in and let the rows below slide down
-                        // instead of jumping when the network result lands.
-                        (binding.photosList.parent as? ViewGroup)?.let {
-                            TransitionManager.beginDelayedTransition(it)
-                        }
-                        binding.photosList.isVisible = showList
-                        binding.addPhoto.isVisible = showAdd
-
-                        // The list was committed while hidden, so pin it to the
-                        // first photo; otherwise the layout manager can settle
-                        // on the last one and open the strip scrolled to the end.
-                        if (showList && !wasListVisible) {
-                            binding.photosList.scrollToPosition(0)
-                        }
-                    }
+                } catch (e: Throwable) {
+                    e.rethrowIfCancellation()
+                    showError(e)
                 }
             }
+        } else {
+            _binding?.placeContent?.bookmarked = false
+            binding.toolbar.menu.findItem(R.id.save).setIcon(R.drawable.icon_bookmark)
         }
-    }
-
-    private fun showPhotoViewer(index: Int) {
-        val urls = photosAdapter.currentList.map { it.fullUrl }
-        if (urls.isEmpty()) return
-
-        PlacePhotoViewerDialogFragment.newInstance(ArrayList(urls), index)
-            .show(parentFragmentManager, PlacePhotoViewerDialogFragment.TAG)
     }
 
     /** Uploads require a signed-in user, so prompt for auth first if needed. */
@@ -831,16 +366,98 @@ class PlaceFragment : Fragment() {
         photoUploader.request(placeId, placeName)
     }
 
-    /**
-     * Explains a verification warning. The dialog is informational only: the
-     * Verify and Report buttons on the place itself are what the user acts on.
-     */
-    private fun showVerificationWarning(@StringRes message: Int) {
-        MaterialAlertDialogBuilder(requireContext())
-            .setTitle(R.string.verification_warning_title)
-            .setMessage(message)
-            .setPositiveButton(android.R.string.ok, null)
-            .show()
+    private fun openBoost() {
+        navigate(
+            BoostFragment(),
+            Bundle().apply {
+                putLong("place_id", placeId)
+                putString("place_name", placeName)
+            },
+        )
+    }
+
+    private fun openCommentsOrAdd() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            val hasComments = withContext(Dispatchers.IO) {
+                db().comment.selectCountByPlaceId(placeId) > 0
+            }
+
+            if (hasComments) openComments() else openAddComment()
+        }
+    }
+
+    private fun openComments() {
+        navigate(
+            CommentsFragment(),
+            Bundle().apply {
+                putLong("place_id", placeId)
+                putString("place_name", placeName)
+            },
+        )
+    }
+
+    private fun openAddComment() {
+        navigate(
+            AddCommentFragment(),
+            Bundle().apply {
+                putLong("place_id", placeId)
+                putString("place_name", placeName)
+            },
+        )
+    }
+
+    private fun openReport(defaultType: String?) {
+        if (prefs.authorized) {
+            navigateToReport(placeId, placeName, defaultType)
+        } else {
+            showAuthDialog(Bundle().apply {
+                putString(EXTRA_AUTH_ACTION, AUTH_ACTION_OPEN_REPORT)
+                putLong(EXTRA_PLACE_ID, placeId)
+                putString(EXTRA_PLACE_NAME, placeName)
+                if (defaultType != null) putString(EXTRA_REPORT_TYPE, defaultType)
+            })
+        }
+    }
+
+    private fun navigateToReport(placeId: Long, placeName: String, defaultType: String?) {
+        navigate(
+            ReportPlaceFragment(),
+            Bundle().apply {
+                putLong("place_id", placeId)
+                putString("place_name", placeName)
+                if (defaultType != null) putString("default_type", defaultType)
+            },
+        )
+    }
+
+    private fun navigate(fragment: Fragment, args: Bundle?) {
+        fragment.arguments = args
+        requireActivity().supportFragmentManager.commit {
+            setReorderingAllowed(true)
+            replace(R.id.fragmentContainerView, fragment)
+            addToBackStack(null)
+        }
+    }
+
+    private fun openDirections() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            // Read the coordinates off the main thread: the shared connection's
+            // lock can stall a read behind a background sync write, and this runs
+            // on the main thread.
+            val place = withContext(Dispatchers.IO) { db().place.selectById(placeId) }
+                ?: return@launch
+            val uri = "geo:${place.lat},${place.lon}?q=${place.getLocalizedName()}".toUri()
+            startActivity(Intent.createChooser(Intent(Intent.ACTION_VIEW, uri), null))
+        }
+    }
+
+    private fun share() {
+        val uri = "https://btcmap.org/merchant/$placeId".toUri()
+        val intent = Intent(Intent.ACTION_SEND).apply {
+            putExtra(Intent.EXTRA_TEXT, uri.toString())
+            type = "text/plain"
+        }
+        startActivity(Intent.createChooser(intent, null))
     }
 
     /**
@@ -895,109 +512,19 @@ class PlaceFragment : Fragment() {
         openInBrowser(url.toUri())
     }
 
-    private fun openReport(defaultType: String?) {
-        if (prefs.authorized) {
-            navigateToReport(placeId, placeName, defaultType)
-        } else {
-            showAuthDialog(Bundle().apply {
-                putString(EXTRA_AUTH_ACTION, AUTH_ACTION_OPEN_REPORT)
-                putLong(EXTRA_PLACE_ID, placeId)
-                putString(EXTRA_PLACE_NAME, placeName)
-                if (defaultType != null) putString(EXTRA_REPORT_TYPE, defaultType)
-            })
-        }
+    override fun onDestroyView() {
+        super.onDestroyView()
+        photoUploader.hideUploading()
+        _binding = null
     }
+}
 
-    private fun navigateToReport(placeId: Long, placeName: String, defaultType: String?) {
-        requireActivity().supportFragmentManager.commit {
-            setReorderingAllowed(true)
-            val args = Bundle().apply {
-                putLong("place_id", placeId)
-                putString("place_name", placeName)
-                if (defaultType != null) putString("default_type", defaultType)
-            }
-            replace<ReportPlaceFragment>(R.id.fragmentContainerView, null, args)
-            addToBackStack(null)
-        }
-    }
-
-    private fun openComments() {
-        val placeId = placeId
-        requireActivity().supportFragmentManager.commit {
-            setReorderingAllowed(true)
-            replace<CommentsFragment>(
-                R.id.fragmentContainerView,
-                null,
-                Bundle().apply {
-                    putLong("place_id", placeId)
-                    putString("place_name", placeName)
-                },
-            )
-            addToBackStack(null)
-        }
-    }
-
-    private fun openAddComment() {
-        requireActivity().supportFragmentManager.commit {
-            setReorderingAllowed(true)
-            replace<AddCommentFragment>(
-                R.id.fragmentContainerView,
-                null,
-                Bundle().apply {
-                    putLong("place_id", placeId)
-                    putString("place_name", placeName)
-                },
-            )
-            addToBackStack(null)
-        }
-    }
-
-    fun onSlide(bottomSheetTop: Int) {
-        val toolbar = _binding?.toolbar ?: return
-        val statusBarTop = ViewCompat.getRootWindowInsets(toolbar)
-            ?.getInsets(WindowInsetsCompat.Type.statusBars())?.top ?: 0
-        toolbar.updateLayoutParams<LinearLayout.LayoutParams> {
-            topMargin = (statusBarTop - bottomSheetTop).coerceIn(0, statusBarTop)
-        }
-    }
-
-    private fun TextView.styleAsLink() {
-        setText(
-            SpannableString(text).apply {
-                setSpan(
-                    URLSpan(""), 0, length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
-                )
-            },
-            TextView.BufferType.SPANNABLE,
-        )
-    }
-
-    fun Toolbar.setSingleLine(singleLine: Boolean) {
-        for (i in 0..childCount) {
-            val child = getChildAt(i)
-            if (child is TextView) {
-                child.isSingleLine = singleLine
-            }
-        }
-    }
-
-    private fun updateBookmarkIcon() {
-        if (prefs.authorized) {
-            viewLifecycleOwner.lifecycleScope.launch {
-                try {
-                    val saved = isPlaceSaved(placeId)
-                    withResumed {
-                        binding.toolbar.menu.findItem(R.id.save).setIcon(
-                            if (saved) R.drawable.icon_bookmark_check else R.drawable.icon_bookmark
-                        )
-                    }
-                } catch (e: Throwable) {
-                    e.rethrowIfCancellation()
-                    showError(e)
-                }
-            }
-        } else {
-            binding.toolbar.menu.findItem(R.id.save).setIcon(R.drawable.icon_bookmark)
+/** Lets the toolbar title wrap instead of truncating a long place name. */
+private fun Toolbar.setSingleLine(singleLine: Boolean) {
+    for (i in 0..childCount) {
+        val child = getChildAt(i)
+        if (child is TextView) {
+            child.isSingleLine = singleLine
         }
     }
 }

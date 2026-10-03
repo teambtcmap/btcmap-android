@@ -1,9 +1,13 @@
 package org.btcmap.place
 
-import android.widget.Button
+import androidx.compose.ui.test.junit4.createEmptyComposeRule
+import androidx.compose.ui.test.onAllNodesWithTag
+import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
 import androidx.fragment.app.commitNow
 import androidx.fragment.app.replace
-import androidx.recyclerview.widget.RecyclerView
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -17,6 +21,8 @@ import org.btcmap.comment.AddCommentFragment
 import org.btcmap.comment.CommentsFragment
 import org.btcmap.db.table.comment.Comment
 import org.btcmap.db.table.place.Place
+import org.btcmap.ui.PLACE_COMMENTS_TAG
+import org.btcmap.ui.PlaceComposeView
 import org.btcmap.util.AppTestCase
 import org.btcmap.util.waitUntilOnMain
 import org.junit.Rule
@@ -29,6 +35,9 @@ class PlaceCommentsTest : AppTestCase() {
 
     private val app = ApplicationProvider.getApplicationContext<App>()
 
+    @get:Rule
+    val composeTestRule = createEmptyComposeRule()
+
     @Test
     fun commentsPreview_showsStoredCommentsAndOpensTheList() {
         databaseRule.db.comment.insert(
@@ -39,20 +48,14 @@ class PlaceCommentsTest : AppTestCase() {
         )
 
         withPlaceFragment { scenario, activity, fragment ->
-            waitUntilOnMain {
-                fragment.requireView().findViewById<Button>(R.id.comments).text ==
-                    activity.getString(R.string.comments_d, 2)
+            composeTestRule.waitUntil(5_000) {
+                composeTestRule.onAllNodesWithText("First").fetchSemanticsNodes().isNotEmpty()
             }
-            waitUntilOnMain {
-                fragment.requireView()
-                    .findViewById<RecyclerView>(R.id.comments_list)
-                    .adapter
-                    ?.itemCount == 2
-            }
+            composeTestRule.onNodeWithText("First").assertExists()
+            composeTestRule.onNodeWithText("Second").assertExists()
 
-            scenario.onActivity {
-                fragment.requireView().findViewById<Button>(R.id.comments).performClick()
-            }
+            composeTestRule.onNodeWithTag(PLACE_COMMENTS_TAG).performClick()
+
             waitUntilOnMain {
                 activity.supportFragmentManager
                     .findFragmentById(R.id.fragmentContainerView) is CommentsFragment
@@ -74,12 +77,17 @@ class PlaceCommentsTest : AppTestCase() {
 
         withPlaceFragment { scenario, activity, fragment ->
             waitUntilOnMain {
-                fragment.requireView().findViewById<Button>(R.id.comments).isEnabled
+                fragment.requireView()
+                    .findViewById<PlaceComposeView>(R.id.placeContent)
+                    .place != null
+            }
+            composeTestRule.waitUntil(5_000) {
+                composeTestRule.onAllNodesWithTag(PLACE_COMMENTS_TAG)
+                    .fetchSemanticsNodes().isNotEmpty()
             }
 
-            scenario.onActivity {
-                fragment.requireView().findViewById<Button>(R.id.comments).performClick()
-            }
+            composeTestRule.onNodeWithTag(PLACE_COMMENTS_TAG).performClick()
+
             waitUntilOnMain {
                 activity.supportFragmentManager
                     .findFragmentById(R.id.fragmentContainerView) is AddCommentFragment
@@ -140,7 +148,8 @@ class PlaceCommentsTest : AppTestCase() {
             line = null,
             requiredAppUrl = null,
             boostedUntil = null,
-            comments = null,
+            // The stored comments are the count the body labels its action with.
+            comments = 2L,
             telegram = null,
             osmId = null,
         )
