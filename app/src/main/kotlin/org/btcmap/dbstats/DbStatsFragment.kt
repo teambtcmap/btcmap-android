@@ -1,7 +1,6 @@
 package org.btcmap.dbstats
 
 import android.os.Bundle
-import android.text.format.Formatter
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -10,12 +9,9 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.btcmap.R
-import org.btcmap.sync.SyncState
 import org.btcmap.bundle.BundledAreas
 import org.btcmap.bundle.BundledComments
 import org.btcmap.bundle.BundledEvents
@@ -26,15 +22,21 @@ import org.btcmap.db.table.area.TABLE as AREA_TABLE
 import org.btcmap.db.table.comment.TABLE as COMMENT_TABLE
 import org.btcmap.db.table.event.TABLE as EVENT_TABLE
 import org.btcmap.db.table.place.TABLE as PLACE_TABLE
-import org.btcmap.settings.apiUrl
 import org.btcmap.settings.prefs
-import org.btcmap.stats.StatsEntry
-import org.btcmap.stats.StatsSection
+import org.btcmap.sync.SyncState
 import org.btcmap.syncController
+import org.btcmap.ui.DbStatsPageLabels
 import org.btcmap.util.iconTypeface
 import org.btcmap.util.rethrowIfCancellation
 import org.btcmap.util.showError
 
+/**
+ * The database stats screen: a Views toolbar with the sync action over the
+ * shared [org.btcmap.ui.DbStatsPage], which reads the database, builds the cards
+ * with the shared [dbStatsSections] and renders [org.btcmap.ui.StatsScreen].
+ * This fragment supplies the labels and the bundled snapshot stats, and keeps
+ * the sync action's enabled state in step with the controller.
+ */
 class DbStatsFragment : Fragment() {
 
     private var _binding: DbStatsFragmentBinding? = null
@@ -58,7 +60,7 @@ class DbStatsFragment : Fragment() {
         binding.topAppBar.setOnMenuItemClickListener { item ->
             when (item.itemId) {
                 R.id.sync -> {
-                    // Kicks off the app-scoped full sync; the card above follows
+                    // Kicks off the app-scoped full sync; the card below follows
                     // it and the item stays disabled until it finishes.
                     sync.start()
                     true
@@ -67,88 +69,43 @@ class DbStatsFragment : Fragment() {
             }
         }
 
-        binding.statsList.iconTypeface = iconTypeface
-
-        val database = db()
-        val reader = DbStatsReader(database.conn)
-        val context = requireContext()
-        // The database cards are a live snapshot while the bundle cards come
-        // from immutable assets, so the bundles are read once and the whole list
-        // is rebuilt whenever the database is re-read. The sync card has to
-        // follow the controller, so the base sections are combined for the
-        // adapter.
-        val baseSections = MutableStateFlow<List<StatsSection>>(emptyList())
-        var bundles: Map<String, BundleStats> = emptyMap()
-
-        suspend fun refresh() {
-            val file = withContext(Dispatchers.IO) {
-                DatabaseFile.read(database.path)
-            }
-            val version = withContext(Dispatchers.IO) {
-                reader.readUserVersion()
-            }
-            val tables = withContext(Dispatchers.IO) {
-                reader.readTables()
-            }
-            baseSections.value = dbStatsSections(
-                file = file,
-                version = version,
-                tables = tables,
-                bundles = bundles,
-                labels = dbStatsLabels(),
-                formatBytes = { Formatter.formatFileSize(context, it) },
-            )
+        // Read before apply(): inside it, the name would resolve to the view's
+        // own property instead of the icon font built from the assets.
+        val typeface = iconTypeface
+        binding.statsContent.apply {
+            database = db()
+            settings = prefs
+            labels = dbStatsPageLabels()
+            iconTypeface = typeface
+            onSync = { sync.start() }
+            showSyncButton = false
         }
 
+        // The bundle cards come from immutable assets, so they are read once and
+        // handed to the shared page. A snapshot that cannot be read only loses
+        // its own card: the database stats still render, and the problem is
+        // reported rather than hidden behind a blank screen.
+        val context = requireContext().applicationContext
         viewLifecycleOwner.lifecycleScope.launch {
             try {
                 val reads = withContext(Dispatchers.IO) {
                     readBundles(BUNDLES) { fileName -> context.assets.open(fileName) }
                 }
-                bundles = reads.stats
-                // A snapshot that cannot be read only loses its own card: the
-                // database stats above still render, and the problem is
-                // reported rather than hidden behind a blank screen.
+                _binding?.statsContent?.bundles = reads.stats
                 reads.failures.forEach { showError(it) }
-                refresh()
             } catch (e: Throwable) {
                 e.rethrowIfCancellation()
                 showError(e)
             }
-
-            // The database cards are a snapshot too, so re-read them when the
-            // app-scoped sync finishes and the underlying rows have changed.
-            var wasSyncing = false
-            sync.state.collect { state ->
-                val syncing = state != SyncState.Idle
-                if (wasSyncing && !syncing) {
-                    try {
-                        refresh()
-                    } catch (e: Throwable) {
-                        e.rethrowIfCancellation()
-                        showError(e)
-                    }
-                }
-                wasSyncing = syncing
-            }
         }
 
-        viewLifecycleOwner.lifecycleScope.launch {
-            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                combine(baseSections, sync.state) { base, state ->
-                    buildList {
-                        add(syncSection(state))
-                        addAll(base)
-                    }
-                }.collect { binding.statsList.sections = it }
-            }
-        }
-
+        // The sync card follows the controller and the toolbar action is only
+        // enabled while it is idle.
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 sync.state.collect { state ->
-                    binding.topAppBar.menu.findItem(R.id.sync)?.isEnabled =
-                        state == SyncState.Idle
+                    _binding?.statsContent?.syncState = state
+                    binding.topAppBar.menu.findItem(R.id.sync)?.isEnabled = state == SyncState.Idle
                 }
             }
         }
@@ -175,20 +132,14 @@ class DbStatsFragment : Fragment() {
         newestUpdate = getString(R.string.db_stats_max_updated_at),
     )
 
-    private fun syncSection(state: SyncState): StatsSection = StatsSection(
-        key = "sync",
-        title = getString(R.string.db_stats_sync),
-        icon = "sync",
-        entries = listOf(
-            StatsEntry(
-                getString(R.string.db_stats_sync_source),
-                prefs.apiUrl.toString(),
-            ),
-            StatsEntry(
-                getString(R.string.db_stats_sync_state),
-                getString(state.labelRes),
-            ),
-        ),
+    /** The Android labels for the shared sync card. */
+    private fun dbStatsPageLabels(): DbStatsPageLabels = DbStatsPageLabels(
+        dbStats = dbStatsLabels(),
+        sync = getString(R.string.db_stats_sync),
+        source = getString(R.string.db_stats_sync_source),
+        state = getString(R.string.db_stats_sync_state),
+        syncNow = getString(R.string.sync),
+        syncStateLabel = { getString(it.labelRes) },
     )
 
     private val SyncState.labelRes: Int

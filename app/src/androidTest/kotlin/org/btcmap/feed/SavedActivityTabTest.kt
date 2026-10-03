@@ -1,5 +1,8 @@
 package org.btcmap.feed
 
+import androidx.compose.ui.test.junit4.createEmptyComposeRule
+import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.onNodeWithText
 import androidx.fragment.app.commitNow
 import androidx.fragment.app.replace
 import androidx.test.core.app.ActivityScenario
@@ -14,10 +17,9 @@ import org.btcmap.R
 import org.btcmap.db.table.user.SavedItem
 import org.btcmap.db.table.user.User
 import org.btcmap.settings.authToken
-import org.btcmap.ui.ActivityFeedComposeView
 import org.btcmap.util.AppTestCase
-import org.btcmap.util.waitUntilOnMain
 import org.junit.Assert
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import java.util.concurrent.atomic.AtomicInteger
@@ -32,17 +34,16 @@ class SavedActivityTabTest : AppTestCase() {
 
     private val app = ApplicationProvider.getApplicationContext<App>()
 
+    @get:Rule
+    val composeTestRule = createEmptyComposeRule()
+
     @Test
     fun signedOut_showsSignInMessageWithoutCallingApi() {
         val apiCalls = AtomicInteger(0)
         apiRule.server.dispatcher = countingDispatcher(apiCalls)
 
-        withSavedTab { scenario, tab ->
-            waitUntilOnMain { emptyText(tab).isNotEmpty() }
-            Assert.assertEquals(
-                app.getString(R.string.activity_empty_saved_signed_out),
-                textOnMain(scenario, tab),
-            )
+        withSavedTab { _, _ ->
+            assertShowsMessage(R.string.activity_empty_saved_signed_out)
             Assert.assertEquals(0, apiCalls.get())
         }
     }
@@ -54,12 +55,8 @@ class SavedActivityTabTest : AppTestCase() {
         val apiCalls = AtomicInteger(0)
         apiRule.server.dispatcher = countingDispatcher(apiCalls)
 
-        withSavedTab { scenario, tab ->
-            waitUntilOnMain { emptyText(tab).isNotEmpty() }
-            Assert.assertEquals(
-                app.getString(R.string.activity_empty_saved_no_items),
-                textOnMain(scenario, tab),
-            )
+        withSavedTab { _, _ ->
+            assertShowsMessage(R.string.activity_empty_saved_no_items)
             Assert.assertEquals(0, apiCalls.get())
         }
     }
@@ -72,11 +69,18 @@ class SavedActivityTabTest : AppTestCase() {
             override fun dispatch(request: RecordedRequest): MockResponse = jsonResponse()
         }
 
-        withSavedTab { _, tab ->
-            waitUntilOnMain {
-                emptyText(tab) == app.getString(R.string.activity_empty_saved_no_activity)
-            }
+        withSavedTab { _, _ ->
+            assertShowsMessage(R.string.activity_empty_saved_no_activity)
         }
+    }
+
+    /** Waits for the given empty message to be rendered, then asserts it. */
+    private fun assertShowsMessage(resId: Int) {
+        val message = app.getString(resId)
+        composeTestRule.waitUntil(5_000) {
+            composeTestRule.onAllNodesWithText(message).fetchSemanticsNodes().isNotEmpty()
+        }
+        composeTestRule.onNodeWithText(message).assertExists()
     }
 
     private fun withSavedTab(
@@ -99,19 +103,6 @@ class SavedActivityTabTest : AppTestCase() {
             app.mapStyleUriForTesting = null
         }
     }
-
-    /** Reads the empty message on the main thread, where the view may be touched. */
-    private fun textOnMain(
-        scenario: ActivityScenario<Activity>,
-        tab: SavedActivityFragment,
-    ): String {
-        lateinit var text: String
-        scenario.onActivity { text = emptyText(tab) }
-        return text
-    }
-
-    private fun emptyText(tab: SavedActivityFragment): String =
-        tab.requireView().findViewById<ActivityFeedComposeView>(R.id.feedList).emptyMessage.orEmpty()
 
     private fun countingDispatcher(calls: AtomicInteger) = object : Dispatcher() {
         override fun dispatch(request: RecordedRequest): MockResponse {

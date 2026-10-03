@@ -14,7 +14,6 @@ import androidx.lifecycle.setViewTreeViewModelStoreOwner
 import androidx.savedstate.setViewTreeSavedStateRegistryOwner
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.btcmap.R
@@ -30,7 +29,6 @@ import org.btcmap.settings.ActivityInterval
 import org.btcmap.settings.activityIntervalDays
 import org.btcmap.settings.prefs
 import org.btcmap.ui.ActivityFeedComposeView
-import org.btcmap.ui.ActivityFeedState
 import org.btcmap.ui.ChipFilterComposeView
 import org.btcmap.ui.ChipOption
 import org.btcmap.util.iconTypeface
@@ -44,10 +42,10 @@ data class ActivityScope(
 )
 
 /**
- * Common scaffolding for an Activity Feed tab: list of items, filter chips
- * surfaced via [showFilterDialog], and a placeholder for empty/loading states.
- * Subclasses override [loadScope] to yield the ids to query for the current
- * selection (or null to short-circuit with empty).
+ * Common scaffolding for an Activity Feed tab: the filter chips surfaced via
+ * [showFilterDialog], the area selection, and the load handed to the shared
+ * [org.btcmap.ui.ActivityFeedPage]. Subclasses override [loadScope] to yield
+ * the ids to query for the current selection (or null to short-circuit).
  */
 abstract class BaseActivityFeedTab : Fragment() {
 
@@ -61,10 +59,8 @@ abstract class BaseActivityFeedTab : Fragment() {
     private val binding get() = _binding!!
 
     private val selectedIds = mutableSetOf<String>()
-    private var loadJob: Job? = null
     private var showAreaChips: Boolean = false
     private var initialAreas: List<Area> = emptyList()
-    private var itemsByKey: Map<String, ActivityFeedItem> = emptyMap()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -77,10 +73,6 @@ abstract class BaseActivityFeedTab : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        binding.feedList.iconTypeface = iconTypeface
-        binding.feedList.onItemClick = { key -> itemsByKey[key]?.let(::openItem) }
-        binding.feedList.onRetry = { loadActivity() }
 
         showAreaChips = arguments?.getBoolean(ARG_SHOW_AREA_CHIPS, false) ?: false
         val ids = arguments?.getStringArrayList(ARG_INITIAL_AREA_IDS) ?: arrayListOf()
@@ -106,7 +98,22 @@ abstract class BaseActivityFeedTab : Fragment() {
             selectedIds.addAll(communities.ifEmpty { initialAreas }.map { it.id })
         }
 
-        loadActivity()
+        // Read before apply(): inside it, the name would resolve to the view's
+        // own property instead of the icon font built from the assets.
+        val typeface = iconTypeface
+        val errorMessage = getString(
+            R.string.failed_to_load_tap_to_retry,
+            getString(R.string.failed_to_load),
+            getString(R.string.tap_to_retry),
+        )
+        binding.feedList.apply {
+            iconTypeface = typeface
+            load = { loadItems() }
+            toRow = { item -> item.toRow(requireContext()) }
+            emptyMessage = { this@BaseActivityFeedTab.emptyMessage() }
+            this.errorMessage = errorMessage
+            onItemClick = { item -> openItem(item) }
+        }
     }
 
     abstract fun emptyMessage(): String
@@ -125,14 +132,14 @@ abstract class BaseActivityFeedTab : Fragment() {
         view.onAreaToggle = { key ->
             if (selectedIds.contains(key)) selectedIds.remove(key) else selectedIds.add(key)
             updateChipView(view)
-            loadActivity()
+            reload()
         }
         view.onIntervalSelect = { key ->
             key.toIntOrNull()?.let { days ->
                 if (prefs.activityIntervalDays != days) {
                     prefs.activityIntervalDays = days
                     updateChipView(view)
-                    loadActivity()
+                    reload()
                 }
             }
         }
@@ -169,43 +176,27 @@ abstract class BaseActivityFeedTab : Fragment() {
         return ActivityScope(areaIds = selectedIds.toList())
     }
 
-    protected fun loadActivity() {
-        loadJob?.cancel()
-        val feedList = _binding?.feedList ?: return
-        val context = requireContext()
-
-        loadJob = viewLifecycleOwner.lifecycleScope.launch {
-            // [loadScope] reads the local cache for the Saved tab, so it runs
-            // inside the coroutine (and off the main thread): the shared SQLite
-            // connection's lock can stall a main-thread read behind a background
-            // sync write.
-            val scope = loadScope()
-            if (scope == null || (scope.areaIds.isEmpty() && scope.placeIds.isEmpty())) {
-                showEmptyState(feedList)
-                return@launch
-            }
-
-            feedList.state = ActivityFeedState.Loading
-
-            try {
-                val items = withContext(Dispatchers.IO) {
-                    api().getActivity(
-                        scope.areaIds,
-                        scope.placeIds,
-                        prefs.activityIntervalDays,
-                    )
-                }
-                if (items.isEmpty()) {
-                    showEmptyState(feedList)
-                } else {
-                    itemsByKey = items.associateBy { it.feedKey() }
-                    feedList.state = ActivityFeedState.Content(items.map { it.toRow(context) })
-                }
-            } catch (e: Throwable) {
-                e.rethrowIfCancellation()
-                showErrorState(feedList)
-            }
+    /**
+     * Runs the query behind the shared page. [loadScope] reads the local cache
+     * for the Saved tab, so it runs inside the coroutine: the shared SQLite
+     * connection's lock can stall a main-thread read behind a background sync
+     * write.
+     */
+    private suspend fun loadItems(): List<ActivityFeedItem> {
+        val scope = loadScope()
+        if (scope == null || (scope.areaIds.isEmpty() && scope.placeIds.isEmpty())) {
+            return emptyList()
         }
+
+        return withContext(Dispatchers.IO) {
+            api().getActivity(scope.areaIds, scope.placeIds, prefs.activityIntervalDays)
+        }
+    }
+
+    /** Re-runs the load, e.g. after the filter changed or on resume. */
+    protected fun reload() {
+        val list = _binding?.feedList ?: return
+        list.reloadKey += 1
     }
 
     private fun openItem(item: ActivityFeedItem) {
@@ -246,21 +237,6 @@ abstract class BaseActivityFeedTab : Fragment() {
         }
     }
 
-    private fun showEmptyState(feedList: ActivityFeedComposeView) {
-        feedList.state = ActivityFeedState.Empty(emptyMessage(), retryable = false)
-    }
-
-    private fun showErrorState(feedList: ActivityFeedComposeView) {
-        feedList.state = ActivityFeedState.Empty(
-            message = getString(
-                R.string.failed_to_load_tap_to_retry,
-                getString(R.string.failed_to_load),
-                getString(R.string.tap_to_retry),
-            ),
-            retryable = true,
-        )
-    }
-
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
         outState.putStringArrayList(STATE_SELECTED_IDS, ArrayList(selectedIds))
@@ -268,8 +244,6 @@ abstract class BaseActivityFeedTab : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
-        loadJob?.cancel()
-        loadJob = null
         _binding = null
     }
 

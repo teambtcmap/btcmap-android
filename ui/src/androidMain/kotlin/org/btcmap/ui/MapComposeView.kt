@@ -128,6 +128,12 @@ class MapComposeView @JvmOverloads constructor(
 
     var showAttribution: Boolean by mutableStateOf(true)
 
+    var syncVisible: Boolean by mutableStateOf(false)
+
+    var updateVisible: Boolean by mutableStateOf(false)
+
+    var onUpdateClick: () -> Unit by mutableStateOf({})
+
     var attributionText: String by mutableStateOf("© OpenStreetMap contributors")
 
     var attributionTextColor: Color by mutableStateOf(Color.Black.copy(alpha = 0.8f))
@@ -175,6 +181,9 @@ class MapComposeView @JvmOverloads constructor(
             onFeaturesDrawn = onFeaturesDrawn,
             placeSheet = placeSheet,
             showAttribution = showAttribution,
+            syncVisible = syncVisible,
+            updateVisible = updateVisible,
+            onUpdateClick = onUpdateClick,
             attributionText = attributionText,
             attributionTextColor = attributionTextColor,
             openTarget = openTarget,

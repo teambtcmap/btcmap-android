@@ -19,6 +19,7 @@ fun Context.areaStrings(): AreaStrings = AreaStrings(
     offlineDownload = getString(R.string.offline_map_download),
     offlineDownloadAgain = getString(R.string.offline_map_download_again),
     offlineDelete = getString(R.string.delete),
+    cancel = getString(android.R.string.cancel),
     boosted = getString(R.string.boosted),
     boostedUntil = { date -> getString(R.string.boosted_until_s, date) },
     issues = { shown, total ->
@@ -45,5 +46,13 @@ fun Context.areaStrings(): AreaStrings = AreaStrings(
     },
     offlineStyleMismatch = getString(R.string.offline_map_style_mismatch),
     offlineStatusFailed = { message -> getString(R.string.offline_map_status_failed, message) },
+    offlineDialogDescription = { areaName ->
+        getString(R.string.offline_map_description, areaName)
+    },
+    offlineDialogStyle = { styleName -> getString(R.string.offline_map_style, styleName) },
+    offlineDialogMaxZoom = { zoom -> getString(R.string.offline_map_max_zoom, zoom) },
+    offlineDialogEstimatedSize = { size -> getString(R.string.offline_map_estimated_size, size) },
+    offlineDialogTooLarge = { size -> getString(R.string.offline_map_too_large, size) },
+    offlineDialogEstimateNote = getString(R.string.offline_map_estimate_note),
     formatBytes = { bytes -> Formatter.formatFileSize(this, bytes) },
 )

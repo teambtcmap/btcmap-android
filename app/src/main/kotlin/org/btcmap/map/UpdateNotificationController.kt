@@ -3,7 +3,6 @@ package org.btcmap.map
 import android.content.Context
 import android.content.Intent
 import androidx.core.net.toUri
-import androidx.core.view.isVisible
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.withResumed
@@ -19,29 +18,29 @@ import okhttp3.coroutines.executeAsync
 import org.btcmap.BuildConfig
 import org.btcmap.R
 import org.btcmap.util.rethrowIfCancellation
-import org.btcmap.view.IconButton
 
 /**
- * Shows an update button when the published APK is newer than this build.
+ * Reports whether the published APK is newer than this build, and opens the
+ * update dialog when the map's update button is tapped.
  *
- * The check and the button's tap are independent of the map, but the button
- * lives on the map, so the controller is rebuilt with every map view. The check
- * itself is process-scoped: its outcome is cached and reused, so a rotation or
- * a return to the map does not re-issue it. The controller still owns nothing
- * expensive: the HTTP client is shared for the whole process.
+ * The check is independent of the map, so the controller hands the button's
+ * visibility to the shared map through [onUpdateAvailable] rather than touching
+ * a view itself. The check is process-scoped: its outcome is cached and reused,
+ * so a rotation or a return to the map does not re-issue it. The HTTP client is
+ * shared for the whole process.
  */
 class UpdateNotificationController(
     private val context: Context,
     private val lifecycleOwner: LifecycleOwner,
-    private val icon: IconButton,
+    private val onUpdateAvailable: (Boolean) -> Unit,
 ) {
     init {
-        icon.isVisible = false
+        onUpdateAvailable(false)
         lifecycleOwner.lifecycleScope.launch {
             lifecycleOwner.withResumed {
                 launch {
                     if (checked) {
-                        availableUpdate?.let(::show)
+                        onUpdateAvailable(availableUpdate != null)
                         return@launch
                     }
 
@@ -49,7 +48,7 @@ class UpdateNotificationController(
                         val update = withContext(Dispatchers.IO) { fetchLatestUpdate() }
                         availableUpdate = update
                         checked = true
-                        update?.let(::show)
+                        onUpdateAvailable(update != null)
                     } catch (e: Throwable) {
                         // A failed check is not cached, so the next map view
                         // retries instead of hiding the button for the session.
@@ -60,34 +59,32 @@ class UpdateNotificationController(
         }
     }
 
-    private fun show(update: AvailableUpdate) {
-        icon.isVisible = true
-        icon.iconColor(context.getErrorColor())
+    /** Opens the update dialog, if a newer build was found. */
+    fun showDialog() {
+        val update = availableUpdate ?: return
 
-        icon.setOnClickListener {
-            MaterialAlertDialogBuilder(context)
-                .setTitle(R.string.update_available)
-                .setMessage(
-                    if (isBeta) {
-                        context.getString(
-                            R.string.update_available_description_beta,
-                            BuildConfig.VERSION_CODE, update.versionCode
-                        )
-                    } else {
-                        context.getString(
-                            R.string.update_available_description,
-                            BuildConfig.VERSION_NAME, update.versionName
-                        )
-                    }
-                )
-                .setPositiveButton(R.string.get_apk) { _, _ ->
-                    val intent = Intent(Intent.ACTION_VIEW)
-                    intent.data = update.url.toUri()
-                    context.startActivity(intent)
+        MaterialAlertDialogBuilder(context)
+            .setTitle(R.string.update_available)
+            .setMessage(
+                if (isBeta) {
+                    context.getString(
+                        R.string.update_available_description_beta,
+                        BuildConfig.VERSION_CODE, update.versionCode
+                    )
+                } else {
+                    context.getString(
+                        R.string.update_available_description,
+                        BuildConfig.VERSION_NAME, update.versionName
+                    )
                 }
-                .setNegativeButton(R.string.ignore, null)
-                .show()
-        }
+            )
+            .setPositiveButton(R.string.get_apk) { _, _ ->
+                val intent = Intent(Intent.ACTION_VIEW)
+                intent.data = update.url.toUri()
+                context.startActivity(intent)
+            }
+            .setNegativeButton(R.string.ignore, null)
+            .show()
     }
 
     private companion object {

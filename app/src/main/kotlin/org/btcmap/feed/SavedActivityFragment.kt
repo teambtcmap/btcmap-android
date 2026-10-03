@@ -45,7 +45,7 @@ class SavedActivityFragment : BaseActivityFeedTab() {
 
     override fun onResume() {
         super.onResume()
-        loadActivity()
+        reload()
     }
 
     companion object {

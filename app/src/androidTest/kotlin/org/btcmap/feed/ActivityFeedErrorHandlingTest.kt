@@ -2,6 +2,8 @@ package org.btcmap.feed
 
 import android.os.Bundle
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
+import androidx.compose.ui.test.onAllNodesWithTag
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.fragment.app.commitNow
@@ -15,11 +17,9 @@ import mockwebserver3.RecordedRequest
 import org.btcmap.Activity
 import org.btcmap.App
 import org.btcmap.R
-import org.btcmap.ui.ActivityFeedComposeView
 import org.btcmap.ui.FEED_RETRY_TAG
 import org.btcmap.util.AppTestCase
 import org.btcmap.util.waitUntil
-import org.btcmap.util.waitUntilOnMain
 import org.junit.Assert
 import org.junit.Rule
 import org.junit.Test
@@ -52,42 +52,19 @@ class ActivityFeedErrorHandlingTest : AppTestCase() {
             ActivityScenario.launch(Activity::class.java).use { scenario ->
                 lateinit var feed: TestActivityFeedTab
                 scenario.onActivity { activity ->
-                    feed = TestActivityFeedTab().apply {
-                        arguments = Bundle().apply {
-                            putBoolean(BaseActivityFeedTab.ARG_SHOW_AREA_CHIPS, true)
-                            putStringArrayList(
-                                BaseActivityFeedTab.ARG_INITIAL_AREA_IDS,
-                                arrayListOf("1"),
-                            )
-                            putStringArrayList(
-                                BaseActivityFeedTab.ARG_INITIAL_AREA_NAMES,
-                                arrayListOf("Area"),
-                            )
-                            putStringArrayList(
-                                BaseActivityFeedTab.ARG_INITIAL_AREA_TYPES,
-                                arrayListOf("community"),
-                            )
-                        }
-                    }
+                    feed = TestActivityFeedTab().apply { arguments = feedArguments() }
                     activity.supportFragmentManager.commitNow {
                         setReorderingAllowed(true)
                         replace(R.id.fragmentContainerView, feed, FEED_TAG)
                     }
                 }
                 waitUntil { apiRule.server.requestCount >= 1 }
-                waitUntilOnMain {
-                    !feed.requireView().findViewById<ActivityFeedComposeView>(R.id.feedList).loading
-                }
 
-                scenario.onActivity {
-                    val message = feed.requireView()
-                        .findViewById<ActivityFeedComposeView>(R.id.feedList)
-                        .emptyMessage
-                    Assert.assertNotEquals(
-                        "A failed load must not be presented as the empty state",
-                        feed.emptyMessage(),
-                        message,
-                    )
+                // The retry affordance only exists on the error state; the empty
+                // state is not retryable, so a failed load must show it.
+                composeTestRule.waitUntil(5_000) {
+                    composeTestRule.onAllNodesWithTag(FEED_RETRY_TAG)
+                        .fetchSemanticsNodes().isNotEmpty()
                 }
             }
         } finally {
@@ -115,45 +92,37 @@ class ActivityFeedErrorHandlingTest : AppTestCase() {
             ActivityScenario.launch(Activity::class.java).use { scenario ->
                 lateinit var feed: TestActivityFeedTab
                 scenario.onActivity { activity ->
-                    feed = TestActivityFeedTab().apply {
-                        arguments = Bundle().apply {
-                            putBoolean(BaseActivityFeedTab.ARG_SHOW_AREA_CHIPS, true)
-                            putStringArrayList(
-                                BaseActivityFeedTab.ARG_INITIAL_AREA_IDS,
-                                arrayListOf("1"),
-                            )
-                            putStringArrayList(
-                                BaseActivityFeedTab.ARG_INITIAL_AREA_NAMES,
-                                arrayListOf("Area"),
-                            )
-                            putStringArrayList(
-                                BaseActivityFeedTab.ARG_INITIAL_AREA_TYPES,
-                                arrayListOf("community"),
-                            )
-                        }
-                    }
+                    feed = TestActivityFeedTab().apply { arguments = feedArguments() }
                     activity.supportFragmentManager.commitNow {
                         setReorderingAllowed(true)
                         replace(R.id.fragmentContainerView, feed, FEED_TAG)
                     }
                 }
 
-                waitUntilOnMain {
-                    feed.requireView().findViewById<ActivityFeedComposeView>(R.id.feedList)
-                        .emptyMessage?.isNotBlank() == true
+                composeTestRule.waitUntil(5_000) {
+                    composeTestRule.onAllNodesWithTag(FEED_RETRY_TAG)
+                        .fetchSemanticsNodes().isNotEmpty()
                 }
 
                 composeTestRule.onNodeWithTag(FEED_RETRY_TAG).performClick()
 
-                waitUntilOnMain {
-                    feed.requireView().findViewById<ActivityFeedComposeView>(R.id.feedList)
-                        .emptyMessage == feed.emptyMessage()
+                // The retry succeeds with an empty list, so the empty state shows.
+                composeTestRule.waitUntil(5_000) {
+                    composeTestRule.onAllNodesWithText(feed.emptyMessage())
+                        .fetchSemanticsNodes().isNotEmpty()
                 }
                 Assert.assertEquals(2, attempts.get())
             }
         } finally {
             app.mapStyleUriForTesting = null
         }
+    }
+
+    private fun feedArguments(): Bundle = Bundle().apply {
+        putBoolean(BaseActivityFeedTab.ARG_SHOW_AREA_CHIPS, true)
+        putStringArrayList(BaseActivityFeedTab.ARG_INITIAL_AREA_IDS, arrayListOf("1"))
+        putStringArrayList(BaseActivityFeedTab.ARG_INITIAL_AREA_NAMES, arrayListOf("Area"))
+        putStringArrayList(BaseActivityFeedTab.ARG_INITIAL_AREA_TYPES, arrayListOf("community"))
     }
 
     companion object {

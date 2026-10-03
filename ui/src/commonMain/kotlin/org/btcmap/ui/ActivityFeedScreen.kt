@@ -13,11 +13,20 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import org.btcmap.api.ActivityFeedItem
+import org.btcmap.feed.feedKey
+import org.btcmap.util.rethrowIfCancellation
 
 /** Test tag on the tappable retry shown after a failed load. */
 const val FEED_RETRY_TAG = "feed-retry"
@@ -38,6 +47,51 @@ sealed interface ActivityFeedState {
     data class Empty(val message: String, val retryable: Boolean) : ActivityFeedState
 
     data class Content(val rows: List<ActivityFeedRow>) : ActivityFeedState
+}
+
+/**
+ * The activity feed's load and state machine: it runs [load] whenever
+ * [reloadKey] changes or the retry is tapped, maps the items with [toRow] and
+ * renders [ActivityFeedScreen]. An empty result shows [emptyMessage] (not
+ * retryable); a thrown load shows [errorMessage] as retryable. Tapping a row
+ * resolves its [ActivityFeedItem] back and calls [onItemClick].
+ */
+@Composable
+fun ActivityFeedPage(
+    load: suspend () -> List<ActivityFeedItem>,
+    toRow: (ActivityFeedItem) -> ActivityFeedRow,
+    emptyMessage: () -> String,
+    errorMessage: String,
+    onItemClick: (ActivityFeedItem) -> Unit,
+    reloadKey: Int = 0,
+    modifier: Modifier = Modifier,
+) {
+    var state by remember { mutableStateOf<ActivityFeedState>(ActivityFeedState.Loading) }
+    var itemsByKey by remember { mutableStateOf<Map<String, ActivityFeedItem>>(emptyMap()) }
+    var retryKey by remember { mutableIntStateOf(0) }
+
+    LaunchedEffect(reloadKey, retryKey) {
+        state = ActivityFeedState.Loading
+        try {
+            val items = load()
+            itemsByKey = items.associateBy { it.feedKey() }
+            state = if (items.isEmpty()) {
+                ActivityFeedState.Empty(emptyMessage(), retryable = false)
+            } else {
+                ActivityFeedState.Content(items.map(toRow))
+            }
+        } catch (e: Throwable) {
+            e.rethrowIfCancellation()
+            state = ActivityFeedState.Empty(errorMessage, retryable = true)
+        }
+    }
+
+    ActivityFeedScreen(
+        state = state,
+        onItemClick = { key -> itemsByKey[key]?.let(onItemClick) },
+        onRetry = { retryKey++ },
+        modifier = modifier,
+    )
 }
 
 @Composable

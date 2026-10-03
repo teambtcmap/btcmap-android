@@ -21,8 +21,8 @@
 
     </com.google.android.material.appbar.AppBarLayout>
 
-    <org.btcmap.ui.StatsComposeView
-        android:id="@+id/statsList"
+    <org.btcmap.ui.DbStatsComposeView
+        android:id="@+id/statsContent"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:layout_behavior="@string/appbar_scrolling_view_behavior" />

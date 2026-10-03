@@ -1,15 +1,11 @@
 package org.btcmap.area
 
-import android.content.DialogInterface
-import android.text.format.Formatter
-import android.widget.TextView
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.google.android.material.slider.Slider
 import kotlinx.coroutines.launch
 import org.btcmap.R
 import org.btcmap.databinding.AreaFragmentBinding
@@ -17,7 +13,6 @@ import org.btcmap.db.table.area.Area
 import org.btcmap.i18n.getLocalizedName
 import org.btcmap.offline.OfflineAreaState
 import org.btcmap.offline.OfflineBounds
-import org.btcmap.offline.OfflineRegionEstimates
 import org.btcmap.offlineMaps
 import org.btcmap.settings.mapStyle
 import org.btcmap.settings.name
@@ -33,7 +28,8 @@ import org.btcmap.settings.prefs
  * Kept out of [AreaFragment] so the screen only wires the area content. The
  * controller owns the [Area] the toolbar action needs, set by [bind], and
  * collects the download state for as long as the view is resumed, pushing it
- * into the Compose body.
+ * into the Compose body. The dialog itself is the shared
+ * [org.btcmap.ui.AreaScreen]'s, so only the download and delete calls stay here.
  */
 internal class AreaOfflineMapController(
     private val fragment: Fragment,
@@ -49,8 +45,16 @@ internal class AreaOfflineMapController(
         if (bounds == null) return
 
         binding.areaContent.apply {
-            onDownload = { showDialog(area, bounds) }
+            areaName = area.getLocalizedName()
+            offlineStyleName = prefs.mapStyle.name(fragment.requireContext())
+            offlineBounds = bounds
+            onDownload = { showOfflineDialog = true }
             onDelete = { confirmDelete(area) }
+            onDismissOfflineDialog = { showOfflineDialog = false }
+            onConfirmOfflineDownload = { maxZoom ->
+                showOfflineDialog = false
+                startDownload(area, bounds, maxZoom)
+            }
             // The shared panel only needs to know whether a downloaded pack is
             // still on the selected style's family.
             offlineStyleMatches = { downloadedStyleUrl ->
@@ -70,8 +74,8 @@ internal class AreaOfflineMapController(
 
     fun onDownloadClicked() {
         val area = area ?: return
-        val bounds = area.offlineBounds() ?: return
-        showDialog(area, bounds)
+        if (area.offlineBounds() == null) return
+        binding.areaContent.showOfflineDialog = true
     }
 
     private fun renderState(state: OfflineAreaState?) {
@@ -82,72 +86,6 @@ internal class AreaOfflineMapController(
         binding.areaContent.offlineState = resolved
         binding.toolbar.menu.findItem(R.id.download).isEnabled =
             resolved !is OfflineAreaState.Downloading
-    }
-
-    private fun showDialog(area: Area, bounds: OfflineBounds) {
-        val context = fragment.requireContext()
-        val view = fragment.layoutInflater.inflate(R.layout.dialog_offline_map, null)
-        val description = view.findViewById<TextView>(R.id.description)
-        val style = view.findViewById<TextView>(R.id.style)
-        val zoom = view.findViewById<TextView>(R.id.zoom)
-        val slider = view.findViewById<Slider>(R.id.zoom_slider)
-        val estimate = view.findViewById<TextView>(R.id.estimate)
-
-        description.text =
-            fragment.getString(R.string.offline_map_description, area.getLocalizedName())
-        style.text = fragment.getString(
-            R.string.offline_map_style,
-            prefs.mapStyle.name(context),
-        )
-
-        val minZoom = OfflineRegionEstimates.MIN_SELECTABLE_MAX_ZOOM
-        val maxZoom = OfflineRegionEstimates.maxSelectableZoom(bounds)
-        val withinLimit = OfflineRegionEstimates.isWithinLimit(bounds)
-
-        fun update(selectedMaxZoom: Int) {
-            zoom.text = fragment.getString(R.string.offline_map_max_zoom, selectedMaxZoom)
-            val bytes = OfflineRegionEstimates.estimatedBytes(
-                bounds,
-                OfflineRegionEstimates.MIN_ZOOM,
-                selectedMaxZoom,
-            )
-            val size = Formatter.formatFileSize(context, bytes)
-            estimate.text = if (withinLimit) {
-                fragment.getString(R.string.offline_map_estimated_size, size)
-            } else {
-                fragment.getString(R.string.offline_map_too_large, size)
-            }
-        }
-
-        val fixedZoom = maxZoom <= minZoom
-        if (fixedZoom) {
-            slider.isVisible = false
-            update(minZoom)
-        } else {
-            slider.valueFrom = minZoom.toFloat()
-            slider.valueTo = maxZoom.toFloat()
-            slider.stepSize = 1f
-            slider.value = OfflineRegionEstimates.defaultMaxZoom(bounds)
-                .coerceIn(minZoom, maxZoom)
-                .toFloat()
-            slider.addOnChangeListener { _, value, _ -> update(value.toInt()) }
-            update(slider.value.toInt())
-        }
-
-        val dialog = MaterialAlertDialogBuilder(context)
-            .setTitle(R.string.offline_map)
-            .setView(view)
-            .setNegativeButton(android.R.string.cancel, null)
-            .setPositiveButton(R.string.offline_map_download) { _, _ ->
-                val selectedMaxZoom = if (fixedZoom) minZoom else slider.value.toInt()
-                startDownload(area, bounds, selectedMaxZoom)
-            }
-            .create()
-        dialog.show()
-
-        if (!withinLimit) {
-            dialog.getButton(DialogInterface.BUTTON_POSITIVE).isEnabled = false
-        }
     }
 
     private fun startDownload(area: Area, bounds: OfflineBounds, maxZoom: Int) {

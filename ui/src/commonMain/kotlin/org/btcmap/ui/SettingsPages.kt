@@ -27,6 +27,7 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.btcmap.db.Database
+import org.btcmap.dbstats.BundleStats
 import org.btcmap.dbstats.DatabaseFile
 import org.btcmap.dbstats.DbStatsLabels
 import org.btcmap.dbstats.DbStatsReader
@@ -292,7 +293,9 @@ data class DbStatsPageLabels(
 
 /**
  * The database stats page: the shared [StatsScreen] over the shared
- * [dbStatsSections], with the host's own sync card and "sync now" button.
+ * [dbStatsSections], with the host's own sync card and, optionally, a "sync
+ * now" button. The Android host reads the bundled snapshots and hides the
+ * button, since its toolbar carries the sync action.
  */
 @Composable
 fun DbStatsPage(
@@ -301,26 +304,31 @@ fun DbStatsPage(
     syncState: SyncState,
     labels: DbStatsPageLabels,
     onSync: () -> Unit,
+    bundles: Map<String, BundleStats> = emptyMap(),
+    showSyncButton: Boolean = true,
+    modifier: Modifier = Modifier,
 ) {
     var sections by remember { mutableStateOf<List<StatsSection>>(emptyList()) }
-    LaunchedEffect(syncState) {
+    LaunchedEffect(syncState, bundles) {
         sections = withContext(Dispatchers.IO) {
-            loadDbStatsSections(db, settings.apiUrl.toString(), syncState, labels)
+            loadDbStatsSections(db, settings.apiUrl.toString(), syncState, labels, bundles)
         }
     }
 
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-    ) {
-        Button(
-            onClick = onSync,
-            enabled = syncState == SyncState.Idle,
+    if (showSyncButton) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
         ) {
-            Text(text = labels.syncNow)
+            Button(
+                onClick = onSync,
+                enabled = syncState == SyncState.Idle,
+            ) {
+                Text(text = labels.syncNow)
+            }
         }
     }
-    StatsScreen(sections = sections)
+    StatsScreen(sections = sections, modifier = modifier)
 }
 
 private fun loadDbStatsSections(
@@ -328,6 +336,7 @@ private fun loadDbStatsSections(
     apiUrl: String,
     syncState: SyncState,
     labels: DbStatsPageLabels,
+    bundles: Map<String, BundleStats>,
 ): List<StatsSection> {
     val reader = DbStatsReader(db.conn)
     val file = DatabaseFile.read(db.path)
@@ -340,7 +349,7 @@ private fun loadDbStatsSections(
                 file = file,
                 version = version,
                 tables = tables,
-                bundles = emptyMap(),
+                bundles = bundles,
                 labels = labels.dbStats,
                 formatBytes = ::formatBytes,
             ),

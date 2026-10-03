@@ -3,6 +3,7 @@ package org.btcmap.feed
 import android.os.Bundle
 import androidx.appcompat.widget.Toolbar
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.fragment.app.commitNow
@@ -18,7 +19,6 @@ import org.btcmap.App
 import org.btcmap.R
 import org.btcmap.db.table.place.Place
 import org.btcmap.place.PlaceFragment
-import org.btcmap.ui.ActivityFeedComposeView
 import org.btcmap.ui.PlaceComposeView
 import org.btcmap.util.AppTestCase
 import org.btcmap.util.waitUntil
@@ -84,10 +84,9 @@ class ActivityFeedPlaceNavigationTest : AppTestCase() {
                 }
 
                 waitUntil { apiRule.server.requestCount >= 1 }
-                waitUntilOnMain {
-                    feed.requireView()
-                        .findViewById<ActivityFeedComposeView>(R.id.feedList)
-                        .rows.isNotEmpty()
+                composeTestRule.waitUntil(5_000) {
+                    composeTestRule.onAllNodesWithText("Test Merchant")
+                        .fetchSemanticsNodes().isNotEmpty()
                 }
 
                 composeTestRule.onNodeWithText("Test Merchant").performClick()

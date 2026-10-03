@@ -8,14 +8,17 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Slider
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -31,6 +34,7 @@ import org.btcmap.area.descriptionParagraphs
 import org.btcmap.db.table.place.Place
 import org.btcmap.i18n.getLocalizedName
 import org.btcmap.offline.OfflineAreaState
+import org.btcmap.offline.OfflineBounds
 import org.btcmap.offline.OfflineRegionEstimates
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
@@ -63,6 +67,7 @@ data class AreaStrings(
     val offlineDownload: String,
     val offlineDownloadAgain: String,
     val offlineDelete: String,
+    val cancel: String,
     val boosted: String,
     val boostedUntil: (date: String) -> String,
     val issues: (shown: Long, total: Long) -> String,
@@ -72,7 +77,20 @@ data class AreaStrings(
     val offlineStatusDownloaded: (size: String, minZoom: Int, maxZoom: Int) -> String,
     val offlineStyleMismatch: String,
     val offlineStatusFailed: (message: String) -> String,
+    val offlineDialogDescription: (areaName: String) -> String,
+    val offlineDialogStyle: (styleName: String) -> String,
+    val offlineDialogMaxZoom: (zoom: Int) -> String,
+    val offlineDialogEstimatedSize: (size: String) -> String,
+    val offlineDialogTooLarge: (size: String) -> String,
+    val offlineDialogEstimateNote: String,
     val formatBytes: (Long) -> String,
+)
+
+/** The region and labels the offline download dialog needs. */
+data class AreaOfflineDialog(
+    val areaName: String,
+    val styleName: String,
+    val bounds: OfflineBounds,
 )
 
 /**
@@ -100,6 +118,9 @@ fun AreaScreen(
     onJoinUs: () -> Unit,
     onDownload: () -> Unit,
     onDelete: () -> Unit,
+    offlineDialog: AreaOfflineDialog? = null,
+    onDismissOfflineDialog: () -> Unit = {},
+    onConfirmOfflineDownload: (maxZoom: Int) -> Unit = {},
     bitcoinOrange: Color = Color(0xFFF7931A),
     modifier: Modifier = Modifier,
 ) {
@@ -185,6 +206,15 @@ fun AreaScreen(
                 )
             }
         }
+    }
+
+    offlineDialog?.let { dialog ->
+        OfflineMapDialog(
+            dialog = dialog,
+            strings = strings,
+            onDismiss = onDismissOfflineDialog,
+            onConfirm = onConfirmOfflineDownload,
+        )
     }
 }
 
@@ -424,4 +454,96 @@ private fun boostSubtitle(
 ): String {
     val date = boostedUntil?.format(format) ?: return strings.boosted
     return strings.boostedUntil(date)
+}
+
+/**
+ * The offline download dialog: it picks the maximum zoom (bounded by
+ * [OfflineRegionEstimates]) and shows the estimated size, disabling the
+ * download when the region would be too large.
+ */
+@Composable
+private fun OfflineMapDialog(
+    dialog: AreaOfflineDialog,
+    strings: AreaStrings,
+    onDismiss: () -> Unit,
+    onConfirm: (Int) -> Unit,
+) {
+    val bounds = dialog.bounds
+    val minZoom = OfflineRegionEstimates.MIN_SELECTABLE_MAX_ZOOM
+    val maxZoom = OfflineRegionEstimates.maxSelectableZoom(bounds)
+    val withinLimit = OfflineRegionEstimates.isWithinLimit(bounds)
+    val fixedZoom = maxZoom <= minZoom
+
+    var selectedMaxZoom by remember(bounds) {
+        mutableIntStateOf(
+            OfflineRegionEstimates.defaultMaxZoom(bounds).coerceIn(minZoom, maxZoom),
+        )
+    }
+
+    val bytes = OfflineRegionEstimates.estimatedBytes(
+        bounds,
+        OfflineRegionEstimates.MIN_ZOOM,
+        selectedMaxZoom,
+    )
+    val size = strings.formatBytes(bytes)
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(text = strings.offlineMap) },
+        text = {
+            Column {
+                Text(
+                    text = strings.offlineDialogDescription(dialog.areaName),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                Text(
+                    text = strings.offlineDialogStyle(dialog.styleName),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(top = 8.dp),
+                )
+                Text(
+                    text = strings.offlineDialogMaxZoom(selectedMaxZoom),
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.padding(top = 16.dp),
+                )
+                if (!fixedZoom) {
+                    Slider(
+                        value = selectedMaxZoom.toFloat(),
+                        onValueChange = { selectedMaxZoom = it.toInt() },
+                        valueRange = minZoom.toFloat()..maxZoom.toFloat(),
+                        steps = (maxZoom - minZoom - 1).coerceAtLeast(0),
+                    )
+                }
+                Text(
+                    text = if (withinLimit) {
+                        strings.offlineDialogEstimatedSize(size)
+                    } else {
+                        strings.offlineDialogTooLarge(size)
+                    },
+                    style = MaterialTheme.typography.bodyMedium,
+                )
+                Text(
+                    text = strings.offlineDialogEstimateNote,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(top = 8.dp),
+                )
+            }
+        },
+        confirmButton = {
+            TextButton(
+                onClick = { onConfirm(selectedMaxZoom) },
+                enabled = withinLimit,
+            ) {
+                Text(strings.offlineDownload)
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text(strings.cancel)
+            }
+        },
+    )
 }

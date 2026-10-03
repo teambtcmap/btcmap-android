@@ -1,12 +1,17 @@
 package org.btcmap.dbstats
 
-import androidx.fragment.app.commit
-import androidx.fragment.app.replace
-import androidx.test.core.app.ActivityScenario
+import androidx.compose.ui.test.assertTextContains
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
+import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
+import androidx.compose.ui.test.performScrollToNode
+import androidx.fragment.app.commit
+import androidx.fragment.app.replace
+import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.action.ViewActions.click
@@ -15,17 +20,16 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.btcmap.Activity
 import org.btcmap.App
 import org.btcmap.R
-import org.btcmap.sync.SyncState
 import org.btcmap.db.Database
 import org.btcmap.db.table.place.Place
 import org.btcmap.settings.SettingsFragment
-import org.btcmap.stats.StatsSection
-import org.btcmap.ui.StatsComposeView
+import org.btcmap.sync.SyncState
+import org.btcmap.ui.STATS_LIST_TAG
+import org.btcmap.ui.statsEntryTag
 import org.btcmap.util.AppTestCase
 import org.btcmap.util.TestSyncController
 import org.btcmap.util.waitUntil
 import org.btcmap.util.waitUntilOnMain
-import org.junit.Assert
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -43,44 +47,20 @@ class DbStatsFragmentTest : AppTestCase() {
     fun showsRowCountsForEachTable() {
         databaseRule.db.place.insert(listOf(place(1L), place(2L)))
 
-        launchFragment { scenario, fragment ->
-            lateinit var list: StatsComposeView
-            scenario.onActivity {
-                list = fragment.requireView().findViewById(R.id.statsList)
-            }
+        launchFragment { _, _ ->
+            waitForSection("place table")
+            entry("table:place", "Rows").assertTextContains("2")
+            entry("table:place", "Visible").assertTextContains("2")
+            entry("table:place", "Deleted").assertTextContains("0")
 
-            waitUntilOnMain { list.sections.any { it.title == "place table" } }
+            waitForSection("event table")
+            entry("table:event", "Future").assertExists()
 
-            scenario.onActivity {
-                val current = list.sections
-                val sections = current.associateBy { it.title }
+            waitForSection("Database")
+            entry("database", "Version").assertTextContains(Database.VERSION.toString())
 
-                val place = sections.getValue("place table").entries.associate { it.label to it.value }
-                Assert.assertEquals("2", place["Rows"])
-                Assert.assertEquals("2", place["Visible"])
-                Assert.assertEquals("0", place["Deleted"])
-
-                val event = sections.getValue("event table")
-                Assert.assertTrue(
-                    "event section should report a Future count, was ${event.entries}",
-                    event.entries.any { it.label == "Future" },
-                )
-
-                Assert.assertTrue(
-                    "expected a Database section, sections were ${current.map { it.title }}",
-                    "Database" in sections,
-                )
-                val version = sections.getValue("Database").entries.first { it.label == "Version" }
-                Assert.assertEquals(Database.VERSION.toString(), version.value)
-
-                Assert.assertTrue(
-                    "expected a Sync section, sections were ${current.map { it.title }}",
-                    "Sync" in sections,
-                )
-                val syncState = sections.getValue("Sync").entries.first { it.label == "State" }
-                // The app-scoped sync is disabled for tests, so it reports Idle.
-                Assert.assertEquals("Idle", syncState.value)
-            }
+            waitForSection("Sync")
+            entry("sync", "State").assertTextContains("Idle")
         }
     }
 
@@ -97,22 +77,13 @@ class DbStatsFragmentTest : AppTestCase() {
 
     @Test
     fun showsBundleStatsForEachSnapshot() {
-        launchFragment { scenario, fragment ->
-            lateinit var list: StatsComposeView
-            scenario.onActivity {
-                list = fragment.requireView().findViewById(R.id.statsList)
-            }
+        launchFragment { _, _ ->
+            waitForSection("place bundle")
 
-            waitUntilOnMain { sectionOf(list, "place bundle") != null }
-
-            scenario.onActivity {
-                val entries = requireNotNull(sectionOf(list, "place bundle"))
-                    .entries
-                    .associate { it.label to it.value }
-                Assert.assertEquals("assets/bundled-places.json", entries["Location"])
-                Assert.assertTrue("expected a Visible count, was $entries", "Visible" in entries)
-                Assert.assertTrue("expected a Deleted count, was $entries", "Deleted" in entries)
-            }
+            entry("bundle:place", "Location")
+                .assertTextContains("assets/bundled-places.json")
+            entry("bundle:place", "Visible").assertExists()
+            entry("bundle:place", "Deleted").assertExists()
         }
     }
 
@@ -121,22 +92,27 @@ class DbStatsFragmentTest : AppTestCase() {
         val controller = app.syncControllerForTesting as TestSyncController
         databaseRule.db.place.insert(listOf(place(1L)))
 
-        launchFragment { scenario, fragment ->
-            lateinit var list: StatsComposeView
-            scenario.onActivity {
-                list = fragment.requireView().findViewById(R.id.statsList)
-            }
-
-            waitUntilOnMain { valueOf(list, "place table", "Rows") == "1" }
+        launchFragment { scenario, _ ->
+            waitForSection("place table")
+            entry("table:place", "Rows").assertTextContains("1")
 
             // The sync writes a new row, reports that it is running, and only
             // then finishes; the counts must be re-read when it does.
             databaseRule.db.place.insert(listOf(place(2L)))
             scenario.onActivity { controller.setState(SyncState.SyncingPlaces) }
-            waitUntilOnMain { valueOf(list, "Sync", "State") == "Syncing places" }
-            scenario.onActivity { controller.setState(SyncState.Idle) }
+            waitForSection("Sync")
+            composeTestRule.waitUntil(5_000) {
+                composeTestRule.onAllNodesWithText("Syncing places").fetchSemanticsNodes()
+                    .isNotEmpty()
+            }
 
-            waitUntilOnMain { valueOf(list, "place table", "Rows") == "2" }
+            scenario.onActivity { controller.setState(SyncState.Idle) }
+            composeTestRule.waitUntil(5_000) {
+                runCatching {
+                    scrollToSection("place table")
+                    entry("table:place", "Rows").assertTextContains("2")
+                }.isSuccess
+            }
         }
     }
 
@@ -165,6 +141,20 @@ class DbStatsFragmentTest : AppTestCase() {
         }
     }
 
+    /** Scrolls to the card titled [title], waiting for the async load to land. */
+    private fun waitForSection(title: String) {
+        composeTestRule.waitUntil(5_000) {
+            runCatching { scrollToSection(title) }.isSuccess
+        }
+    }
+
+    private fun scrollToSection(title: String) {
+        composeTestRule.onNodeWithTag(STATS_LIST_TAG).performScrollToNode(hasText(title))
+    }
+
+    private fun entry(sectionKey: String, label: String) =
+        composeTestRule.onNodeWithTag(statsEntryTag(sectionKey, label))
+
     private fun launchFragment(block: (ActivityScenario<Activity>, DbStatsFragment) -> Unit) {
         ActivityScenario.launch(Activity::class.java).use { scenario ->
             lateinit var fragment: DbStatsFragment
@@ -179,12 +169,6 @@ class DbStatsFragmentTest : AppTestCase() {
             block(scenario, fragment)
         }
     }
-
-    private fun sectionOf(list: StatsComposeView, title: String): StatsSection? =
-        list.sections.firstOrNull { it.title == title }
-
-    private fun valueOf(list: StatsComposeView, sectionTitle: String, label: String): String? =
-        sectionOf(list, sectionTitle)?.entries?.firstOrNull { it.label == label }?.value
 
     private fun place(id: Long): Place {
         return Place(

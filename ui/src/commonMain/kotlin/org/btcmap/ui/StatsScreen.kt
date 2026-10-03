@@ -29,6 +29,9 @@ import org.btcmap.stats.StatsSection
 /** Test tag for the stats card list, so a test can scroll to a section. */
 const val STATS_LIST_TAG = "stats-list"
 
+/** Test tag for one label/value row of a stats card. */
+fun statsEntryTag(sectionKey: String, label: String): String = "stats-$sectionKey-$label"
+
 /**
  * Renders a list of label/value cards, the shape shared by the database and
  * image stats screens.
@@ -94,6 +97,7 @@ private fun StatsCard(section: StatsSection) {
                     // them together instead of as two stops.
                     modifier = Modifier
                         .fillMaxWidth()
+                        .testTag(statsEntryTag(section.key, entry.label))
                         .semantics(mergeDescendants = true) {}
                         .padding(horizontal = 16.dp, vertical = 12.dp),
                     verticalAlignment = Alignment.CenterVertically,

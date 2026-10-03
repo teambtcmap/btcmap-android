@@ -1,15 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
     <!--
-        The map itself is the shared Compose map, which also draws the search
-        field, the area chips, the activity button and the location button. What
-        is left here is the Android-only chrome around it: the place sheet with
-        the sync and update buttons.
+        The map is the shared Compose map, which also draws its search field, the
+        area chips, the sync and update indicators, the activity button and the
+        location button. Only the place sheet and the debug overlay stay here.
     -->
     <org.btcmap.ui.MapComposeView
         android:id="@+id/map"
@@ -28,35 +26,5 @@
         android:textColor="@android:color/white"
         android:textSize="12sp"
         android:visibility="gone" />
-
-
-
-    <LinearLayout
-        android:id="@+id/buttonGroup"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom"
-        android:orientation="vertical"
-        android:padding="4dp">
-
-        <org.btcmap.view.IconButton
-            android:id="@+id/sync"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_marginTop="16dp"
-            android:alpha="0.3"
-            android:visibility="gone"
-            app:iconSrc="@drawable/icon_sync"
-            app:spin="true" />
-
-        <org.btcmap.view.IconButton
-            android:id="@+id/update"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_marginTop="16dp"
-            app:iconSrc="@drawable/icon_warning" />
-
-    </LinearLayout>
-
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

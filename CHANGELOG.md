@@ -28,6 +28,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Move the Android settings, colour and event screens onto the shared Compose UI, dropping the colour picker library
 - Move the Android add-place, report, account, comments, boost and add-comment screens onto the shared Compose UI
 - Move the Android image-stats, place and area screens onto the shared Compose UI, and share the image-stats reader and area section loaders
+- Move the Android database-stats screen, the activity-feed state machine, the offline-map dialog and the map sync/update controls onto the shared Compose UI
 
 ## [1.2.0] - 2026-09-30
 

@@ -1,5 +1,10 @@
 package org.btcmap.ui
 
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -23,6 +28,8 @@ import androidx.compose.runtime.withFrameNanos
 import kotlinx.coroutines.flow.filterIsInstance
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontFamily
@@ -74,6 +81,7 @@ import org.btcmap.ui.map.rememberViewportFeatures
 import org.btcmap.ui.map.setBitmap
 import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.IconButtonDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import org.maplibre.compose.camera.CameraPosition
 import org.maplibre.compose.camera.CameraUpdate
@@ -135,6 +143,11 @@ fun MapScreen(
      * it is the map's own overlay rather than a fixed part of it.
      */
     showAttribution: Boolean = true,
+    /** Whether the sync spinner is shown above the map controls. */
+    syncVisible: Boolean = false,
+    /** Whether the update button is shown above the map controls. */
+    updateVisible: Boolean = false,
+    onUpdateClick: () -> Unit = {},
     /**
      * The attribution line, shown centred at the bottom of the map. The host
      * supplies it because the string is localized there.
@@ -563,6 +576,42 @@ fun MapScreen(
                     .align(Alignment.BottomEnd)
                     .padding(end = 24.dp, bottom = MAP_CONTROLS_BOTTOM),
             ) {
+                if (syncVisible) {
+                    val transition = rememberInfiniteTransition()
+                    val angle by transition.animateFloat(
+                        initialValue = 0f,
+                        targetValue = 360f,
+                        animationSpec = infiniteRepeatable(
+                            animation = tween(durationMillis = 1000, easing = LinearEasing),
+                        ),
+                    )
+                    FilledTonalIconButton(
+                        onClick = {},
+                        colors = controlColors,
+                        // The sync indicator is dimmed, as the Views button was,
+                        // so it reads as a status rather than a control.
+                        modifier = Modifier.size(AREA_CHIP_SIZE).alpha(0.3f),
+                    ) {
+                        MaterialSymbol(
+                            glyph = "sync",
+                            contentDescription = null,
+                            modifier = Modifier.rotate(angle),
+                        )
+                    }
+                }
+                if (updateVisible) {
+                    FilledTonalIconButton(
+                        onClick = onUpdateClick,
+                        colors = controlColors,
+                        modifier = Modifier.size(AREA_CHIP_SIZE),
+                    ) {
+                        MaterialSymbol(
+                            glyph = "warning",
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.error,
+                        )
+                    }
+                }
                 AreaChips(
                     areas = areas,
                     apiUrl = apiUrl,

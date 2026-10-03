@@ -16,11 +16,12 @@ import org.btcmap.area.AreaIssues
 import org.btcmap.area.AreaPlaceIssue
 import org.btcmap.db.table.place.Place
 import org.btcmap.offline.OfflineAreaState
+import org.btcmap.offline.OfflineBounds
 
 /**
  * Hosts the shared [AreaScreen] body inside the Android Views hierarchy, under
- * the collapsing toolbar the area screen owns. The app sets the loaded sections
- * and the offline state; this view holds no state of its own.
+ * the collapsing toolbar the area screen owns. The app sets the loaded sections,
+ * the offline state and the dialog inputs; this view holds no state of its own.
  */
 class AreaComposeView @JvmOverloads constructor(
     context: Context,
@@ -48,6 +49,15 @@ class AreaComposeView @JvmOverloads constructor(
 
     var iconTypeface: Typeface? by mutableStateOf(null)
 
+    /** The inputs the offline download dialog needs; shown while the flag is set. */
+    var areaName: String by mutableStateOf("")
+
+    var offlineStyleName: String by mutableStateOf("")
+
+    var offlineBounds: OfflineBounds? by mutableStateOf(null)
+
+    var showOfflineDialog: Boolean by mutableStateOf(false)
+
     var onOpenPlace: (Long) -> Unit = {}
 
     var onOpenEvent: (GetEventsItem) -> Unit = {}
@@ -60,11 +70,21 @@ class AreaComposeView @JvmOverloads constructor(
 
     var onDelete: () -> Unit = {}
 
+    var onDismissOfflineDialog: () -> Unit = {}
+
+    var onConfirmOfflineDownload: (Int) -> Unit = {}
+
     @Composable
     override fun Content() {
         val strings = strings ?: return
 
         val fontFamily = remember(iconTypeface) { iconTypeface?.let { FontFamily(it) } }
+        val bounds = offlineBounds
+        val dialog = if (showOfflineDialog && bounds != null) {
+            AreaOfflineDialog(areaName = areaName, styleName = offlineStyleName, bounds = bounds)
+        } else {
+            null
+        }
 
         AppTheme(iconFont = fontFamily) {
             AreaScreen(
@@ -82,6 +102,9 @@ class AreaComposeView @JvmOverloads constructor(
                 onJoinUs = onJoinUs,
                 onDownload = onDownload,
                 onDelete = onDelete,
+                offlineDialog = dialog,
+                onDismissOfflineDialog = onDismissOfflineDialog,
+                onConfirmOfflineDownload = onConfirmOfflineDownload,
                 bitcoinOrange = bitcoinOrange,
             )
         }
