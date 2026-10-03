@@ -1,4 +1,4 @@
-package org.btcmap.desktop
+package org.btcmap.ui
 
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertCountEquals
@@ -10,7 +10,6 @@ import androidx.compose.ui.test.runComposeUiTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
-import org.btcmap.ui.AppTheme
 
 /** The change-password form's client-side validation and saved credentials. */
 class ChangePasswordFormTest {
@@ -22,7 +21,11 @@ class ChangePasswordFormTest {
         runComposeUiTest {
             setContent {
                 AppTheme {
-                    ChangePasswordForm(onCancel = {}, save = { _, _ -> saved = true })
+                    ChangePasswordForm(
+                        labels = TEST_PROFILE_FORM_LABELS,
+                        onCancel = {},
+                        save = { _, _ -> saved = true },
+                    )
                 }
             }
             onNodeWithTag(PROFILE_PASSWORD_SAVE_TAG).performClick()
@@ -39,7 +42,11 @@ class ChangePasswordFormTest {
         runComposeUiTest {
             setContent {
                 AppTheme {
-                    ChangePasswordForm(onCancel = {}, save = { current, new -> saved = current to new })
+                    ChangePasswordForm(
+                        labels = TEST_PROFILE_FORM_LABELS,
+                        onCancel = {},
+                        save = { current, new -> saved = current to new },
+                    )
                 }
             }
             onNodeWithTag(PROFILE_PASSWORD_CURRENT_TAG).performTextInput("old")

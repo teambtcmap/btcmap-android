@@ -1,4 +1,4 @@
-package org.btcmap.desktop
+package org.btcmap.ui
 
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.onNodeWithTag
@@ -9,7 +9,6 @@ import androidx.compose.ui.test.runComposeUiTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
-import org.btcmap.ui.AppTheme
 
 /** The change-username form: the name is required and saved trimmed. */
 class ChangeUsernameFormTest {
@@ -21,7 +20,12 @@ class ChangeUsernameFormTest {
         runComposeUiTest {
             setContent {
                 AppTheme {
-                    ChangeUsernameForm(currentName = "", onCancel = {}, save = { saved = it })
+                    ChangeUsernameForm(
+                        currentName = "",
+                        labels = TEST_PROFILE_FORM_LABELS,
+                        onCancel = {},
+                        save = { saved = it },
+                    )
                 }
             }
             onNodeWithTag(PROFILE_USERNAME_SAVE_TAG).performClick()
@@ -37,7 +41,12 @@ class ChangeUsernameFormTest {
         runComposeUiTest {
             setContent {
                 AppTheme {
-                    ChangeUsernameForm(currentName = "", onCancel = {}, save = { saved = it })
+                    ChangeUsernameForm(
+                        currentName = "",
+                        labels = TEST_PROFILE_FORM_LABELS,
+                        onCancel = {},
+                        save = { saved = it },
+                    )
                 }
             }
             onNodeWithTag(PROFILE_USERNAME_FIELD_TAG).performTextInput(" bob ")

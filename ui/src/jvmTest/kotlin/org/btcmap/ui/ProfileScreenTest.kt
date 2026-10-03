@@ -1,4 +1,4 @@
-package org.btcmap.desktop
+package org.btcmap.ui
 
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.onAllNodesWithText
@@ -12,13 +12,12 @@ import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import org.btcmap.db.table.user.SavedItem
 import org.btcmap.db.table.user.User
-import org.btcmap.ui.AppTheme
 
 /**
- * The desktop profile over a cached account: the saved lists render, and logging
- * out clears the session and tells the host.
+ * The profile page over a cached account: the saved lists render, and logging out
+ * clears the session and tells the host.
  */
-class DesktopProfileTest {
+class ProfileScreenTest {
 
     private val db = testDatabase()
     private val settings = testSettings(db)
@@ -42,10 +41,12 @@ class DesktopProfileTest {
         runComposeUiTest {
             setContent {
                 AppTheme {
-                    DesktopProfile(
+                    ProfileScreen(
                         api = testApi(),
                         db = db,
                         settings = settings,
+                        profileLabels = TEST_PROFILE_LABELS,
+                        formLabels = TEST_PROFILE_FORM_LABELS,
                         onLoggedOut = { loggedOut = true },
                     )
                 }

@@ -8,14 +8,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.runComposeUiTest
-import androidx.sqlite.driver.bundled.BundledSQLiteDriver
-import java.nio.file.Files
 import kotlin.test.Test
-import okhttp3.HttpUrl.Companion.toHttpUrl
-import org.btcmap.api.Api
-import org.btcmap.api.apiHttpClient
-import org.btcmap.db.Database
-import org.btcmap.settings.Settings
 
 /** The account page's signed-out form: sign-in and sign-up. */
 class AccountScreenTest {
@@ -87,20 +80,4 @@ class AccountScreenTest {
             onNodeWithText("Passwords do not match").assertIsDisplayed()
         }
     }
-
-    private fun testDatabase(): Database =
-        Database(BundledSQLiteDriver(), Files.createTempFile("ui-account-test", ".db").toString())
-
-    private fun testSettings(db: Database): Settings =
-        Settings(dbProvider = { db }, legacyValues = { emptyMap() }).apply { preload() }
-
-    private fun testApi(): Api = Api(
-        httpClient = apiHttpClient(
-            userAgent = "btcmap-ui-test",
-            token = { null },
-            apiUrl = { "https://api.example".toHttpUrl() },
-        ),
-        baseUrl = { "https://api.example".toHttpUrl() },
-        userAgent = "btcmap-ui-test",
-    )
 }

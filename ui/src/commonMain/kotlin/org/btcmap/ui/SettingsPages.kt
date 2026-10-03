@@ -1,4 +1,4 @@
-package org.btcmap.desktop
+package org.btcmap.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -45,19 +45,11 @@ import org.btcmap.settings.verifiedFilterYears
 import org.btcmap.stats.StatsEntry
 import org.btcmap.stats.StatsSection
 import org.btcmap.sync.SyncState
-import org.btcmap.ui.ColorSettingsScreen
-import org.btcmap.ui.RadioOption
-import org.btcmap.ui.RadioPickerContent
-import org.btcmap.ui.SettingsScreen
-import org.btcmap.ui.SettingsStrings
-import org.btcmap.ui.StatsScreen
 import org.btcmap.ui.map.AreaChipPalette
 import org.btcmap.ui.map.MarkerPalette
-import org.btcmap.ui.mapColorItems
-import org.btcmap.ui.settingsItems
 
 /** The marker colours the user configured, or their defaults. */
-internal fun markerPalette(settings: Settings): MarkerPalette = MarkerPalette(
+fun markerPalette(settings: Settings): MarkerPalette = MarkerPalette(
     markerBackground = Color(settings.mapColor(MapColor.MarkerBackground)),
     markerIcon = Color(settings.mapColor(MapColor.MarkerIcon)),
     boostedMarkerBackground = Color(settings.mapColor(MapColor.BoostedMarkerBackground)),
@@ -67,7 +59,7 @@ internal fun markerPalette(settings: Settings): MarkerPalette = MarkerPalette(
 )
 
 /** The area-chip and map-control colours the user configured, or their defaults. */
-internal fun areaChipPalette(settings: Settings): AreaChipPalette = AreaChipPalette(
+fun areaChipPalette(settings: Settings): AreaChipPalette = AreaChipPalette(
     buttonBackground = Color(settings.mapColor(MapColor.ButtonBackground)),
     buttonIcon = Color(settings.mapColor(MapColor.ButtonIcon)),
     buttonBorder = Color(settings.mapColor(MapColor.ButtonBorder)),
@@ -75,20 +67,45 @@ internal fun areaChipPalette(settings: Settings): AreaChipPalette = AreaChipPale
     badgeText = Color(settings.mapColor(MapColor.BadgeText)),
 )
 
+/** The settings page's strings beyond what [settingsItems] already names. */
+data class SettingsPageLabels(
+    val account: String,
+    val logIn: String,
+    val loggedInAs: (username: String) -> String,
+    val openProfile: String,
+    val mapStyle: String,
+    val mapStyleValue: (MapStyle) -> String,
+    val customizeColors: String,
+    val customizeColorsSecondary: String,
+    val verifiedFilter: String,
+    val verifiedFilterValue: (years: Int) -> String,
+    val verifiedFilterYears: List<Int>,
+    val showAttribution: String,
+    val showAttributionSecondary: String,
+    val mapRotation: String,
+    val mapRotationSecondary: String,
+    val dbStats: String,
+    val dbStatsSecondary: String,
+    val imageStats: String,
+    val imageStatsSecondary: String,
+    val mapStyleDialogTitle: String,
+    val verifiedFilterDialogTitle: String,
+    val close: String,
+)
+
 /** The dialog the settings list can raise. */
 private enum class SettingsDialog { MapStyle, VerifiedFilter }
 
 /**
- * The desktop settings screen. It renders the same rows Android does through the
- * shared [settingsItems], and opens the colour and database screens the desktop
- * hosts. The strings and the pickers are the desktop's own; everything the
- * screen reads and writes goes through `:shared`, so both apps see one set of
- * settings.
+ * The settings page: the shared [settingsItems] rows, the account row read from
+ * the cached user, and the host's dialogs. The colour and database screens are
+ * the host's to open.
  */
 @Composable
-internal fun DesktopSettingsScreen(
+fun SettingsPage(
     settings: Settings,
     db: Database,
+    labels: SettingsPageLabels,
     onOpenAccount: () -> Unit,
     onOpenColors: () -> Unit,
     onOpenDbStats: () -> Unit,
@@ -99,8 +116,8 @@ internal fun DesktopSettingsScreen(
     var verifiedYears by remember { mutableStateOf(settings.verifiedFilterYears) }
 
     // The account row names the cached user, which is read off the main thread.
-    var accountTitle by remember { mutableStateOf(NOT_LOGGED_IN) }
-    var accountSecondary by remember { mutableStateOf(LOG_IN) }
+    var accountTitle by remember { mutableStateOf(labels.account) }
+    var accountSecondary by remember { mutableStateOf(labels.logIn) }
     LaunchedEffect(Unit) {
         val username = if (settings.authorized) {
             withContext(Dispatchers.IO) { db.user.select()?.name }
@@ -108,8 +125,8 @@ internal fun DesktopSettingsScreen(
             null
         }
         if (username != null) {
-            accountTitle = "Logged in as $username"
-            accountSecondary = "Click to see your profile"
+            accountTitle = labels.loggedInAs(username)
+            accountSecondary = labels.openProfile
         }
     }
 
@@ -120,20 +137,20 @@ internal fun DesktopSettingsScreen(
             strings = SettingsStrings(
                 accountTitle = accountTitle,
                 accountSecondary = accountSecondary,
-                mapStyle = "Map style",
-                mapStyleValue = mapStyleName(mapStyle),
-                customizeColors = "Customize colors",
-                customizeColorsSecondary = "Marker, badge and button colors",
-                verifiedFilter = "Only show places",
-                verifiedFilterValue = verifiedFilterName(verifiedYears),
-                showAttribution = "Show attribution",
-                showAttributionSecondary = "Visible by default per OSM policy",
-                mapRotation = "Allow map rotation",
-                mapRotationSecondary = "Compass appears when not facing north",
-                dbStats = "Database",
-                dbStatsSecondary = "Database metadata and table management",
-                imageStats = "Image cache",
-                imageStatsSecondary = "Memory and disk caches metadata plus load stats",
+                mapStyle = labels.mapStyle,
+                mapStyleValue = labels.mapStyleValue(mapStyle),
+                customizeColors = labels.customizeColors,
+                customizeColorsSecondary = labels.customizeColorsSecondary,
+                verifiedFilter = labels.verifiedFilter,
+                verifiedFilterValue = labels.verifiedFilterValue(verifiedYears),
+                showAttribution = labels.showAttribution,
+                showAttributionSecondary = labels.showAttributionSecondary,
+                mapRotation = labels.mapRotation,
+                mapRotationSecondary = labels.mapRotationSecondary,
+                dbStats = labels.dbStats,
+                dbStatsSecondary = labels.dbStatsSecondary,
+                imageStats = labels.imageStats,
+                imageStatsSecondary = labels.imageStatsSecondary,
             ),
             showAttribution = attribution,
             mapRotationEnabled = rotation,
@@ -165,9 +182,10 @@ internal fun DesktopSettingsScreen(
 
     when (dialog) {
         SettingsDialog.MapStyle -> RadioPickerDialog(
-            title = "Map style",
-            options = MapStyle.entries.map { RadioOption(it.name, mapStyleName(it)) },
+            title = labels.mapStyleDialogTitle,
+            options = MapStyle.entries.map { RadioOption(it.name, labels.mapStyleValue(it)) },
             selectedKey = mapStyle.name,
+            close = labels.close,
             onSelect = { key ->
                 MapStyle.entries.firstOrNull { it.name == key }?.let {
                     mapStyle = it
@@ -179,11 +197,12 @@ internal fun DesktopSettingsScreen(
         )
 
         SettingsDialog.VerifiedFilter -> RadioPickerDialog(
-            title = "Only show places",
-            options = VERIFIED_FILTER_YEARS.map { years ->
-                RadioOption(years.toString(), verifiedFilterName(years))
+            title = labels.verifiedFilterDialogTitle,
+            options = labels.verifiedFilterYears.map { years ->
+                RadioOption(years.toString(), labels.verifiedFilterValue(years))
             },
             selectedKey = verifiedYears.toString(),
+            close = labels.close,
             onSelect = { key ->
                 key.toIntOrNull()?.let {
                     verifiedYears = it
@@ -198,39 +217,50 @@ internal fun DesktopSettingsScreen(
     }
 }
 
+/** The colour screen's strings and the desktop picker's labels. */
+data class ColorsPageLabels(
+    val colorTitle: (MapColor) -> String,
+    val red: String,
+    val green: String,
+    val blue: String,
+    val alpha: String,
+    val ok: String,
+    val reset: String,
+    val cancel: String,
+)
+
 /**
- * The colour screen: the shared list plus the desktop colour picker. A chosen
+ * The colour screen: the shared list plus the host's colour picker. A chosen
  * colour is written straight to the shared settings and the list re-read, so the
  * map picks it up when it returns.
  */
 @Composable
-internal fun DesktopColorsScreen(
+fun ColorsPage(
     settings: Settings,
-    onBack: () -> Unit,
+    labels: ColorsPageLabels,
 ) {
-    var items by remember { mutableStateOf(mapColorItems(settings, ::mapColorTitle)) }
+    var items by remember { mutableStateOf(mapColorItems(settings, labels.colorTitle)) }
     var picking by remember { mutableStateOf<MapColor?>(null) }
 
-    ScreenPage(title = "Customize colors", onBack = onBack) {
-        ColorSettingsScreen(
-            items = items,
-            onItemClick = { key -> picking = MapColor.fromKey(key) },
-        )
-    }
+    ColorSettingsScreen(
+        items = items,
+        onItemClick = { key -> picking = MapColor.fromKey(key) },
+    )
 
     picking?.let { color ->
         ColorPickerDialog(
-            title = mapColorTitle(color),
+            title = labels.colorTitle(color),
             initial = settings.mapColor(color),
             resettable = color.resettable,
+            labels = labels,
             onPick = { argb ->
                 settings.setMapColor(color, argb)
-                items = mapColorItems(settings, ::mapColorTitle)
+                items = mapColorItems(settings, labels.colorTitle)
                 picking = null
             },
             onReset = {
                 settings.setMapColor(color, null)
-                items = mapColorItems(settings, ::mapColorTitle)
+                items = mapColorItems(settings, labels.colorTitle)
                 picking = null
             },
             onDismiss = { picking = null },
@@ -238,46 +268,92 @@ internal fun DesktopColorsScreen(
     }
 }
 
+/** The database stats page's strings beyond the shared [DbStatsLabels]. */
+data class DbStatsPageLabels(
+    val dbStats: DbStatsLabels,
+    val sync: String,
+    val source: String,
+    val state: String,
+    val syncNow: String,
+    val syncStateLabel: (SyncState) -> String,
+)
+
 /**
- * The database stats screen, the desktop counterpart of Android's `DbStatsFragment`.
- * The desktop bundles no data snapshots, so the bundle cards Android shows have
- * no desktop equivalent and are omitted.
+ * The database stats page: the shared [StatsScreen] over the shared
+ * [dbStatsSections], with the host's own sync card and "sync now" button.
  */
 @Composable
-internal fun DesktopDbStatsScreen(
+fun DbStatsPage(
     db: Database,
     settings: Settings,
     syncState: SyncState,
+    labels: DbStatsPageLabels,
     onSync: () -> Unit,
-    onBack: () -> Unit,
 ) {
     var sections by remember { mutableStateOf<List<StatsSection>>(emptyList()) }
     LaunchedEffect(syncState) {
-        sections = withContext(Dispatchers.IO) { loadDbStatsSections(db, settings.apiUrl.toString(), syncState) }
+        sections = withContext(Dispatchers.IO) {
+            loadDbStatsSections(db, settings.apiUrl.toString(), syncState, labels)
+        }
     }
 
-    ScreenPage(title = "Database", onBack = onBack) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+    ) {
+        Button(
+            onClick = onSync,
+            enabled = syncState == SyncState.Idle,
         ) {
-            Button(
-                onClick = onSync,
-                enabled = syncState == SyncState.Idle,
-            ) {
-                Text(text = "Sync now")
-            }
+            Text(text = labels.syncNow)
         }
-        StatsScreen(sections = sections)
+    }
+    StatsScreen(sections = sections)
+}
+
+private fun loadDbStatsSections(
+    db: Database,
+    apiUrl: String,
+    syncState: SyncState,
+    labels: DbStatsPageLabels,
+): List<StatsSection> {
+    val reader = DbStatsReader(db.conn)
+    val file = DatabaseFile.read(db.path)
+    val version = reader.readUserVersion()
+    val tables = reader.readTables()
+
+    return buildList {
+        addAll(
+            dbStatsSections(
+                file = file,
+                version = version,
+                tables = tables,
+                bundles = emptyMap(),
+                labels = labels.dbStats,
+                formatBytes = ::formatBytes,
+            ),
+        )
+        add(
+            StatsSection(
+                key = "sync",
+                title = labels.sync,
+                icon = "sync",
+                entries = listOf(
+                    StatsEntry(labels.source, apiUrl),
+                    StatsEntry(labels.state, labels.syncStateLabel(syncState)),
+                ),
+            )
+        )
     }
 }
 
-/** A titled radio list in a dialog, the desktop shape of Android's picker dialogs. */
+/** A titled radio list in a dialog, the shape Android shows as picker dialogs. */
 @Composable
 private fun RadioPickerDialog(
     title: String,
     options: List<RadioOption>,
     selectedKey: String?,
+    close: String,
     onSelect: (String) -> Unit,
     onDismiss: () -> Unit,
 ) {
@@ -292,7 +368,7 @@ private fun RadioPickerDialog(
             )
         },
         confirmButton = {
-            TextButton(onClick = onDismiss) { Text(text = "Close") }
+            TextButton(onClick = onDismiss) { Text(text = close) }
         },
     )
 }
@@ -307,6 +383,7 @@ private fun ColorPickerDialog(
     title: String,
     initial: Int,
     resettable: Boolean,
+    labels: ColorsPageLabels,
     onPick: (Int) -> Unit,
     onReset: () -> Unit,
     onDismiss: () -> Unit,
@@ -332,10 +409,10 @@ private fun ColorPickerDialog(
                         .height(48.dp)
                         .background(Color(argb)),
                 )
-                ChannelSlider(label = "Red", value = red) { red = it }
-                ChannelSlider(label = "Green", value = green) { green = it }
-                ChannelSlider(label = "Blue", value = blue) { blue = it }
-                ChannelSlider(label = "Alpha", value = alpha) { alpha = it }
+                ChannelSlider(label = labels.red, value = red) { red = it }
+                ChannelSlider(label = labels.green, value = green) { green = it }
+                ChannelSlider(label = labels.blue, value = blue) { blue = it }
+                ChannelSlider(label = labels.alpha, value = alpha) { alpha = it }
                 Text(
                     text = "#" + argb.toUInt().toString(16).uppercase().padStart(8, '0'),
                     modifier = Modifier.padding(top = 8.dp),
@@ -343,14 +420,14 @@ private fun ColorPickerDialog(
             }
         },
         confirmButton = {
-            TextButton(onClick = { onPick(argb) }) { Text(text = "OK") }
+            TextButton(onClick = { onPick(argb) }) { Text(text = labels.ok) }
         },
         dismissButton = {
             Row {
                 if (resettable) {
-                    TextButton(onClick = onReset) { Text(text = "Reset") }
+                    TextButton(onClick = onReset) { Text(text = labels.reset) }
                 }
-                TextButton(onClick = onDismiss) { Text(text = "Cancel") }
+                TextButton(onClick = onDismiss) { Text(text = labels.cancel) }
             }
         },
     )
@@ -385,7 +462,7 @@ private fun ChannelSlider(
 }
 
 /** A human-readable byte size, the desktop stand-in for Android's file formatter. */
-private fun formatBytes(bytes: Long): String {
+fun formatBytes(bytes: Long): String {
     val units = listOf("B", "KB", "MB", "GB", "TB")
     var value = bytes.toDouble()
     var unit = 0
@@ -393,101 +470,7 @@ private fun formatBytes(bytes: Long): String {
         value /= 1024
         unit++
     }
-    return if (unit == 0) "$bytes ${units[unit]}" else "%.1f %s".format(value, units[unit])
+    if (unit == 0) return "$bytes ${units[unit]}"
+    val rounded = kotlin.math.round(value * 10.0) / 10.0
+    return "$rounded ${units[unit]}"
 }
-
-private fun loadDbStatsSections(
-    db: Database,
-    apiUrl: String,
-    syncState: SyncState,
-): List<StatsSection> {
-    val reader = DbStatsReader(db.conn)
-    val file = DatabaseFile.read(db.path)
-    val version = reader.readUserVersion()
-    val tables = reader.readTables()
-
-    return buildList {
-        addAll(
-            dbStatsSections(
-                file = file,
-                version = version,
-                tables = tables,
-                bundles = emptyMap(),
-                labels = DESKTOP_DB_STATS_LABELS,
-                formatBytes = ::formatBytes,
-            ),
-        )
-        add(
-            StatsSection(
-                key = "sync",
-                title = "Sync",
-                icon = "sync",
-                entries = listOf(
-                    StatsEntry("Source", apiUrl),
-                    StatsEntry("State", syncStateLabel(syncState)),
-                ),
-            )
-        )
-    }
-}
-
-/** The desktop's labels for the shared database stats cards. */
-private val DESKTOP_DB_STATS_LABELS = DbStatsLabels(
-    database = "Database",
-    file = "File",
-    version = "Version",
-    size = "Size",
-    table = { "Table $it" },
-    bundle = { "Bundle $it" },
-    location = "Location",
-    visibleRows = "Visible rows",
-    deletedRows = "Deleted rows",
-    futureRows = "Future rows",
-    rows = "Rows",
-    newestUpdate = "Newest update",
-)
-
-private fun syncStateLabel(state: SyncState): String = when (state) {
-    SyncState.Idle -> "Idle"
-    SyncState.UnbundlingPlaces -> "Unbundling places"
-    SyncState.SyncingPlaces -> "Syncing places"
-    SyncState.UnbundlingEvents -> "Unbundling events"
-    SyncState.SyncingEvents -> "Syncing events"
-    SyncState.UnbundlingComments -> "Unbundling comments"
-    SyncState.SyncingComments -> "Syncing comments"
-    SyncState.UnbundlingAreas -> "Unbundling areas"
-    SyncState.SyncingAreas -> "Syncing areas"
-}
-
-private fun mapStyleName(style: MapStyle): String = when (style) {
-    MapStyle.Auto -> "Auto"
-    MapStyle.Liberty -> "OpenFreeMap Liberty"
-    MapStyle.Positron -> "OpenFreeMap Positron"
-    MapStyle.Bright -> "OpenFreeMap Bright"
-    MapStyle.Dark -> "OpenFreeMap Dark"
-    MapStyle.DarkMatter -> "OpenFreeMap Dark Matter"
-}
-
-private fun mapColorTitle(color: MapColor): String = when (color) {
-    MapColor.MarkerBackground -> "Marker background"
-    MapColor.MarkerIcon -> "Marker icon"
-    MapColor.BoostedMarkerBackground -> "Boosted marker background"
-    MapColor.BoostedMarkerIcon -> "Boosted marker icon"
-    MapColor.BadgeBackground -> "Badge background"
-    MapColor.BadgeText -> "Badge text"
-    MapColor.ButtonBackground -> "Button background"
-    MapColor.ButtonIcon -> "Button icon"
-    MapColor.ButtonBorder -> "Button border"
-}
-
-private fun verifiedFilterName(years: Int): String = when (years) {
-    1 -> "Verified within 1 year"
-    2 -> "Verified within 2 years"
-    3 -> "Verified within 3 years"
-    else -> ""
-}
-
-private const val NOT_LOGGED_IN = "Account"
-private const val LOG_IN = "Log in"
-
-private val VERIFIED_FILTER_YEARS = listOf(1, 2, 3)

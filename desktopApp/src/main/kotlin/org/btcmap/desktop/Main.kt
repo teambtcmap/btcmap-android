@@ -64,12 +64,15 @@ import org.btcmap.bundle.BundledComments
 import org.btcmap.bundle.BundledEvents
 import org.btcmap.bundle.BundledPlaces
 import org.btcmap.db.Database
+import org.btcmap.dbstats.DbStatsLabels
 import org.btcmap.payment.PaymentInvoice
 import org.btcmap.place.ReportType
 import org.btcmap.place.submitReport
 import org.btcmap.sync.Sync
 import org.btcmap.sync.SyncManager
 import org.btcmap.settings.KEY_AUTH_TOKEN
+import org.btcmap.settings.MapColor
+import org.btcmap.settings.MapStyle
 import org.btcmap.settings.Settings
 import org.btcmap.settings.apiUrl
 import org.btcmap.settings.authorized
@@ -86,10 +89,21 @@ import org.btcmap.ui.AddPlaceForm
 import org.btcmap.ui.AddPlaceLabels
 import org.btcmap.ui.AddPlaceScreen
 import org.btcmap.ui.AppTheme
+import org.btcmap.ui.ColorsPage
+import org.btcmap.ui.ColorsPageLabels
+import org.btcmap.ui.DbStatsPage
+import org.btcmap.ui.DbStatsPageLabels
 import org.btcmap.ui.MapScreen
+import org.btcmap.ui.ProfileFormLabels
+import org.btcmap.ui.ProfileScreen
 import org.btcmap.ui.ReportPlaceLabels
 import org.btcmap.ui.ReportPlaceScreen
+import org.btcmap.ui.SettingsPage
+import org.btcmap.ui.SettingsPageLabels
 import org.btcmap.ui.StatsScreen
+import org.btcmap.ui.UserProfileLabels
+import org.btcmap.ui.areaChipPalette
+import org.btcmap.ui.markerPalette
 import java.io.File
 import java.io.InputStream
 import java.net.URLDecoder
@@ -356,27 +370,35 @@ private fun runApp() = application {
                             title = "Settings",
                             onBack = { route = Route.Map },
                         ) {
-                            DesktopSettingsScreen(
+                            SettingsPage(
                                 settings = settings,
                                 db = db,
+                                labels = SETTINGS_PAGE_LABELS,
                                 onOpenAccount = { route = Route.Account },
                                 onOpenColors = { route = Route.Colors },
                                 onOpenDbStats = { route = Route.DbStats },
                             )
                         }
 
-                        Route.Colors -> DesktopColorsScreen(
-                            settings = settings,
+                        Route.Colors -> ScreenPage(
+                            title = "Customize colors",
                             onBack = { route = Route.Settings },
-                        )
+                        ) {
+                            ColorsPage(settings = settings, labels = COLORS_PAGE_LABELS)
+                        }
 
-                        Route.DbStats -> DesktopDbStatsScreen(
-                            db = db,
-                            settings = settings,
-                            syncState = syncState,
-                            onSync = { syncManager.start() },
+                        Route.DbStats -> ScreenPage(
+                            title = "Database",
                             onBack = { route = Route.Settings },
-                        )
+                        ) {
+                            DbStatsPage(
+                                db = db,
+                                settings = settings,
+                                syncState = syncState,
+                                labels = DB_STATS_PAGE_LABELS,
+                                onSync = { syncManager.start() },
+                            )
+                        }
 
                         Route.Account -> ScreenPage(
                             title = "Account",
@@ -389,10 +411,12 @@ private fun runApp() = application {
                                 tokenLabel = DESKTOP_TOKEN_LABEL,
                                 labels = ACCOUNT_LABELS,
                                 profile = { onLoggedOut ->
-                                    DesktopProfile(
+                                    ProfileScreen(
                                         api = api,
                                         db = db,
                                         settings = settings,
+                                        profileLabels = PROFILE_LABELS,
+                                        formLabels = PROFILE_FORM_LABELS,
                                         onLoggedOut = onLoggedOut,
                                     )
                                 },
@@ -477,21 +501,22 @@ private fun renderScreen(spec: String) {
             // shows what the screen actually sits on.
             Surface(modifier = androidx.compose.ui.Modifier.fillMaxSize()) {
                 when (name) {
-                    "settings" -> DesktopSettingsScreen(
+                    "settings" -> SettingsPage(
                         settings = settings,
                         db = db,
+                        labels = SETTINGS_PAGE_LABELS,
                         onOpenAccount = {},
                         onOpenColors = {},
                         onOpenDbStats = {},
                     )
 
-                    "colors" -> DesktopColorsScreen(settings = settings, onBack = {})
-                    "dbstats" -> DesktopDbStatsScreen(
+                    "colors" -> ColorsPage(settings = settings, labels = COLORS_PAGE_LABELS)
+                    "dbstats" -> DbStatsPage(
                         db = db,
                         settings = settings,
                         syncState = SyncState.Idle,
+                        labels = DB_STATS_PAGE_LABELS,
                         onSync = {},
-                        onBack = {},
                     )
 
                     "report" -> ReportPlaceScreen(
@@ -518,10 +543,12 @@ private fun renderScreen(spec: String) {
                             tokenLabel = DESKTOP_TOKEN_LABEL,
                             labels = ACCOUNT_LABELS,
                             profile = { onLoggedOut ->
-                                DesktopProfile(
+                                ProfileScreen(
                                     api = api,
                                     db = db,
                                     settings = settings,
+                                    profileLabels = PROFILE_LABELS,
+                                    formLabels = PROFILE_FORM_LABELS,
                                     onLoggedOut = onLoggedOut,
                                 )
                             },
@@ -735,7 +762,139 @@ private fun bundledSnapshot(fileName: String): InputStream =
     Thread.currentThread().contextClassLoader.getResourceAsStream(fileName)
         ?: throw java.io.FileNotFoundException(fileName)
 
+private val VERIFIED_FILTER_YEARS = listOf(1, 2, 3)
+
+private fun mapStyleName(style: MapStyle): String = when (style) {
+    MapStyle.Auto -> "Auto"
+    MapStyle.Liberty -> "OpenFreeMap Liberty"
+    MapStyle.Positron -> "OpenFreeMap Positron"
+    MapStyle.Bright -> "OpenFreeMap Bright"
+    MapStyle.Dark -> "OpenFreeMap Dark"
+    MapStyle.DarkMatter -> "OpenFreeMap Dark Matter"
+}
+
+private fun verifiedFilterName(years: Int): String = when (years) {
+    1 -> "Verified within 1 year"
+    2 -> "Verified within 2 years"
+    3 -> "Verified within 3 years"
+    else -> ""
+}
+
+private fun mapColorTitle(color: MapColor): String = when (color) {
+    MapColor.MarkerBackground -> "Marker background"
+    MapColor.MarkerIcon -> "Marker icon"
+    MapColor.BoostedMarkerBackground -> "Boosted marker background"
+    MapColor.BoostedMarkerIcon -> "Boosted marker icon"
+    MapColor.BadgeBackground -> "Badge background"
+    MapColor.BadgeText -> "Badge text"
+    MapColor.ButtonBackground -> "Button background"
+    MapColor.ButtonIcon -> "Button icon"
+    MapColor.ButtonBorder -> "Button border"
+}
+
+private fun syncStateLabel(state: SyncState): String = when (state) {
+    SyncState.Idle -> "Idle"
+    SyncState.UnbundlingPlaces -> "Unbundling places"
+    SyncState.SyncingPlaces -> "Syncing places"
+    SyncState.UnbundlingEvents -> "Unbundling events"
+    SyncState.SyncingEvents -> "Syncing events"
+    SyncState.UnbundlingComments -> "Unbundling comments"
+    SyncState.SyncingComments -> "Syncing comments"
+    SyncState.UnbundlingAreas -> "Unbundling areas"
+    SyncState.SyncingAreas -> "Syncing areas"
+}
+
+private val DESKTOP_DB_STATS_LABELS = DbStatsLabels(
+    database = "Database",
+    file = "File",
+    version = "Version",
+    size = "Size",
+    table = { "Table $it" },
+    bundle = { "Bundle $it" },
+    location = "Location",
+    visibleRows = "Visible rows",
+    deletedRows = "Deleted rows",
+    futureRows = "Future rows",
+    rows = "Rows",
+    newestUpdate = "Newest update",
+)
+
+private val SETTINGS_PAGE_LABELS = SettingsPageLabels(
+    account = "Account",
+    logIn = "Log in",
+    loggedInAs = { "Logged in as $it" },
+    openProfile = "Click to see your profile",
+    mapStyle = "Map style",
+    mapStyleValue = ::mapStyleName,
+    customizeColors = "Customize colors",
+    customizeColorsSecondary = "Marker, badge and button colors",
+    verifiedFilter = "Only show places",
+    verifiedFilterValue = ::verifiedFilterName,
+    verifiedFilterYears = VERIFIED_FILTER_YEARS,
+    showAttribution = "Show attribution",
+    showAttributionSecondary = "Visible by default per OSM policy",
+    mapRotation = "Allow map rotation",
+    mapRotationSecondary = "Compass appears when not facing north",
+    dbStats = "Database",
+    dbStatsSecondary = "Database metadata and table management",
+    imageStats = "Image cache",
+    imageStatsSecondary = "Memory and disk caches metadata plus load stats",
+    mapStyleDialogTitle = "Map style",
+    verifiedFilterDialogTitle = "Only show places",
+    close = "Close",
+)
+
+private val COLORS_PAGE_LABELS = ColorsPageLabels(
+    colorTitle = ::mapColorTitle,
+    red = "Red",
+    green = "Green",
+    blue = "Blue",
+    alpha = "Alpha",
+    ok = "OK",
+    reset = "Reset",
+    cancel = "Cancel",
+)
+
+private val DB_STATS_PAGE_LABELS = DbStatsPageLabels(
+    dbStats = DESKTOP_DB_STATS_LABELS,
+    sync = "Sync",
+    source = "Source",
+    state = "State",
+    syncNow = "Sync now",
+    syncStateLabel = ::syncStateLabel,
+)
+
 private const val DESKTOP_TOKEN_LABEL = "BTC Map desktop"
+
+private val PROFILE_LABELS = UserProfileLabels(
+    username = "Username",
+    password = "Password",
+    savedPlaces = "Saved places",
+    savedAreas = "Saved areas",
+    noSavedPlaces = "No saved places.",
+    noSavedAreas = "No saved areas.",
+    logOut = "Log out",
+    editUsername = "Change username",
+    editPassword = "Change password",
+    delete = "Delete",
+)
+
+private val PROFILE_FORM_LABELS = ProfileFormLabels(
+    passwordMask = "••••••••",
+    required = "Required",
+    changeUsernameTitle = "Change username",
+    changePasswordTitle = "Change password",
+    username = "Username",
+    currentPassword = "Current password",
+    newPassword = "New password",
+    confirmPassword = "Confirm password",
+    passwordsDoNotMatch = "Passwords do not match",
+    passwordTooShort = { "At least $it characters" },
+    save = "Save",
+    cancel = "Cancel",
+    usernameChanged = "Username changed.",
+    passwordChanged = "Password changed.",
+)
 
 private val ACCOUNT_LABELS = AccountLabels(
     username = "Username",

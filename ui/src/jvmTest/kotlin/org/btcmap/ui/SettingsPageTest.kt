@@ -1,4 +1,4 @@
-package org.btcmap.desktop
+package org.btcmap.ui
 
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertIsDisplayed
@@ -15,11 +15,10 @@ import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 /**
- * The desktop settings screen. It now renders the same shared row list Android
- * does, so these tests pin the rows and the wiring of the ones that open another
- * screen or a dialog.
+ * The settings page: it renders the shared row list Android does, so these tests
+ * pin the rows and the wiring of the ones that open another screen or a dialog.
  */
-class DesktopSettingsScreenTest {
+class SettingsPageTest {
 
     private val db = testDatabase()
     private val settings = testSettings(db)
@@ -28,7 +27,7 @@ class DesktopSettingsScreenTest {
     @Test
     fun rows_renderTheSameSettingsAsAndroid() {
         runComposeUiTest {
-            setContent { DesktopSettingsScreen(settings, db, {}, {}, {}) }
+            setContent { SettingsPage(settings, db, TEST_SETTINGS_PAGE_LABELS, {}, {}, {}) }
             onNodeWithText("Map style").assertIsDisplayed()
             onNodeWithText("Customize colors").assertIsDisplayed()
             onNodeWithText("Only show places").assertIsDisplayed()
@@ -44,7 +43,7 @@ class DesktopSettingsScreenTest {
     fun accountRow_opensTheAccountPage() {
         var opened = false
         runComposeUiTest {
-            setContent { DesktopSettingsScreen(settings, db, { opened = true }, {}, {}) }
+            setContent { SettingsPage(settings, db, TEST_SETTINGS_PAGE_LABELS, { opened = true }, {}, {}) }
             onNodeWithText("Account").performClick()
         }
         assertTrue(opened)
@@ -55,7 +54,7 @@ class DesktopSettingsScreenTest {
     fun customizeColorsRow_opensTheColorsPage() {
         var opened = false
         runComposeUiTest {
-            setContent { DesktopSettingsScreen(settings, db, {}, { opened = true }, {}) }
+            setContent { SettingsPage(settings, db, TEST_SETTINGS_PAGE_LABELS, {}, { opened = true }, {}) }
             onNodeWithText("Customize colors").performClick()
         }
         assertTrue(opened)
@@ -66,7 +65,7 @@ class DesktopSettingsScreenTest {
     fun databaseRow_opensTheDatabasePage() {
         var opened = false
         runComposeUiTest {
-            setContent { DesktopSettingsScreen(settings, db, {}, {}, { opened = true }) }
+            setContent { SettingsPage(settings, db, TEST_SETTINGS_PAGE_LABELS, {}, {}, { opened = true }) }
             onNodeWithText("Database").performClick()
         }
         assertTrue(opened)
@@ -76,7 +75,7 @@ class DesktopSettingsScreenTest {
     @Test
     fun mapStyleRow_picksAStyleAndStoresIt() {
         runComposeUiTest {
-            setContent { DesktopSettingsScreen(settings, db, {}, {}, {}) }
+            setContent { SettingsPage(settings, db, TEST_SETTINGS_PAGE_LABELS, {}, {}, {}) }
             onNodeWithText("Map style").performClick()
             onNodeWithText("OpenFreeMap Dark").performClick()
         }
@@ -88,7 +87,7 @@ class DesktopSettingsScreenTest {
     fun togglingAttribution_writesItThrough() {
         assertTrue(settings.showAttribution)
         runComposeUiTest {
-            setContent { DesktopSettingsScreen(settings, db, {}, {}, {}) }
+            setContent { SettingsPage(settings, db, TEST_SETTINGS_PAGE_LABELS, {}, {}, {}) }
             // The first toggle is Show attribution, the second Map rotation.
             onAllNodes(isToggleable())[0].performClick()
         }

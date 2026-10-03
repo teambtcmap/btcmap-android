@@ -33,6 +33,9 @@ kotlin {
     sourceSets {
         commonMain.dependencies {
             implementation(project(":shared"))
+            // The db-stats page reads the shared database's connection, so the
+            // SQLite types must be on the compile classpath.
+            implementation(libs.androidx.sqlite)
             // Exposed because the Android app hosts these composables through a
             // ComposeView, which needs the Compose types on its classpath.
             api(compose.runtime)

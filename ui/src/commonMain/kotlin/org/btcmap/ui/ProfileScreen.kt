@@ -1,4 +1,4 @@
-package org.btcmap.desktop
+package org.btcmap.ui
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -35,43 +35,41 @@ import org.btcmap.api.signOut
 import org.btcmap.api.updatePassword
 import org.btcmap.auth.AuthError
 import org.btcmap.auth.AuthValidation
+import org.btcmap.db.Database
+import org.btcmap.db.table.user.User
 import org.btcmap.saved.SavedItems
 import org.btcmap.saved.withLocalizedAreaNames
 import org.btcmap.saved.withLocalizedPlaceNames
-import org.btcmap.db.Database
-import org.btcmap.db.table.user.User
 import org.btcmap.settings.Settings
-import org.btcmap.ui.SavedItemUi
-import org.btcmap.ui.UserProfileLabels
-import org.btcmap.ui.UserProfileScreen
-import org.btcmap.ui.UserProfileUiState
 
-/** Test tags so the desktop tests can drive the profile forms. */
-internal const val PROFILE_USERNAME_FIELD_TAG = "profile-username-field"
-internal const val PROFILE_USERNAME_SAVE_TAG = "profile-username-save"
-internal const val PROFILE_PASSWORD_CURRENT_TAG = "profile-password-current"
-internal const val PROFILE_PASSWORD_NEW_TAG = "profile-password-new"
-internal const val PROFILE_PASSWORD_CONFIRM_TAG = "profile-password-confirm"
-internal const val PROFILE_PASSWORD_SAVE_TAG = "profile-password-save"
+/** Test tags so a test can drive the profile forms. */
+const val PROFILE_USERNAME_FIELD_TAG = "profile-username-field"
+const val PROFILE_USERNAME_SAVE_TAG = "profile-username-save"
+const val PROFILE_PASSWORD_CURRENT_TAG = "profile-password-current"
+const val PROFILE_PASSWORD_NEW_TAG = "profile-password-new"
+const val PROFILE_PASSWORD_CONFIRM_TAG = "profile-password-confirm"
+const val PROFILE_PASSWORD_SAVE_TAG = "profile-password-save"
 
-private const val PASSWORD_MASK = "••••••••"
-private const val REQUIRED = "Required"
+/** The profile edit forms' strings, so the screens stay resource-free. */
+data class ProfileFormLabels(
+    val passwordMask: String,
+    val required: String,
+    val changeUsernameTitle: String,
+    val changePasswordTitle: String,
+    val username: String,
+    val currentPassword: String,
+    val newPassword: String,
+    val confirmPassword: String,
+    val passwordsDoNotMatch: String,
+    val passwordTooShort: (minLength: Int) -> String,
+    val save: String,
+    val cancel: String,
+    val usernameChanged: String,
+    val passwordChanged: String,
+)
 
 /** The profile page the signed-in account sees, or one of its edit forms. */
 private enum class ProfileEdit { Username, Password }
-
-private val PROFILE_LABELS = UserProfileLabels(
-    username = "Username",
-    password = "Password",
-    savedPlaces = "Saved places",
-    savedAreas = "Saved areas",
-    noSavedPlaces = "No saved places.",
-    noSavedAreas = "No saved areas.",
-    logOut = "Log out",
-    editUsername = "Change username",
-    editPassword = "Change password",
-    delete = "Delete",
-)
 
 /**
  * The signed-in account page: the shared [UserProfileScreen] over the cached
@@ -79,13 +77,16 @@ private val PROFILE_LABELS = UserProfileLabels(
  * clears the session and (best-effort) revokes the token server-side.
  *
  * The edit forms are inline rather than dialogs so they render in one composable
- * window, which keeps them testable.
+ * window, which keeps them testable. [profileLabels] are [UserProfileScreen]'s
+ * strings; [formLabels] are the edit forms'.
  */
 @Composable
-internal fun DesktopProfile(
+fun ProfileScreen(
     api: Api,
     db: Database,
     settings: Settings,
+    profileLabels: UserProfileLabels,
+    formLabels: ProfileFormLabels,
     onLoggedOut: () -> Unit,
 ) {
     var account by remember { mutableStateOf<User?>(null) }
@@ -125,19 +126,21 @@ internal fun DesktopProfile(
 
         editing == ProfileEdit.Username -> ChangeUsernameForm(
             currentName = current.name,
+            labels = formLabels,
             onCancel = { editing = null },
             save = { name ->
-                changeUsername(api, db, name)
-                message = "Username changed."
+                AccountSession.changeUsername(api, db, name)
+                message = formLabels.usernameChanged
                 reload()
             },
         )
 
         editing == ProfileEdit.Password -> ChangePasswordForm(
+            labels = formLabels,
             onCancel = { editing = null },
             save = { oldPassword, newPassword ->
                 api.updatePassword(oldPassword = oldPassword, newPassword = newPassword)
-                message = "Password changed."
+                message = formLabels.passwordChanged
             },
         )
 
@@ -152,10 +155,10 @@ internal fun DesktopProfile(
             UserProfileScreen(
                 state = UserProfileUiState(
                     username = current.name,
-                    password = PASSWORD_MASK,
+                    password = formLabels.passwordMask,
                     savedPlaces = current.savedPlaces.map { SavedItemUi(it.id, it.name) },
                     savedAreas = current.savedAreas.map { SavedItemUi(it.id, it.name) },
-                    labels = PROFILE_LABELS,
+                    labels = profileLabels,
                 ),
                 onEditUsername = {
                     message = null
@@ -191,8 +194,9 @@ internal fun DesktopProfile(
 
 /** The change-username form: one field, saved when it is not blank. */
 @Composable
-internal fun ChangeUsernameForm(
+fun ChangeUsernameForm(
     currentName: String,
+    labels: ProfileFormLabels,
     onCancel: () -> Unit,
     save: suspend (String) -> Unit,
 ) {
@@ -202,14 +206,14 @@ internal fun ChangeUsernameForm(
     val scope = rememberCoroutineScope()
 
     Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
-        Text(text = "Change username", style = MaterialTheme.typography.titleLarge)
+        Text(text = labels.changeUsernameTitle, style = MaterialTheme.typography.titleLarge)
         OutlinedTextField(
             value = name,
             onValueChange = {
                 name = it
                 error = null
             },
-            label = { Text("Username") },
+            label = { Text(labels.username) },
             singleLine = true,
             isError = error != null,
             supportingText = error?.let { { Text(it) } },
@@ -228,7 +232,7 @@ internal fun ChangeUsernameForm(
                 onClick = {
                     val trimmed = name.trim()
                     if (trimmed.isEmpty()) {
-                        error = REQUIRED
+                        error = labels.required
                     } else {
                         busy = true
                         error = null
@@ -246,16 +250,17 @@ internal fun ChangeUsernameForm(
                 },
                 modifier = Modifier.testTag(PROFILE_USERNAME_SAVE_TAG),
             ) {
-                Text("Save")
+                Text(labels.save)
             }
-            TextButton(onClick = onCancel, enabled = !busy) { Text("Cancel") }
+            TextButton(onClick = onCancel, enabled = !busy) { Text(labels.cancel) }
         }
     }
 }
 
 /** The change-password form: current, new and confirmation, client-validated. */
 @Composable
-internal fun ChangePasswordForm(
+fun ChangePasswordForm(
+    labels: ProfileFormLabels,
     onCancel: () -> Unit,
     save: suspend (current: String, new: String) -> Unit,
 ) {
@@ -278,16 +283,16 @@ internal fun ChangePasswordForm(
     val confirmError = errors.contains(AuthError.PasswordsDoNotMatch)
 
     Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
-        Text(text = "Change password", style = MaterialTheme.typography.titleLarge)
+        Text(text = labels.changePasswordTitle, style = MaterialTheme.typography.titleLarge)
         OutlinedTextField(
             value = current,
             onValueChange = { current = it },
-            label = { Text("Current password") },
+            label = { Text(labels.currentPassword) },
             singleLine = true,
             visualTransformation = PasswordVisualTransformation(),
             isError = currentError,
             supportingText = if (currentError) {
-                { Text(REQUIRED) }
+                { Text(labels.required) }
             } else {
                 null
             },
@@ -300,15 +305,15 @@ internal fun ChangePasswordForm(
         OutlinedTextField(
             value = newPassword,
             onValueChange = { newPassword = it },
-            label = { Text("New password") },
+            label = { Text(labels.newPassword) },
             singleLine = true,
             visualTransformation = PasswordVisualTransformation(),
             isError = newError,
             supportingText = {
                 when {
-                    newTooShort -> Text("At least ${AuthValidation.MIN_PASSWORD_LENGTH} characters")
-                    newError -> Text(REQUIRED)
-                    else -> Text("At least ${AuthValidation.MIN_PASSWORD_LENGTH} characters")
+                    newTooShort -> Text(labels.passwordTooShort(AuthValidation.MIN_PASSWORD_LENGTH))
+                    newError -> Text(labels.required)
+                    else -> Text(labels.passwordTooShort(AuthValidation.MIN_PASSWORD_LENGTH))
                 }
             },
             enabled = !busy,
@@ -320,12 +325,12 @@ internal fun ChangePasswordForm(
         OutlinedTextField(
             value = confirmation,
             onValueChange = { confirmation = it },
-            label = { Text("Confirm password") },
+            label = { Text(labels.confirmPassword) },
             singleLine = true,
             visualTransformation = PasswordVisualTransformation(),
             isError = confirmError,
             supportingText = if (confirmError) {
-                { Text("Passwords do not match") }
+                { Text(labels.passwordsDoNotMatch) }
             } else {
                 null
             },
@@ -367,16 +372,11 @@ internal fun ChangePasswordForm(
                 },
                 modifier = Modifier.testTag(PROFILE_PASSWORD_SAVE_TAG),
             ) {
-                Text("Save")
+                Text(labels.save)
             }
-            TextButton(onClick = onCancel, enabled = !busy) { Text("Cancel") }
+            TextButton(onClick = onCancel, enabled = !busy) { Text(labels.cancel) }
         }
     }
-}
-
-/** Renames the account, keeping the cached saved lists (see [AccountSession]). */
-private suspend fun changeUsername(api: Api, db: Database, name: String) {
-    AccountSession.changeUsername(api, db, name)
 }
 
 /**
@@ -385,8 +385,6 @@ private suspend fun changeUsername(api: Api, db: Database, name: String) {
  * not dropped.
  */
 private suspend fun logOut(api: Api, db: Database, settings: Settings) {
-    // Clear only the session this caller saw, then revoke that token
-    // best-effort; a sign-in that raced this logout keeps its new session.
     AccountSession.clearSession(db, settings)?.let { token ->
         runCatching { api.signOut(token) }
     }
