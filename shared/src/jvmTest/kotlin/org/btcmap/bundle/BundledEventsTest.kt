@@ -8,21 +8,21 @@ import org.btcmap.db.Database
 import org.btcmap.db.table.event.Event
 import org.junit.Assert
 import org.junit.Test
-import java.time.ZonedDateTime
+import kotlin.time.Instant
 
 class BundledEventsTest {
 
     private fun createDatabase(): Database = Database(BundledSQLiteDriver(), ":memory:")
 
-    private fun event(id: Long, deletedAt: ZonedDateTime? = null) = Event(
+    private fun event(id: Long, deletedAt: Instant? = null) = Event(
         id = id,
         lat = 1.0,
         lon = 2.0,
         name = "Event $id",
         website = null,
-        startsAt = ZonedDateTime.parse("2026-11-01T09:00:00Z"),
+        startsAt = Instant.parse("2026-11-01T09:00:00Z"),
         endsAt = null,
-        updatedAt = ZonedDateTime.parse("2026-01-02T00:00:00Z"),
+        updatedAt = Instant.parse("2026-01-02T00:00:00Z"),
         deletedAt = deletedAt,
     )
 
@@ -64,9 +64,9 @@ class BundledEventsTest {
         Assert.assertEquals(99.0156, event.lon, 0.0)
         Assert.assertEquals("Bitcoin Half Marathon", event.name)
         Assert.assertEquals("https://www.bitcoinmarathon.org/", event.website.toString())
-        Assert.assertEquals(ZonedDateTime.parse("2026-11-01T09:00:00+07:00"), event.startsAt)
-        Assert.assertEquals(ZonedDateTime.parse("2026-11-02T23:00:00+07:00"), event.endsAt)
-        Assert.assertEquals(ZonedDateTime.parse("2026-03-01T12:00:00Z"), event.updatedAt)
+        Assert.assertEquals(Instant.parse("2026-11-01T09:00:00+07:00"), event.startsAt)
+        Assert.assertEquals(Instant.parse("2026-11-02T23:00:00+07:00"), event.endsAt)
+        Assert.assertEquals(Instant.parse("2026-03-01T12:00:00Z"), event.updatedAt)
         Assert.assertNull(event.deletedAt)
     }
 
@@ -183,8 +183,8 @@ class BundledEventsTest {
         Assert.assertNotNull(first)
         Assert.assertEquals("One", first!!.name)
         Assert.assertEquals("https://example.com", first.website.toString())
-        Assert.assertEquals(ZonedDateTime.parse("2026-11-02T09:00:00Z"), first.endsAt)
-        Assert.assertEquals(ZonedDateTime.parse("2026-03-01T12:00:00Z"), first.updatedAt)
+        Assert.assertEquals(Instant.parse("2026-11-02T09:00:00Z"), first.endsAt)
+        Assert.assertEquals(Instant.parse("2026-03-01T12:00:00Z"), first.updatedAt)
 
         val second = db.event.selectById(2L)
         Assert.assertNotNull(second)
@@ -211,7 +211,7 @@ class BundledEventsTest {
     fun import_skipsWhenDatabaseHoldsOnlyTombstones() = runTest {
         val db = createDatabase()
         db.event.insert(
-            listOf(event(id = 99L, deletedAt = ZonedDateTime.parse("2026-05-01T00:00:00Z"))),
+            listOf(event(id = 99L, deletedAt = Instant.parse("2026-05-01T00:00:00Z"))),
         )
 
         val result = BundledEvents.import(db) { snapshotJson(2).asSource() }

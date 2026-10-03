@@ -2,11 +2,12 @@ package org.btcmap.db
 
 import androidx.sqlite.SQLiteStatement
 import io.ktor.http.Url
+import kotlin.time.Instant
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.jsonObject
 import org.btcmap.json.parseJson
+import org.btcmap.util.toInstant
 import org.btcmap.util.toUrl
-import java.time.ZonedDateTime
 
 fun SQLiteStatement.bindTextOrNull(index: Int, value: String?) {
     if (value == null) bindNull(index) else bindText(index, value)
@@ -24,11 +25,11 @@ fun SQLiteStatement.bindHttpUrlOrNull(index: Int, value: Url?) {
     if (value == null) bindNull(index) else bindText(index, value.toString())
 }
 
-fun SQLiteStatement.bindZonedDateTime(index: Int, value: ZonedDateTime) {
+fun SQLiteStatement.bindInstant(index: Int, value: Instant) {
     bindText(index, value.toString())
 }
 
-fun SQLiteStatement.bindZonedDateTimeOrNull(index: Int, value: ZonedDateTime?) {
+fun SQLiteStatement.bindInstantOrNull(index: Int, value: Instant?) {
     if (value == null) bindNull(index) else bindText(index, value.toString())
 }
 
@@ -45,11 +46,11 @@ fun SQLiteStatement.getLongOrNull(index: Int): Long? =
 fun SQLiteStatement.getDoubleOrNull(index: Int): Double? =
     if (isNull(index)) null else getDouble(index)
 
-fun SQLiteStatement.getZonedDateTime(index: Int): ZonedDateTime =
-    ZonedDateTime.parse(getText(index))
+fun SQLiteStatement.getInstant(index: Int): Instant =
+    getText(index).toInstant()
 
-fun SQLiteStatement.getZonedDateTimeOrNull(index: Int): ZonedDateTime? =
-    if (isNull(index)) null else ZonedDateTime.parse(getText(index))
+fun SQLiteStatement.getInstantOrNull(index: Int): Instant? =
+    if (isNull(index)) null else getText(index).toInstant()
 
 fun SQLiteStatement.getHttpUrl(index: Int): Url = getText(index).toUrl()
 

@@ -1,5 +1,10 @@
 package org.btcmap.db.table.place
 
+import kotlinx.datetime.plus
+import kotlinx.datetime.minus
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.DateTimePeriod
+import kotlin.time.Clock
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import org.btcmap.json.parseJsonObject
 import org.btcmap.db.Database
@@ -7,8 +12,7 @@ import org.btcmap.i18n.getSearchableNames
 import org.btcmap.search.nameMatchRank
 import org.junit.Assert
 import org.junit.Test
-import java.time.ZoneOffset
-import java.time.ZonedDateTime
+import kotlin.time.Instant
 
 class PlaceQueriesTest {
 
@@ -35,7 +39,7 @@ class PlaceQueriesTest {
         val db = createDatabase()
         val place = Place(
             id = 1L,
-            updatedAt = ZonedDateTime.parse("2024-01-01T10:00:00Z"),
+            updatedAt = Instant.parse("2024-01-01T10:00:00Z"),
             lat = 40.7128,
             lon = -74.0060,
             icon = "restaurant",
@@ -80,7 +84,7 @@ class PlaceQueriesTest {
     @Test
     fun selectByIdIncludingDeleted_returnsTombstone() {
         val db = createDatabase()
-        val deletedAt = ZonedDateTime.parse("2024-01-02T10:00:00Z")
+        val deletedAt = Instant.parse("2024-01-02T10:00:00Z")
         db.place.insert(
             listOf(
                 createPlace(id = 1L, icon = "coffee", updatedAt = deletedAt)
@@ -157,7 +161,7 @@ class PlaceQueriesTest {
     @Test
     fun selectByOsmIds_skipsDeletedPlacesAndEmptyInput() {
         val db = createDatabase()
-        val deletedAt = ZonedDateTime.parse("2024-01-02T10:00:00Z")
+        val deletedAt = Instant.parse("2024-01-02T10:00:00Z")
         db.place.insert(
             listOf(
                 createPlace(id = 1L, icon = "coffee", updatedAt = deletedAt)
@@ -308,7 +312,7 @@ class PlaceQueriesTest {
     @Test
     fun selectByBounds_excludesDeletedPlaces() {
         val db = createDatabase()
-        val deletedAt = ZonedDateTime.parse("2024-01-02T10:00:00Z")
+        val deletedAt = Instant.parse("2024-01-02T10:00:00Z")
         db.place.insert(
             listOf(
                 createPlace(id = 1L, lat = 10.0, lon = 10.0),
@@ -333,7 +337,7 @@ class PlaceQueriesTest {
             listOf(
                 createPlace(id = 1L, lat = 10.0, lon = 10.0),
                 createPlace(id = 2L, lat = 11.0, lon = 11.0)
-                    .copy(boostedUntil = ZonedDateTime.parse("2999-01-01T00:00:00Z")),
+                    .copy(boostedUntil = Instant.parse("2999-01-01T00:00:00Z")),
             )
         )
 
@@ -433,11 +437,11 @@ class PlaceQueriesTest {
     @Test
     fun selectExchangesByBounds_withMinVerifiedAt_excludesOldAndUnverified() {
         val db = createDatabase()
-        val now = ZonedDateTime.now(ZoneOffset.UTC)
+        val now = Clock.System.now()
         db.place.insert(listOf(createPlace(
             id = 1L,
             icon = "local_atm",
-            verifiedAt = now.minusYears(1),
+            verifiedAt = now.minus(DateTimePeriod(years = 1), TimeZone.UTC),
         )))
         db.place.insert(listOf(createPlace(
             id = 2L,
@@ -447,7 +451,7 @@ class PlaceQueriesTest {
         db.place.insert(listOf(createPlace(
             id = 3L,
             icon = "local_atm",
-            verifiedAt = now.minusYears(2),
+            verifiedAt = now.minus(DateTimePeriod(years = 2), TimeZone.UTC),
         )))
 
         val results = db.place.selectExchangesByBounds(
@@ -455,7 +459,7 @@ class PlaceQueriesTest {
             maxLat = 41.0,
             minLon = -75.0,
             maxLon = -73.0,
-            minVerifiedAt = now.minusYears(1).minusDays(1),
+            minVerifiedAt = now.minus(DateTimePeriod(years = 1), TimeZone.UTC).minus(DateTimePeriod(days = 1), TimeZone.UTC),
         )
 
         Assert.assertEquals(1, results.size)
@@ -467,11 +471,11 @@ class PlaceQueriesTest {
     @Test
     fun selectExchangesByBounds_withMinVerifiedAtNull_returnsAllExchanges() {
         val db = createDatabase()
-        val now = ZonedDateTime.now(ZoneOffset.UTC)
+        val now = Clock.System.now()
         db.place.insert(listOf(createPlace(
             id = 1L,
             icon = "local_atm",
-            verifiedAt = now.minusYears(5),
+            verifiedAt = now.minus(DateTimePeriod(years = 5), TimeZone.UTC),
         )))
         db.place.insert(listOf(createPlace(
             id = 2L,
@@ -502,26 +506,26 @@ class PlaceQueriesTest {
     @Test
     fun selectMaxUpdatedAt_returnsMaxDate() {
         val db = createDatabase()
-        db.place.insert(listOf(createPlace(id = 1L, updatedAt = ZonedDateTime.parse("2024-01-01T10:00:00Z"))))
-        db.place.insert(listOf(createPlace(id = 2L, updatedAt = ZonedDateTime.parse("2024-01-03T10:00:00Z"))))
-        db.place.insert(listOf(createPlace(id = 3L, updatedAt = ZonedDateTime.parse("2024-01-02T10:00:00Z"))))
+        db.place.insert(listOf(createPlace(id = 1L, updatedAt = Instant.parse("2024-01-01T10:00:00Z"))))
+        db.place.insert(listOf(createPlace(id = 2L, updatedAt = Instant.parse("2024-01-03T10:00:00Z"))))
+        db.place.insert(listOf(createPlace(id = 3L, updatedAt = Instant.parse("2024-01-02T10:00:00Z"))))
 
         val result = db.place.selectMaxUpdatedAt()
 
-        Assert.assertEquals(ZonedDateTime.parse("2024-01-03T10:00:00Z"), result)
+        Assert.assertEquals(Instant.parse("2024-01-03T10:00:00Z"), result)
     }
 
     @Test
     fun selectMaxUpdatedAt_comparesByInstantNotByText() {
         val db = createDatabase()
-        // ZonedDateTime.toString() drops a zero fraction, so the earlier
+        // Instant.toString() drops a zero fraction, so the earlier
         // "2024-01-01T10:00Z" sorts after "2024-01-01T10:00:00.500Z" as text.
-        db.place.insert(listOf(createPlace(id = 1L, updatedAt = ZonedDateTime.parse("2024-01-01T10:00:00Z"))))
-        db.place.insert(listOf(createPlace(id = 2L, updatedAt = ZonedDateTime.parse("2024-01-01T10:00:00.500Z"))))
+        db.place.insert(listOf(createPlace(id = 1L, updatedAt = Instant.parse("2024-01-01T10:00:00Z"))))
+        db.place.insert(listOf(createPlace(id = 2L, updatedAt = Instant.parse("2024-01-01T10:00:00.500Z"))))
 
         val result = db.place.selectMaxUpdatedAt()
 
-        Assert.assertEquals(ZonedDateTime.parse("2024-01-01T10:00:00.500Z"), result)
+        Assert.assertEquals(Instant.parse("2024-01-01T10:00:00.500Z"), result)
     }
 
     @Test
@@ -543,7 +547,7 @@ class PlaceQueriesTest {
         db.place.insert(
             listOf(
                 createPlace(id = 2L)
-                    .copy(deletedAt = ZonedDateTime.parse("2024-02-01T00:00:00Z")),
+                    .copy(deletedAt = Instant.parse("2024-02-01T00:00:00Z")),
             ),
         )
 
@@ -559,12 +563,12 @@ class PlaceQueriesTest {
         db.place.insert(listOf(createPlace(
             id = 1L,
             icon = "restaurant",
-            verifiedAt = ZonedDateTime.parse("2024-01-01T10:00:00Z"),
+            verifiedAt = Instant.parse("2024-01-01T10:00:00Z"),
         )))
         db.place.insert(listOf(createPlace(
             id = 2L,
             icon = "coffee",
-            verifiedAt = ZonedDateTime.parse("2024-01-01T10:00:01Z"),
+            verifiedAt = Instant.parse("2024-01-01T10:00:01Z"),
         )))
 
         val results = db.place.selectMerchantsByBounds(
@@ -572,7 +576,7 @@ class PlaceQueriesTest {
             maxLat = 41.0,
             minLon = -75.0,
             maxLon = -73.0,
-            minVerifiedAt = ZonedDateTime.parse("2024-01-01T10:00:00.500Z"),
+            minVerifiedAt = Instant.parse("2024-01-01T10:00:00.500Z"),
         )
 
         Assert.assertEquals(listOf(2L), results.map { it.id })
@@ -581,21 +585,21 @@ class PlaceQueriesTest {
     @Test
     fun selectMerchantsByBounds_withMinVerifiedAt_returnsOnlyRecentMerchants() {
         val db = createDatabase()
-        val now = ZonedDateTime.now(ZoneOffset.UTC)
+        val now = Clock.System.now()
         db.place.insert(listOf(createPlace(
             id = 1L,
             icon = "restaurant",
-            verifiedAt = now.minusYears(2)
+            verifiedAt = now.minus(DateTimePeriod(years = 2), TimeZone.UTC)
         )))
         db.place.insert(listOf(createPlace(
             id = 2L,
             icon = "coffee",
-            verifiedAt = now.minusYears(4)
+            verifiedAt = now.minus(DateTimePeriod(years = 4), TimeZone.UTC)
         )))
         db.place.insert(listOf(createPlace(
             id = 3L,
             icon = "bank",
-            verifiedAt = now.minusYears(1)
+            verifiedAt = now.minus(DateTimePeriod(years = 1), TimeZone.UTC)
         )))
 
         val results = db.place.selectMerchantsByBounds(
@@ -603,7 +607,7 @@ class PlaceQueriesTest {
             maxLat = 41.0,
             minLon = -75.0,
             maxLon = -73.0,
-            minVerifiedAt = now.minusYears(3)
+            minVerifiedAt = now.minus(DateTimePeriod(years = 3), TimeZone.UTC)
         )
 
         Assert.assertEquals(2, results.size)
@@ -615,16 +619,16 @@ class PlaceQueriesTest {
     @Test
     fun selectMerchantsByBounds_withMinVerifiedAtNull_returnsAllMerchants() {
         val db = createDatabase()
-        val now = ZonedDateTime.now(ZoneOffset.UTC)
+        val now = Clock.System.now()
         db.place.insert(listOf(createPlace(
             id = 1L,
             icon = "restaurant",
-            verifiedAt = now.minusYears(5)
+            verifiedAt = now.minus(DateTimePeriod(years = 5), TimeZone.UTC)
         )))
         db.place.insert(listOf(createPlace(
             id = 2L,
             icon = "coffee",
-            verifiedAt = now.minusYears(1)
+            verifiedAt = now.minus(DateTimePeriod(years = 1), TimeZone.UTC)
         )))
 
         val results = db.place.selectMerchantsByBounds(
@@ -641,11 +645,11 @@ class PlaceQueriesTest {
     @Test
     fun selectMerchantsByBounds_withMinVerifiedAt_excludesUnverified() {
         val db = createDatabase()
-        val now = ZonedDateTime.now(ZoneOffset.UTC)
+        val now = Clock.System.now()
         db.place.insert(listOf(createPlace(
             id = 1L,
             icon = "restaurant",
-            verifiedAt = now.minusYears(1)
+            verifiedAt = now.minus(DateTimePeriod(years = 1), TimeZone.UTC)
         )))
         db.place.insert(listOf(createPlace(
             id = 2L,
@@ -655,7 +659,7 @@ class PlaceQueriesTest {
         db.place.insert(listOf(createPlace(
             id = 3L,
             icon = "bank",
-            verifiedAt = now.minusYears(2)
+            verifiedAt = now.minus(DateTimePeriod(years = 2), TimeZone.UTC)
         )))
 
         val results = db.place.selectMerchantsByBounds(
@@ -663,7 +667,7 @@ class PlaceQueriesTest {
             maxLat = 41.0,
             minLon = -75.0,
             maxLon = -73.0,
-            minVerifiedAt = now.minusYears(1).minusDays(1)
+            minVerifiedAt = now.minus(DateTimePeriod(years = 1), TimeZone.UTC).minus(DateTimePeriod(days = 1), TimeZone.UTC)
         )
 
         Assert.assertEquals(1, results.size)
@@ -675,16 +679,16 @@ class PlaceQueriesTest {
     @Test
     fun selectMerchantsByBounds_withMinVerifiedAt_returnsEmptyWhenAllExcluded() {
         val db = createDatabase()
-        val now = ZonedDateTime.now(ZoneOffset.UTC)
+        val now = Clock.System.now()
         db.place.insert(listOf(createPlace(
             id = 1L,
             icon = "restaurant",
-            verifiedAt = now.minusYears(5)
+            verifiedAt = now.minus(DateTimePeriod(years = 5), TimeZone.UTC)
         )))
         db.place.insert(listOf(createPlace(
             id = 2L,
             icon = "coffee",
-            verifiedAt = now.minusYears(4)
+            verifiedAt = now.minus(DateTimePeriod(years = 4), TimeZone.UTC)
         )))
 
         val results = db.place.selectMerchantsByBounds(
@@ -692,7 +696,7 @@ class PlaceQueriesTest {
             maxLat = 41.0,
             minLon = -75.0,
             maxLon = -73.0,
-            minVerifiedAt = now.minusYears(1)
+            minVerifiedAt = now.minus(DateTimePeriod(years = 1), TimeZone.UTC)
         )
 
         Assert.assertEquals(0, results.size)
@@ -701,7 +705,7 @@ class PlaceQueriesTest {
     @Test
     fun insert_keepsTombstoneButHidesItFromReads() {
         val db = createDatabase()
-        val deletedAt = ZonedDateTime.parse("2024-01-02T10:00:00Z")
+        val deletedAt = Instant.parse("2024-01-02T10:00:00Z")
         db.place.insert(listOf(createPlace(id = 1L, icon = "coffee")))
         db.place.insert(
             listOf(
@@ -735,10 +739,10 @@ class PlaceQueriesTest {
         id: Long,
         name: String? = "Test Place",
         icon: String = "place",
-        updatedAt: ZonedDateTime = ZonedDateTime.parse("2024-01-01T10:00:00Z"),
+        updatedAt: Instant = Instant.parse("2024-01-01T10:00:00Z"),
         lat: Double = 40.7128,
         lon: Double = -74.0060,
-        verifiedAt: ZonedDateTime? = null,
+        verifiedAt: Instant? = null,
     ): Place {
         return Place(
             id = id,

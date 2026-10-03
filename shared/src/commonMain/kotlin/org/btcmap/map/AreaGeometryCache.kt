@@ -1,7 +1,7 @@
 package org.btcmap.map
 
+import kotlin.time.Instant
 import org.btcmap.db.table.area.AreaGeometry
-import java.time.ZonedDateTime
 
 /**
  * An access-ordered LRU of parsed area geometries.
@@ -27,7 +27,7 @@ internal class AreaGeometryCache(
      * parsing and caching it with [parse] otherwise. Touching a hit marks the
      * entry as most recently used.
      */
-    fun getOrPut(id: Long, updatedAt: ZonedDateTime, parse: () -> AreaGeometry): AreaGeometry {
+    fun getOrPut(id: Long, updatedAt: Instant, parse: () -> AreaGeometry): AreaGeometry {
         val cached = entries[id]
         if (cached != null && cached.updatedAt == updatedAt) return cached.geometry
 
@@ -53,7 +53,7 @@ internal class AreaGeometryCache(
     }
 
     private class CachedGeometry(
-        val updatedAt: ZonedDateTime,
+        val updatedAt: Instant,
         val geometry: AreaGeometry,
     )
 }

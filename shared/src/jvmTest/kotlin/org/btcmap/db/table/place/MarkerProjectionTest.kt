@@ -4,7 +4,7 @@ import io.ktor.http.Url
 import org.btcmap.util.toUrl
 import org.junit.Assert
 import org.junit.Test
-import java.time.ZonedDateTime
+import kotlin.time.Instant
 
 class MarkerProjectionTest {
 
@@ -13,7 +13,7 @@ class MarkerProjectionTest {
         val place = place(
             comments = 3,
             requiredAppUrl = "https://example.com/app".toUrl(),
-            boostedUntil = ZonedDateTime.parse("2024-02-01T00:00:00Z"),
+            boostedUntil = Instant.parse("2024-02-01T00:00:00Z"),
         )
 
         val marker = place.toMarker()
@@ -36,17 +36,17 @@ class MarkerProjectionTest {
     private fun place(
         comments: Long?,
         requiredAppUrl: Url? = null,
-        boostedUntil: ZonedDateTime? = null,
+        boostedUntil: Instant? = null,
     ): Place {
         return Place(
             id = 7,
-            updatedAt = ZonedDateTime.parse("2024-01-01T00:00:00Z"),
+            updatedAt = Instant.parse("2024-01-01T00:00:00Z"),
             lat = 1.5,
             lon = 2.5,
             icon = "restaurant",
             name = "Cafe",
             localizedName = null,
-            verifiedAt = ZonedDateTime.parse("2024-01-01T00:00:00Z"),
+            verifiedAt = Instant.parse("2024-01-01T00:00:00Z"),
             address = null,
             openingHours = null,
             phone = null,

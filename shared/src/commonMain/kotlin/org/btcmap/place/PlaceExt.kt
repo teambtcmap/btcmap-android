@@ -1,9 +1,10 @@
 package org.btcmap.place
 
+import kotlin.time.Clock
+import kotlin.time.Instant
 import org.btcmap.db.table.area.AreaGeometry
 import org.btcmap.db.table.place.Place
 import org.btcmap.db.table.place.SearchPlace
-import java.time.ZonedDateTime
 
 fun Place.isMerchant(): Boolean {
     return icon != "local_atm" && icon != "currency_exchange"
@@ -13,13 +14,13 @@ fun Place.isMerchant(): Boolean {
  * Whether the place's boost is still active at [now]. A place with no boost, or
  * one whose boost expired, is not boosted.
  */
-fun Place.isBoosted(now: ZonedDateTime = ZonedDateTime.now()): Boolean {
-    return boostedUntil?.isAfter(now) == true
+fun Place.isBoosted(now: Instant = Clock.System.now()): Boolean {
+    return boostedUntil?.let { it > now } == true
 }
 
 /** [isBoosted] for a search row, which omits fields search does not use. */
-fun SearchPlace.isBoosted(now: ZonedDateTime = ZonedDateTime.now()): Boolean {
-    return boostedUntil?.isAfter(now) == true
+fun SearchPlace.isBoosted(now: Instant = Clock.System.now()): Boolean {
+    return boostedUntil?.let { it > now } == true
 }
 
 /**

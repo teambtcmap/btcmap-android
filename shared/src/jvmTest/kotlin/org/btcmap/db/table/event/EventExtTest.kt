@@ -3,7 +3,7 @@ package org.btcmap.db.table.event
 import org.btcmap.db.table.area.AreaGeometry
 import org.junit.Assert
 import org.junit.Test
-import java.time.ZonedDateTime
+import kotlin.time.Instant
 
 class EventExtTest {
 
@@ -34,7 +34,7 @@ class EventExtTest {
             lon = lon,
             name = "Event",
             website = null,
-            startsAt = ZonedDateTime.parse("2026-01-01T00:00:00Z"),
+            startsAt = Instant.parse("2026-01-01T00:00:00Z"),
             endsAt = null,
         )
     }

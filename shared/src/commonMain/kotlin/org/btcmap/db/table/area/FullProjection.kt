@@ -1,15 +1,13 @@
 package org.btcmap.db.table.area
 
 import androidx.sqlite.SQLiteStatement
+import kotlin.time.Instant
 import kotlinx.serialization.json.JsonObject
 import org.btcmap.db.getDoubleOrNull
+import org.btcmap.db.getInstant
+import org.btcmap.db.getInstantOrNull
 import org.btcmap.db.getJsonObjectOrNull
 import org.btcmap.db.getTextOrNull
-import org.btcmap.db.getZonedDateTime
-import org.btcmap.db.getZonedDateTimeOrNull
-import java.time.Instant
-import java.time.ZoneOffset
-import java.time.ZonedDateTime
 
 typealias Area = FullProjection
 
@@ -34,8 +32,8 @@ data class FullProjection(
     // Defaults to the epoch for callers that build an area for display only.
     // Sync writes the server's value; selectMaxUpdatedAt reads it back as the
     // delta cursor, and an epoch value simply means "sync from the beginning".
-    val updatedAt: ZonedDateTime = ZonedDateTime.ofInstant(Instant.EPOCH, ZoneOffset.UTC),
-    val deletedAt: ZonedDateTime? = null,
+    val updatedAt: Instant = Instant.fromEpochSeconds(0),
+    val deletedAt: Instant? = null,
     // Per-language maps keyed by a two-letter code, or null when the area has
     // no translation for any language.
     val localizedName: JsonObject? = null,
@@ -62,8 +60,8 @@ data class FullProjection(
                 bboxEast = stmt.getDoubleOrNull(10),
                 bboxNorth = stmt.getDoubleOrNull(11),
                 geoJson = stmt.getTextOrNull(12),
-                updatedAt = stmt.getZonedDateTime(13),
-                deletedAt = stmt.getZonedDateTimeOrNull(14),
+                updatedAt = stmt.getInstant(13),
+                deletedAt = stmt.getInstantOrNull(14),
                 localizedName = stmt.getJsonObjectOrNull(15),
                 localizedDescription = stmt.getJsonObjectOrNull(16),
             )

@@ -2,7 +2,7 @@ package org.btcmap.ui.map
 
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import java.nio.file.Files
-import java.time.ZonedDateTime
+import kotlin.time.Instant
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
@@ -126,7 +126,7 @@ class MapSearchTest {
 
     private fun place(id: Long, name: String, lat: Double, lon: Double) = Place(
         id = id,
-        updatedAt = ZonedDateTime.parse("2024-01-01T00:00:00Z"),
+        updatedAt = Instant.parse("2024-01-01T00:00:00Z"),
         lat = lat,
         lon = lon,
         icon = "local_cafe",
@@ -161,7 +161,7 @@ class MapSearchTest {
         lon = lon,
         name = name,
         website = website?.toUrl(),
-        startsAt = ZonedDateTime.parse("2999-01-01T18:00:00Z"),
+        startsAt = Instant.parse("2999-01-01T18:00:00Z"),
         endsAt = null,
     )
 

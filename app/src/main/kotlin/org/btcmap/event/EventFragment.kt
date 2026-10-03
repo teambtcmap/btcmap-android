@@ -18,13 +18,13 @@ import org.btcmap.settings.badgeBackgroundColor
 import org.btcmap.settings.badgeTextColor
 import org.btcmap.settings.boostedMarkerBackgroundColor
 import org.btcmap.settings.boostedMarkerIconColor
+import kotlin.time.Instant
 import org.btcmap.settings.mapStyle
 import org.btcmap.settings.markerBackgroundColor
 import org.btcmap.settings.markerIconColor
 import org.btcmap.settings.prefs
 import org.btcmap.settings.uri
 import org.btcmap.ui.EventScreenLabels
-import java.time.ZonedDateTime
 
 private const val ARG_ID = "id"
 private const val ARG_LAT = "lat"
@@ -68,8 +68,8 @@ class EventFragment : Fragment() {
             lon = args.getDouble(ARG_LON),
             name = args.getString(ARG_NAME).orEmpty(),
             website = args.getString(ARG_WEBSITE)?.toUrlOrNull(),
-            startsAt = ZonedDateTime.parse(requireNotNull(args.getString(ARG_STARTS_AT))),
-            endsAt = args.getString(ARG_ENDS_AT)?.let { ZonedDateTime.parse(it) },
+            startsAt = Instant.parse(requireNotNull(args.getString(ARG_STARTS_AT))),
+            endsAt = args.getString(ARG_ENDS_AT)?.let { Instant.parse(it) },
         )
     }
 

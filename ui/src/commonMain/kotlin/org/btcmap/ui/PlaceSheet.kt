@@ -1,5 +1,9 @@
 package org.btcmap.ui
 
+import kotlinx.datetime.minus
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.DateTimePeriod
+import kotlin.time.Clock
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -58,7 +62,7 @@ import org.btcmap.place.osmEditUrl
 import org.btcmap.place.osmUrl
 import java.time.DayOfWeek
 import java.time.LocalDate
-import java.time.ZonedDateTime
+import kotlin.time.Instant
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 import java.util.Locale
@@ -508,12 +512,12 @@ private fun ButtonLabel(label: String, glyph: String?) {
     Text(text = label, maxLines = 1)
 }
 
-private fun formatVerifiedAt(verifiedAt: ZonedDateTime): String {
+private fun formatVerifiedAt(verifiedAt: Instant): String {
     return verifiedAt.format(DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM))
 }
 
 /** True when the place has never been verified, or not within the last year. */
-private fun Place.isOutdated(now: ZonedDateTime = ZonedDateTime.now()): Boolean {
+private fun Place.isOutdated(now: Instant = Clock.System.now()): Boolean {
     val verifiedAt = verifiedAt ?: return true
-    return verifiedAt.isBefore(now.minusYears(1))
+    return verifiedAt < now.minus(DateTimePeriod(years = 1), TimeZone.UTC)
 }

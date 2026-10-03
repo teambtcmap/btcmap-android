@@ -5,7 +5,7 @@ import org.btcmap.util.toUrl
 import org.btcmap.db.Database
 import org.junit.Assert
 import org.junit.Test
-import java.time.ZonedDateTime
+import kotlin.time.Instant
 
 class EventQueriesTest {
     private fun createDatabase(): Database {
@@ -21,8 +21,8 @@ class EventQueriesTest {
             lon = -74.0060,
             name = "Bitcoin Meetup",
             website = "https://example.com".toUrl(),
-            startsAt = ZonedDateTime.parse("2024-06-01T18:00:00Z"),
-            endsAt = ZonedDateTime.parse("2024-06-01T20:00:00Z"),
+            startsAt = Instant.parse("2024-06-01T18:00:00Z"),
+            endsAt = Instant.parse("2024-06-01T20:00:00Z"),
         )
 
         db.event.insert(listOf(event))
@@ -44,7 +44,7 @@ class EventQueriesTest {
             lon = -0.1278,
             name = "London BTC",
             website = "https://london.btc".toUrl(),
-            startsAt = ZonedDateTime.parse("2024-07-01T19:00:00Z"),
+            startsAt = Instant.parse("2024-07-01T19:00:00Z"),
             endsAt = null,
         )
 
@@ -66,7 +66,7 @@ class EventQueriesTest {
             lon = -74.0060,
             name = "No Website",
             website = null,
-            startsAt = ZonedDateTime.parse("2024-06-01T18:00:00Z"),
+            startsAt = Instant.parse("2024-06-01T18:00:00Z"),
             endsAt = null,
         )
 
@@ -102,7 +102,7 @@ class EventQueriesTest {
             lon = -74.0060,
             name = "NYC Event",
             website = "https://example.com".toUrl(),
-            startsAt = ZonedDateTime.parse("2024-06-01T18:00:00Z"),
+            startsAt = Instant.parse("2024-06-01T18:00:00Z"),
             endsAt = null,
         )
         val event2 = Event(
@@ -111,7 +111,7 @@ class EventQueriesTest {
             lon = -0.1278,
             name = "London Event",
             website = "https://example.com".toUrl(),
-            startsAt = ZonedDateTime.parse("2024-07-01T18:00:00Z"),
+            startsAt = Instant.parse("2024-07-01T18:00:00Z"),
             endsAt = null,
         )
         val event3 = Event(
@@ -120,7 +120,7 @@ class EventQueriesTest {
             lon = -118.2437,
             name = "LA Event",
             website = "https://example.com".toUrl(),
-            startsAt = ZonedDateTime.parse("2024-08-01T18:00:00Z"),
+            startsAt = Instant.parse("2024-08-01T18:00:00Z"),
             endsAt = null,
         )
 
@@ -147,7 +147,7 @@ class EventQueriesTest {
             lon = -74.0060,
             name = "NYC Event",
             website = "https://example.com".toUrl(),
-            startsAt = ZonedDateTime.parse("2024-06-01T18:00:00Z"),
+            startsAt = Instant.parse("2024-06-01T18:00:00Z"),
             endsAt = null,
         )
 
@@ -171,7 +171,7 @@ class EventQueriesTest {
         db.event.insert(listOf(event))
 
         Assert.assertEquals(
-            ZonedDateTime.parse("2024-05-01T10:00:00Z"),
+            Instant.parse("2024-05-01T10:00:00Z"),
             db.event.selectById(1L)!!.updatedAt,
         )
     }
@@ -189,7 +189,7 @@ class EventQueriesTest {
     @Test
     fun selectCount_excludesTombstonesUnlessAsked() {
         val db = createDatabase()
-        val deletedAt = ZonedDateTime.parse("2024-01-02T10:00:00Z")
+        val deletedAt = Instant.parse("2024-01-02T10:00:00Z")
         db.event.insert(
             listOf(
                 event(id = 1L),
@@ -221,7 +221,7 @@ class EventQueriesTest {
         // "10:00:00Z" sorts after "10:00:00.500Z" as text but is earlier by
         // instant, so a plain max() would pick the wrong cursor.
         Assert.assertEquals(
-            ZonedDateTime.parse("2024-01-01T10:00:00.500Z"),
+            Instant.parse("2024-01-01T10:00:00.500Z"),
             db.event.selectMaxUpdatedAt(),
         )
     }
@@ -294,7 +294,7 @@ class EventQueriesTest {
     @Test
     fun insert_keepsTombstoneButHidesItFromSelects() {
         val db = createDatabase()
-        val deletedAt = ZonedDateTime.parse("2024-01-02T10:00:00Z")
+        val deletedAt = Instant.parse("2024-01-02T10:00:00Z")
         db.event.insert(
             listOf(
                 event(id = 1L, name = "Bitcoin Meetup", updatedAt = "2024-01-02T10:00:00Z")
@@ -330,9 +330,9 @@ class EventQueriesTest {
             lon = -74.0060,
             name = name,
             website = null,
-            startsAt = ZonedDateTime.parse("2099-06-01T18:00:00Z"),
+            startsAt = Instant.parse("2099-06-01T18:00:00Z"),
             endsAt = null,
-            updatedAt = ZonedDateTime.parse(updatedAt),
+            updatedAt = Instant.parse(updatedAt),
         )
     }
 
@@ -350,7 +350,7 @@ class EventQueriesTest {
                     lon = -74.0060,
                     name = name,
                     website = website?.toUrl(),
-                    startsAt = ZonedDateTime.parse("2024-06-01T18:00:00Z"),
+                    startsAt = Instant.parse("2024-06-01T18:00:00Z"),
                     endsAt = null,
                 )
             )

@@ -27,7 +27,7 @@ import org.btcmap.util.waitUntilOnMain
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import java.time.ZonedDateTime
+import kotlin.time.Instant
 
 @RunWith(AndroidJUnit4::class)
 class PlaceCommentsTest : AppTestCase() {
@@ -115,14 +115,14 @@ class PlaceCommentsTest : AppTestCase() {
         id = id,
         placeId = 1L,
         comment = text,
-        createdAt = ZonedDateTime.parse(createdAt),
-        updatedAt = ZonedDateTime.parse(createdAt),
+        createdAt = Instant.parse(createdAt),
+        updatedAt = Instant.parse(createdAt),
     )
 
     private fun placeRow(): Place {
         return Place(
             id = 1,
-            updatedAt = ZonedDateTime.parse("2024-01-01T00:00:00Z"),
+            updatedAt = Instant.parse("2024-01-01T00:00:00Z"),
             lat = 0.0,
             lon = 0.0,
             icon = "storefront",

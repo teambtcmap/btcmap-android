@@ -1,16 +1,17 @@
 package org.btcmap.api
 
+import kotlin.time.Instant
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.atStartOfDayIn
 import org.btcmap.db.table.place.FullProjection
+import org.btcmap.util.toInstant
 import org.btcmap.util.toUrlOrNull
-import org.btcmap.util.toZonedDateTime
-import java.time.LocalDate
-import java.time.ZoneOffset
-import java.time.ZonedDateTime
 
 fun GetPlacesItem.toPlace(): FullProjection {
     return FullProjection(
         id = id,
-        updatedAt = updatedAt.toZonedDateTime(),
+        updatedAt = updatedAt.toInstant(),
         lat = lat,
         lon = lon,
         icon = icon,
@@ -27,22 +28,22 @@ fun GetPlacesItem.toPlace(): FullProjection {
         instagram = instagram?.toUrlOrNull(),
         line = line?.toUrlOrNull(),
         requiredAppUrl = requiredAppUrl?.toUrlOrNull(),
-        boostedUntil = boostedUntil?.toZonedDateTime(),
+        boostedUntil = boostedUntil?.toInstant(),
         comments = comments,
         telegram = telegram?.toUrlOrNull(),
         osmId = osmId,
-        deletedAt = deletedAt?.toZonedDateTime(),
+        deletedAt = deletedAt?.toInstant(),
     )
 }
 
-fun String.toVerifiedAt(): ZonedDateTime {
+fun String.toVerifiedAt(): Instant {
     // A date-only value gets midnight UTC; anything else is a full timestamp.
     // Choosing on the date/time separator instead of trying LocalDate first
-    // keeps a full timestamp from paying for a thrown and caught
-    // DateTimeParseException, which costs far more than the parse itself.
+    // keeps a full timestamp from paying for a thrown and caught parse
+    // exception, which costs far more than the parse itself.
     return if (contains('T')) {
-        ZonedDateTime.parse(this)
+        Instant.parse(this)
     } else {
-        LocalDate.parse(this).atStartOfDay(ZoneOffset.UTC)
+        LocalDate.parse(this).atStartOfDayIn(TimeZone.UTC)
     }
 }

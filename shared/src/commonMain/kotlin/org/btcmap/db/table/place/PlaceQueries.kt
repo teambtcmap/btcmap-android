@@ -5,11 +5,11 @@ import org.btcmap.db.bindHttpUrlOrNull
 import org.btcmap.db.bindJsonObjectOrNull
 import org.btcmap.db.bindLongOrNull
 import org.btcmap.db.bindTextOrNull
-import org.btcmap.db.bindZonedDateTime
-import org.btcmap.db.bindZonedDateTimeOrNull
+import org.btcmap.db.bindInstant
+import org.btcmap.db.bindInstantOrNull
 import org.btcmap.db.escapeLikePattern
-import org.btcmap.db.getZonedDateTimeOrNull
-import java.time.ZonedDateTime
+import org.btcmap.db.getInstantOrNull
+import kotlin.time.Instant
 
 /**
  * Caps the number of bound variables per statement. Android 10 (minSdk 29)
@@ -28,13 +28,13 @@ class PlaceQueries(private val conn: SQLiteConnection) {
         ).use { stmt ->
             rows.forEach { row ->
                 stmt.bindLong(1, row.id)
-                stmt.bindZonedDateTime(2, row.updatedAt)
+                stmt.bindInstant(2, row.updatedAt)
                 stmt.bindDouble(3, row.lat)
                 stmt.bindDouble(4, row.lon)
                 stmt.bindText(5, row.icon)
                 stmt.bindTextOrNull(6, row.name)
                 stmt.bindJsonObjectOrNull(7, row.localizedName)
-                stmt.bindZonedDateTimeOrNull(8, row.verifiedAt)
+                stmt.bindInstantOrNull(8, row.verifiedAt)
                 stmt.bindTextOrNull(9, row.address)
                 stmt.bindTextOrNull(10, row.openingHours)
                 stmt.bindTextOrNull(11, row.phone)
@@ -45,11 +45,11 @@ class PlaceQueries(private val conn: SQLiteConnection) {
                 stmt.bindHttpUrlOrNull(16, row.instagram)
                 stmt.bindHttpUrlOrNull(17, row.line)
                 stmt.bindHttpUrlOrNull(18, row.requiredAppUrl)
-                stmt.bindZonedDateTimeOrNull(19, row.boostedUntil)
+                stmt.bindInstantOrNull(19, row.boostedUntil)
                 stmt.bindLongOrNull(20, row.comments)
                 stmt.bindHttpUrlOrNull(21, row.telegram)
                 stmt.bindTextOrNull(22, row.osmId)
-                stmt.bindZonedDateTimeOrNull(23, row.deletedAt)
+                stmt.bindInstantOrNull(23, row.deletedAt)
                 stmt.step()
                 stmt.reset()
             }
@@ -209,7 +209,7 @@ class PlaceQueries(private val conn: SQLiteConnection) {
         maxLat: Double,
         minLon: Double,
         maxLon: Double,
-        minVerifiedAt: ZonedDateTime? = null,
+        minVerifiedAt: Instant? = null,
     ): List<Marker> {
         val whereClause = buildString {
             append("$ICON <> 'local_atm' AND $ICON <> 'currency_exchange'")
@@ -217,7 +217,7 @@ class PlaceQueries(private val conn: SQLiteConnection) {
             append(" AND $LAT >= ?1 AND $LAT <= ?2 AND $LON >= ?3 AND $LON <= ?4")
             if (minVerifiedAt != null) {
                 // julianday, not plain text: timestamps are stored as
-                // ZonedDateTime.toString(), which is not fixed-width, so text
+                // Instant.toString(), which is not fixed-width, so text
                 // ordering is not chronological (see selectMaxUpdatedAt).
                 append(" AND julianday($VERIFIED_AT) >= julianday(?5)")
             }
@@ -269,7 +269,7 @@ class PlaceQueries(private val conn: SQLiteConnection) {
         maxLat: Double,
         minLon: Double,
         maxLon: Double,
-        minVerifiedAt: ZonedDateTime? = null,
+        minVerifiedAt: Instant? = null,
     ): List<Marker> {
         val whereClause = buildString {
             append("($ICON = 'local_atm' OR $ICON = 'currency_exchange')")
@@ -303,9 +303,9 @@ class PlaceQueries(private val conn: SQLiteConnection) {
         }
     }
 
-    fun selectMaxUpdatedAt(): ZonedDateTime? {
+    fun selectMaxUpdatedAt(): Instant? {
         // See CommentQueries.selectMaxUpdatedAt: text ordering of
-        // ZonedDateTime.toString() values is not chronological.
+        // Instant.toString() values is not chronological.
         conn.prepare(
             """
             SELECT $UPDATED_AT
@@ -317,7 +317,7 @@ class PlaceQueries(private val conn: SQLiteConnection) {
             if (!it.step()) {
                 return null
             }
-            return it.getZonedDateTimeOrNull(0)
+            return it.getInstantOrNull(0)
         }
     }
 

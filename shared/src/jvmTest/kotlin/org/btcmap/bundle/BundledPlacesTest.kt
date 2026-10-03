@@ -9,15 +9,15 @@ import org.btcmap.db.Database
 import org.btcmap.db.table.place.Place
 import org.junit.Assert
 import org.junit.Test
-import java.time.ZonedDateTime
+import kotlin.time.Instant
 
 class BundledPlacesTest {
 
     private fun createDatabase(): Database = Database(BundledSQLiteDriver(), ":memory:")
 
-    private fun place(id: Long, deletedAt: ZonedDateTime? = null) = Place(
+    private fun place(id: Long, deletedAt: Instant? = null) = Place(
         id = id,
-        updatedAt = ZonedDateTime.parse("2024-01-01T00:00:00Z"),
+        updatedAt = Instant.parse("2024-01-01T00:00:00Z"),
         lat = 0.0,
         lon = 0.0,
         icon = "store",
@@ -77,8 +77,8 @@ class BundledPlacesTest {
         Assert.assertEquals("local_cafe", place.icon)
         Assert.assertEquals("Cafe", place.name)
         Assert.assertEquals(7L, place.comments)
-        Assert.assertEquals(ZonedDateTime.parse("2026-02-01T00:00:00Z"), place.boostedUntil)
-        Assert.assertEquals(ZonedDateTime.parse("2026-03-01T12:00:00Z"), place.updatedAt)
+        Assert.assertEquals(Instant.parse("2026-02-01T00:00:00Z"), place.boostedUntil)
+        Assert.assertEquals(Instant.parse("2026-03-01T12:00:00Z"), place.updatedAt)
     }
 
     @Test
@@ -114,7 +114,7 @@ class BundledPlacesTest {
 
         Assert.assertEquals(parseJsonObject("""{"en":"Shop","de":"Laden"}"""), place.localizedName)
         Assert.assertEquals(
-            ZonedDateTime.parse("2026-01-15T00:00:00Z"),
+            Instant.parse("2026-01-15T00:00:00Z"),
             place.verifiedAt,
         )
         Assert.assertEquals("1 Main St", place.address)
@@ -182,7 +182,7 @@ class BundledPlacesTest {
         Assert.assertNull(place.name)
         Assert.assertNull(place.comments)
         Assert.assertNull(place.boostedUntil)
-        Assert.assertEquals(ZonedDateTime.parse("2026-03-01T12:00:00Z"), place.updatedAt)
+        Assert.assertEquals(Instant.parse("2026-03-01T12:00:00Z"), place.updatedAt)
     }
 
     @Test
@@ -326,14 +326,14 @@ class BundledPlacesTest {
         Assert.assertEquals("store", first.icon)
         Assert.assertEquals("One", first.name)
         Assert.assertEquals(3L, first.comments)
-        Assert.assertEquals(ZonedDateTime.parse("2026-02-01T00:00:00Z"), first.boostedUntil)
-        Assert.assertEquals(ZonedDateTime.parse("2026-03-01T12:00:00Z"), first.updatedAt)
+        Assert.assertEquals(Instant.parse("2026-02-01T00:00:00Z"), first.boostedUntil)
+        Assert.assertEquals(Instant.parse("2026-03-01T12:00:00Z"), first.updatedAt)
         val second = db.place.selectById(2L)
         Assert.assertNotNull(second)
         Assert.assertNull(second!!.name)
         Assert.assertNull(second.comments)
         Assert.assertNull(second.boostedUntil)
-        Assert.assertEquals(ZonedDateTime.parse("2026-04-01T12:00:00Z"), second.updatedAt)
+        Assert.assertEquals(Instant.parse("2026-04-01T12:00:00Z"), second.updatedAt)
     }
 
     @Test
@@ -357,7 +357,7 @@ class BundledPlacesTest {
     fun import_skipsWhenDatabaseHoldsOnlyTombstones() = runTest {
         val db = createDatabase()
         db.place.insert(
-            listOf(place(id = 99L, deletedAt = ZonedDateTime.parse("2026-05-01T00:00:00Z"))),
+            listOf(place(id = 99L, deletedAt = Instant.parse("2026-05-01T00:00:00Z"))),
         )
 
         val result = BundledPlaces.import(db) { snapshotJson(2).asSource() }

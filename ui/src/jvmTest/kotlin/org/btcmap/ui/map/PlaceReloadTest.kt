@@ -6,7 +6,7 @@ import androidx.compose.ui.test.runComposeUiTest
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import kotlinx.coroutines.runBlocking
 import java.nio.file.Files
-import java.time.ZonedDateTime
+import kotlin.time.Instant
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import org.btcmap.db.Database
@@ -52,7 +52,7 @@ class PlaceReloadTest {
 
     private fun place(name: String) = Place(
         id = PLACE_ID,
-        updatedAt = ZonedDateTime.parse("2024-01-01T00:00:00Z"),
+        updatedAt = Instant.parse("2024-01-01T00:00:00Z"),
         lat = 0.0,
         lon = 0.0,
         icon = "storefront",

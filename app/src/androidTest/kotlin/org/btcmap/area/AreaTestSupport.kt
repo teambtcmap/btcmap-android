@@ -16,7 +16,7 @@ import org.btcmap.db.table.area.Area
 import org.btcmap.db.table.event.Event
 import org.btcmap.util.AppTestCase
 import org.junit.Rule
-import java.time.ZonedDateTime
+import kotlin.time.Instant
 
 internal const val AREA_TAG = "area"
 
@@ -129,7 +129,7 @@ internal fun area(
         bboxEast = bboxEast,
         bboxNorth = bboxNorth,
         geoJson = geoJson,
-        updatedAt = ZonedDateTime.parse("2024-01-01T00:00:00Z"),
+        updatedAt = Instant.parse("2024-01-01T00:00:00Z"),
     )
 }
 
@@ -147,9 +147,9 @@ internal fun event(
         lon = lon,
         name = name,
         website = "https://example.com/events/$id".toUrlOrNull(),
-        startsAt = ZonedDateTime.parse(startsAt),
-        endsAt = endsAt?.let { ZonedDateTime.parse(it) },
-        updatedAt = ZonedDateTime.parse("2024-01-01T00:00:00Z"),
+        startsAt = Instant.parse(startsAt),
+        endsAt = endsAt?.let { Instant.parse(it) },
+        updatedAt = Instant.parse("2024-01-01T00:00:00Z"),
     )
 }
 

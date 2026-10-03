@@ -11,9 +11,10 @@ import io.ktor.http.HttpMethod
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.Url
 import kotlinx.coroutines.delay
-import java.time.ZonedDateTime
-import java.time.format.DateTimeFormatter
-import java.time.format.DateTimeParseException
+import kotlin.time.Clock
+import kotlin.time.Instant
+import kotlinx.datetime.format.DateTimeComponents
+import kotlinx.datetime.parse
 import kotlin.random.Random
 
 private const val MAX_RETRY_ATTEMPTS = 10
@@ -86,9 +87,9 @@ internal fun Headers.retryAfterMillis(): Long? {
     value.toLongOrNull()?.let { return it * 1000 }
 
     return try {
-        val date = ZonedDateTime.parse(value, DateTimeFormatter.RFC_1123_DATE_TIME)
-        (date.toEpochSecond() - ZonedDateTime.now().toEpochSecond()).coerceAtLeast(0) * 1000
-    } catch (e: DateTimeParseException) {
+        val date = Instant.parse(value, DateTimeComponents.Formats.RFC_1123)
+        (date - Clock.System.now()).inWholeMilliseconds.coerceAtLeast(0)
+    } catch (e: RuntimeException) {
         null
     }
 }

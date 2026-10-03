@@ -2,11 +2,11 @@ package org.btcmap.db.table.event
 
 import androidx.sqlite.SQLiteConnection
 import org.btcmap.db.bindHttpUrlOrNull
-import org.btcmap.db.bindZonedDateTime
-import org.btcmap.db.bindZonedDateTimeOrNull
+import org.btcmap.db.bindInstant
+import org.btcmap.db.bindInstantOrNull
 import org.btcmap.db.escapeLikePattern
-import org.btcmap.db.getZonedDateTimeOrNull
-import java.time.ZonedDateTime
+import org.btcmap.db.getInstantOrNull
+import kotlin.time.Instant
 
 class EventQueries(private val conn: SQLiteConnection) {
     fun insert(rows: List<Event>) {
@@ -28,10 +28,10 @@ class EventQueries(private val conn: SQLiteConnection) {
                 stmt.bindDouble(3, row.lon)
                 stmt.bindText(4, row.name)
                 stmt.bindHttpUrlOrNull(5, row.website)
-                stmt.bindZonedDateTime(6, row.startsAt)
-                stmt.bindZonedDateTimeOrNull(7, row.endsAt)
-                stmt.bindZonedDateTime(8, row.updatedAt)
-                stmt.bindZonedDateTimeOrNull(9, row.deletedAt)
+                stmt.bindInstant(6, row.startsAt)
+                stmt.bindInstantOrNull(7, row.endsAt)
+                stmt.bindInstant(8, row.updatedAt)
+                stmt.bindInstantOrNull(9, row.deletedAt)
                 stmt.step()
                 stmt.reset()
             }
@@ -116,9 +116,9 @@ class EventQueries(private val conn: SQLiteConnection) {
         }
     }
 
-    fun selectMaxUpdatedAt(): ZonedDateTime? {
+    fun selectMaxUpdatedAt(): Instant? {
         // julianday, not plain max(): timestamps are stored as text and
-        // ZonedDateTime.toString() is not fixed-width (it drops a zero second
+        // Instant.toString() is not fixed-width (it drops a zero second
         // and a zero fraction), so text ordering is not chronological.
         conn.prepare(
             """
@@ -131,7 +131,7 @@ class EventQueries(private val conn: SQLiteConnection) {
             if (!it.step()) {
                 return null
             }
-            return it.getZonedDateTimeOrNull(0)
+            return it.getInstantOrNull(0)
         }
     }
 

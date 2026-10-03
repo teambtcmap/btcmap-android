@@ -5,7 +5,7 @@ import org.btcmap.util.toUrl
 import org.btcmap.json.parseJsonObject
 import org.junit.Assert
 import org.junit.Test
-import java.time.ZonedDateTime
+import kotlin.time.Instant
 
 class GetPlacesItemExtTest {
     @Test
@@ -40,8 +40,8 @@ class GetPlacesItemExtTest {
 
         Assert.assertEquals("2026-01-02T03:04:05Z", place.updatedAt.toString())
         Assert.assertEquals("Kaffee", place.localizedName!!.getValue("de").jsonPrimitive.content)
-        Assert.assertEquals(ZonedDateTime.parse("2026-01-15T00:00:00Z"), place.verifiedAt)
-        Assert.assertEquals(ZonedDateTime.parse("2026-02-01T00:00:00Z"), place.boostedUntil)
+        Assert.assertEquals(Instant.parse("2026-01-15T00:00:00Z"), place.verifiedAt)
+        Assert.assertEquals(Instant.parse("2026-02-01T00:00:00Z"), place.boostedUntil)
         Assert.assertEquals("https://cafe.example".toUrl(), place.website)
         Assert.assertEquals("https://x.com/cafe".toUrl(), place.twitter)
         Assert.assertEquals("https://fb.com/cafe".toUrl(), place.facebook)
@@ -81,7 +81,7 @@ class GetPlacesItemExtTest {
             osmId = null,
         )
 
-        Assert.assertEquals(ZonedDateTime.parse("2026-01-15T00:00:00Z"), item.toPlace().verifiedAt)
+        Assert.assertEquals(Instant.parse("2026-01-15T00:00:00Z"), item.toPlace().verifiedAt)
     }
 
     @Test

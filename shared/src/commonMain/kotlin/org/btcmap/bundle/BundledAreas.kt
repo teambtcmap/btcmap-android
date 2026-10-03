@@ -18,7 +18,7 @@ import org.btcmap.db.Database
 import org.btcmap.db.table.area.Area
 import org.btcmap.json.btcmapJson
 import org.btcmap.util.rethrowIfCancellation
-import org.btcmap.util.toZonedDateTimeOrNull
+import org.btcmap.util.toInstantOrNull
 
 /**
  * Seeds the areas table from the bundled snapshot produced by the bundler.
@@ -148,7 +148,7 @@ internal fun BundledAreaJson.toArea(): Area {
     }
     // `updated_at` drives the delta sync cursor, so a malformed one must fail
     // the seed rather than silently reset the cursor to an arbitrary value.
-    val areaUpdatedAt = requireNotNull(updatedAt?.toZonedDateTimeOrNull()) {
+    val areaUpdatedAt = requireNotNull(updatedAt?.toInstantOrNull()) {
         "bundled area $areaId is missing a parseable 'updated_at'"
     }
     // A bbox that is not exactly four numbers is treated as absent: the app

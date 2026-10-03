@@ -27,6 +27,8 @@ kotlin {
             // Multiplatform HTTP, the OkHttp replacement. Exposed because the
             // shared DTOs carry Ktor `Url` fields.
             api(libs.ktor.client.core)
+            // Multiplatform date/time, the java.time replacement.
+            implementation(libs.kotlinx.datetime)
             // The java.io replacement: streaming sources and file access.
             implementation(libs.okio)
             implementation(libs.kotlinx.coroutines.core)

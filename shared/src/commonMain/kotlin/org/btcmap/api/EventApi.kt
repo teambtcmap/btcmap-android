@@ -2,12 +2,11 @@ package org.btcmap.api
 
 import io.ktor.http.HttpMethod
 import io.ktor.http.Url
+import kotlin.time.Instant
 import kotlinx.serialization.json.JsonObject
 import org.btcmap.util.toJsonArray
 import org.btcmap.util.toJsonObject
 import org.btcmap.util.toUrlOrNull
-import java.time.ZonedDateTime
-import java.time.format.DateTimeParseException
 
 data class GetEventsItem(
     val id: Long,
@@ -18,8 +17,8 @@ data class GetEventsItem(
     val lon: Double,
     val name: String,
     val website: Url?,
-    val startsAt: ZonedDateTime,
-    val endsAt: ZonedDateTime?,
+    val startsAt: Instant,
+    val endsAt: Instant?,
 )
 
 /**
@@ -33,13 +32,13 @@ data class GetEventsDeltaItem(
     val lon: Double,
     val name: String,
     val website: Url?,
-    val startsAt: ZonedDateTime,
-    val endsAt: ZonedDateTime?,
+    val startsAt: Instant,
+    val endsAt: Instant?,
     val updatedAt: String,
     val deletedAt: String?,
 )
 
-suspend fun Api.getEvents(updatedSince: ZonedDateTime, limit: Long): List<GetEventsDeltaItem> {
+suspend fun Api.getEvents(updatedSince: Instant, limit: Long): List<GetEventsDeltaItem> {
     val url = buildUrl("v4", "events") {
         // Always send updated_since: without it the endpoint falls back to the
         // legacy full snapshot, which omits updated_at and so cannot seed a
@@ -67,8 +66,8 @@ internal fun JsonObject.toGetEventsItem(): GetEventsItem {
         lon = double("lon"),
         name = string("name"),
         website = nonBlankStringOrNull("website")?.toUrlOrNull(),
-        startsAt = string("starts_at").toApiZonedDateTime("starts_at"),
-        endsAt = stringOrNull("ends_at")?.toApiZonedDateTime("ends_at"),
+        startsAt = string("starts_at").toApiInstant("starts_at"),
+        endsAt = stringOrNull("ends_at")?.toApiInstant("ends_at"),
     )
 }
 
@@ -87,10 +86,10 @@ private fun JsonObject.toGetEventsDeltaItem(): GetEventsDeltaItem {
     )
 }
 
-private fun String.toApiZonedDateTime(field: String): ZonedDateTime {
+private fun String.toApiInstant(field: String): Instant {
     return try {
-        ZonedDateTime.parse(this)
-    } catch (e: DateTimeParseException) {
+        Instant.parse(this)
+    } catch (e: RuntimeException) {
         throw ApiParseException("Field '$field' is not a valid ISO 8601 datetime", e)
     }
 }

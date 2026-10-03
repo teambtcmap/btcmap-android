@@ -4,7 +4,7 @@ import org.btcmap.db.table.comment.Comment
 import org.junit.Assert
 import org.junit.Test
 import java.time.ZoneId
-import java.time.ZonedDateTime
+import kotlin.time.Instant
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 import java.util.Locale
@@ -15,8 +15,8 @@ class CommentExtTest {
         id = 7L,
         placeId = 100L,
         comment = "Great coffee!",
-        createdAt = ZonedDateTime.parse(createdAt),
-        updatedAt = ZonedDateTime.parse(createdAt),
+        createdAt = Instant.parse(createdAt),
+        updatedAt = Instant.parse(createdAt),
     )
 
     private fun expectedDate(
@@ -26,7 +26,8 @@ class CommentExtTest {
     ): String =
         DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM)
             .withLocale(locale)
-            .format(ZonedDateTime.parse(createdAt).withZoneSameInstant(zone))
+            .withZone(zone)
+            .format(java.time.Instant.ofEpochSecond(Instant.parse(createdAt).epochSeconds))
 
     @Test
     fun toAdapterItem_copiesIdAndComment() {

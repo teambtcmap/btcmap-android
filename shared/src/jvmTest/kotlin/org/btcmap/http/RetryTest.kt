@@ -1,5 +1,10 @@
 package org.btcmap.http
 
+import kotlinx.datetime.plus
+import kotlinx.datetime.minus
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.DateTimePeriod
+import kotlin.time.Clock
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.cio.CIO
 import io.ktor.http.HttpHeaders
@@ -15,8 +20,7 @@ import org.btcmap.util.toUrl
 import org.junit.Assert
 import org.junit.Rule
 import org.junit.Test
-import java.time.ZonedDateTime
-import java.time.format.DateTimeFormatter
+import kotlin.time.Instant
 
 class RetryTest {
     @JvmField
@@ -100,7 +104,7 @@ class RetryTest {
 
     @Test
     fun retryAfterPastHttpDateIsZero() {
-        val past = ZonedDateTime.now().minusHours(1).format(DateTimeFormatter.RFC_1123_DATE_TIME)
+        val past = "Mon, 01 Jan 2024 00:00:00 GMT"
 
         Assert.assertEquals(0L, headersOf(HttpHeaders.RetryAfter, past).retryAfterMillis())
     }

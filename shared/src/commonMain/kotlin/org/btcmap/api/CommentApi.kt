@@ -5,7 +5,7 @@ import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
 import org.btcmap.util.toJsonArray
 import org.btcmap.util.toJsonObject
-import java.time.ZonedDateTime
+import kotlin.time.Instant
 
 data class GetCommentsItem(
     val id: Long,
@@ -25,7 +25,7 @@ data class AddCommentResponse(
     val invoice: String,
 )
 
-suspend fun Api.getComments(updatedSince: ZonedDateTime?, limit: Long): List<GetCommentsItem> {
+suspend fun Api.getComments(updatedSince: Instant?, limit: Long): List<GetCommentsItem> {
     val url = buildUrl("v4", "place-comments") {
         parameters.append("limit", "$limit")
         parameters.append("include_deleted", "true")

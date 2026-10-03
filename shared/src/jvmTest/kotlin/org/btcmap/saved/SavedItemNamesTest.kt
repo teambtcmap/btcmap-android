@@ -9,7 +9,7 @@ import org.btcmap.db.table.user.SavedItem
 import org.btcmap.json.parseJsonObject
 import org.junit.Assert
 import org.junit.Test
-import java.time.ZonedDateTime
+import kotlin.time.Instant
 import java.util.Locale
 
 class SavedItemNamesTest {
@@ -18,7 +18,7 @@ class SavedItemNamesTest {
 
     private fun place(id: Long, name: String?, localizedName: String?) = Place(
         id = id,
-        updatedAt = ZonedDateTime.parse("2026-01-01T00:00:00Z"),
+        updatedAt = Instant.parse("2026-01-01T00:00:00Z"),
         lat = 0.0,
         lon = 0.0,
         icon = "store",

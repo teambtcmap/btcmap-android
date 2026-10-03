@@ -2,6 +2,7 @@
 
 package org.btcmap.dbstats
 
+import kotlin.time.Instant
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.DecodeSequenceMode
@@ -12,8 +13,7 @@ import okio.Source
 import okio.buffer
 import org.btcmap.json.btcmapJson
 import org.btcmap.util.rethrowIfCancellation
-import org.btcmap.util.toZonedDateTimeOrNull
-import java.time.ZonedDateTime
+import org.btcmap.util.toInstantOrNull
 
 /** Stats about a bundled snapshot asset. */
 data class BundleStats(
@@ -58,7 +58,7 @@ object BundleReader {
         var visible = 0L
         var deleted = 0L
         var maxUpdatedAt: String? = null
-        var maxUpdatedAtInstant: ZonedDateTime? = null
+        var maxUpdatedAtInstant: Instant? = null
         try {
             for (record in btcmapJson.decodeBufferedSourceToSequence<BundleRecordJson>(
                 buffered,
@@ -69,8 +69,8 @@ object BundleReader {
                 // Timestamps are stored as ISO-8601 text and are not
                 // fixed-width (a zero fraction is dropped), so the newest is
                 // found by parsing and comparing chronologically, not as text.
-                val updatedAt = record.updatedAt?.toZonedDateTimeOrNull() ?: continue
-                if (maxUpdatedAtInstant == null || updatedAt.isAfter(maxUpdatedAtInstant)) {
+                val updatedAt = record.updatedAt?.toInstantOrNull() ?: continue
+                if (maxUpdatedAtInstant == null || updatedAt > maxUpdatedAtInstant) {
                     maxUpdatedAtInstant = updatedAt
                     maxUpdatedAt = record.updatedAt
                 }

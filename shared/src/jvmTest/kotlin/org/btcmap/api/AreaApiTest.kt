@@ -4,7 +4,7 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.serialization.json.jsonPrimitive
 import org.junit.Assert
 import org.junit.Test
-import java.time.ZonedDateTime
+import kotlin.time.Instant
 import java.util.Locale
 
 class AreaApiTest : ApiTestBase() {
@@ -91,7 +91,7 @@ class AreaApiTest : ApiTestBase() {
     fun getAreasDelta_sendsCursorFieldsAndParsesBboxAndTombstone() = runTest {
         enqueueJson(AREAS_DELTA)
 
-        val areas = api().getAreas(ZonedDateTime.parse("2025-06-11T00:00:00Z"), 500L)
+        val areas = api().getAreas(Instant.parse("2025-06-11T00:00:00Z"), 500L)
 
         val request = takeRequest()
         Assert.assertEquals("GET", request.method)
@@ -130,7 +130,7 @@ class AreaApiTest : ApiTestBase() {
     fun getAreasDelta_handlesMissingBboxAndBlankOptionalFields() = runTest {
         enqueueJson(AREAS_DELTA_MINIMAL)
 
-        val area = api().getAreas(ZonedDateTime.parse("2025-06-11T00:00:00Z"), 1L).single()
+        val area = api().getAreas(Instant.parse("2025-06-11T00:00:00Z"), 1L).single()
 
         Assert.assertNull(area.icon)
         Assert.assertNull(area.iconWide)

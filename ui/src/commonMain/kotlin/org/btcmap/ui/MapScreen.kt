@@ -1,5 +1,6 @@
 package org.btcmap.ui
 
+import kotlin.time.Clock
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
@@ -99,7 +100,7 @@ import org.maplibre.compose.map.rememberMapState
 import org.maplibre.compose.style.BaseStyle
 import org.maplibre.spatialk.geojson.BoundingBox
 import org.maplibre.spatialk.geojson.Position
-import java.time.ZonedDateTime
+import kotlin.time.Instant
 
 /**
  * The shared MapLibre Compose map: the app's base style, the merchant, event and
@@ -113,7 +114,7 @@ fun MapScreen(
     initialLat: Double,
     initialLon: Double,
     initialZoom: Double,
-    minVerifiedAt: ZonedDateTime?,
+    minVerifiedAt: Instant?,
     palette: MarkerPalette,
     areaChipPalette: AreaChipPalette,
     apiUrl: String,
@@ -483,7 +484,7 @@ fun MapScreen(
         idOf = { it.id },
         toGeoJson = { it.toEventGeoJson() },
     ) { bounds ->
-        val now = ZonedDateTime.now()
+        val now = Clock.System.now()
         bounds.longitudeRanges().flatMap { (minLon, maxLon) ->
             db.event.selectByBounds(bounds.south, bounds.north, minLon, maxLon)
         }.filter { it.startsAt.isUpcoming(now) }
@@ -496,7 +497,7 @@ fun MapScreen(
     }
 
     val markersByName = remember(merchants.snapshot) {
-        val now = ZonedDateTime.now()
+        val now = Clock.System.now()
         merchants.snapshot.associateBy { it.markerImageName(now) }
     }
     val exchangeIcons = remember(exchanges.snapshot) { exchanges.snapshot.map { it.icon }.distinct() }

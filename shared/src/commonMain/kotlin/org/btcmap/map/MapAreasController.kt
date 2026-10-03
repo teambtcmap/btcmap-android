@@ -17,7 +17,8 @@ import org.btcmap.db.table.area.geoJsonGeometry
 import org.btcmap.db.table.event.isWithin
 import org.btcmap.i18n.getLocalizedName
 import org.btcmap.util.isUpcoming
-import java.time.ZonedDateTime
+import kotlin.time.Clock
+import kotlin.time.Instant
 
 /**
  * Finds the communities and countries containing the map centre in the local
@@ -29,7 +30,7 @@ import java.time.ZonedDateTime
  */
 class MapAreasController(
     private val db: Database,
-    private val now: () -> ZonedDateTime = { ZonedDateTime.now() },
+    private val now: () -> Instant = { Clock.System.now() },
 ) {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
     private var currentJob: Job? = null

@@ -17,7 +17,7 @@ import org.btcmap.db.table.event.Event
 import org.btcmap.json.btcmapJson
 import org.btcmap.util.rethrowIfCancellation
 import org.btcmap.util.toUrlOrNull
-import org.btcmap.util.toZonedDateTimeOrNull
+import org.btcmap.util.toInstantOrNull
 
 /**
  * Seeds the event table from the bundled snapshot produced by the bundler.
@@ -134,12 +134,12 @@ internal fun BundledEventJson.toEvent(): Event {
     val eventLat = requireNotNull(lat) { "bundled event $eventId is missing 'lat'" }
     val eventLon = requireNotNull(lon) { "bundled event $eventId is missing 'lon'" }
     val eventName = requireNotNull(name) { "bundled event $eventId is missing 'name'" }
-    val eventStartsAt = requireNotNull(startsAt?.toZonedDateTimeOrNull()) {
+    val eventStartsAt = requireNotNull(startsAt?.toInstantOrNull()) {
         "bundled event $eventId is missing a parseable 'starts_at'"
     }
     // `updated_at` drives the delta sync cursor, so a malformed one must fail
     // the seed rather than silently reset the cursor to an arbitrary value.
-    val eventUpdatedAt = requireNotNull(updatedAt?.toZonedDateTimeOrNull()) {
+    val eventUpdatedAt = requireNotNull(updatedAt?.toInstantOrNull()) {
         "bundled event $eventId is missing a parseable 'updated_at'"
     }
     require(eventName.isNotEmpty()) { "bundled event $eventId has an empty 'name'" }
@@ -150,7 +150,7 @@ internal fun BundledEventJson.toEvent(): Event {
         name = eventName,
         website = website?.toUrlOrNull(),
         startsAt = eventStartsAt,
-        endsAt = endsAt?.toZonedDateTimeOrNull(),
+        endsAt = endsAt?.toInstantOrNull(),
         updatedAt = eventUpdatedAt,
         deletedAt = null,
     )

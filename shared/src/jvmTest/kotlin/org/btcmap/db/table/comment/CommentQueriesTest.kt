@@ -4,7 +4,7 @@ import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import org.btcmap.db.Database
 import org.junit.Assert
 import org.junit.Test
-import java.time.ZonedDateTime
+import kotlin.time.Instant
 
 class CommentQueriesTest {
 
@@ -18,8 +18,8 @@ class CommentQueriesTest {
         createdAt: String = "2024-01-01T10:00:00Z",
         deletedAt: String? = null,
     ): Comment {
-        val created = ZonedDateTime.parse(createdAt)
-        val deleted = deletedAt?.let { ZonedDateTime.parse(it) }
+        val created = Instant.parse(createdAt)
+        val deleted = deletedAt?.let { Instant.parse(it) }
         return Comment(
             id = id,
             placeId = placeId,
@@ -37,8 +37,8 @@ class CommentQueriesTest {
             id = 1L,
             placeId = 100L,
             comment = "Great place!",
-            createdAt = ZonedDateTime.parse("2024-01-01T10:00:00Z"),
-            updatedAt = ZonedDateTime.parse("2024-01-01T10:00:00Z"),
+            createdAt = Instant.parse("2024-01-01T10:00:00Z"),
+            updatedAt = Instant.parse("2024-01-01T10:00:00Z"),
         )
 
         db.comment.insert(listOf(comment))
@@ -57,15 +57,15 @@ class CommentQueriesTest {
             id = 1L,
             placeId = 100L,
             comment = "First",
-            createdAt = ZonedDateTime.parse("2024-01-01T10:00:00Z"),
-            updatedAt = ZonedDateTime.parse("2024-01-01T10:00:00Z"),
+            createdAt = Instant.parse("2024-01-01T10:00:00Z"),
+            updatedAt = Instant.parse("2024-01-01T10:00:00Z"),
         )
         val edited = Comment(
             id = 1L,
             placeId = 100L,
             comment = "Edited",
-            createdAt = ZonedDateTime.parse("2024-01-01T10:00:00Z"),
-            updatedAt = ZonedDateTime.parse("2024-01-02T10:00:00Z"),
+            createdAt = Instant.parse("2024-01-01T10:00:00Z"),
+            updatedAt = Instant.parse("2024-01-02T10:00:00Z"),
         )
 
         db.comment.insert(listOf(original))
@@ -74,7 +74,7 @@ class CommentQueriesTest {
         val results = db.comment.selectByPlaceId(100L)
         Assert.assertEquals(1, results.size)
         Assert.assertEquals("Edited", results[0].comment)
-        Assert.assertEquals(ZonedDateTime.parse("2024-01-02T10:00:00Z"), results[0].updatedAt)
+        Assert.assertEquals(Instant.parse("2024-01-02T10:00:00Z"), results[0].updatedAt)
     }
 
     @Test
@@ -86,8 +86,8 @@ class CommentQueriesTest {
             id = 5L,
             placeId = 100L,
             comment = "gm",
-            createdAt = ZonedDateTime.parse("2024-01-01T10:00:00Z"),
-            updatedAt = ZonedDateTime.parse("2024-01-02T10:00:00Z"),
+            createdAt = Instant.parse("2024-01-01T10:00:00Z"),
+            updatedAt = Instant.parse("2024-01-02T10:00:00Z"),
         )
 
         db.comment.insert(listOf(comment))
@@ -110,21 +110,21 @@ class CommentQueriesTest {
     @Test
     fun selectCount_excludesTombstonesUnlessAsked() {
         val db = createDatabase()
-        val deletedAt = ZonedDateTime.parse("2024-01-02T10:00:00Z")
+        val deletedAt = Instant.parse("2024-01-02T10:00:00Z")
         db.comment.insert(
             listOf(
                 Comment(
                     id = 1L,
                     placeId = 100L,
                     comment = "visible",
-                    createdAt = ZonedDateTime.parse("2024-01-01T10:00:00Z"),
-                    updatedAt = ZonedDateTime.parse("2024-01-01T10:00:00Z"),
+                    createdAt = Instant.parse("2024-01-01T10:00:00Z"),
+                    updatedAt = Instant.parse("2024-01-01T10:00:00Z"),
                 ),
                 Comment(
                     id = 2L,
                     placeId = 100L,
                     comment = "gone",
-                    createdAt = ZonedDateTime.parse("2024-01-01T10:00:00Z"),
+                    createdAt = Instant.parse("2024-01-01T10:00:00Z"),
                     updatedAt = deletedAt,
                     deletedAt = deletedAt,
                 ),
@@ -142,15 +142,15 @@ class CommentQueriesTest {
             id = 1L,
             placeId = 1L,
             comment = "First",
-            createdAt = ZonedDateTime.parse("2024-01-01T10:00:00Z"),
-            updatedAt = ZonedDateTime.parse("2024-01-01T10:00:00Z"),
+            createdAt = Instant.parse("2024-01-01T10:00:00Z"),
+            updatedAt = Instant.parse("2024-01-01T10:00:00Z"),
         )
         val comment2 = Comment(
             id = 2L,
             placeId = 1L,
             comment = "Second",
-            createdAt = ZonedDateTime.parse("2024-01-02T10:00:00Z"),
-            updatedAt = ZonedDateTime.parse("2024-01-02T10:00:00Z"),
+            createdAt = Instant.parse("2024-01-02T10:00:00Z"),
+            updatedAt = Instant.parse("2024-01-02T10:00:00Z"),
         )
 
         db.comment.insert(listOf(comment1, comment2))
@@ -163,7 +163,7 @@ class CommentQueriesTest {
     @Test
     fun selectByPlaceId_breaksCreatedAtTiesByIdDesc() {
         val db = createDatabase()
-        val sameTime = ZonedDateTime.parse("2024-01-01T10:00:00Z")
+        val sameTime = Instant.parse("2024-01-01T10:00:00Z")
         val lowerId = Comment(
             id = 1L,
             placeId = 1L,
@@ -203,47 +203,47 @@ class CommentQueriesTest {
             id = 1L,
             placeId = 1L,
             comment = "First",
-            createdAt = ZonedDateTime.parse("2024-01-01T10:00:00Z"),
-            updatedAt = ZonedDateTime.parse("2024-01-01T10:00:00Z"),
+            createdAt = Instant.parse("2024-01-01T10:00:00Z"),
+            updatedAt = Instant.parse("2024-01-01T10:00:00Z"),
         )
         val comment2 = Comment(
             id = 2L,
             placeId = 1L,
             comment = "Second",
-            createdAt = ZonedDateTime.parse("2024-01-02T10:00:00Z"),
-            updatedAt = ZonedDateTime.parse("2024-01-03T10:00:00Z"),
+            createdAt = Instant.parse("2024-01-02T10:00:00Z"),
+            updatedAt = Instant.parse("2024-01-03T10:00:00Z"),
         )
 
         db.comment.insert(listOf(comment1, comment2))
         val result = db.comment.selectMaxUpdatedAt()
 
-        Assert.assertEquals(ZonedDateTime.parse("2024-01-03T10:00:00Z"), result)
+        Assert.assertEquals(Instant.parse("2024-01-03T10:00:00Z"), result)
     }
 
     @Test
     fun selectMaxUpdatedAt_comparesByInstantNotByText() {
         val db = createDatabase()
-        // ZonedDateTime.toString() drops a zero fraction, so the earlier
+        // Instant.toString() drops a zero fraction, so the earlier
         // "2024-01-01T10:00Z" sorts after "2024-01-01T10:00:00.500Z" as text.
         val earlier = Comment(
             id = 1L,
             placeId = 1L,
             comment = "Earlier",
-            createdAt = ZonedDateTime.parse("2024-01-01T10:00:00Z"),
-            updatedAt = ZonedDateTime.parse("2024-01-01T10:00:00Z"),
+            createdAt = Instant.parse("2024-01-01T10:00:00Z"),
+            updatedAt = Instant.parse("2024-01-01T10:00:00Z"),
         )
         val later = Comment(
             id = 2L,
             placeId = 1L,
             comment = "Later",
-            createdAt = ZonedDateTime.parse("2024-01-01T10:00:00.500Z"),
-            updatedAt = ZonedDateTime.parse("2024-01-01T10:00:00.500Z"),
+            createdAt = Instant.parse("2024-01-01T10:00:00.500Z"),
+            updatedAt = Instant.parse("2024-01-01T10:00:00.500Z"),
         )
 
         db.comment.insert(listOf(earlier, later))
 
         Assert.assertEquals(
-            ZonedDateTime.parse("2024-01-01T10:00:00.500Z"),
+            Instant.parse("2024-01-01T10:00:00.500Z"),
             db.comment.selectMaxUpdatedAt(),
         )
     }
@@ -255,15 +255,15 @@ class CommentQueriesTest {
             id = 1L,
             placeId = 1L,
             comment = "Earlier",
-            createdAt = ZonedDateTime.parse("2024-01-01T10:00:00Z"),
-            updatedAt = ZonedDateTime.parse("2024-01-01T10:00:00Z"),
+            createdAt = Instant.parse("2024-01-01T10:00:00Z"),
+            updatedAt = Instant.parse("2024-01-01T10:00:00Z"),
         )
         val later = Comment(
             id = 2L,
             placeId = 1L,
             comment = "Later",
-            createdAt = ZonedDateTime.parse("2024-01-01T10:00:00.500Z"),
-            updatedAt = ZonedDateTime.parse("2024-01-01T10:00:00.500Z"),
+            createdAt = Instant.parse("2024-01-01T10:00:00.500Z"),
+            updatedAt = Instant.parse("2024-01-01T10:00:00.500Z"),
         )
 
         db.comment.insert(listOf(earlier, later))
@@ -334,14 +334,14 @@ class CommentQueriesTest {
     @Test
     fun insert_keepsTombstoneButHidesItFromSelects() {
         val db = createDatabase()
-        val deletedAt = ZonedDateTime.parse("2024-01-02T10:00:00Z")
+        val deletedAt = Instant.parse("2024-01-02T10:00:00Z")
         db.comment.insert(
             listOf(
                 Comment(
                     id = 1L,
                     placeId = 100L,
                     comment = "gone",
-                    createdAt = ZonedDateTime.parse("2024-01-01T10:00:00Z"),
+                    createdAt = Instant.parse("2024-01-01T10:00:00Z"),
                     updatedAt = deletedAt,
                     deletedAt = deletedAt,
                 )

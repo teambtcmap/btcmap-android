@@ -18,7 +18,7 @@ import org.btcmap.map.MapArea
 import org.btcmap.ui.map.AreaChipPalette
 import org.btcmap.ui.map.MarkerPalette
 import org.btcmap.ui.map.SearchActions
-import java.time.ZonedDateTime
+import kotlin.time.Instant
 
 /**
  * Hosts [MapScreen] inside the Android Views hierarchy (Phase 3 spike). The
@@ -44,7 +44,7 @@ class MapComposeView @JvmOverloads constructor(
 
     var initialZoom: Double by mutableStateOf(2.0)
 
-    var minVerifiedAt: ZonedDateTime? by mutableStateOf(null)
+    var minVerifiedAt: Instant? by mutableStateOf(null)
 
     var markerBackgroundColor: Color by mutableStateOf(Color(0xFFF7931A))
 

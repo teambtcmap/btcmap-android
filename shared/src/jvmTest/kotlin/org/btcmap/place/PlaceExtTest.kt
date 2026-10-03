@@ -3,22 +3,22 @@ package org.btcmap.place
 import org.btcmap.db.table.place.Place
 import org.junit.Assert
 import org.junit.Test
-import java.time.ZonedDateTime
+import kotlin.time.Instant
 
 class PlaceExtTest {
 
-    private val now = ZonedDateTime.parse("2026-06-01T00:00:00Z")
+    private val now = Instant.parse("2026-06-01T00:00:00Z")
 
     @Test
     fun isBoosted_trueForFutureBoost() {
-        val place = place(boostedUntil = ZonedDateTime.parse("2026-06-02T00:00:00Z"))
+        val place = place(boostedUntil = Instant.parse("2026-06-02T00:00:00Z"))
 
         Assert.assertTrue(place.isBoosted(now))
     }
 
     @Test
     fun isBoosted_falseForExpiredBoost() {
-        val place = place(boostedUntil = ZonedDateTime.parse("2026-05-31T23:59:59Z"))
+        val place = place(boostedUntil = Instant.parse("2026-05-31T23:59:59Z"))
 
         Assert.assertFalse(place.isBoosted(now))
     }
@@ -104,10 +104,10 @@ class PlaceExtTest {
         Assert.assertNull(place(boostedUntil = null).copy(osmId = ":123").osmEditUrl())
     }
 
-    private fun place(boostedUntil: ZonedDateTime?): Place {
+    private fun place(boostedUntil: Instant?): Place {
         return Place(
             id = 1,
-            updatedAt = ZonedDateTime.parse("2026-01-01T00:00:00Z"),
+            updatedAt = Instant.parse("2026-01-01T00:00:00Z"),
             lat = 0.0,
             lon = 0.0,
             icon = "store",

@@ -1,25 +1,30 @@
 package org.btcmap.map
 
+import kotlin.time.Clock
+import kotlin.time.Instant
+import kotlinx.datetime.DateTimePeriod
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.minus
 import org.btcmap.db.table.place.Marker
-import java.time.ZonedDateTime
 
-private const val OUTDATED_AFTER_YEARS = 1L
+private const val OUTDATED_AFTER_YEARS = 1
 private const val ESTIMATED_BYTES_PER_FEATURE = 320
 const val MAX_COMMENT_BADGE = 9L
 const val EXCHANGE_MARKER_ICON_PREFIX = "marker-icon-"
 const val EVENT_MARKER_ICON_NAME = "marker-icon-event"
 const val EVENT_ICON = "event"
 
-fun Marker.isOutdated(now: ZonedDateTime = ZonedDateTime.now()): Boolean {
+fun Marker.isOutdated(now: Instant = Clock.System.now()): Boolean {
     val verifiedAt = verifiedAt
-    return verifiedAt == null || verifiedAt.isBefore(now.minusYears(OUTDATED_AFTER_YEARS))
+    return verifiedAt == null ||
+        verifiedAt < now.minus(DateTimePeriod(years = OUTDATED_AFTER_YEARS), TimeZone.UTC)
 }
 
-fun Marker.isBoosted(now: ZonedDateTime = ZonedDateTime.now()): Boolean {
-    return boostedUntil?.isAfter(now) == true
+fun Marker.isBoosted(now: Instant = Clock.System.now()): Boolean {
+    return boostedUntil?.let { it > now } == true
 }
 
-fun Marker.markerImageName(now: ZonedDateTime = ZonedDateTime.now()): String {
+fun Marker.markerImageName(now: Instant = Clock.System.now()): String {
     return merchantMarkerImageName(
         iconId = icon,
         boosted = isBoosted(now),
@@ -51,7 +56,7 @@ fun exchangeMarkerIconImageName(iconId: String): String {
     return "$EXCHANGE_MARKER_ICON_PREFIX$iconId"
 }
 
-fun Iterable<Marker>.toMarkerGeoJson(now: ZonedDateTime = ZonedDateTime.now()): String {
+fun Iterable<Marker>.toMarkerGeoJson(now: Instant = Clock.System.now()): String {
     val sizeHint = if (this is Collection<*>) size else 0
     val sb = StringBuilder(sizeHint * ESTIMATED_BYTES_PER_FEATURE + 64)
 

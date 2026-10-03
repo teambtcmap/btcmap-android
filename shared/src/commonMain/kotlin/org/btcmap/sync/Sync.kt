@@ -15,17 +15,16 @@ import org.btcmap.db.Database
 import org.btcmap.db.table.area.Area
 import org.btcmap.db.table.comment.Comment
 import org.btcmap.db.table.event.Event
+import kotlin.time.Clock
+import kotlin.time.Duration
+import kotlin.time.Instant
 import org.btcmap.util.rethrowIfCancellation
-import org.btcmap.util.toZonedDateTime
-import java.time.Duration
-import java.time.Instant
-import java.time.ZoneOffset
-import java.time.ZonedDateTime
+import org.btcmap.util.toInstant
 
 private const val PLACES_BATCH_SIZE = 10_000L
 private const val DEFAULT_BATCH_SIZE = 1_000L
 
-private val EPOCH: ZonedDateTime = ZonedDateTime.ofInstant(Instant.EPOCH, ZoneOffset.UTC)
+private val EPOCH: Instant = Instant.fromEpochSeconds(0)
 
 class Sync(val api: Api, val db: Database) {
     /**
@@ -112,12 +111,12 @@ class Sync(val api: Api, val db: Database) {
      */
     private suspend fun <T> syncDelta(
         baseBatchSize: Long,
-        cursor: suspend () -> ZonedDateTime?,
-        fetch: suspend (since: ZonedDateTime?, limit: Long) -> List<T>,
+        cursor: suspend () -> Instant?,
+        fetch: suspend (since: Instant?, limit: Long) -> List<T>,
         updatedAt: (T) -> String,
         apply: (List<T>) -> Unit,
     ): Report = withContext(Dispatchers.IO) {
-        val startedAt = ZonedDateTime.now(ZoneOffset.UTC)
+        val startedAt = Clock.System.now()
         var rowsAffected = 0L
         var failed = false
         // [cursor] is a lambda, not an already-read value, so the read runs on
@@ -186,7 +185,7 @@ class Sync(val api: Api, val db: Database) {
         }
 
         Report(
-            duration = Duration.between(startedAt, ZonedDateTime.now(ZoneOffset.UTC)),
+            duration = Clock.System.now() - startedAt,
             rowsAffected = rowsAffected,
             failed = failed,
         )
@@ -197,9 +196,9 @@ private fun GetCommentsItem.toComment(): Comment = Comment(
     id = id,
     placeId = placeId,
     comment = comment,
-    createdAt = ZonedDateTime.parse(createdAt),
-    updatedAt = ZonedDateTime.parse(updatedAt),
-    deletedAt = deletedAt?.toZonedDateTime(),
+    createdAt = Instant.parse(createdAt),
+    updatedAt = Instant.parse(updatedAt),
+    deletedAt = deletedAt?.toInstant(),
 )
 
 private fun GetEventsDeltaItem.toEvent(): Event = Event(
@@ -210,8 +209,8 @@ private fun GetEventsDeltaItem.toEvent(): Event = Event(
     website = website,
     startsAt = startsAt,
     endsAt = endsAt,
-    updatedAt = ZonedDateTime.parse(updatedAt),
-    deletedAt = deletedAt?.toZonedDateTime(),
+    updatedAt = Instant.parse(updatedAt),
+    deletedAt = deletedAt?.toInstant(),
 )
 
 private fun GetAreasDeltaItem.toArea(): Area = Area(
@@ -228,8 +227,8 @@ private fun GetAreasDeltaItem.toArea(): Area = Area(
     bboxEast = bboxEast,
     bboxNorth = bboxNorth,
     geoJson = geoJson,
-    updatedAt = ZonedDateTime.parse(updatedAt),
-    deletedAt = deletedAt?.toZonedDateTime(),
+    updatedAt = Instant.parse(updatedAt),
+    deletedAt = deletedAt?.toInstant(),
     localizedName = localizedName,
     localizedDescription = localizedDescription,
 )
@@ -256,11 +255,11 @@ fun reportSyncFailure(t: Throwable) {
  * insert replaces the rows). When every row shares one timestamp there is no
  * such timestamp, and the caller must widen the request instead.
  */
-internal fun nextUpdatedAtCursor(timestamps: List<String>, pageSize: Long): ZonedDateTime? {
+internal fun nextUpdatedAtCursor(timestamps: List<String>, pageSize: Long): Instant? {
     if (timestamps.size.toLong() < pageSize) {
-        return timestamps.maxOf { ZonedDateTime.parse(it) }
+        return timestamps.maxOf { Instant.parse(it) }
     }
 
-    val distinct = timestamps.map { ZonedDateTime.parse(it) }.distinct().sorted()
+    val distinct = timestamps.map { Instant.parse(it) }.distinct().sorted()
     return distinct.getOrNull(distinct.size - 2)
 }

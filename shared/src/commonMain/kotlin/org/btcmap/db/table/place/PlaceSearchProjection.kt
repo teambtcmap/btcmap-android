@@ -4,8 +4,8 @@ import androidx.sqlite.SQLiteStatement
 import kotlinx.serialization.json.JsonObject
 import org.btcmap.db.getJsonObjectOrNull
 import org.btcmap.db.getTextOrNull
-import org.btcmap.db.getZonedDateTimeOrNull
-import java.time.ZonedDateTime
+import org.btcmap.db.getInstantOrNull
+import kotlin.time.Instant
 
 typealias SearchPlace = PlaceSearchProjection
 
@@ -22,7 +22,7 @@ data class PlaceSearchProjection(
     val lat: Double,
     val lon: Double,
     val icon: String,
-    val boostedUntil: ZonedDateTime?,
+    val boostedUntil: Instant?,
 ) {
     companion object {
         const val COLUMNS = "$ID, $NAME, $LOCALIZED_NAME, $LAT, $LON, $ICON, $BOOSTED_UNTIL"
@@ -35,7 +35,7 @@ data class PlaceSearchProjection(
                 lat = stmt.getDouble(3),
                 lon = stmt.getDouble(4),
                 icon = stmt.getText(5),
-                boostedUntil = stmt.getZonedDateTimeOrNull(6),
+                boostedUntil = stmt.getInstantOrNull(6),
             )
         }
     }

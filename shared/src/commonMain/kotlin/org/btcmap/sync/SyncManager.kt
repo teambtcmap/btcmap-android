@@ -15,7 +15,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import org.btcmap.util.rethrowIfCancellation
-import java.time.Duration
+import kotlin.time.Duration
 
 /**
  * Owns the full sync: it seeds each table from its bundled snapshot and then

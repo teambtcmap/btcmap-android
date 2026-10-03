@@ -4,15 +4,14 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.serialization.json.jsonPrimitive
 import org.junit.Assert
 import org.junit.Test
-import java.time.ZonedDateTime
-import java.time.format.DateTimeFormatter
+import kotlin.time.Instant
 
 class PlaceApiTest : ApiTestBase() {
     @Test
     fun getPlaces_sendsParametersAndParsesAllFields() = runTest {
         enqueueJson(FULL_PLACE_ARRAY)
 
-        val updatedSince = ZonedDateTime.parse("2026-01-01T00:00:00Z")
+        val updatedSince = Instant.parse("2026-01-01T00:00:00Z")
         val places = api().getPlaces(updatedSince = updatedSince, limit = 10)
 
         val request = takeRequest()
@@ -21,9 +20,10 @@ class PlaceApiTest : ApiTestBase() {
         Assert.assertEquals("10", request.url.queryParameter("limit"))
         Assert.assertEquals("true", request.url.queryParameter("include_deleted"))
         Assert.assertEquals(
-            updatedSince.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
+            updatedSince.toString(),
             request.url.queryParameter("updated_since"),
         )
+
         Assert.assertTrue(request.url.queryParameter("fields")!!.contains("deleted_at"))
 
         Assert.assertEquals(1, places.size)

@@ -15,6 +15,7 @@ import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.okio.decodeBufferedSourceToSequence
 import okio.Source
 import okio.buffer
+import kotlin.time.Instant
 import org.btcmap.api.toVerifiedAt
 import org.btcmap.db.Database
 import org.btcmap.db.table.place.CREATE_INDEXES
@@ -22,10 +23,8 @@ import org.btcmap.db.table.place.INDEX_NAMES
 import org.btcmap.db.table.place.Place
 import org.btcmap.json.btcmapJson
 import org.btcmap.util.rethrowIfCancellation
+import org.btcmap.util.toInstantOrNull
 import org.btcmap.util.toUrlOrNull
-import org.btcmap.util.toZonedDateTimeOrNull
-import java.time.ZonedDateTime
-import java.time.format.DateTimeParseException
 
 /**
  * Seeds the places table from the bundled snapshot produced by the bundler.
@@ -258,7 +257,7 @@ internal fun BundledPlaceJson.toPlace(): Place {
     val placeIcon = requireNotNull(icon) { "bundled place $placeId is missing 'icon'" }
     // `updated_at` drives the delta sync cursor, so a malformed one must fail
     // the seed rather than silently reset the cursor to an arbitrary value.
-    val placeUpdatedAt = requireNotNull(updatedAt?.toZonedDateTimeOrNull()) {
+    val placeUpdatedAt = requireNotNull(updatedAt?.toInstantOrNull()) {
         "bundled place $placeId is missing a parseable 'updated_at'"
     }
     // Coordinates are range-checked here as well as by the bundler: the asset is
@@ -287,16 +286,16 @@ internal fun BundledPlaceJson.toPlace(): Place {
         instagram = instagram?.toUrlOrNull(),
         line = line?.toUrlOrNull(),
         requiredAppUrl = requiredAppUrl?.toUrlOrNull(),
-        boostedUntil = boostedUntil?.toZonedDateTimeOrNull(),
+        boostedUntil = boostedUntil?.toInstantOrNull(),
         comments = comments,
         telegram = telegram?.toUrlOrNull(),
         osmId = osmId,
     )
 }
 
-private fun String.toVerifiedAtOrNull(): ZonedDateTime? =
+private fun String.toVerifiedAtOrNull(): Instant? =
     try {
         toVerifiedAt()
-    } catch (_: DateTimeParseException) {
+    } catch (_: RuntimeException) {
         null
     }

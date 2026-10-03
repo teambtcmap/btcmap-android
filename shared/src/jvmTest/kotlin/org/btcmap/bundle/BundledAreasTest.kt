@@ -10,13 +10,13 @@ import org.btcmap.db.Database
 import org.btcmap.db.table.area.Area
 import org.junit.Assert
 import org.junit.Test
-import java.time.ZonedDateTime
+import kotlin.time.Instant
 
 class BundledAreasTest {
 
     private fun createDatabase(): Database = Database(BundledSQLiteDriver(), ":memory:")
 
-    private fun area(id: Long, deletedAt: ZonedDateTime? = null) = Area(
+    private fun area(id: Long, deletedAt: Instant? = null) = Area(
         id = id,
         name = "Area $id",
         type = "community",
@@ -30,7 +30,7 @@ class BundledAreasTest {
         bboxEast = null,
         bboxNorth = null,
         geoJson = null,
-        updatedAt = ZonedDateTime.parse("2024-01-01T00:00:00Z"),
+        updatedAt = Instant.parse("2024-01-01T00:00:00Z"),
         deletedAt = deletedAt,
     )
 
@@ -104,7 +104,7 @@ class BundledAreasTest {
             ),
             parseJson(area.geoJson!!),
         )
-        Assert.assertEquals(ZonedDateTime.parse("2026-03-01T12:00:00Z"), area.updatedAt)
+        Assert.assertEquals(Instant.parse("2026-03-01T12:00:00Z"), area.updatedAt)
         Assert.assertNull(area.deletedAt)
     }
 
@@ -275,14 +275,14 @@ class BundledAreasTest {
             parseJsonObject("""{"en":"One"}"""),
             first.localizedName,
         )
-        Assert.assertEquals(ZonedDateTime.parse("2026-03-01T12:00:00Z"), first.updatedAt)
+        Assert.assertEquals(Instant.parse("2026-03-01T12:00:00Z"), first.updatedAt)
 
         val second = db.area.selectById(2L)
         Assert.assertNotNull(second)
         Assert.assertEquals("country", second!!.type)
         Assert.assertNull(second.bboxWest)
         Assert.assertNull(second.geoJson)
-        Assert.assertEquals(ZonedDateTime.parse("2026-04-01T12:00:00Z"), second.updatedAt)
+        Assert.assertEquals(Instant.parse("2026-04-01T12:00:00Z"), second.updatedAt)
     }
 
     @Test
@@ -306,7 +306,7 @@ class BundledAreasTest {
     fun import_skipsWhenDatabaseHoldsOnlyTombstones() = runTest {
         val db = createDatabase()
         db.area.insert(
-            listOf(area(id = 99L, deletedAt = ZonedDateTime.parse("2026-05-01T00:00:00Z"))),
+            listOf(area(id = 99L, deletedAt = Instant.parse("2026-05-01T00:00:00Z"))),
         )
 
         val result = BundledAreas.import(db) { snapshotJson(2).asSource() }

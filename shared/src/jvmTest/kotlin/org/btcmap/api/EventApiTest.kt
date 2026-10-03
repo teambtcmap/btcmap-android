@@ -3,7 +3,7 @@ package org.btcmap.api
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert
 import org.junit.Test
-import java.time.ZonedDateTime
+import kotlin.time.Instant
 
 class EventApiTest : ApiTestBase() {
     @Test
@@ -133,7 +133,7 @@ class EventApiTest : ApiTestBase() {
     }
 
     private companion object {
-        val SINCE: ZonedDateTime = ZonedDateTime.parse("1970-01-01T00:00:00Z")
+        val SINCE: Instant = Instant.parse("1970-01-01T00:00:00Z")
 
         const val EVENT = """
             {

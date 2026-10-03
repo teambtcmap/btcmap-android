@@ -1,5 +1,7 @@
 package org.btcmap.area
 
+import kotlin.time.Clock
+import kotlin.time.Instant
 import org.btcmap.api.Api
 import org.btcmap.api.GetEventsItem
 import org.btcmap.api.getPlaceIssues
@@ -12,7 +14,6 @@ import org.btcmap.db.table.place.Place
 import org.btcmap.place.isBoosted
 import org.btcmap.place.isWithin
 import org.btcmap.util.isUpcoming
-import java.time.ZonedDateTime
 
 /** A place issue as the area screen lists it, with the matching cached place. */
 data class AreaPlaceIssue(
@@ -54,7 +55,7 @@ object AreaSections {
     fun boostedMerchants(
         db: Database,
         area: Area,
-        now: ZonedDateTime = ZonedDateTime.now(),
+        now: Instant = Clock.System.now(),
         limit: Int = BOOSTED_MERCHANTS_LIMIT,
     ): List<Place> {
         val west = area.bboxWest ?: return emptyList()
@@ -80,7 +81,7 @@ object AreaSections {
     fun events(
         db: Database,
         area: Area,
-        now: ZonedDateTime = ZonedDateTime.now(),
+        now: Instant = Clock.System.now(),
     ): List<GetEventsItem> {
         val west = area.bboxWest ?: return emptyList()
         val south = area.bboxSouth ?: return emptyList()

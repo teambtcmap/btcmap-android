@@ -27,7 +27,7 @@ import org.junit.Assert
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import java.time.ZonedDateTime
+import kotlin.time.Instant
 
 @RunWith(AndroidJUnit4::class)
 class AreaContentTest : AreaScreenTest() {
@@ -269,7 +269,7 @@ class AreaContentTest : AreaScreenTest() {
                     lat = 48.8566,
                     lon = 2.3522,
                     name = "Boosted Cafe",
-                    boostedUntil = ZonedDateTime.parse("2999-01-01T00:00:00Z"),
+                    boostedUntil = Instant.parse("2999-01-01T00:00:00Z"),
                 ),
                 place(
                     osmId = "node:2",
@@ -278,7 +278,7 @@ class AreaContentTest : AreaScreenTest() {
                     lat = 48.8566,
                     lon = 2.3522,
                     name = "Expired Cafe",
-                    boostedUntil = ZonedDateTime.parse("2020-01-01T00:00:00Z"),
+                    boostedUntil = Instant.parse("2020-01-01T00:00:00Z"),
                 ),
                 place(
                     osmId = "node:3",
@@ -338,11 +338,11 @@ class AreaContentTest : AreaScreenTest() {
         lat: Double = 0.0,
         lon: Double = 0.0,
         name: String = "Test Place",
-        boostedUntil: ZonedDateTime? = null,
+        boostedUntil: Instant? = null,
     ): Place {
         return Place(
             id = id,
-            updatedAt = ZonedDateTime.parse("2024-01-01T00:00:00Z"),
+            updatedAt = Instant.parse("2024-01-01T00:00:00Z"),
             lat = lat,
             lon = lon,
             icon = icon,

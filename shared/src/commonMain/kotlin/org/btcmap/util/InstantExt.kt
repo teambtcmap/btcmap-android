@@ -1,23 +1,18 @@
 package org.btcmap.util
 
-import java.time.ZonedDateTime
-import java.time.format.DateTimeParseException
+import kotlin.time.Instant
 
-fun String.toZonedDateTime() = ZonedDateTime.parse(this)
+/** Parses [this] as an ISO-8601 instant, throwing when it is malformed. */
+fun String.toInstant(): Instant = Instant.parse(this)
 
 /**
- * Parses a bundled timestamp, returning null when it is unparseable.
+ * Parses [this] as an ISO-8601 instant, or null when it is malformed.
  *
  * Only display-only timestamps are optional like this; a malformed value must
  * not roll back a whole snapshot and leave the map empty, so it degrades to
  * null exactly like a missing field.
  */
-fun String.toZonedDateTimeOrNull(): ZonedDateTime? =
-    try {
-        ZonedDateTime.parse(this)
-    } catch (_: DateTimeParseException) {
-        null
-    }
+fun String.toInstantOrNull(): Instant? = runCatching { Instant.parse(this) }.getOrNull()
 
 /**
  * Whether an event starting at this instant is still upcoming relative to
@@ -29,4 +24,4 @@ fun String.toZonedDateTimeOrNull(): ZonedDateTime? =
  * The API represents an event with no start date as the epoch, which is simply
  * in the past and therefore not upcoming.
  */
-fun ZonedDateTime.isUpcoming(now: ZonedDateTime): Boolean = isAfter(now)
+fun Instant.isUpcoming(now: Instant): Boolean = this > now

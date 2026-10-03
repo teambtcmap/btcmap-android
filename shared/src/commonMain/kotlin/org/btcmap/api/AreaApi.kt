@@ -4,7 +4,7 @@ import io.ktor.http.HttpMethod
 import kotlinx.serialization.json.JsonObject
 import org.btcmap.util.toJsonArray
 import org.btcmap.util.toJsonObject
-import java.time.ZonedDateTime
+import kotlin.time.Instant
 import java.util.Locale
 
 data class GetAreaItem(
@@ -51,7 +51,7 @@ private const val AREA_DELTA_FIELDS =
     "id,name,type,url_alias,icon,icon_wide,website_url,description,localized_name," +
         "localized_description,bbox,geo_json,updated_at,deleted_at"
 
-suspend fun Api.getAreas(updatedSince: ZonedDateTime, limit: Long): List<GetAreasDeltaItem> {
+suspend fun Api.getAreas(updatedSince: Instant, limit: Long): List<GetAreasDeltaItem> {
     val url = buildUrl("v4", "areas") {
         parameters.append("fields", AREA_DELTA_FIELDS)
         // Always send updated_since so the server filters rather than returning

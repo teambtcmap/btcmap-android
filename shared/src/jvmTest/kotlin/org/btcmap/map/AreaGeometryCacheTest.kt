@@ -1,12 +1,16 @@
 package org.btcmap.map
 
+import kotlinx.datetime.plus
+import kotlinx.datetime.minus
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.DateTimePeriod
 import org.btcmap.db.table.area.AreaGeometry
 import org.junit.Assert
 import org.junit.Test
-import java.time.ZonedDateTime
+import kotlin.time.Instant
 
 class AreaGeometryCacheTest {
-    private val now = ZonedDateTime.parse("2026-06-01T00:00:00Z")
+    private val now = Instant.parse("2026-06-01T00:00:00Z")
 
     @Test
     fun getOrPut_reusesTheGeometryWhileUpdatedAtIsUnchanged() {
@@ -34,7 +38,7 @@ class AreaGeometryCacheTest {
         }
 
         cache.getOrPut(1L, now, parse)
-        cache.getOrPut(1L, now.plusDays(1), parse)
+        cache.getOrPut(1L, now.plus(DateTimePeriod(days = 1), TimeZone.UTC), parse)
 
         Assert.assertEquals(2, parses)
         Assert.assertEquals(1, cache.size)

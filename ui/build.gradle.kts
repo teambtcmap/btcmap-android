@@ -43,6 +43,7 @@ kotlin {
             implementation(compose.foundation)
             implementation(compose.material3)
             implementation(libs.maplibre.compose)
+            implementation(libs.kotlinx.datetime)
             implementation(libs.coil.compose)
             // QR encoding for Lightning invoices, which is plain JVM code and so
             // runs in common.

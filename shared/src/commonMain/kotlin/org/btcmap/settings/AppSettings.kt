@@ -3,8 +3,11 @@ package org.btcmap.settings
 import io.ktor.http.Url
 import org.btcmap.util.toUrl
 import org.btcmap.util.toUrlOrNull
-import java.time.ZoneOffset
-import java.time.ZonedDateTime
+import kotlin.time.Clock
+import kotlin.time.Instant
+import kotlinx.datetime.DateTimePeriod
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.minus
 
 /**
  * The settings every host shares. They are plain [Settings] reads and writes, so
@@ -150,6 +153,6 @@ var Settings.verifiedFilterYears: Int
  * `julianday()`, which returns NULL for a zone id such as `[Asia/Bangkok]`, so
  * a cutoff carrying one would hide every place instead of the old ones.
  */
-fun Settings.verifiedFilterMinVerifiedAt(now: ZonedDateTime = ZonedDateTime.now()): ZonedDateTime {
-    return now.minusYears(verifiedFilterYears.toLong()).withZoneSameInstant(ZoneOffset.UTC)
+fun Settings.verifiedFilterMinVerifiedAt(now: Instant = Clock.System.now()): Instant {
+    return now.minus(DateTimePeriod(years = verifiedFilterYears), TimeZone.UTC)
 }

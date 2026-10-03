@@ -78,9 +78,9 @@ class DbStatsReader(private val conn: SQLiteConnection) {
         }
 
         val maxUpdatedAt = if (hasUpdatedAt) {
-            // julianday, not max(): timestamps are stored as text and
-            // ZonedDateTime.toString() is not fixed-width, so text ordering
-            // is not chronological.
+            // julianday, not max(): timestamps are stored as text and an
+            // instant's toString() is not fixed-width, so text ordering is not
+            // chronological.
             conn.prepare(
                 """
                 SELECT $UPDATED_AT FROM $table

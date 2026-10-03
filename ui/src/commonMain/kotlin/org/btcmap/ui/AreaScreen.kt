@@ -36,7 +36,7 @@ import org.btcmap.i18n.getLocalizedName
 import org.btcmap.offline.OfflineAreaState
 import org.btcmap.offline.OfflineBounds
 import org.btcmap.offline.OfflineRegionEstimates
-import java.time.ZonedDateTime
+import kotlin.time.Instant
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 
@@ -448,7 +448,7 @@ private fun OfflineButtons(
 }
 
 private fun boostSubtitle(
-    boostedUntil: ZonedDateTime?,
+    boostedUntil: Instant?,
     format: DateTimeFormatter,
     strings: AreaStrings,
 ): String {

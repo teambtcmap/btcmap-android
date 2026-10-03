@@ -1,10 +1,10 @@
 package org.btcmap.db.table.comment
 
 import androidx.sqlite.SQLiteConnection
-import org.btcmap.db.bindZonedDateTime
-import org.btcmap.db.bindZonedDateTimeOrNull
-import org.btcmap.db.getZonedDateTimeOrNull
-import java.time.ZonedDateTime
+import org.btcmap.db.bindInstant
+import org.btcmap.db.bindInstantOrNull
+import org.btcmap.db.getInstantOrNull
+import kotlin.time.Instant
 import kotlin.use
 
 class CommentQueries(private val conn: SQLiteConnection) {
@@ -25,9 +25,9 @@ class CommentQueries(private val conn: SQLiteConnection) {
                 it.bindLong(1, row.id)
                 it.bindLong(2, row.placeId)
                 it.bindText(3, row.comment)
-                it.bindZonedDateTime(4, row.createdAt)
-                it.bindZonedDateTime(5, row.updatedAt)
-                it.bindZonedDateTimeOrNull(6, row.deletedAt)
+                it.bindInstant(4, row.createdAt)
+                it.bindInstant(5, row.updatedAt)
+                it.bindInstantOrNull(6, row.deletedAt)
                 it.step()
                 it.reset()
             }
@@ -79,9 +79,9 @@ class CommentQueries(private val conn: SQLiteConnection) {
         }
     }
 
-    fun selectMaxUpdatedAt(): ZonedDateTime? {
+    fun selectMaxUpdatedAt(): Instant? {
         // julianday, not plain max(): timestamps are stored as text and
-        // ZonedDateTime.toString() is not fixed-width (it drops a zero second
+        // Instant.toString() is not fixed-width (it drops a zero second
         // and a zero fraction), so text ordering is not chronological.
         conn.prepare(
             """
@@ -94,7 +94,7 @@ class CommentQueries(private val conn: SQLiteConnection) {
             if (!it.step()) {
                 return null
             }
-            return it.getZonedDateTimeOrNull(0)
+            return it.getInstantOrNull(0)
         }
     }
 

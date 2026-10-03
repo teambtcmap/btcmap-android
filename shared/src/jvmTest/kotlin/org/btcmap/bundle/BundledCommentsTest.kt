@@ -8,18 +8,18 @@ import org.btcmap.db.Database
 import org.btcmap.db.table.comment.Comment
 import org.junit.Assert
 import org.junit.Test
-import java.time.ZonedDateTime
+import kotlin.time.Instant
 
 class BundledCommentsTest {
 
     private fun createDatabase(): Database = Database(BundledSQLiteDriver(), ":memory:")
 
-    private fun comment(id: Long, deletedAt: ZonedDateTime? = null) = Comment(
+    private fun comment(id: Long, deletedAt: Instant? = null) = Comment(
         id = id,
         placeId = 1L,
         comment = "Comment $id",
-        createdAt = ZonedDateTime.parse("2026-01-01T00:00:00Z"),
-        updatedAt = ZonedDateTime.parse("2026-01-02T00:00:00Z"),
+        createdAt = Instant.parse("2026-01-01T00:00:00Z"),
+        updatedAt = Instant.parse("2026-01-02T00:00:00Z"),
         deletedAt = deletedAt,
     )
 
@@ -56,8 +56,8 @@ class BundledCommentsTest {
         Assert.assertEquals(42L, comment.id)
         Assert.assertEquals(7L, comment.placeId)
         Assert.assertEquals("Bitcoin accepted here", comment.comment)
-        Assert.assertEquals(ZonedDateTime.parse("2026-01-01T00:00:00Z"), comment.createdAt)
-        Assert.assertEquals(ZonedDateTime.parse("2026-03-01T12:00:00Z"), comment.updatedAt)
+        Assert.assertEquals(Instant.parse("2026-01-01T00:00:00Z"), comment.createdAt)
+        Assert.assertEquals(Instant.parse("2026-03-01T12:00:00Z"), comment.updatedAt)
         Assert.assertNull(comment.deletedAt)
     }
 
@@ -151,7 +151,7 @@ class BundledCommentsTest {
         val comments = db.comment.selectByPlaceId(7L)
         Assert.assertEquals(2, comments.size)
         Assert.assertEquals("Two", comments[0].comment)
-        Assert.assertEquals(ZonedDateTime.parse("2026-04-01T12:00:00Z"), comments[0].updatedAt)
+        Assert.assertEquals(Instant.parse("2026-04-01T12:00:00Z"), comments[0].updatedAt)
         Assert.assertEquals("One", comments[1].comment)
         Assert.assertNull(comments[1].deletedAt)
     }
@@ -176,7 +176,7 @@ class BundledCommentsTest {
     fun import_skipsWhenDatabaseHoldsOnlyTombstones() = runTest {
         val db = createDatabase()
         db.comment.insert(
-            listOf(comment(id = 99L, deletedAt = ZonedDateTime.parse("2026-05-01T00:00:00Z"))),
+            listOf(comment(id = 99L, deletedAt = Instant.parse("2026-05-01T00:00:00Z"))),
         )
 
         val result = BundledComments.import(db) { snapshotJson(2).asSource() }

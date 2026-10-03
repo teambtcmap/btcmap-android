@@ -1,5 +1,6 @@
 package org.btcmap.ui.map
 
+import kotlin.time.Clock
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Canvas
@@ -51,7 +52,7 @@ class MarkerBitmapFactory(
 
     /** The marker for a place, with its glyph, variant and comment badge. */
     fun merchantMarker(marker: Marker): ImageBitmap {
-        val now = java.time.ZonedDateTime.now()
+        val now = Clock.System.now()
         return render(
             character = marker.icon,
             outdated = marker.isOutdated(now),

@@ -4,11 +4,11 @@ import androidx.sqlite.SQLiteConnection
 import org.btcmap.db.bindDoubleOrNull
 import org.btcmap.db.bindJsonObjectOrNull
 import org.btcmap.db.bindTextOrNull
-import org.btcmap.db.bindZonedDateTime
-import org.btcmap.db.bindZonedDateTimeOrNull
+import org.btcmap.db.bindInstant
+import org.btcmap.db.bindInstantOrNull
 import org.btcmap.db.escapeLikePattern
-import org.btcmap.db.getZonedDateTimeOrNull
-import java.time.ZonedDateTime
+import org.btcmap.db.getInstantOrNull
+import kotlin.time.Instant
 
 class AreaQueries(private val conn: SQLiteConnection) {
     fun insert(rows: List<Area>) {
@@ -38,8 +38,8 @@ class AreaQueries(private val conn: SQLiteConnection) {
                 stmt.bindDoubleOrNull(11, row.bboxEast)
                 stmt.bindDoubleOrNull(12, row.bboxNorth)
                 stmt.bindTextOrNull(13, row.geoJson)
-                stmt.bindZonedDateTime(14, row.updatedAt)
-                stmt.bindZonedDateTimeOrNull(15, row.deletedAt)
+                stmt.bindInstant(14, row.updatedAt)
+                stmt.bindInstantOrNull(15, row.deletedAt)
                 stmt.bindJsonObjectOrNull(16, row.localizedName)
                 stmt.bindJsonObjectOrNull(17, row.localizedDescription)
                 stmt.step()
@@ -140,9 +140,9 @@ class AreaQueries(private val conn: SQLiteConnection) {
         }
     }
 
-    fun selectMaxUpdatedAt(): ZonedDateTime? {
+    fun selectMaxUpdatedAt(): Instant? {
         // See CommentQueries.selectMaxUpdatedAt: text ordering of
-        // ZonedDateTime.toString() values is not chronological.
+        // Instant.toString() values is not chronological.
         conn.prepare(
             """
             SELECT $UPDATED_AT
@@ -154,7 +154,7 @@ class AreaQueries(private val conn: SQLiteConnection) {
             if (!it.step()) {
                 return null
             }
-            return it.getZonedDateTimeOrNull(0)
+            return it.getInstantOrNull(0)
         }
     }
 

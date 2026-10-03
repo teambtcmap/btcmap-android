@@ -4,7 +4,7 @@ import io.ktor.http.HttpMethod
 import kotlinx.serialization.json.JsonObject
 import org.btcmap.util.toJsonArray
 import org.btcmap.util.toJsonObject
-import java.time.ZonedDateTime
+import kotlin.time.Instant
 
 private val placeFields = listOf(
     "lat",
@@ -62,7 +62,7 @@ data class PlaceCoordinates(
     val lon: Double,
 )
 
-suspend fun Api.getPlaces(updatedSince: ZonedDateTime?, limit: Long): List<GetPlacesItem> {
+suspend fun Api.getPlaces(updatedSince: Instant?, limit: Long): List<GetPlacesItem> {
     val url = buildUrl("v4", "places") {
         parameters.append("fields", placeFields.joinToString(separator = ","))
         parameters.append("limit", "$limit")

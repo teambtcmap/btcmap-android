@@ -3,15 +3,14 @@ package org.btcmap.api
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert
 import org.junit.Test
-import java.time.ZonedDateTime
-import java.time.format.DateTimeFormatter
+import kotlin.time.Instant
 
 class CommentApiTest : ApiTestBase() {
     @Test
     fun getComments_sendsParametersAndParsesAllFields() = runTest {
         enqueueJson(COMMENTS)
 
-        val updatedSince = ZonedDateTime.parse("2026-01-01T00:00:00Z")
+        val updatedSince = Instant.parse("2026-01-01T00:00:00Z")
         val comments = api().getComments(updatedSince = updatedSince, limit = 100)
 
         val request = takeRequest()
@@ -20,7 +19,7 @@ class CommentApiTest : ApiTestBase() {
         Assert.assertEquals("100", request.url.queryParameter("limit"))
         Assert.assertEquals("true", request.url.queryParameter("include_deleted"))
         Assert.assertEquals(
-            updatedSince.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
+            updatedSince.toString(),
             request.url.queryParameter("updated_since"),
         )
 

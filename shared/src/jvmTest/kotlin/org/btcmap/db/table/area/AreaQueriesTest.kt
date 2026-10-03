@@ -5,7 +5,7 @@ import org.btcmap.json.parseJsonObject
 import org.btcmap.db.Database
 import org.junit.Assert
 import org.junit.Test
-import java.time.ZonedDateTime
+import kotlin.time.Instant
 
 class AreaQueriesTest {
     private fun createDatabase(): Database {
@@ -16,7 +16,7 @@ class AreaQueriesTest {
         id: Long,
         name: String = "Grand Paris",
         updatedAt: String = "2024-01-01T00:00:00Z",
-        deletedAt: ZonedDateTime? = null,
+        deletedAt: Instant? = null,
         geoJson: String? = null,
     ): Area {
         return Area(
@@ -33,7 +33,7 @@ class AreaQueriesTest {
             bboxEast = 2.47,
             bboxNorth = 48.91,
             geoJson = geoJson,
-            updatedAt = ZonedDateTime.parse(updatedAt),
+            updatedAt = Instant.parse(updatedAt),
             deletedAt = deletedAt,
         )
     }
@@ -126,7 +126,7 @@ class AreaQueriesTest {
     @Test
     fun selectById_hidesTombstones() {
         val db = createDatabase()
-        db.area.insert(listOf(area(7L, deletedAt = ZonedDateTime.parse("2024-02-01T00:00:00Z"))))
+        db.area.insert(listOf(area(7L, deletedAt = Instant.parse("2024-02-01T00:00:00Z"))))
 
         Assert.assertNull(db.area.selectById(7L))
         Assert.assertTrue(db.area.selectAll().isEmpty())
@@ -135,7 +135,7 @@ class AreaQueriesTest {
         // caller that needs the total can still count it.
         Assert.assertEquals(1L, db.area.selectCount(includeDeleted = true))
         Assert.assertEquals(
-            ZonedDateTime.parse("2024-01-01T00:00:00Z"),
+            Instant.parse("2024-01-01T00:00:00Z"),
             db.area.selectMaxUpdatedAt(),
         )
     }
@@ -173,7 +173,7 @@ class AreaQueriesTest {
     fun selectBySearchString_hidesTombstones() {
         val db = createDatabase()
         db.area.insert(
-            listOf(area(1L, name = "Grand Paris", deletedAt = ZonedDateTime.parse("2024-02-01T00:00:00Z")))
+            listOf(area(1L, name = "Grand Paris", deletedAt = Instant.parse("2024-02-01T00:00:00Z")))
         )
 
         Assert.assertTrue(db.area.selectBySearchString("paris").isEmpty())
@@ -222,7 +222,7 @@ class AreaQueriesTest {
                     bboxEast = 13.8,
                     bboxNorth = 52.7,
                 ),
-                area(3L, name = "Gone", deletedAt = ZonedDateTime.parse("2024-02-01T00:00:00Z")),
+                area(3L, name = "Gone", deletedAt = Instant.parse("2024-02-01T00:00:00Z")),
             ),
         )
 
@@ -262,7 +262,7 @@ class AreaQueriesTest {
         )
 
         Assert.assertEquals(
-            ZonedDateTime.parse("2024-03-01T00:00:00Z"),
+            Instant.parse("2024-03-01T00:00:00Z"),
             db.area.selectMaxUpdatedAt(),
         )
     }

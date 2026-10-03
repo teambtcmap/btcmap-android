@@ -1,8 +1,8 @@
 package org.btcmap.db.table.event
 
 import androidx.sqlite.SQLiteStatement
-import org.btcmap.db.getZonedDateTime
-import java.time.ZonedDateTime
+import org.btcmap.db.getInstant
+import kotlin.time.Instant
 
 typealias SearchEvent = EventSearchProjection
 
@@ -17,7 +17,7 @@ data class EventSearchProjection(
     val lat: Double,
     val lon: Double,
     val name: String,
-    val startsAt: ZonedDateTime,
+    val startsAt: Instant,
 ) {
     companion object {
         const val COLUMNS = "$ID, $LAT, $LON, $NAME, $STARTS_AT"
@@ -28,7 +28,7 @@ data class EventSearchProjection(
                 lat = stmt.getDouble(1),
                 lon = stmt.getDouble(2),
                 name = stmt.getText(3),
-                startsAt = stmt.getZonedDateTime(4),
+                startsAt = stmt.getInstant(4),
             )
         }
     }

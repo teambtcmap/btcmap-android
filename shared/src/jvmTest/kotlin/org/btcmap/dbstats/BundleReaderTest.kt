@@ -31,7 +31,7 @@ class BundleReaderTest {
 
     @Test
     fun read_reportsTheNewestUpdatedAtChronologicallyNotAsText() {
-        // ZonedDateTime.toString() drops a zero fraction, so as text the
+        // Instant.toString() drops a zero fraction, so as text the
         // earlier "2024-01-01T10:00Z" sorts after the later ".500Z".
         val bytes = """
             [

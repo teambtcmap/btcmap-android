@@ -32,7 +32,11 @@ fun Comment.toAdapterItem(formatter: DateTimeFormatter): CommentsAdapterItem =
     CommentsAdapterItem(
         id = id,
         comment = comment,
-        localizedDate = formatter.format(createdAt),
+        localizedDate = formatter.format(
+            // Bridged to java.time until the localized date formatting moves to
+            // kotlinx-datetime with the rest of the locale work.
+            java.time.Instant.ofEpochSecond(createdAt.epochSeconds, createdAt.nanosecondsOfSecond.toLong()),
+        ),
     )
 
 /**

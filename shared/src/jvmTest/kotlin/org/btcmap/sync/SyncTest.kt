@@ -5,7 +5,7 @@ import org.btcmap.util.toUrl
 import org.btcmap.db.Database
 import org.junit.Assert
 import org.junit.Test
-import java.time.ZonedDateTime
+import kotlin.time.Instant
 import kotlinx.coroutines.test.runTest
 import kotlinx.serialization.json.jsonPrimitive
 import mockwebserver3.Dispatcher
@@ -315,8 +315,8 @@ class SyncTest {
                     id = 1,
                     placeId = 100,
                     comment = "Old comment",
-                    createdAt = ZonedDateTime.parse("2024-01-01T10:00:00Z"),
-                    updatedAt = ZonedDateTime.parse("2024-01-01T10:00:00Z")
+                    createdAt = Instant.parse("2024-01-01T10:00:00Z"),
+                    updatedAt = Instant.parse("2024-01-01T10:00:00Z")
                 )
             )
         )
@@ -437,9 +437,9 @@ class SyncTest {
                 val limit = request.url.queryParameter("limit")!!.toLong()
                 requestedLimits += limit.toString()
                 val since = request.url.queryParameter("updated_since")
-                    ?.let { ZonedDateTime.parse(it) }
+                    ?.let { Instant.parse(it) }
                 val page = rows
-                    .filter { since == null || ZonedDateTime.parse(it.updatedAt) > since }
+                    .filter { since == null || Instant.parse(it.updatedAt) > since }
                     .sortedWith(compareBy({ it.updatedAt }, { it.id }))
                     .take(limit.toInt())
                 val body = buildString {
@@ -473,7 +473,7 @@ class SyncTest {
             pageSize = 10,
         )
 
-        Assert.assertEquals(ZonedDateTime.parse("2024-01-02T00:00:00Z"), cursor)
+        Assert.assertEquals(Instant.parse("2024-01-02T00:00:00Z"), cursor)
     }
 
     @Test
@@ -489,7 +489,7 @@ class SyncTest {
             pageSize = 3,
         )
 
-        Assert.assertEquals(ZonedDateTime.parse("2024-01-01T00:00:00Z"), cursor)
+        Assert.assertEquals(Instant.parse("2024-01-01T00:00:00Z"), cursor)
     }
 
     @Test
@@ -586,7 +586,7 @@ class SyncTest {
         val events = db.event.selectAll()
         Assert.assertEquals(1, events.size)
         Assert.assertEquals("Bitcoin Conference", events[0].name)
-        Assert.assertEquals(ZonedDateTime.parse("2024-05-01T10:00:00Z"), events[0].updatedAt)
+        Assert.assertEquals(Instant.parse("2024-05-01T10:00:00Z"), events[0].updatedAt)
     }
 
     @Test
@@ -602,9 +602,9 @@ class SyncTest {
                     lon = -74.0060,
                     name = "Old Event",
                     website = "https://example.com".toUrl(),
-                    startsAt = ZonedDateTime.parse("2099-01-01T10:00:00Z"),
+                    startsAt = Instant.parse("2099-01-01T10:00:00Z"),
                     endsAt = null,
-                    updatedAt = ZonedDateTime.parse("2024-01-01T10:00:00Z"),
+                    updatedAt = Instant.parse("2024-01-01T10:00:00Z"),
                 )
             )
         )
@@ -637,9 +637,9 @@ class SyncTest {
                     lon = -74.0060,
                     name = "Old Event",
                     website = null,
-                    startsAt = ZonedDateTime.parse("2099-01-01T10:00:00Z"),
+                    startsAt = Instant.parse("2099-01-01T10:00:00Z"),
                     endsAt = null,
-                    updatedAt = ZonedDateTime.parse("2024-01-01T10:00:00Z"),
+                    updatedAt = Instant.parse("2024-01-01T10:00:00Z"),
                 )
             )
         )
@@ -753,7 +753,7 @@ class SyncTest {
             """{"type":"Point","coordinates":[2.22,48.81]}""",
             area.geoJson,
         )
-        Assert.assertEquals(ZonedDateTime.parse("2024-01-01T10:00:00Z"), area.updatedAt)
+        Assert.assertEquals(Instant.parse("2024-01-01T10:00:00Z"), area.updatedAt)
     }
 
     @Test
@@ -850,7 +850,7 @@ class SyncTest {
             bboxEast = null,
             bboxNorth = null,
             geoJson = null,
-            updatedAt = ZonedDateTime.parse(updatedAt),
+            updatedAt = Instant.parse(updatedAt),
         )
     }
 
@@ -890,9 +890,9 @@ class SyncTest {
         override fun dispatch(request: RecordedRequest): MockResponse {
             val limit = request.url.queryParameter("limit")!!.toLong()
             val since = request.url.queryParameter("updated_since")
-                ?.let { ZonedDateTime.parse(it) }
+                ?.let { Instant.parse(it) }
             val page = rows
-                .filter { since == null || ZonedDateTime.parse(it.updatedAt) > since }
+                .filter { since == null || Instant.parse(it.updatedAt) > since }
                 .sortedWith(compareBy({ it.updatedAt }, { it.id }))
                 .take(limit.toInt())
             return MockResponse.Builder()

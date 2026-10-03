@@ -149,7 +149,7 @@ class DbStatsReaderTest {
             conn.execSQL(
                 "CREATE TABLE event (id INTEGER PRIMARY KEY, updated_at TEXT);",
             )
-            // ZonedDateTime.toString() drops a zero fraction, so as text the
+            // Instant.toString() drops a zero fraction, so as text the
             // earlier "2024-01-01T10:00Z" sorts after the later ".500Z".
             conn.execSQL(
                 """

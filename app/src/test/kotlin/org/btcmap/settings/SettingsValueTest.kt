@@ -1,11 +1,11 @@
 package org.btcmap.settings
 
+import kotlin.time.Clock
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import org.btcmap.db.Database
 import org.junit.Assert
 import org.junit.Test
-import java.time.ZoneOffset
-import java.time.ZonedDateTime
+import kotlin.time.Instant
 
 class SettingsValueTest {
 
@@ -56,10 +56,10 @@ class SettingsValueTest {
     fun verifiedFilterMinVerifiedAt_subtractsConfiguredYears() {
         val settings = createSettings(createDatabase())
         settings.verifiedFilterYears = 1
-        val now = ZonedDateTime.parse("2026-06-15T12:00:00Z")
+        val now = Instant.parse("2026-06-15T12:00:00Z")
 
         Assert.assertEquals(
-            ZonedDateTime.parse("2025-06-15T12:00:00Z"),
+            Instant.parse("2025-06-15T12:00:00Z"),
             settings.verifiedFilterMinVerifiedAt(now),
         )
     }
@@ -67,27 +67,26 @@ class SettingsValueTest {
     @Test
     fun verifiedFilterMinVerifiedAt_defaultsToThreeYears() {
         val settings = createSettings(createDatabase())
-        val now = ZonedDateTime.parse("2026-06-15T12:00:00Z")
+        val now = Instant.parse("2026-06-15T12:00:00Z")
 
         Assert.assertEquals(
-            ZonedDateTime.parse("2023-06-15T12:00:00Z"),
+            Instant.parse("2023-06-15T12:00:00Z"),
             settings.verifiedFilterMinVerifiedAt(now),
         )
     }
 
     @Test
     fun verifiedFilterMinVerifiedAt_normalisesCutoffToUtc() {
-        // A device east of UTC turns ZonedDateTime.now() into a value whose
-        // toString() carries "[Asia/Bangkok]"; SQLite's julianday() returns NULL
-        // for that, which would make the viewport query hide every place. The
-        // cutoff must therefore be a bare UTC instant.
+        // A device east of UTC parses to a value whose offset is not UTC; the
+        // cutoff must still be a bare UTC instant, because SQLite's julianday()
+        // is compared against it in the viewport query.
         val settings = createSettings(createDatabase())
         settings.verifiedFilterYears = 1
-        val now = ZonedDateTime.parse("2026-06-15T12:00:00+07:00[Asia/Bangkok]")
+        val now = Instant.parse("2026-06-15T12:00:00+07:00")
 
         val cutoff = settings.verifiedFilterMinVerifiedAt(now)
 
-        Assert.assertEquals(ZonedDateTime.parse("2025-06-15T05:00:00Z"), cutoff)
-        Assert.assertEquals(ZoneOffset.UTC, cutoff.offset)
+        Assert.assertEquals(Instant.parse("2025-06-15T05:00:00Z"), cutoff)
+        Assert.assertEquals("2025-06-15T05:00:00Z", cutoff.toString())
     }
 }

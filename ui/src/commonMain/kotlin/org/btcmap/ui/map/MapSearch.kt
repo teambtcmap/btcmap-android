@@ -1,5 +1,6 @@
 package org.btcmap.ui.map
 
+import kotlin.time.Clock
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -20,7 +21,7 @@ import org.btcmap.search.SearchAdapterItem
 import org.btcmap.search.nameMatchRank
 import org.btcmap.util.isUpcoming
 import org.maplibre.compose.map.MapState
-import java.time.ZonedDateTime
+import kotlin.time.Instant
 import kotlin.math.PI
 import kotlin.math.asin
 import kotlin.math.cos
@@ -87,7 +88,7 @@ internal fun search(
     referenceLon: Double,
     formatDistance: (Double) -> String,
 ): List<SearchAdapterItem> {
-    val now = ZonedDateTime.now()
+    val now = Clock.System.now()
 
     val areas = db.area.selectBySearchString(query).mapNotNull { area ->
         val bbox = area.searchBbox()

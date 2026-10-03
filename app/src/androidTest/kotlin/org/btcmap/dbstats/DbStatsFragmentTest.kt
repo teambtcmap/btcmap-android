@@ -33,7 +33,7 @@ import org.btcmap.util.waitUntilOnMain
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import java.time.ZonedDateTime
+import kotlin.time.Instant
 
 @RunWith(AndroidJUnit4::class)
 class DbStatsFragmentTest : AppTestCase() {
@@ -173,7 +173,7 @@ class DbStatsFragmentTest : AppTestCase() {
     private fun place(id: Long): Place {
         return Place(
             id = id,
-            updatedAt = ZonedDateTime.parse("2024-01-01T10:00:00Z"),
+            updatedAt = Instant.parse("2024-01-01T10:00:00Z"),
             lat = 40.7128,
             lon = -74.0060,
             icon = "coffee",

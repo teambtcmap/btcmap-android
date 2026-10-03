@@ -2,12 +2,10 @@ package org.btcmap.db.table.event
 
 import androidx.sqlite.SQLiteStatement
 import io.ktor.http.Url
+import kotlin.time.Instant
 import org.btcmap.db.getHttpUrlOrNull
-import org.btcmap.db.getZonedDateTime
-import org.btcmap.db.getZonedDateTimeOrNull
-import java.time.Instant
-import java.time.ZoneOffset
-import java.time.ZonedDateTime
+import org.btcmap.db.getInstant
+import org.btcmap.db.getInstantOrNull
 
 typealias Event = FullProjection
 
@@ -17,13 +15,13 @@ data class FullProjection(
     val lon: Double,
     val name: String,
     val website: Url?,
-    val startsAt: ZonedDateTime,
-    val endsAt: ZonedDateTime?,
+    val startsAt: Instant,
+    val endsAt: Instant?,
     // Defaults to the epoch for callers that build an event for display only.
     // Sync writes the server's value; selectMaxUpdatedAt reads it back as the
     // delta cursor, and an epoch value simply means "sync from the beginning".
-    val updatedAt: ZonedDateTime = ZonedDateTime.ofInstant(Instant.EPOCH, ZoneOffset.UTC),
-    val deletedAt: ZonedDateTime? = null,
+    val updatedAt: Instant = Instant.fromEpochSeconds(0),
+    val deletedAt: Instant? = null,
 ) {
     companion object {
         const val COLUMNS = "$ID, $LAT, $LON, $NAME, $WEBSITE, $STARTS_AT, $ENDS_AT, $UPDATED_AT, $DELETED_AT"
@@ -35,10 +33,10 @@ data class FullProjection(
                 lon = stmt.getDouble(2),
                 name = stmt.getText(3),
                 website = stmt.getHttpUrlOrNull(4),
-                startsAt = stmt.getZonedDateTime(5),
-                endsAt = stmt.getZonedDateTimeOrNull(6),
-                updatedAt = stmt.getZonedDateTime(7),
-                deletedAt = stmt.getZonedDateTimeOrNull(8),
+                startsAt = stmt.getInstant(5),
+                endsAt = stmt.getInstantOrNull(6),
+                updatedAt = stmt.getInstant(7),
+                deletedAt = stmt.getInstantOrNull(8),
             )
         }
     }

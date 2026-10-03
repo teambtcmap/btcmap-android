@@ -17,7 +17,7 @@ import org.btcmap.db.table.comment.Comment
 import org.btcmap.json.btcmapJson
 import org.btcmap.sync.reportSyncFailure
 import org.btcmap.util.rethrowIfCancellation
-import org.btcmap.util.toZonedDateTimeOrNull
+import org.btcmap.util.toInstantOrNull
 
 /**
  * Seeds the comment table from the bundled snapshot produced by the bundler.
@@ -133,12 +133,12 @@ internal fun BundledCommentJson.toComment(): Comment {
     val commentId = requireNotNull(id) { "bundled comment is missing 'id'" }
     val commentPlaceId = requireNotNull(placeId) { "bundled comment $commentId is missing 'place_id'" }
     val commentText = requireNotNull(text) { "bundled comment $commentId is missing 'text'" }
-    val commentCreatedAt = requireNotNull(createdAt?.toZonedDateTimeOrNull()) {
+    val commentCreatedAt = requireNotNull(createdAt?.toInstantOrNull()) {
         "bundled comment $commentId is missing a parseable 'created_at'"
     }
     // `updated_at` drives the delta sync cursor, so a malformed one must fail
     // the seed rather than silently reset the cursor to an arbitrary value.
-    val commentUpdatedAt = requireNotNull(updatedAt?.toZonedDateTimeOrNull()) {
+    val commentUpdatedAt = requireNotNull(updatedAt?.toInstantOrNull()) {
         "bundled comment $commentId is missing a parseable 'updated_at'"
     }
     require(commentText.isNotEmpty()) { "bundled comment $commentId has an empty 'text'" }
