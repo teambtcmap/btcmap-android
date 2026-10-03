@@ -7,29 +7,52 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.AbstractComposeView
+import org.btcmap.db.Database
+import org.btcmap.settings.Settings
 
 /**
- * Hosts [SettingsScreen] inside the Android Views hierarchy. The app sets
- * [items] and the two callbacks; this view holds no state of its own.
+ * Hosts [SettingsPage] inside the Android Views hierarchy. The app sets
+ * [settings], [database] and [labels] plus the navigation callbacks; this view
+ * holds no state of its own. [reloadKey] lets the app re-read the account row
+ * after a sign-in.
  */
 class SettingsComposeView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
 ) : AbstractComposeView(context, attrs) {
 
-    var items: List<SettingsItem> by mutableStateOf(emptyList())
+    var settings: Settings? by mutableStateOf(null)
 
-    var onItemClick: (key: String) -> Unit = {}
+    var database: Database? by mutableStateOf(null)
 
-    var onItemCheckedChange: (key: String, checked: Boolean) -> Unit = { _, _ -> }
+    var labels: SettingsPageLabels? by mutableStateOf(null)
+
+    var reloadKey: Int by mutableStateOf(0)
+
+    var onOpenAccount: () -> Unit = {}
+
+    var onOpenColors: () -> Unit = {}
+
+    var onOpenDbStats: () -> Unit = {}
+
+    var onOpenImageStats: () -> Unit = {}
 
     @Composable
     override fun Content() {
+        val settings = this.settings ?: return
+        val database = this.database ?: return
+        val labels = this.labels ?: return
         AppTheme {
-            SettingsScreen(
-                items = items,
-                onItemClick = onItemClick,
-                onItemCheckedChange = onItemCheckedChange,
+            SettingsPage(
+                settings = settings,
+                db = database,
+                labels = labels,
+                includeImageStats = true,
+                onOpenAccount = onOpenAccount,
+                onOpenColors = onOpenColors,
+                onOpenDbStats = onOpenDbStats,
+                onOpenImageStats = onOpenImageStats,
+                reloadKey = reloadKey,
             )
         }
     }

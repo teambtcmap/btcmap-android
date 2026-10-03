@@ -106,9 +106,12 @@ fun SettingsPage(
     settings: Settings,
     db: Database,
     labels: SettingsPageLabels,
+    includeImageStats: Boolean = true,
     onOpenAccount: () -> Unit,
     onOpenColors: () -> Unit,
     onOpenDbStats: () -> Unit,
+    onOpenImageStats: () -> Unit = {},
+    reloadKey: Int = 0,
 ) {
     var attribution by remember { mutableStateOf(settings.showAttribution) }
     var rotation by remember { mutableStateOf(settings.mapRotationEnabled) }
@@ -116,18 +119,26 @@ fun SettingsPage(
     var verifiedYears by remember { mutableStateOf(settings.verifiedFilterYears) }
 
     // The account row names the cached user, which is read off the main thread.
+    // [reloadKey] lets a host re-read it after a sign-in, which the page cannot
+    // observe on its own.
     var accountTitle by remember { mutableStateOf(labels.account) }
     var accountSecondary by remember { mutableStateOf(labels.logIn) }
-    LaunchedEffect(Unit) {
-        val username = if (settings.authorized) {
-            withContext(Dispatchers.IO) { db.user.select()?.name }
-        } else {
-            null
+    LaunchedEffect(reloadKey) {
+        val username = withContext(Dispatchers.IO) {
+            if (!settings.authorized) {
+                null
+            } else {
+                db.user.select()?.name ?: run {
+                    // A token without a cached account is not a usable session,
+                    // so clear it instead of pointing at a profile that will be
+                    // dropped.
+                    settings.clearSession(db)
+                    null
+                }
+            }
         }
-        if (username != null) {
-            accountTitle = labels.loggedInAs(username)
-            accountSecondary = labels.openProfile
-        }
+        accountTitle = if (username != null) labels.loggedInAs(username) else labels.account
+        accountSecondary = if (username != null) labels.openProfile else labels.logIn
     }
 
     var dialog by remember { mutableStateOf<SettingsDialog?>(null) }
@@ -154,7 +165,7 @@ fun SettingsPage(
             ),
             showAttribution = attribution,
             mapRotationEnabled = rotation,
-            includeImageStats = false,
+            includeImageStats = includeImageStats,
         ),
         onItemClick = { key ->
             when (key) {
@@ -163,6 +174,7 @@ fun SettingsPage(
                 "customizeColors" -> onOpenColors()
                 "verifiedFilter" -> dialog = SettingsDialog.VerifiedFilter
                 "dbStats" -> onOpenDbStats()
+                "imageStats" -> onOpenImageStats()
             }
         },
         onItemCheckedChange = { key, checked ->

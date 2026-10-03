@@ -6,18 +6,16 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.StringRes
 import androidx.fragment.app.Fragment
-import com.mrudultora.colorpicker.ColorPickerPopUp
-import com.mrudultora.colorpicker.ColorPickerPopUp.OnPickColorListener
 import org.btcmap.R
 import org.btcmap.databinding.ColorSettingsFragmentBinding
-import org.btcmap.ui.mapColorItems
+import org.btcmap.ui.ColorsPageLabels
 
 /**
  * The map's customizable colors, one row per element, split off the main
  * settings screen so its list of colors does not crowd out everything else.
  *
- * The list itself and the stored keys come from the shared `MapColor` registry;
- * only the picker is Android's.
+ * The list, the stored keys and the picker all come from the shared
+ * [org.btcmap.ui.ColorsPage]; this fragment only supplies the labels.
  */
 class ColorSettingsFragment : Fragment() {
 
@@ -38,11 +36,17 @@ class ColorSettingsFragment : Fragment() {
             parentFragmentManager.popBackStack()
         }
 
-        binding.colorSettingsList.onItemClick = { key ->
-            MapColor.fromKey(key)?.let { showColorPicker(it) }
-        }
-
-        refreshItems()
+        binding.colorSettingsList.settings = prefs
+        binding.colorSettingsList.labels = ColorsPageLabels(
+            colorTitle = { getString(it.titleRes()) },
+            red = getString(R.string.color_picker_red),
+            green = getString(R.string.color_picker_green),
+            blue = getString(R.string.color_picker_blue),
+            alpha = getString(R.string.color_picker_alpha),
+            ok = getString(android.R.string.ok),
+            reset = getString(R.string.reset),
+            cancel = getString(android.R.string.cancel),
+        )
     }
 
     override fun onDestroyView() {
@@ -61,43 +65,5 @@ class ColorSettingsFragment : Fragment() {
         MapColor.ButtonBackground -> R.string.button_background
         MapColor.ButtonIcon -> R.string.button_icon
         MapColor.ButtonBorder -> R.string.button_border
-    }
-
-    private fun refreshItems() {
-        _binding ?: return
-
-        binding.colorSettingsList.items = mapColorItems(prefs) { color ->
-            getString(color.titleRes())
-        }
-    }
-
-    /**
-     * Opens the Android color picker for [color]. The four marker colors get a
-     * reset labelled as such, matching the desktop; the badge and button rows
-     * keep the picker's own negative-button label.
-     */
-    private fun showColorPicker(color: MapColor) {
-        val colorPickerPopUp = ColorPickerPopUp(context)
-        colorPickerPopUp.setShowAlpha(true)
-            .setDefaultColor(prefs.mapColor(color))
-            .setOnPickColorListener(object : OnPickColorListener {
-                override fun onColorPicked(picked: Int) {
-                    prefs.setMapColor(color, picked)
-                    refreshItems()
-                }
-
-                override fun onCancel() {
-                    colorPickerPopUp.dismissDialog()
-                }
-            })
-            .show()
-        if (color.resettable) {
-            colorPickerPopUp.negativeButton.setText(R.string.reset)
-        }
-        colorPickerPopUp.negativeButton.setOnClickListener {
-            prefs.setMapColor(color, null)
-            refreshItems()
-            colorPickerPopUp.dismissDialog()
-        }
     }
 }

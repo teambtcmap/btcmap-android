@@ -86,6 +86,10 @@
     <string name="button_border">Button border</string>
     <string name="color_hex" translatable="false">#%1$s</string>
     <string name="reset">Reset</string>
+    <string name="color_picker_red">Red</string>
+    <string name="color_picker_green">Green</string>
+    <string name="color_picker_blue">Blue</string>
+    <string name="color_picker_alpha">Alpha</string>
     <string name="area_icon">Area icon</string>
     <string name="read_more">Read more</string>
     <string name="collapse">Collapse</string>

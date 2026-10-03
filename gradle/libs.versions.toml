@@ -60,9 +60,7 @@ maplibre-compose = "0.19.0"
 # QR encoding for Lightning invoices, shared by every host.
 # https://github.com/zxing/zxing/releases
 zxing = "3.5.0"
-# Helps customize colors, when necessary
-# https://github.com/mrudultora/Colorpicker/releases
-colorpicker = "1.2.0"
+
 # Image loading
 # https://github.com/coil-kt/coil/releases
 coil = "3.6.3"
@@ -112,7 +110,6 @@ maplibre-compose = { module = "org.maplibre.compose:maplibre-compose", version.r
 maplibre-compose-runtime-opengl-android = { module = "org.maplibre.compose:maplibre-compose-runtime-opengl-android", version.ref = "maplibre-compose" }
 maplibre-compose-runtime-opengl-linux-x64 = { module = "org.maplibre.compose:maplibre-compose-runtime-opengl-linux-x64", version.ref = "maplibre-compose" }
 zxing-core = { module = "com.google.zxing:core", version.ref = "zxing" }
-colorpicker = { module = "com.github.mrudultora:Colorpicker", version.ref = "colorpicker" }
 coil = { group = "io.coil-kt.coil3", name = "coil", version.ref = "coil" }
 coil-compose = { group = "io.coil-kt.coil3", name = "coil-compose", version.ref = "coil" }
 coil-network = { group = "io.coil-kt.coil3", name = "coil-network-okhttp", version.ref = "coil" }

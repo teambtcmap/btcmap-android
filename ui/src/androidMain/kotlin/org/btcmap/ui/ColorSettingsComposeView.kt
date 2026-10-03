@@ -7,24 +7,27 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.AbstractComposeView
+import org.btcmap.settings.Settings
 
 /**
- * Hosts [ColorSettingsScreen] inside the Android Views hierarchy. The app sets
- * [items] and [onItemClick]; this view holds no state of its own.
+ * Hosts [ColorsPage] inside the Android Views hierarchy. The app sets [settings]
+ * and [labels]; this view holds no state of its own.
  */
 class ColorSettingsComposeView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
 ) : AbstractComposeView(context, attrs) {
 
-    var items: List<ColorItem> by mutableStateOf(emptyList())
+    var settings: Settings? by mutableStateOf(null)
 
-    var onItemClick: (key: String) -> Unit = {}
+    var labels: ColorsPageLabels? by mutableStateOf(null)
 
     @Composable
     override fun Content() {
+        val settings = this.settings ?: return
+        val labels = this.labels ?: return
         AppTheme {
-            ColorSettingsScreen(items = items, onItemClick = onItemClick)
+            ColorsPage(settings = settings, labels = labels)
         }
     }
 }

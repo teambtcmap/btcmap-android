@@ -4,18 +4,9 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.annotation.StringRes
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.commit
 import androidx.fragment.app.replace
-import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.setViewTreeLifecycleOwner
-import androidx.lifecycle.setViewTreeViewModelStoreOwner
-import androidx.savedstate.setViewTreeSavedStateRegistryOwner
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import org.btcmap.R
 import org.btcmap.auth.registerAuthResultListener
 import org.btcmap.auth.showAuthDialog
@@ -23,22 +14,17 @@ import org.btcmap.databinding.SettingsFragmentBinding
 import org.btcmap.db
 import org.btcmap.dbstats.DbStatsFragment
 import org.btcmap.imagestats.ImageStatsFragment
-import org.btcmap.ui.RadioOption
-import org.btcmap.ui.RadioPickerComposeView
-import org.btcmap.ui.SettingsStrings
-import org.btcmap.ui.settingsItems
+import org.btcmap.ui.SettingsPageLabels
 
+/**
+ * The settings screen, hosted by the shared [org.btcmap.ui.SettingsPage]. The
+ * page owns the rows, the toggles and the picker dialogs; this fragment only
+ * supplies the labels and the navigation the rows trigger.
+ */
 class SettingsFragment : Fragment() {
 
     private var _binding: SettingsFragmentBinding? = null
     private val binding get() = _binding!!
-
-    /**
-     * The account row's strings. Read off the main thread by [updateAccountUi],
-     * so they are cached here and folded into the row list by [refreshItems].
-     */
-    private var accountTitle = ""
-    private var accountSecondary = ""
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -54,20 +40,31 @@ class SettingsFragment : Fragment() {
             parentFragmentManager.popBackStack()
         }
 
-        binding.settingsList.onItemClick = ::onItemClick
-        binding.settingsList.onItemCheckedChange = ::onItemCheckedChange
-
-        if (prefs.authorized) {
-            accountTitle = ""
-            accountSecondary = ""
-        } else {
-            accountTitle = getString(R.string.not_logged_in)
-            accountSecondary = getString(R.string.create_account)
+        binding.settingsList.apply {
+            settings = prefs
+            database = db()
+            labels = pageLabels()
+            onOpenAccount = {
+                if (prefs.authorized) {
+                    open { replace<UserProfileFragment>(R.id.fragmentContainerView, null) }
+                } else {
+                    showAuthDialog()
+                }
+            }
+            onOpenColors = {
+                open { replace<ColorSettingsFragment>(R.id.fragmentContainerView, null) }
+            }
+            onOpenDbStats = {
+                open { replace<DbStatsFragment>(R.id.fragmentContainerView, null) }
+            }
+            onOpenImageStats = {
+                open { replace<ImageStatsFragment>(R.id.fragmentContainerView, null) }
+            }
         }
 
-        updateAccountUi()
-        registerAuthResultListener { updateAccountUi() }
-        refreshItems()
+        // A sign-in returns to this screen without recreating it, so the account
+        // row has to be told to re-read the cached user.
+        registerAuthResultListener { binding.settingsList.reloadKey++ }
     }
 
     override fun onDestroyView() {
@@ -75,153 +72,36 @@ class SettingsFragment : Fragment() {
         _binding = null
     }
 
-    /** Rebuilds the row list from the current settings. */
-    private fun refreshItems() {
-        _binding ?: return
-
-        binding.settingsList.items = settingsItems(
-            SettingsStrings(
-                accountTitle = accountTitle,
-                accountSecondary = accountSecondary,
-                mapStyle = getString(R.string.map_style),
-                mapStyleValue = prefs.mapStyle.name(requireContext()),
-                customizeColors = getString(R.string.customize_colors),
-                customizeColorsSecondary = getString(R.string.customize_colors_secondary),
-                verifiedFilter = getString(R.string.verified_filter),
-                verifiedFilterValue = prefs.verifiedFilterYears.toVerifiedFilterYears(requireContext()),
-                showAttribution = getString(R.string.show_attribution),
-                showAttributionSecondary = getString(R.string.show_attribution_secondary),
-                mapRotation = getString(R.string.map_rotation),
-                mapRotationSecondary = getString(R.string.map_rotation_secondary),
-                dbStats = getString(R.string.database_stats),
-                dbStatsSecondary = getString(R.string.database_stats_secondary),
-                imageStats = getString(R.string.image_stats),
-                imageStatsSecondary = getString(R.string.image_stats_secondary),
-            ),
-            showAttribution = prefs.showAttribution,
-            mapRotationEnabled = prefs.mapRotationEnabled,
-        )
-    }
-
-    private fun onItemClick(key: String) {
-        when (key) {
-            "account" -> {
-                if (prefs.authorized) {
-                    open { replace<UserProfileFragment>(R.id.fragmentContainerView, null) }
-                } else {
-                    showAuthDialog()
-                }
-            }
-            "mapStyle" -> showMapStyleDialog()
-            "customizeColors" -> open { replace<ColorSettingsFragment>(R.id.fragmentContainerView, null) }
-            "verifiedFilter" -> showVerifiedFilterDialog()
-            "dbStats" -> open { replace<DbStatsFragment>(R.id.fragmentContainerView, null) }
-            "imageStats" -> open { replace<ImageStatsFragment>(R.id.fragmentContainerView, null) }
-        }
-    }
-
-    private fun onItemCheckedChange(key: String, checked: Boolean) {
-        when (key) {
-            "showAttribution" -> prefs.showAttribution = checked
-            "mapRotation" -> prefs.mapRotationEnabled = checked
-        }
-        refreshItems()
-    }
+    private fun pageLabels(): SettingsPageLabels = SettingsPageLabels(
+        account = getString(R.string.not_logged_in),
+        logIn = getString(R.string.create_account),
+        loggedInAs = { getString(R.string.logged_in_as, it) },
+        openProfile = getString(R.string.click_to_see_your_profile),
+        mapStyle = getString(R.string.map_style),
+        mapStyleValue = { it.name(requireContext()) },
+        customizeColors = getString(R.string.customize_colors),
+        customizeColorsSecondary = getString(R.string.customize_colors_secondary),
+        verifiedFilter = getString(R.string.verified_filter),
+        verifiedFilterValue = { it.toVerifiedFilterYears(requireContext()) },
+        verifiedFilterYears = listOf(1, 2, 3),
+        showAttribution = getString(R.string.show_attribution),
+        showAttributionSecondary = getString(R.string.show_attribution_secondary),
+        mapRotation = getString(R.string.map_rotation),
+        mapRotationSecondary = getString(R.string.map_rotation_secondary),
+        dbStats = getString(R.string.database_stats),
+        dbStatsSecondary = getString(R.string.database_stats_secondary),
+        imageStats = getString(R.string.image_stats),
+        imageStatsSecondary = getString(R.string.image_stats_secondary),
+        mapStyleDialogTitle = getString(R.string.map_style),
+        verifiedFilterDialogTitle = getString(R.string.verified_filter),
+        close = getString(R.string.close),
+    )
 
     private fun open(block: androidx.fragment.app.FragmentTransaction.() -> Unit) {
         parentFragmentManager.commit {
             setReorderingAllowed(true)
             block()
             addToBackStack(null)
-        }
-    }
-
-    private fun showMapStyleDialog() {
-        val options = MapStyle.entries.map { style ->
-            RadioOption(key = style.name, label = style.name(requireContext()))
-        }
-        showRadioPickerDialog(
-            titleRes = R.string.map_style,
-            options = options,
-            selectedKey = prefs.mapStyle.name,
-        ) { key ->
-            MapStyle.entries.firstOrNull { it.name == key }?.let { prefs.mapStyle = it }
-            refreshItems()
-        }
-    }
-
-    private fun showVerifiedFilterDialog() {
-        val options = listOf(1, 2, 3).map { years ->
-            RadioOption(key = years.toString(), label = years.toVerifiedFilterYears(requireContext()))
-        }
-        showRadioPickerDialog(
-            titleRes = R.string.verified_filter,
-            options = options,
-            selectedKey = prefs.verifiedFilterYears.toString(),
-        ) { key ->
-            key.toIntOrNull()?.let { prefs.verifiedFilterYears = it }
-            refreshItems()
-        }
-    }
-
-    /**
-     * Shows a titled radio picker. The content is a Compose view, so the dialog
-     * window is given the view-tree owners it would otherwise miss; a selection
-     * applies the setting and dismisses.
-     */
-    private fun showRadioPickerDialog(
-        @StringRes titleRes: Int,
-        options: List<RadioOption>,
-        selectedKey: String?,
-        onSelect: (key: String) -> Unit,
-    ) {
-        val view = RadioPickerComposeView(requireContext()).apply {
-            setViewTreeLifecycleOwner(this@SettingsFragment)
-            setViewTreeSavedStateRegistryOwner(this@SettingsFragment)
-            setViewTreeViewModelStoreOwner(this@SettingsFragment)
-            this.options = options
-            this.selectedKey = selectedKey
-        }
-        val dialog = MaterialAlertDialogBuilder(requireContext())
-            .setTitle(titleRes)
-            .setView(view)
-            .create()
-        view.onSelect = { key ->
-            onSelect(key)
-            dialog.dismiss()
-        }
-        dialog.show()
-    }
-
-    private fun updateAccountUi() {
-        viewLifecycleOwner.lifecycleScope.launch {
-            // Read the cached account off the main thread and only report it as
-            // signed in when a usable session token is actually stored.
-            val username = withContext(Dispatchers.IO) {
-                if (!prefs.authorized) {
-                    null
-                } else {
-                    db().user.select()?.name ?: run {
-                        // A token without a cached account is not a usable
-                        // session, so clear it instead of leaving the account
-                        // button pointing at a profile that will be dropped.
-                        prefs.clearSession(db())
-                        null
-                    }
-                }
-            }
-
-            _binding ?: return@launch
-
-            if (username != null) {
-                accountTitle = getString(R.string.logged_in_as, username)
-                accountSecondary = getString(R.string.click_to_see_your_profile)
-            } else {
-                accountTitle = getString(R.string.not_logged_in)
-                accountSecondary = getString(R.string.create_account)
-            }
-
-            refreshItems()
         }
     }
 }

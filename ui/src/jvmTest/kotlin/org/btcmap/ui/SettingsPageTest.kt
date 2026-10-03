@@ -27,7 +27,7 @@ class SettingsPageTest {
     @Test
     fun rows_renderTheSameSettingsAsAndroid() {
         runComposeUiTest {
-            setContent { SettingsPage(settings, db, TEST_SETTINGS_PAGE_LABELS, {}, {}, {}) }
+            setContent { SettingsPage(settings, db, TEST_SETTINGS_PAGE_LABELS, onOpenAccount = {}, onOpenColors = {}, onOpenDbStats = {}) }
             onNodeWithText("Map style").assertIsDisplayed()
             onNodeWithText("Customize colors").assertIsDisplayed()
             onNodeWithText("Only show places").assertIsDisplayed()
@@ -43,7 +43,7 @@ class SettingsPageTest {
     fun accountRow_opensTheAccountPage() {
         var opened = false
         runComposeUiTest {
-            setContent { SettingsPage(settings, db, TEST_SETTINGS_PAGE_LABELS, { opened = true }, {}, {}) }
+            setContent { SettingsPage(settings, db, TEST_SETTINGS_PAGE_LABELS, onOpenAccount = { opened = true }, onOpenColors = {}, onOpenDbStats = {}) }
             onNodeWithText("Account").performClick()
         }
         assertTrue(opened)
@@ -54,7 +54,7 @@ class SettingsPageTest {
     fun customizeColorsRow_opensTheColorsPage() {
         var opened = false
         runComposeUiTest {
-            setContent { SettingsPage(settings, db, TEST_SETTINGS_PAGE_LABELS, {}, { opened = true }, {}) }
+            setContent { SettingsPage(settings, db, TEST_SETTINGS_PAGE_LABELS, onOpenAccount = {}, onOpenColors = { opened = true }, onOpenDbStats = {}) }
             onNodeWithText("Customize colors").performClick()
         }
         assertTrue(opened)
@@ -65,7 +65,7 @@ class SettingsPageTest {
     fun databaseRow_opensTheDatabasePage() {
         var opened = false
         runComposeUiTest {
-            setContent { SettingsPage(settings, db, TEST_SETTINGS_PAGE_LABELS, {}, {}, { opened = true }) }
+            setContent { SettingsPage(settings, db, TEST_SETTINGS_PAGE_LABELS, onOpenAccount = {}, onOpenColors = {}, onOpenDbStats = { opened = true }) }
             onNodeWithText("Database").performClick()
         }
         assertTrue(opened)
@@ -75,7 +75,7 @@ class SettingsPageTest {
     @Test
     fun mapStyleRow_picksAStyleAndStoresIt() {
         runComposeUiTest {
-            setContent { SettingsPage(settings, db, TEST_SETTINGS_PAGE_LABELS, {}, {}, {}) }
+            setContent { SettingsPage(settings, db, TEST_SETTINGS_PAGE_LABELS, onOpenAccount = {}, onOpenColors = {}, onOpenDbStats = {}) }
             onNodeWithText("Map style").performClick()
             onNodeWithText("OpenFreeMap Dark").performClick()
         }
@@ -87,7 +87,7 @@ class SettingsPageTest {
     fun togglingAttribution_writesItThrough() {
         assertTrue(settings.showAttribution)
         runComposeUiTest {
-            setContent { SettingsPage(settings, db, TEST_SETTINGS_PAGE_LABELS, {}, {}, {}) }
+            setContent { SettingsPage(settings, db, TEST_SETTINGS_PAGE_LABELS, onOpenAccount = {}, onOpenColors = {}, onOpenDbStats = {}) }
             // The first toggle is Show attribution, the second Map rotation.
             onAllNodes(isToggleable())[0].performClick()
         }
