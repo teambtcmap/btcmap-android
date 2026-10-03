@@ -7,12 +7,13 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.withResumed
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import io.ktor.client.HttpClient
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import okhttp3.OkHttpClient
 import org.btcmap.BuildConfig
 import org.btcmap.R
+import org.btcmap.api.apiHttpClient
 import org.btcmap.update.AvailableUpdate
 import org.btcmap.update.UpdateCheck
 import org.btcmap.util.rethrowIfCancellation
@@ -93,7 +94,7 @@ class UpdateNotificationController(
     }
 
     private companion object {
-        val sharedHttpClient: OkHttpClient by lazy { OkHttpClient() }
+        val sharedHttpClient: HttpClient by lazy { apiHttpClient("btcmap-android") }
 
         /**
          * The check is identical for every map view in the process, so its

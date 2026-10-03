@@ -1,7 +1,7 @@
 package org.btcmap.api
 
+import io.ktor.http.HttpMethod
 import kotlinx.serialization.json.JsonPrimitive
-import okhttp3.Request
 import org.btcmap.util.toJsonLongArray
 
 /**
@@ -11,13 +11,12 @@ import org.btcmap.util.toJsonLongArray
  */
 internal suspend fun Api.saveItem(resource: String, id: Long): List<Long> {
     val url = buildUrl("v4", resource, "saved")
-    val body = jsonBody(JsonPrimitive(id))
 
-    return call(Request.Builder().post(body).url(url).build()) { it.toJsonLongArray() }
+    return call(HttpMethod.Post, url, body = JsonPrimitive(id)) { it.toJsonLongArray() }
 }
 
 internal suspend fun Api.removeSavedItem(resource: String, id: Long): List<Long> {
     val url = buildUrl("v4", resource, "saved", "$id")
 
-    return call(Request.Builder().delete().url(url).build()) { it.toJsonLongArray() }
+    return call(HttpMethod.Delete, url) { it.toJsonLongArray() }
 }

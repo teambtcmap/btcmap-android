@@ -8,7 +8,7 @@ import android.view.ViewGroup
 import androidx.compose.ui.graphics.Color
 import androidx.core.net.toUri
 import androidx.fragment.app.Fragment
-import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
+import org.btcmap.util.toUrlOrNull
 import org.btcmap.R
 import org.btcmap.api.GetEventsItem
 import org.btcmap.databinding.EventFragmentBinding
@@ -67,7 +67,7 @@ class EventFragment : Fragment() {
             lat = args.getDouble(ARG_LAT),
             lon = args.getDouble(ARG_LON),
             name = args.getString(ARG_NAME).orEmpty(),
-            website = args.getString(ARG_WEBSITE)?.toHttpUrlOrNull(),
+            website = args.getString(ARG_WEBSITE)?.toUrlOrNull(),
             startsAt = ZonedDateTime.parse(requireNotNull(args.getString(ARG_STARTS_AT))),
             endsAt = args.getString(ARG_ENDS_AT)?.let { ZonedDateTime.parse(it) },
         )

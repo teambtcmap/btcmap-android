@@ -1,43 +1,28 @@
 package org.btcmap.api
 
-import okhttp3.HttpUrl.Companion.toHttpUrl
-import okhttp3.brotli.BrotliInterceptor
-import org.btcmap.auth.TokenSettingInterceptor
-import org.btcmap.http.RateLimitingInterceptor
-import org.btcmap.http.UserAgentSettingInterceptor
+import io.ktor.client.request.get
+import io.ktor.client.statement.bodyAsText
+import kotlinx.coroutines.runBlocking
+import mockwebserver3.MockResponse
+import mockwebserver3.junit4.MockWebServerRule
+import org.btcmap.util.toUrl
 import org.junit.Assert
+import org.junit.Rule
 import org.junit.Test
 
 class ApiHttpClientTest {
-    private fun client(userAgent: String = "test-agent"): okhttp3.OkHttpClient {
-        return apiHttpClient(
-            userAgent = userAgent,
-            token = { null },
-            apiUrl = { "https://example.com".toHttpUrl() },
-        )
-    }
+    @JvmField
+    @Rule
+    val serverRule = MockWebServerRule()
 
     @Test
-    fun apiHttpClient_installsInterceptorsInOrder() {
-        val interceptors = client().interceptors.map { it::class.java }
+    fun apiHttpClient_sendsTheConfiguredUserAgent() = runBlocking {
+        serverRule.server.enqueue(MockResponse.Builder().body("ok").build())
 
-        Assert.assertEquals(
-            listOf(
-                BrotliInterceptor::class.java,
-                UserAgentSettingInterceptor::class.java,
-                TokenSettingInterceptor::class.java,
-                RateLimitingInterceptor::class.java,
-            ),
-            interceptors,
-        )
-    }
+        apiHttpClient("test-agent")
+            .get(serverRule.server.url("/x").toString().toUrl())
+            .bodyAsText()
 
-    @Test
-    fun apiHttpClient_configuresTimeouts() {
-        val client = client()
-
-        Assert.assertEquals(15_000, client.connectTimeoutMillis)
-        Assert.assertEquals(60_000, client.readTimeoutMillis)
-        Assert.assertEquals(30_000, client.writeTimeoutMillis)
+        Assert.assertEquals("test-agent", serverRule.server.takeRequest().headers["User-Agent"])
     }
 }

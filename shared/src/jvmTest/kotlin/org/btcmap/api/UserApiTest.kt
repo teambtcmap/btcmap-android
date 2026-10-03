@@ -1,7 +1,9 @@
 package org.btcmap.api
 
 import kotlinx.coroutines.test.runTest
-import okhttp3.OkHttpClient
+import io.ktor.client.HttpClient
+import io.ktor.client.engine.cio.CIO
+import org.btcmap.util.toUrl
 import org.junit.Assert
 import org.junit.Test
 
@@ -158,8 +160,8 @@ class UserApiTest : ApiTestBase() {
 
         var unauthorized = false
         val api = Api(
-            httpClient = OkHttpClient(),
-            baseUrl = { server.url("/") },
+            httpClient = HttpClient(CIO),
+            baseUrl = { server.url("/").toString().toUrl() },
             onUnauthorized = { unauthorized = true },
         )
 
@@ -191,8 +193,8 @@ class UserApiTest : ApiTestBase() {
 
         var unauthorized = false
         val api = Api(
-            httpClient = OkHttpClient(),
-            baseUrl = { server.url("/") },
+            httpClient = HttpClient(CIO),
+            baseUrl = { server.url("/").toString().toUrl() },
             onUnauthorized = { unauthorized = true },
         )
 

@@ -1,11 +1,11 @@
 package org.btcmap.api
 
+import io.ktor.http.HttpMethod
 import kotlinx.serialization.json.buildJsonArray
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.long
 import kotlinx.serialization.json.put
-import okhttp3.Request
 import org.btcmap.util.toJsonObject
 import java.util.Base64
 
@@ -43,18 +43,13 @@ suspend fun Api.reportPlace(
         }
     }
 
-    return call(
-        Request.Builder()
-            .post(jsonBody(req))
-            .url(url)
-            .build()
-    ) { stream ->
-        val body = stream.toJsonObject()
+    return call(HttpMethod.Post, url, body = req) { body ->
+        val parsed = body.toJsonObject()
 
         ReportPlaceResponse(
-            id = body.long("id"),
-            origin = body.string("origin"),
-            photoIds = body.arrayOrNull("photo_ids")?.map { it.jsonPrimitive.long }.orEmpty(),
+            id = parsed.long("id"),
+            origin = parsed.string("origin"),
+            photoIds = parsed.arrayOrNull("photo_ids")?.map { it.jsonPrimitive.long }.orEmpty(),
         )
     }
 }

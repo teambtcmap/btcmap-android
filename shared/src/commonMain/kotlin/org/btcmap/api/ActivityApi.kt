@@ -1,8 +1,6 @@
 package org.btcmap.api
 
-import okhttp3.Request
-import okio.BufferedSource
-import org.btcmap.auth.withoutAuth
+import io.ktor.http.HttpMethod
 import org.btcmap.util.toJsonArray
 
 data class ActivityFeedItem(
@@ -42,18 +40,18 @@ suspend fun Api.getActivity(
 
     val url = buildUrl("v4", "activity") {
         if (areaIds.isNotEmpty()) {
-            addQueryParameter("areas", areaIds.joinToString(","))
+            parameters.append("areas", areaIds.joinToString(","))
         }
         if (placeIds.isNotEmpty()) {
-            addQueryParameter("places", placeIds.joinToString(","))
+            parameters.append("places", placeIds.joinToString(","))
         }
-        addQueryParameter("days", "$days")
+        parameters.append("days", "$days")
     }
 
-    return call(Request.Builder().withoutAuth().url(url).build()) { it.toActivityFeedItems() }
+    return call(HttpMethod.Get, url, withoutAuth = true) { it.toActivityFeedItems() }
 }
 
-private fun BufferedSource.toActivityFeedItems(): List<ActivityFeedItem> {
+private fun String.toActivityFeedItems(): List<ActivityFeedItem> {
     return toJsonArray().map {
         ActivityFeedItem(
             type = it.string("type"),

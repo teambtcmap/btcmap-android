@@ -1,7 +1,7 @@
 package org.btcmap.db.table.event
 
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
-import okhttp3.HttpUrl.Companion.toHttpUrl
+import org.btcmap.util.toUrl
 import org.btcmap.db.Database
 import org.junit.Assert
 import org.junit.Test
@@ -20,7 +20,7 @@ class EventQueriesTest {
             lat = 40.7128,
             lon = -74.0060,
             name = "Bitcoin Meetup",
-            website = "https://example.com".toHttpUrl(),
+            website = "https://example.com".toUrl(),
             startsAt = ZonedDateTime.parse("2024-06-01T18:00:00Z"),
             endsAt = ZonedDateTime.parse("2024-06-01T20:00:00Z"),
         )
@@ -43,7 +43,7 @@ class EventQueriesTest {
             lat = 51.5074,
             lon = -0.1278,
             name = "London BTC",
-            website = "https://london.btc".toHttpUrl(),
+            website = "https://london.btc".toUrl(),
             startsAt = ZonedDateTime.parse("2024-07-01T19:00:00Z"),
             endsAt = null,
         )
@@ -101,7 +101,7 @@ class EventQueriesTest {
             lat = 40.7128,
             lon = -74.0060,
             name = "NYC Event",
-            website = "https://example.com".toHttpUrl(),
+            website = "https://example.com".toUrl(),
             startsAt = ZonedDateTime.parse("2024-06-01T18:00:00Z"),
             endsAt = null,
         )
@@ -110,7 +110,7 @@ class EventQueriesTest {
             lat = 51.5074,
             lon = -0.1278,
             name = "London Event",
-            website = "https://example.com".toHttpUrl(),
+            website = "https://example.com".toUrl(),
             startsAt = ZonedDateTime.parse("2024-07-01T18:00:00Z"),
             endsAt = null,
         )
@@ -119,7 +119,7 @@ class EventQueriesTest {
             lat = 34.0522,
             lon = -118.2437,
             name = "LA Event",
-            website = "https://example.com".toHttpUrl(),
+            website = "https://example.com".toUrl(),
             startsAt = ZonedDateTime.parse("2024-08-01T18:00:00Z"),
             endsAt = null,
         )
@@ -146,7 +146,7 @@ class EventQueriesTest {
             lat = 40.7128,
             lon = -74.0060,
             name = "NYC Event",
-            website = "https://example.com".toHttpUrl(),
+            website = "https://example.com".toUrl(),
             startsAt = ZonedDateTime.parse("2024-06-01T18:00:00Z"),
             endsAt = null,
         )
@@ -349,7 +349,7 @@ class EventQueriesTest {
                     lat = 40.7128,
                     lon = -74.0060,
                     name = name,
-                    website = website?.toHttpUrl(),
+                    website = website?.toUrl(),
                     startsAt = ZonedDateTime.parse("2024-06-01T18:00:00Z"),
                     endsAt = null,
                 )

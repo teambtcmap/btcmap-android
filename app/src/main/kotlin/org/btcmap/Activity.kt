@@ -11,7 +11,7 @@ import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.launch
-import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
+import org.btcmap.util.toUrlOrNull
 import org.btcmap.databinding.ActivityBinding
 import org.btcmap.map.MapFragment
 import org.btcmap.util.DeepLink
@@ -119,6 +119,6 @@ class Activity : AppCompatActivity() {
     }
 
     private fun Intent.deepLink(): DeepLink? {
-        return dataString?.toHttpUrlOrNull()?.deepLink()
+        return dataString?.toUrlOrNull()?.deepLink()
     }
 }

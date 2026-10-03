@@ -1,10 +1,9 @@
 package org.btcmap.api
 
+import io.ktor.http.HttpMethod
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
-import okhttp3.Request
-import org.btcmap.auth.withoutAuth
 import org.btcmap.util.toJsonArray
 import org.btcmap.util.toJsonObject
 import java.util.Base64
@@ -24,8 +23,8 @@ data class PlaceImage(
 suspend fun Api.getPlaceImages(placeId: Long): List<PlaceImage> {
     val url = buildUrl("v4", "places", "$placeId", "images")
 
-    return call(Request.Builder().withoutAuth().url(url).build()) { stream ->
-        stream.toJsonArray().map { it.toPlaceImage() }
+    return call(HttpMethod.Get, url, withoutAuth = true) { body ->
+        body.toJsonArray().map { it.toPlaceImage() }
     }
 }
 
@@ -40,8 +39,8 @@ suspend fun Api.addPlaceImage(placeId: Long, photo: ByteArray): PlaceImage {
         put("data_base64", Base64.getEncoder().encodeToString(photo))
     }
 
-    return call(Request.Builder().post(jsonBody(req)).url(url).build()) { stream ->
-        stream.toJsonObject().toPlaceImage()
+    return call(HttpMethod.Post, url, body = req) { body ->
+        body.toJsonObject().toPlaceImage()
     }
 }
 
@@ -56,8 +55,8 @@ fun Api.placeImageUrl(
     height: Int? = null,
 ): String {
     return buildUrl("v4", "places", "$placeId", "images", "$imageId") {
-        width?.let { addQueryParameter("w", "$it") }
-        height?.let { addQueryParameter("h", "$it") }
+        width?.let { parameters.append("w", "$it") }
+        height?.let { parameters.append("h", "$it") }
     }.toString()
 }
 

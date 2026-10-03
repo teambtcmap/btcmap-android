@@ -1,13 +1,14 @@
 package org.btcmap.update
 
+import io.ktor.client.HttpClient
+import io.ktor.client.statement.bodyAsText
+import io.ktor.http.HttpMethod
 import kotlinx.serialization.json.int
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
-import okhttp3.HttpUrl.Companion.toHttpUrl
-import okhttp3.OkHttpClient
-import okhttp3.Request
-import okhttp3.coroutines.executeAsync
+import org.btcmap.http.executeIdempotent
 import org.btcmap.json.parseJson
+import org.btcmap.util.toUrl
 
 /** A published build newer than the one running. */
 data class AvailableUpdate(
@@ -33,13 +34,13 @@ object UpdateCheck {
      * even when their version code is lower.
      */
     suspend fun fetch(
-        httpClient: OkHttpClient,
+        httpClient: HttpClient,
         manifestUrl: String,
         currentVersionCode: Int,
         isDebugBuild: Boolean,
     ): AvailableUpdate? {
-        val json = httpClient.newCall(Request.Builder().url(manifestUrl.toHttpUrl()).build())
-            .executeAsync().use { it.body.string().trim() }
+        val json = httpClient.executeIdempotent(HttpMethod.Get, manifestUrl.toUrl())
+            .bodyAsText().trim()
 
         val latest = parseJson(json).jsonObject
         val latestVersionCode = latest["code"]!!.jsonPrimitive.int

@@ -1,9 +1,7 @@
 package org.btcmap.api
 
+import io.ktor.http.HttpMethod
 import kotlinx.serialization.json.jsonObject
-import okhttp3.Request
-import okio.BufferedSource
-import org.btcmap.auth.withoutAuth
 import org.btcmap.util.toJsonObject
 
 data class GetPlaceIssuesItem(
@@ -20,14 +18,14 @@ data class GetPlaceIssuesResponse(
 
 suspend fun Api.getPlaceIssues(areaId: Long, limit: Long = 50): GetPlaceIssuesResponse {
     val url = buildUrl("v4", "place-issues") {
-        addQueryParameter("area_id", areaId.toString())
-        addQueryParameter("limit", limit.toString())
+        parameters.append("area_id", areaId.toString())
+        parameters.append("limit", limit.toString())
     }
 
-    return call(Request.Builder().withoutAuth().url(url).build()) { it.toGetPlaceIssuesResponse() }
+    return call(HttpMethod.Get, url, withoutAuth = true) { it.toGetPlaceIssuesResponse() }
 }
 
-private fun BufferedSource.toGetPlaceIssuesResponse(): GetPlaceIssuesResponse {
+private fun String.toGetPlaceIssuesResponse(): GetPlaceIssuesResponse {
     val body = toJsonObject()
 
     val issues = body.arrayOrNull("requested_issues")?.map { element ->

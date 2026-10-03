@@ -1,7 +1,7 @@
 package org.btcmap.sync
 
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
-import okhttp3.HttpUrl.Companion.toHttpUrl
+import org.btcmap.util.toUrl
 import org.btcmap.db.Database
 import org.junit.Assert
 import org.junit.Test
@@ -12,7 +12,8 @@ import mockwebserver3.Dispatcher
 import mockwebserver3.MockResponse
 import mockwebserver3.RecordedRequest
 import mockwebserver3.junit4.MockWebServerRule
-import okhttp3.OkHttpClient
+import io.ktor.client.HttpClient
+import io.ktor.client.engine.cio.CIO
 import org.btcmap.api.Api
 import org.btcmap.db.table.area.Area
 import org.btcmap.db.table.comment.Comment
@@ -30,8 +31,8 @@ class SyncTest {
 
     private fun createApi(): Api {
         return Api(
-            httpClient = OkHttpClient(),
-            baseUrl = { serverRule.server.url("/") }
+            httpClient = HttpClient(CIO),
+            baseUrl = { serverRule.server.url("/").toString().toUrl() }
         )
     }
 
@@ -600,7 +601,7 @@ class SyncTest {
                     lat = 40.7128,
                     lon = -74.0060,
                     name = "Old Event",
-                    website = "https://example.com".toHttpUrl(),
+                    website = "https://example.com".toUrl(),
                     startsAt = ZonedDateTime.parse("2099-01-01T10:00:00Z"),
                     endsAt = null,
                     updatedAt = ZonedDateTime.parse("2024-01-01T10:00:00Z"),

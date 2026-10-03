@@ -9,6 +9,7 @@ import org.btcmap.App
 import org.btcmap.api.ApiException
 import org.btcmap.api.getUser
 import org.btcmap.db.table.user.User
+import org.btcmap.util.toUrl
 import org.btcmap.settings.apiUrl
 import org.btcmap.settings.authToken
 import org.btcmap.util.AppTestCase
@@ -49,7 +50,7 @@ class SessionExpiryTest : AppTestCase() {
 
     @Test
     fun rejectedToken_clearsStoredTokenAndCachedUser() {
-        prefs.apiUrl = server.url("/")
+        prefs.apiUrl = server.url("/").toString().toUrl()
         prefs.setAuthTokenForTesting("stale-token")
         databaseRule.db.user.insert(signedInUser())
 

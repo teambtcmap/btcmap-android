@@ -1,20 +1,23 @@
 package org.btcmap.api
 
+import io.ktor.client.HttpClient
+import io.ktor.client.request.header
+import io.ktor.client.request.setBody
+import io.ktor.client.statement.HttpResponse
+import io.ktor.client.statement.bodyAsText
+import io.ktor.http.ContentType
+import io.ktor.http.HttpHeaders
+import io.ktor.http.HttpMethod
+import io.ktor.http.URLBuilder
+import io.ktor.http.Url
+import io.ktor.http.appendPathSegments
+import io.ktor.http.contentType
+import io.ktor.http.isSuccess
 import kotlinx.coroutines.CancellationException
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.jsonObject
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
-import okhttp3.HttpUrl
-import okhttp3.MediaType.Companion.toMediaType
-import okhttp3.OkHttpClient
-import okhttp3.Request
-import okhttp3.RequestBody
-import okhttp3.RequestBody.Companion.toRequestBody
-import okhttp3.Response
-import okhttp3.coroutines.executeAsync
-import okio.BufferedSource
 import okio.IOException
+import org.btcmap.http.executeIdempotent
 import org.btcmap.json.parseJson
 
 /**
@@ -61,8 +64,14 @@ class ApiTransportException(
 }
 
 class Api(
-    internal val httpClient: OkHttpClient,
-    private val baseUrl: () -> HttpUrl,
+    internal val httpClient: HttpClient,
+    private val baseUrl: () -> Url,
+    /**
+     * The stored session token. It is attached per request by [call], which is
+     * the only code that can tell whether a rejected request carried it, so a
+     * 401 clears the session only when it did.
+     */
+    private val token: () -> String? = { null },
     private val onUnauthorized: suspend (requestToken: String?) -> Unit = {},
     /**
      * Identifies this app to the server as the `origin` of a place report or
@@ -71,81 +80,110 @@ class Api(
      */
     val userAgent: String = "BTC Map",
 ) {
-    internal val url: HttpUrl
+    internal val url: Url
         get() = baseUrl()
 
     internal fun buildUrl(
         vararg segments: String,
-        configure: HttpUrl.Builder.() -> Unit = {},
-    ): HttpUrl {
-        return url.newBuilder().apply {
-            segments.forEach { addPathSegment(it) }
+        configure: URLBuilder.() -> Unit = {},
+    ): Url {
+        return URLBuilder(url).apply {
+            segments.forEach { appendPathSegments(it) }
             configure()
         }.build()
     }
 
-    internal fun jsonBody(body: JsonElement): RequestBody {
-        return body.toString().toRequestBody("application/json".toMediaType())
-    }
-
+    /**
+     * Sends one request and parses its body.
+     *
+     * [authorization] is an explicit `Authorization` header value (used by
+     * sign-in, which carries the password as a bearer token). Otherwise the
+     * stored [token] is attached for same-origin requests unless [withoutAuth]
+     * is set. [parse] receives the response body as text.
+     */
     internal suspend fun <T> call(
-        request: Request,
+        method: HttpMethod,
+        url: Url,
+        authorization: String? = null,
+        withoutAuth: Boolean = false,
+        body: JsonElement? = null,
         clearSessionOnUnauthorized: Boolean = true,
-        parse: (BufferedSource) -> T,
+        parse: (String) -> T,
     ): T {
+        val attachedToken = attachedToken(url, authorization, withoutAuth)
+        val headerValue = authorization ?: attachedToken?.let { "Bearer $it" }
+
         val response = try {
-            httpClient.newCall(request).executeAsync()
+            httpClient.executeIdempotent(method, url) {
+                headerValue?.let { header(HttpHeaders.Authorization, it) }
+                if (body != null) {
+                    contentType(ContentType.Application.Json)
+                    setBody(body.toString())
+                }
+            }
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            throw ApiTransportException("Failed to reach $url", e)
+        }
+
+        if (!response.status.isSuccess()) {
+            val exception = response.toApiException()
+
+            // A 401 only invalidates the session when the request actually
+            // carried the stored token. A request sent without one (for example
+            // while signed out) must not clear a still-valid session.
+            if (response.status.value == 401 && clearSessionOnUnauthorized && attachedToken != null) {
+                try {
+                    onUnauthorized(attachedToken)
+                } catch (e: CancellationException) {
+                    throw e
+                } catch (e: Exception) {
+                    exception.addSuppressed(e)
+                }
+            }
+
+            throw exception
+        }
+
+        val text = try {
+            response.bodyAsText()
         } catch (e: CancellationException) {
             throw e
         } catch (e: IOException) {
-            throw ApiTransportException("Failed to reach ${request.url}", e)
+            throw ApiTransportException("Failed to read response from $url", e)
         }
 
-        return response.use { res ->
-            withContext(Dispatchers.IO) {
-                if (!res.isSuccessful) {
-                    val exception = res.toApiException()
-
-                    // A 401 only invalidates the session when the request actually
-                    // carried the stored token. A request sent without one (for
-                    // example while signed out) must not clear a still-valid session.
-                    val authorization = res.request.header("Authorization")
-                    if (res.code == 401 && clearSessionOnUnauthorized && authorization != null) {
-                        try {
-                            onUnauthorized(authorization.toBearerToken())
-                        } catch (e: CancellationException) {
-                            throw e
-                        } catch (e: Exception) {
-                            exception.addSuppressed(e)
-                        }
-                    }
-
-                    throw exception
-                }
-
-                res.body.source().use { source ->
-                    try {
-                        parse(source)
-                    } catch (e: CancellationException) {
-                        throw e
-                    } catch (e: ApiParseException) {
-                        throw e
-                    } catch (e: IOException) {
-                        throw ApiTransportException("Failed to read response from ${request.url}", e)
-                    } catch (e: RuntimeException) {
-                        throw ApiParseException("Failed to parse response from ${request.url}", e)
-                    }
-                }
-            }
+        return try {
+            parse(text)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: ApiParseException) {
+            throw e
+        } catch (e: RuntimeException) {
+            throw ApiParseException("Failed to parse response from $url", e)
         }
     }
 
-    private fun String.toBearerToken(): String? =
-        removePrefix("Bearer ").takeIf { it.isNotBlank() }
+    /**
+     * The token to attach to a request to [url], or null when it is a public
+     * request, the token is blank, or the host is not the configured API. A
+     * malformed stored API URL is treated like a foreign host.
+     */
+    private fun attachedToken(url: Url, authorization: String?, withoutAuth: Boolean): String? {
+        authorization?.removePrefix("Bearer ")?.takeIf { it.isNotBlank() }?.let { return it }
+        if (withoutAuth) return null
 
-    private fun Response.toApiException(): ApiException {
+        val base = runCatching { baseUrl() }.getOrNull() ?: return null
+        if (url.protocol != base.protocol || url.host != base.host || url.port != base.port) return null
+
+        return runCatching { token() }.getOrNull()?.takeIf { it.isNotBlank() }
+    }
+
+    private suspend fun HttpResponse.toApiException(): ApiException {
+        val code = status.value
         val body = try {
-            body.string()
+            bodyAsText()
         } catch (e: IOException) {
             ""
         }

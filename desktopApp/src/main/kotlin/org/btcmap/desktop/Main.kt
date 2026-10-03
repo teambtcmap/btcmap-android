@@ -54,7 +54,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import okhttp3.HttpUrl.Companion.toHttpUrl
+import org.btcmap.util.toUrl
 import org.btcmap.api.Api
 import org.btcmap.api.signIn
 import org.btcmap.api.submitPlace
@@ -145,12 +145,9 @@ private fun runApp() = application {
     // desktop seeds offline like Android and the first sync only fetches the
     // delta since the snapshot was generated.
     val api = Api(
-        httpClient = apiHttpClient(
-            userAgent = USER_AGENT,
-            token = { settings.getString(KEY_AUTH_TOKEN, null) },
-            apiUrl = { API_URL.toHttpUrl() },
-        ),
-        baseUrl = { API_URL.toHttpUrl() },
+        httpClient = apiHttpClient(USER_AGENT),
+        baseUrl = { API_URL.toUrl() },
+        token = { settings.getString(KEY_AUTH_TOKEN, null) },
         userAgent = USER_AGENT,
     )
     val syncManager = SyncManager(
@@ -578,12 +575,9 @@ private fun renderScreen(spec: String) {
 
                     "account" -> {
                         val api = Api(
-                            httpClient = apiHttpClient(
-                                userAgent = USER_AGENT,
-                                token = { settings.getString(KEY_AUTH_TOKEN, null) },
-                                apiUrl = { API_URL.toHttpUrl() },
-                            ),
-                            baseUrl = { API_URL.toHttpUrl() },
+                            httpClient = apiHttpClient(USER_AGENT),
+                            baseUrl = { API_URL.toUrl() },
+                            token = { settings.getString(KEY_AUTH_TOKEN, null) },
                             userAgent = USER_AGENT,
                         )
                         AccountScreen(

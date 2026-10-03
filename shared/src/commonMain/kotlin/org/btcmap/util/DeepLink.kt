@@ -1,6 +1,6 @@
 package org.btcmap.util
 
-import okhttp3.HttpUrl
+import io.ktor.http.Url
 
 private const val BTCMAP_HOST = "btcmap.org"
 private const val MERCHANT_PATH_SEGMENT = "merchant"
@@ -11,7 +11,7 @@ sealed interface DeepLink {
     data class Event(val id: Long) : DeepLink
 }
 
-fun HttpUrl.deepLink(): DeepLink? {
+fun Url.deepLink(): DeepLink? {
     if (host != BTCMAP_HOST) return null
 
     val segments = pathSegments.filter { it.isNotEmpty() }

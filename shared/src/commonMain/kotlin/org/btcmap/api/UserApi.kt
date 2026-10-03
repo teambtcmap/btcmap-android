@@ -1,12 +1,11 @@
 package org.btcmap.api
 
+import io.ktor.http.HttpMethod
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.put
-import okhttp3.Request
-import org.btcmap.auth.withoutAuth
 import org.btcmap.util.toJsonObject
 
 data class User(
@@ -30,23 +29,15 @@ suspend fun Api.createUser(name: String?, password: String): User {
         name?.takeIf { it.isNotBlank() }?.let { put("name", it) }
     }
 
-    return call(
-        Request.Builder()
-            .post(jsonBody(req))
-            .url(url)
-            .withoutAuth()
-            .build()
-    ) { stream ->
-        stream.toJsonObject().toUser()
+    return call(HttpMethod.Post, url, withoutAuth = true, body = req) { body ->
+        body.toJsonObject().toUser()
     }
 }
 
 suspend fun Api.getUser(): User {
     val url = buildUrl("v4", "users", "me")
 
-    return call(Request.Builder().url(url).build()) { stream ->
-        stream.toJsonObject().toUser()
-    }
+    return call(HttpMethod.Get, url) { body -> body.toJsonObject().toUser() }
 }
 
 suspend fun Api.updateUsername(username: String): User {
@@ -56,14 +47,7 @@ suspend fun Api.updateUsername(username: String): User {
         put("username", username)
     }
 
-    return call(
-        Request.Builder()
-            .put(jsonBody(req))
-            .url(url)
-            .build()
-    ) { stream ->
-        stream.toJsonObject().toUser()
-    }
+    return call(HttpMethod.Put, url, body = req) { body -> body.toJsonObject().toUser() }
 }
 
 suspend fun Api.updatePassword(oldPassword: String, newPassword: String) {
@@ -74,12 +58,7 @@ suspend fun Api.updatePassword(oldPassword: String, newPassword: String) {
         put("new_password", newPassword)
     }
 
-    call(
-        Request.Builder()
-            .put(jsonBody(req))
-            .url(url)
-            .build()
-    ) { }
+    call(HttpMethod.Put, url, body = req) { }
 }
 
 suspend fun Api.signIn(
@@ -94,23 +73,22 @@ suspend fun Api.signIn(
     }
 
     return call(
-        request = Request.Builder()
-            .post(jsonBody(req))
-            .url(url)
-            .header("Authorization", "Bearer $password")
-            .build(),
+        method = HttpMethod.Post,
+        url = url,
+        authorization = "Bearer $password",
         clearSessionOnUnauthorized = false,
-    ) { stream ->
-        val body = stream.toJsonObject()
+        body = req,
+    ) { body ->
+        val parsed = body.toJsonObject()
 
-        val token = body.string("token")
+        val token = parsed.string("token")
         if (token.isBlank()) {
             throw ApiParseException("Sign-in response is missing a token")
         }
 
         CreateTokenResponse(
             token = token,
-            user = body.obj("user").toUser(),
+            user = parsed.obj("user").toUser(),
         )
     }
 }
@@ -125,12 +103,11 @@ suspend fun Api.signOut(token: String) {
     val url = buildUrl("v4", "auth", "signout")
 
     call(
-        request = Request.Builder()
-            .post(jsonBody(buildJsonObject { }))
-            .header("Authorization", "Bearer $token")
-            .url(url)
-            .build(),
+        method = HttpMethod.Post,
+        url = url,
+        authorization = "Bearer $token",
         clearSessionOnUnauthorized = false,
+        body = buildJsonObject { },
     ) { }
 }
 

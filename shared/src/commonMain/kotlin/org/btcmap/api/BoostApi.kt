@@ -1,9 +1,8 @@
 package org.btcmap.api
 
+import io.ktor.http.HttpMethod
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
-import okhttp3.Request
-import org.btcmap.auth.withoutAuth
 import org.btcmap.util.toJsonObject
 
 data class PlaceBoostQuoteResponse(
@@ -20,13 +19,13 @@ data class PlaceBoostResponse(
 suspend fun Api.getPlaceBoostQuote(): PlaceBoostQuoteResponse {
     val url = buildUrl("v4", "place-boosts", "quote")
 
-    return call(Request.Builder().withoutAuth().url(url).build()) { stream ->
-        val body = stream.toJsonObject()
+    return call(HttpMethod.Get, url, withoutAuth = true) { body ->
+        val parsed = body.toJsonObject()
 
         PlaceBoostQuoteResponse(
-            quote30dSat = body.long("quote_30d_sat"),
-            quote90dSat = body.long("quote_90d_sat"),
-            quote365dSat = body.long("quote_365d_sat"),
+            quote30dSat = parsed.long("quote_30d_sat"),
+            quote90dSat = parsed.long("quote_90d_sat"),
+            quote365dSat = parsed.long("quote_365d_sat"),
         )
     }
 }
@@ -39,18 +38,12 @@ suspend fun Api.boostPlace(placeId: Long, days: Long): PlaceBoostResponse {
         put("days", days)
     }
 
-    return call(
-        Request.Builder()
-            .post(jsonBody(req))
-            .url(url)
-            .withoutAuth()
-            .build()
-    ) { stream ->
-        val body = stream.toJsonObject()
+    return call(HttpMethod.Post, url, withoutAuth = true, body = req) { body ->
+        val parsed = body.toJsonObject()
 
         PlaceBoostResponse(
-            invoiceId = body.string("invoice_id"),
-            invoice = body.string("invoice"),
+            invoiceId = parsed.string("invoice_id"),
+            invoice = parsed.string("invoice"),
         )
     }
 }

@@ -2,7 +2,7 @@ package org.btcmap.settings
 
 import androidx.core.graphics.toColorInt
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import okhttp3.HttpUrl.Companion.toHttpUrl
+import org.btcmap.util.toUrl
 import org.btcmap.R
 import org.btcmap.util.AppTestCase
 import org.junit.Assert
@@ -35,11 +35,11 @@ class SettingsPersistenceTest : AppTestCase() {
 
     @Test
     fun apiUrl_defaultsToPublicApi_andPersistsOverride() {
-        Assert.assertEquals("https://api.btcmap.org/", prefs.apiUrl.toString())
+        Assert.assertEquals("https://api.btcmap.org", prefs.apiUrl.toString())
 
-        prefs.apiUrl = "https://staging.example.com".toHttpUrl()
+        prefs.apiUrl = "https://staging.example.com".toUrl()
 
-        Assert.assertEquals("https://staging.example.com/", prefs.apiUrl.toString())
+        Assert.assertEquals("https://staging.example.com", prefs.apiUrl.toString())
     }
 
     @Test

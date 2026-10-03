@@ -51,7 +51,6 @@ dependencies {
     implementation(project(":ui"))
     implementation(compose.desktop.currentOs)
     implementation(compose.material3)
-    implementation(libs.okhttp)
     // Coil has no built-in network fetcher on the JVM, so the remote images the
     // shared screens request (area chips, place photos, search results) never
     // load without this on the classpath. Coil's ServiceLoader picks it up, as

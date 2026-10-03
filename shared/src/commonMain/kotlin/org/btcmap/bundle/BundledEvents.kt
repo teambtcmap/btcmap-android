@@ -10,13 +10,13 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.DecodeSequenceMode
 import kotlinx.serialization.json.okio.decodeBufferedSourceToSequence
-import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import okio.Source
 import okio.buffer
 import org.btcmap.db.Database
 import org.btcmap.db.table.event.Event
 import org.btcmap.json.btcmapJson
 import org.btcmap.util.rethrowIfCancellation
+import org.btcmap.util.toUrlOrNull
 import org.btcmap.util.toZonedDateTimeOrNull
 
 /**
@@ -148,7 +148,7 @@ internal fun BundledEventJson.toEvent(): Event {
         lat = eventLat,
         lon = eventLon,
         name = eventName,
-        website = website?.toHttpUrlOrNull(),
+        website = website?.toUrlOrNull(),
         startsAt = eventStartsAt,
         endsAt = endsAt?.toZonedDateTimeOrNull(),
         updatedAt = eventUpdatedAt,

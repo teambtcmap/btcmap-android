@@ -1,6 +1,7 @@
 package org.btcmap.db.table.place
 
-import okhttp3.HttpUrl.Companion.toHttpUrl
+import io.ktor.http.Url
+import org.btcmap.util.toUrl
 import org.junit.Assert
 import org.junit.Test
 import java.time.ZonedDateTime
@@ -11,7 +12,7 @@ class MarkerProjectionTest {
     fun placeToMarker_carriesMarkerFields() {
         val place = place(
             comments = 3,
-            requiredAppUrl = "https://example.com/app".toHttpUrl(),
+            requiredAppUrl = "https://example.com/app".toUrl(),
             boostedUntil = ZonedDateTime.parse("2024-02-01T00:00:00Z"),
         )
 
@@ -34,7 +35,7 @@ class MarkerProjectionTest {
 
     private fun place(
         comments: Long?,
-        requiredAppUrl: okhttp3.HttpUrl? = null,
+        requiredAppUrl: Url? = null,
         boostedUntil: ZonedDateTime? = null,
     ): Place {
         return Place(

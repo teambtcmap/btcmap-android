@@ -11,7 +11,9 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import mockwebserver3.MockResponse
 import mockwebserver3.junit4.MockWebServerRule
-import okhttp3.OkHttpClient
+import io.ktor.client.HttpClient
+import io.ktor.client.engine.cio.CIO
+import org.btcmap.util.toUrl
 import org.btcmap.api.Api
 import org.btcmap.db.Database
 import org.junit.Assert
@@ -28,8 +30,8 @@ class SyncManagerTest {
     private fun createDatabase() = Database(BundledSQLiteDriver(), ":memory:")
 
     private fun createApi() = Api(
-        httpClient = OkHttpClient(),
-        baseUrl = { serverRule.server.url("/") },
+        httpClient = HttpClient(CIO),
+        baseUrl = { serverRule.server.url("/").toString().toUrl() },
     )
 
     private fun enqueueEmpty() {

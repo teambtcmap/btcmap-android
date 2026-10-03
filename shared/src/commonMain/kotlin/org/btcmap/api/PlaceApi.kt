@@ -1,9 +1,7 @@
 package org.btcmap.api
 
+import io.ktor.http.HttpMethod
 import kotlinx.serialization.json.JsonObject
-import okhttp3.Request
-import okio.BufferedSource
-import org.btcmap.auth.withoutAuth
 import org.btcmap.util.toJsonArray
 import org.btcmap.util.toJsonObject
 import java.time.ZonedDateTime
@@ -66,25 +64,25 @@ data class PlaceCoordinates(
 
 suspend fun Api.getPlaces(updatedSince: ZonedDateTime?, limit: Long): List<GetPlacesItem> {
     val url = buildUrl("v4", "places") {
-        addQueryParameter("fields", placeFields.joinToString(separator = ","))
-        addQueryParameter("limit", "$limit")
-        addQueryParameter("include_deleted", "true")
+        parameters.append("fields", placeFields.joinToString(separator = ","))
+        parameters.append("limit", "$limit")
+        parameters.append("include_deleted", "true")
         addUpdatedSince(updatedSince)
     }
 
-    return call(Request.Builder().withoutAuth().url(url).build()) { it.toGetPlacesItems() }
+    return call(HttpMethod.Get, url, withoutAuth = true) { it.toGetPlacesItems() }
 }
 
 suspend fun Api.getPlaceCoordinates(id: Long): PlaceCoordinates {
     val url = buildUrl("v4", "places", "$id") {
-        addQueryParameter("fields", "lat,lon")
+        parameters.append("fields", "lat,lon")
     }
 
-    return call(Request.Builder().withoutAuth().url(url).build()) { stream ->
-        val body = stream.toJsonObject()
+    return call(HttpMethod.Get, url, withoutAuth = true) { body ->
+        val parsed = body.toJsonObject()
         PlaceCoordinates(
-            lat = body.double("lat"),
-            lon = body.double("lon"),
+            lat = parsed.double("lat"),
+            lon = parsed.double("lon"),
         )
     }
 }
@@ -98,11 +96,11 @@ suspend fun Api.getPlaceCoordinates(id: Long): PlaceCoordinates {
  */
 suspend fun Api.getPlaceOsmId(id: Long): String? {
     val url = buildUrl("v4", "places", "$id") {
-        addQueryParameter("fields", "osm_id")
+        parameters.append("fields", "osm_id")
     }
 
-    return call(Request.Builder().withoutAuth().url(url).build()) { stream ->
-        stream.toJsonObject().nonBlankStringOrNull("osm_id")
+    return call(HttpMethod.Get, url, withoutAuth = true) { body ->
+        body.toJsonObject().nonBlankStringOrNull("osm_id")
     }
 }
 
@@ -110,7 +108,7 @@ suspend fun Api.savePlace(id: Long): List<Long> = saveItem("places", id)
 
 suspend fun Api.removeSavedPlace(id: Long): List<Long> = removeSavedItem("places", id)
 
-private fun BufferedSource.toGetPlacesItems(): List<GetPlacesItem> {
+private fun String.toGetPlacesItems(): List<GetPlacesItem> {
     return toJsonArray().map { it.toGetPlacesItem() }
 }
 

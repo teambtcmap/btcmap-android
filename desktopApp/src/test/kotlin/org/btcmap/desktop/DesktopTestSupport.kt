@@ -1,11 +1,11 @@
 package org.btcmap.desktop
 
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
-import okhttp3.HttpUrl.Companion.toHttpUrl
 import org.btcmap.api.Api
 import org.btcmap.api.apiHttpClient
 import org.btcmap.db.Database
 import org.btcmap.settings.Settings
+import org.btcmap.util.toUrl
 import java.nio.file.Files
 
 /**
@@ -22,11 +22,8 @@ internal fun testSettings(db: Database): Settings =
     Settings(dbProvider = { db }, legacyValues = { emptyMap() }).apply { preload() }
 
 internal fun testApi(): Api = Api(
-    httpClient = apiHttpClient(
-        userAgent = "btcmap-desktop-test",
-        token = { null },
-        apiUrl = { "https://api.example".toHttpUrl() },
-    ),
-    baseUrl = { "https://api.example".toHttpUrl() },
+    httpClient = apiHttpClient("btcmap-desktop-test"),
+    baseUrl = { "https://api.example".toUrl() },
+    token = { null },
     userAgent = "btcmap-desktop-test",
 )

@@ -1,8 +1,8 @@
 package org.btcmap.settings
 
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
-import okhttp3.HttpUrl.Companion.toHttpUrl
 import org.btcmap.db.Database
+import org.btcmap.util.toUrl
 import org.junit.Assert
 import org.junit.Test
 
@@ -19,16 +19,16 @@ class SettingsApiUrlTest {
     fun defaultsToPublicApi() {
         val settings = createSettings(createDatabase())
 
-        Assert.assertEquals("https://api.btcmap.org/", settings.apiUrl.toString())
+        Assert.assertEquals("https://api.btcmap.org", settings.apiUrl.toString())
     }
 
     @Test
     fun usesStoredUrl() {
         val settings = createSettings(createDatabase())
 
-        settings.apiUrl = "https://staging.example.com".toHttpUrl()
+        settings.apiUrl = "https://staging.example.com".toUrl()
 
-        Assert.assertEquals("https://staging.example.com/", settings.apiUrl.toString())
+        Assert.assertEquals("https://staging.example.com", settings.apiUrl.toString())
     }
 
     @Test
@@ -37,7 +37,7 @@ class SettingsApiUrlTest {
         db.preference.upsert("apiUrl", "not a url")
 
         Assert.assertEquals(
-            "https://api.btcmap.org/",
+            "https://api.btcmap.org",
             createSettings(db).apiUrl.toString(),
         )
     }

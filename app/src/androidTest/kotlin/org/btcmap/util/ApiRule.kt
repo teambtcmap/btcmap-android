@@ -5,7 +5,7 @@ import mockwebserver3.Dispatcher
 import mockwebserver3.MockResponse
 import mockwebserver3.MockWebServer
 import mockwebserver3.RecordedRequest
-import okhttp3.OkHttpClient
+import org.btcmap.api.apiHttpClient
 import org.btcmap.App
 import org.btcmap.api.Api
 import org.junit.rules.TestRule
@@ -19,7 +19,7 @@ class ApiRule : TestRule {
     val server = MockWebServer()
 
     val api: Api
-        get() = Api(OkHttpClient(), { server.url("/") })
+        get() = Api(apiHttpClient("btcmap-android-test"), { server.url("/").toString().toUrl() })
 
     override fun apply(base: Statement, description: Description): Statement {
         return object : Statement() {

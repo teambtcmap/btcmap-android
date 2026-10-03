@@ -1,7 +1,7 @@
 package org.btcmap.api
 
 import kotlinx.serialization.json.jsonPrimitive
-import okhttp3.HttpUrl.Companion.toHttpUrl
+import org.btcmap.util.toUrl
 import org.btcmap.json.parseJsonObject
 import org.junit.Assert
 import org.junit.Test
@@ -42,13 +42,13 @@ class GetPlacesItemExtTest {
         Assert.assertEquals("Kaffee", place.localizedName!!.getValue("de").jsonPrimitive.content)
         Assert.assertEquals(ZonedDateTime.parse("2026-01-15T00:00:00Z"), place.verifiedAt)
         Assert.assertEquals(ZonedDateTime.parse("2026-02-01T00:00:00Z"), place.boostedUntil)
-        Assert.assertEquals("https://cafe.example".toHttpUrl(), place.website)
-        Assert.assertEquals("https://x.com/cafe".toHttpUrl(), place.twitter)
-        Assert.assertEquals("https://fb.com/cafe".toHttpUrl(), place.facebook)
-        Assert.assertEquals("https://ig.com/cafe".toHttpUrl(), place.instagram)
-        Assert.assertEquals("https://line.me/cafe".toHttpUrl(), place.line)
-        Assert.assertEquals("https://app.example".toHttpUrl(), place.requiredAppUrl)
-        Assert.assertEquals("https://t.me/cafe".toHttpUrl(), place.telegram)
+        Assert.assertEquals("https://cafe.example".toUrl(), place.website)
+        Assert.assertEquals("https://x.com/cafe".toUrl(), place.twitter)
+        Assert.assertEquals("https://fb.com/cafe".toUrl(), place.facebook)
+        Assert.assertEquals("https://ig.com/cafe".toUrl(), place.instagram)
+        Assert.assertEquals("https://line.me/cafe".toUrl(), place.line)
+        Assert.assertEquals("https://app.example".toUrl(), place.requiredAppUrl)
+        Assert.assertEquals("https://t.me/cafe".toUrl(), place.telegram)
         Assert.assertEquals(3L, place.comments)
         Assert.assertEquals("node:42", place.osmId)
     }

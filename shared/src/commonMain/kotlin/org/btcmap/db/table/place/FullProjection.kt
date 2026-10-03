@@ -1,8 +1,8 @@
 package org.btcmap.db.table.place
 
 import androidx.sqlite.SQLiteStatement
+import io.ktor.http.Url
 import kotlinx.serialization.json.JsonObject
-import okhttp3.HttpUrl
 import org.btcmap.db.getHttpUrlOrNull
 import org.btcmap.db.getJsonObjectOrNull
 import org.btcmap.db.getLongOrNull
@@ -25,16 +25,16 @@ data class FullProjection(
     val address: String?,
     val openingHours: String?,
     val phone: String?,
-    val website: HttpUrl?,
+    val website: Url?,
     val email: String?,
-    val twitter: HttpUrl?,
-    val facebook: HttpUrl?,
-    val instagram: HttpUrl?,
-    val line: HttpUrl?,
-    val requiredAppUrl: HttpUrl?,
+    val twitter: Url?,
+    val facebook: Url?,
+    val instagram: Url?,
+    val line: Url?,
+    val requiredAppUrl: Url?,
     val boostedUntil: ZonedDateTime?,
     val comments: Long?,
-    val telegram: HttpUrl?,
+    val telegram: Url?,
     val osmId: String?,
     val deletedAt: ZonedDateTime? = null,
 ) {

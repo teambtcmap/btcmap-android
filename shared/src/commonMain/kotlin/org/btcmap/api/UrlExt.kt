@@ -1,6 +1,6 @@
 package org.btcmap.api
 
-import okhttp3.HttpUrl
+import io.ktor.http.URLBuilder
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 
@@ -9,8 +9,8 @@ import java.time.format.DateTimeFormatter
  * null [value] is omitted so callers that seed the first sync (which have no
  * cursor yet) build their URL the same way as callers that always send one.
  */
-internal fun HttpUrl.Builder.addUpdatedSince(value: ZonedDateTime?) {
+internal fun URLBuilder.addUpdatedSince(value: ZonedDateTime?) {
     if (value == null) return
 
-    addQueryParameter("updated_since", value.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME))
+    parameters.append("updated_since", value.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME))
 }

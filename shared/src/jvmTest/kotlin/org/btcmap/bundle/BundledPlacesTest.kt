@@ -120,7 +120,7 @@ class BundledPlacesTest {
         Assert.assertEquals("1 Main St", place.address)
         Assert.assertEquals("Mo-Fr 08:00-18:00", place.openingHours)
         Assert.assertEquals("+1234567890", place.phone)
-        Assert.assertEquals("https://example.com/", place.website.toString())
+        Assert.assertEquals("https://example.com", place.website.toString())
         Assert.assertEquals("a@example.com", place.email)
         Assert.assertEquals("https://x.com/example", place.twitter.toString())
         Assert.assertEquals("https://facebook.com/example", place.facebook.toString())

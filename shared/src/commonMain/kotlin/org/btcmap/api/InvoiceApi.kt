@@ -1,8 +1,7 @@
 package org.btcmap.api
 
+import io.ktor.http.HttpMethod
 import kotlinx.coroutines.delay
-import okhttp3.Request
-import org.btcmap.auth.withoutAuth
 import org.btcmap.util.toJsonObject
 
 private const val PAYMENT_POLL_INTERVAL_MS = 500L
@@ -19,12 +18,12 @@ val Invoice.paid: Boolean
 suspend fun Api.getInvoice(id: String): Invoice {
     val url = buildUrl("v4", "invoices", id)
 
-    return call(Request.Builder().withoutAuth().url(url).build()) { stream ->
-        val body = stream.toJsonObject()
+    return call(HttpMethod.Get, url, withoutAuth = true) { body ->
+        val parsed = body.toJsonObject()
 
         Invoice(
-            id = body.string("id"),
-            status = body.string("status"),
+            id = parsed.string("id"),
+            status = parsed.string("status"),
         )
     }
 }

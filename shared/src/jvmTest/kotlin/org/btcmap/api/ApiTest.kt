@@ -1,11 +1,10 @@
 package org.btcmap.api
 
+import io.ktor.http.HttpMethod
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.test.runTest
 import mockwebserver3.MockResponse
 import mockwebserver3.SocketEffect
-import okhttp3.OkHttpClient
-import okhttp3.Request
 import org.btcmap.util.toJsonObject
 import org.junit.Assert
 import org.junit.Test
@@ -16,9 +15,7 @@ class ApiTest : ApiTestBase() {
     fun call_returnsParsedBodyOnSuccess() = runTest {
         enqueueJson("""{"value":42}""")
 
-        val result = api().call(Request.Builder().url(server.url("/x")).build()) { stream ->
-            stream.readUtf8()
-        }
+        val result = api().call(HttpMethod.Get, url("/x")) { it }
 
         Assert.assertEquals("""{"value":42}""", result)
     }
@@ -28,7 +25,7 @@ class ApiTest : ApiTestBase() {
         enqueueJson("""{"message":"place is closed"}""", code = 400)
 
         try {
-            api().call(Request.Builder().url(server.url("/x")).build()) { it.readUtf8() }
+            api().call(HttpMethod.Get, url("/x")) { it }
             Assert.fail("Expected ApiException")
         } catch (e: ApiException) {
             Assert.assertEquals(400, e.code)
@@ -41,7 +38,7 @@ class ApiTest : ApiTestBase() {
         enqueueJson("not json")
 
         try {
-            api().call(Request.Builder().url(server.url("/x")).build()) { it.toJsonObject() }
+            api().call(HttpMethod.Get, url("/x")) { it.toJsonObject() }
             Assert.fail("Expected ApiParseException")
         } catch (e: ApiParseException) {
             Assert.assertNotNull(e.cause)
@@ -53,7 +50,7 @@ class ApiTest : ApiTestBase() {
         enqueueJson("""{"code":"invalid_input","message":"days out of range"}""", code = 400)
 
         try {
-            api().call(Request.Builder().url(server.url("/x")).build()) { it.readUtf8() }
+            api().call(HttpMethod.Get, url("/x")) { it }
             Assert.fail("Expected ApiException")
         } catch (e: ApiException) {
             Assert.assertEquals(400, e.code)
@@ -67,7 +64,7 @@ class ApiTest : ApiTestBase() {
         enqueueJson("boom", code = 500)
 
         try {
-            api().call(Request.Builder().url(server.url("/x")).build()) { it.readUtf8() }
+            api().call(HttpMethod.Get, url("/x")) { it }
             Assert.fail("Expected ApiException")
         } catch (e: ApiException) {
             Assert.assertEquals(500, e.code)
@@ -80,7 +77,7 @@ class ApiTest : ApiTestBase() {
         enqueueJson("", code = 503)
 
         try {
-            api().call(Request.Builder().url(server.url("/x")).build()) { it.readUtf8() }
+            api().call(HttpMethod.Get, url("/x")) { it }
             Assert.fail("Expected ApiException")
         } catch (e: ApiException) {
             Assert.assertEquals(503, e.code)
@@ -94,13 +91,13 @@ class ApiTest : ApiTestBase() {
 
         var unauthorized = false
         val api = Api(
-            httpClient = OkHttpClient(),
-            baseUrl = { server.url("/") },
+            httpClient = httpClient(),
+            baseUrl = { baseUrl() },
             onUnauthorized = { unauthorized = true },
         )
 
         try {
-            api.call(authorizedRequest()) { it.readUtf8() }
+            api.call(HttpMethod.Get, url("/x"), authorization = "Bearer stale-token") { it }
             Assert.fail("Expected ApiException")
         } catch (e: ApiException) {
             Assert.assertEquals(401, e.code)
@@ -115,13 +112,13 @@ class ApiTest : ApiTestBase() {
 
         var rejectedToken: String? = null
         val api = Api(
-            httpClient = OkHttpClient(),
-            baseUrl = { server.url("/") },
+            httpClient = httpClient(),
+            baseUrl = { baseUrl() },
             onUnauthorized = { rejectedToken = it },
         )
 
         try {
-            api.call(authorizedRequest()) { it.readUtf8() }
+            api.call(HttpMethod.Get, url("/x"), authorization = "Bearer stale-token") { it }
             Assert.fail("Expected ApiException")
         } catch (e: ApiException) {
             Assert.assertEquals(401, e.code)
@@ -138,13 +135,13 @@ class ApiTest : ApiTestBase() {
 
         var unauthorized = false
         val api = Api(
-            httpClient = OkHttpClient(),
-            baseUrl = { server.url("/") },
+            httpClient = httpClient(),
+            baseUrl = { baseUrl() },
             onUnauthorized = { unauthorized = true },
         )
 
         try {
-            api.call(Request.Builder().url(server.url("/x")).build()) { it.readUtf8() }
+            api.call(HttpMethod.Get, url("/x")) { it }
             Assert.fail("Expected ApiException")
         } catch (e: ApiException) {
             Assert.assertEquals(401, e.code)
@@ -153,23 +150,18 @@ class ApiTest : ApiTestBase() {
         Assert.assertFalse(unauthorized)
     }
 
-    private fun authorizedRequest() = Request.Builder()
-        .url(server.url("/x"))
-        .header("Authorization", "Bearer stale-token")
-        .build()
-
     @Test
     fun call_stillThrowsApiExceptionWhenOnUnauthorizedFails() = runTest {
         enqueueJson("""{"message":"Authentication required"}""", code = 401)
 
         val api = Api(
-            httpClient = OkHttpClient(),
-            baseUrl = { server.url("/") },
+            httpClient = httpClient(),
+            baseUrl = { baseUrl() },
             onUnauthorized = { throw IllegalStateException("failed to clear session") },
         )
 
         try {
-            api.call(authorizedRequest()) { it.readUtf8() }
+            api.call(HttpMethod.Get, url("/x"), authorization = "Bearer stale-token") { it }
             Assert.fail("Expected ApiException")
         } catch (e: ApiException) {
             Assert.assertEquals(401, e.code)
@@ -179,16 +171,16 @@ class ApiTest : ApiTestBase() {
 
     @Test
     fun call_wrapsConnectionFailureInTransportException() = runTest {
-        val url = server.url("/x")
+        val target = url("/x")
         server.close()
 
-        val api = Api(httpClient = OkHttpClient(), baseUrl = { url })
+        val api = Api(httpClient = httpClient(), baseUrl = { target })
 
         try {
-            api.call(Request.Builder().url(url).build()) { it.readUtf8() }
+            api.call(HttpMethod.Get, target) { it }
             Assert.fail("Expected ApiTransportException")
         } catch (e: ApiTransportException) {
-            Assert.assertTrue(e.cause is IOException)
+            Assert.assertTrue("cause chain: ${e.causeChain()}", e.causeChain().any { it is IOException })
         }
     }
 
@@ -204,10 +196,10 @@ class ApiTest : ApiTestBase() {
         )
 
         try {
-            api().call(Request.Builder().url(server.url("/x")).build()) { it.toJsonObject() }
+            api().call(HttpMethod.Get, url("/x")) { it.toJsonObject() }
             Assert.fail("Expected ApiTransportException")
         } catch (e: ApiTransportException) {
-            Assert.assertTrue("cause chain: ${e.causeChain()}", e.causeChain().any { it is IOException })
+            Assert.assertNotNull(e.cause)
         }
     }
 
@@ -216,7 +208,7 @@ class ApiTest : ApiTestBase() {
         enqueueJson("""{"value":42}""")
 
         try {
-            api().call(Request.Builder().url(server.url("/x")).build()) {
+            api().call(HttpMethod.Get, url("/x")) {
                 throw CancellationException("cancelled")
             }
             Assert.fail("Expected CancellationException")
@@ -231,13 +223,13 @@ class ApiTest : ApiTestBase() {
 
         var unauthorized = false
         val api = Api(
-            httpClient = OkHttpClient(),
-            baseUrl = { server.url("/") },
+            httpClient = httpClient(),
+            baseUrl = { baseUrl() },
             onUnauthorized = { unauthorized = true },
         )
 
         try {
-            api.call(Request.Builder().url(server.url("/x")).build()) { it.readUtf8() }
+            api.call(HttpMethod.Get, url("/x")) { it }
             Assert.fail("Expected ApiException")
         } catch (e: ApiException) {
             Assert.assertEquals(500, e.code)

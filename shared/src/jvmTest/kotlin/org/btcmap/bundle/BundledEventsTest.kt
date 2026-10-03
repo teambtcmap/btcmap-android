@@ -182,7 +182,7 @@ class BundledEventsTest {
         val first = db.event.selectById(1L)
         Assert.assertNotNull(first)
         Assert.assertEquals("One", first!!.name)
-        Assert.assertEquals("https://example.com/", first.website.toString())
+        Assert.assertEquals("https://example.com", first.website.toString())
         Assert.assertEquals(ZonedDateTime.parse("2026-11-02T09:00:00Z"), first.endsAt)
         Assert.assertEquals(ZonedDateTime.parse("2026-03-01T12:00:00Z"), first.updatedAt)
 

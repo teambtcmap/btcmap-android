@@ -1,7 +1,8 @@
 package org.btcmap.update
 
+import io.ktor.client.HttpClient
+import io.ktor.client.engine.cio.CIO
 import kotlinx.coroutines.test.runTest
-import okhttp3.OkHttpClient
 import org.btcmap.api.ApiTestBase
 import org.junit.Assert
 import org.junit.Test
@@ -43,7 +44,7 @@ class UpdateCheckTest : ApiTestBase() {
         enqueueJson("""{"code": 240, "name": "1.3.0", "url": "https://example.com/app.apk"}""")
 
         val update = UpdateCheck.fetch(
-            httpClient = OkHttpClient(),
+            httpClient = HttpClient(CIO),
             manifestUrl = server.url("/latest-app-ver.json").toString(),
             currentVersionCode = 239,
             isDebugBuild = false,
@@ -59,7 +60,7 @@ class UpdateCheckTest : ApiTestBase() {
         enqueueJson("""{"code": 239, "name": "1.2.0", "url": "https://example.com/app.apk"}""")
 
         val update = UpdateCheck.fetch(
-            httpClient = OkHttpClient(),
+            httpClient = HttpClient(CIO),
             manifestUrl = server.url("/latest-app-ver.json").toString(),
             currentVersionCode = 239,
             isDebugBuild = false,

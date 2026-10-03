@@ -1,9 +1,7 @@
 package org.btcmap.api
 
+import io.ktor.http.HttpMethod
 import kotlinx.serialization.json.JsonObject
-import okhttp3.Request
-import okio.BufferedSource
-import org.btcmap.auth.withoutAuth
 import org.btcmap.util.toJsonArray
 import org.btcmap.util.toJsonObject
 import java.time.ZonedDateTime
@@ -55,15 +53,15 @@ private const val AREA_DELTA_FIELDS =
 
 suspend fun Api.getAreas(updatedSince: ZonedDateTime, limit: Long): List<GetAreasDeltaItem> {
     val url = buildUrl("v4", "areas") {
-        addQueryParameter("fields", AREA_DELTA_FIELDS)
+        parameters.append("fields", AREA_DELTA_FIELDS)
         // Always send updated_since so the server filters rather than returning
         // the full snapshot, and include_deleted so tombstones reach the cache.
         addUpdatedSince(updatedSince)
-        addQueryParameter("limit", "$limit")
-        addQueryParameter("include_deleted", "true")
+        parameters.append("limit", "$limit")
+        parameters.append("include_deleted", "true")
     }
 
-    return call(Request.Builder().withoutAuth().url(url).build()) { it.toGetAreasDeltaItems() }
+    return call(HttpMethod.Get, url, withoutAuth = true) { it.toGetAreasDeltaItems() }
 }
 
 suspend fun Api.getArea(
@@ -71,20 +69,20 @@ suspend fun Api.getArea(
     lang: String = Locale.getDefault().language,
 ): GetAreaItem {
     val url = buildUrl("v4", "areas", id) {
-        if (lang.isNotBlank()) addQueryParameter("lang", lang)
+        if (lang.isNotBlank()) parameters.append("lang", lang)
     }
 
-    return call(Request.Builder().withoutAuth().url(url).build()) { stream ->
-        val body = stream.toJsonObject()
+    return call(HttpMethod.Get, url, withoutAuth = true) { body ->
+        val parsed = body.toJsonObject()
         GetAreaItem(
-            id = body.long("id"),
-            name = body.string("name"),
-            type = body.string("type"),
-            urlAlias = body.string("url_alias"),
-            icon = body.nonBlankStringOrNull("icon"),
-            iconWide = body.nonBlankStringOrNull("icon_wide"),
-            websiteUrl = body.string("website_url"),
-            description = body.nonBlankStringOrNull("description"),
+            id = parsed.long("id"),
+            name = parsed.string("name"),
+            type = parsed.string("type"),
+            urlAlias = parsed.string("url_alias"),
+            icon = parsed.nonBlankStringOrNull("icon"),
+            iconWide = parsed.nonBlankStringOrNull("icon_wide"),
+            websiteUrl = parsed.string("website_url"),
+            description = parsed.nonBlankStringOrNull("description"),
         )
     }
 }
@@ -117,6 +115,6 @@ private fun JsonObject.toGetAreasDeltaItem(): GetAreasDeltaItem {
     )
 }
 
-private fun BufferedSource.toGetAreasDeltaItems(): List<GetAreasDeltaItem> {
+private fun String.toGetAreasDeltaItems(): List<GetAreasDeltaItem> {
     return toJsonArray().map { it.toGetAreasDeltaItem() }
 }

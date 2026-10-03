@@ -1,10 +1,8 @@
 package org.btcmap.api
 
+import io.ktor.http.HttpMethod
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
-import okhttp3.Request
-import okio.BufferedSource
-import org.btcmap.auth.withoutAuth
 import org.btcmap.util.toJsonArray
 import org.btcmap.util.toJsonObject
 import java.time.ZonedDateTime
@@ -29,22 +27,22 @@ data class AddCommentResponse(
 
 suspend fun Api.getComments(updatedSince: ZonedDateTime?, limit: Long): List<GetCommentsItem> {
     val url = buildUrl("v4", "place-comments") {
-        addQueryParameter("limit", "$limit")
-        addQueryParameter("include_deleted", "true")
+        parameters.append("limit", "$limit")
+        parameters.append("include_deleted", "true")
         addUpdatedSince(updatedSince)
     }
 
-    return call(Request.Builder().withoutAuth().url(url).build()) { it.toGetCommentsItems() }
+    return call(HttpMethod.Get, url, withoutAuth = true) { it.toGetCommentsItems() }
 }
 
 suspend fun Api.getCommentQuote(): CommentQuoteResponse {
     val url = buildUrl("v4", "place-comments", "quote")
 
-    return call(Request.Builder().withoutAuth().url(url).build()) { stream ->
-        val body = stream.toJsonObject()
+    return call(HttpMethod.Get, url, withoutAuth = true) { body ->
+        val parsed = body.toJsonObject()
 
         CommentQuoteResponse(
-            quoteSat = body.long("quote_sat"),
+            quoteSat = parsed.long("quote_sat"),
         )
     }
 }
@@ -57,16 +55,10 @@ suspend fun Api.addComment(placeId: Long, comment: String): AddCommentResponse {
         put("comment", comment)
     }
 
-    return call(
-        Request.Builder()
-            .post(jsonBody(req))
-            .url(url)
-            .withoutAuth()
-            .build()
-    ) { it.toAddCommentResponse() }
+    return call(HttpMethod.Post, url, withoutAuth = true, body = req) { it.toAddCommentResponse() }
 }
 
-private fun BufferedSource.toGetCommentsItems(): List<GetCommentsItem> {
+private fun String.toGetCommentsItems(): List<GetCommentsItem> {
     return toJsonArray().map {
         GetCommentsItem(
             id = it.long("id"),
@@ -79,7 +71,7 @@ private fun BufferedSource.toGetCommentsItems(): List<GetCommentsItem> {
     }
 }
 
-private fun BufferedSource.toAddCommentResponse(): AddCommentResponse {
+private fun String.toAddCommentResponse(): AddCommentResponse {
     val body = toJsonObject()
 
     return AddCommentResponse(

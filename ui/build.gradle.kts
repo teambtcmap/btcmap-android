@@ -44,7 +44,6 @@ kotlin {
             implementation(compose.material3)
             implementation(libs.maplibre.compose)
             implementation(libs.coil.compose)
-            implementation(libs.okhttp)
             // QR encoding for Lightning invoices, which is plain JVM code and so
             // runs in common.
             implementation(libs.zxing.core)

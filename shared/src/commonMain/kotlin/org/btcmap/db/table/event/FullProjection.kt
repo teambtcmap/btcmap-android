@@ -1,7 +1,7 @@
 package org.btcmap.db.table.event
 
 import androidx.sqlite.SQLiteStatement
-import okhttp3.HttpUrl
+import io.ktor.http.Url
 import org.btcmap.db.getHttpUrlOrNull
 import org.btcmap.db.getZonedDateTime
 import org.btcmap.db.getZonedDateTimeOrNull
@@ -16,7 +16,7 @@ data class FullProjection(
     val lat: Double,
     val lon: Double,
     val name: String,
-    val website: HttpUrl?,
+    val website: Url?,
     val startsAt: ZonedDateTime,
     val endsAt: ZonedDateTime?,
     // Defaults to the epoch for callers that build an event for display only.

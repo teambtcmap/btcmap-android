@@ -1,11 +1,11 @@
 package org.btcmap.db
 
 import androidx.sqlite.SQLiteStatement
+import io.ktor.http.Url
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.jsonObject
-import okhttp3.HttpUrl
-import okhttp3.HttpUrl.Companion.toHttpUrl
 import org.btcmap.json.parseJson
+import org.btcmap.util.toUrl
 import java.time.ZonedDateTime
 
 fun SQLiteStatement.bindTextOrNull(index: Int, value: String?) {
@@ -20,7 +20,7 @@ fun SQLiteStatement.bindDoubleOrNull(index: Int, value: Double?) {
     if (value == null) bindNull(index) else bindDouble(index, value)
 }
 
-fun SQLiteStatement.bindHttpUrlOrNull(index: Int, value: HttpUrl?) {
+fun SQLiteStatement.bindHttpUrlOrNull(index: Int, value: Url?) {
     if (value == null) bindNull(index) else bindText(index, value.toString())
 }
 
@@ -51,10 +51,10 @@ fun SQLiteStatement.getZonedDateTime(index: Int): ZonedDateTime =
 fun SQLiteStatement.getZonedDateTimeOrNull(index: Int): ZonedDateTime? =
     if (isNull(index)) null else ZonedDateTime.parse(getText(index))
 
-fun SQLiteStatement.getHttpUrl(index: Int): HttpUrl = getText(index).toHttpUrl()
+fun SQLiteStatement.getHttpUrl(index: Int): Url = getText(index).toUrl()
 
-fun SQLiteStatement.getHttpUrlOrNull(index: Int): HttpUrl? =
-    if (isNull(index)) null else getText(index).toHttpUrl()
+fun SQLiteStatement.getHttpUrlOrNull(index: Int): Url? =
+    if (isNull(index)) null else getText(index).toUrl()
 
 fun SQLiteStatement.getJsonObjectOrNull(index: Int): JsonObject? =
     // A malformed value is treated as absent rather than thrown out of a read

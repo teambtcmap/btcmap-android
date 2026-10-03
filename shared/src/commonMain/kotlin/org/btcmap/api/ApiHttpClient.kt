@@ -1,29 +1,29 @@
 package org.btcmap.api
 
-import okhttp3.HttpUrl
-import okhttp3.OkHttpClient
-import okhttp3.brotli.BrotliInterceptor
-import org.btcmap.auth.TokenSettingInterceptor
-import org.btcmap.http.RateLimitingInterceptor
-import org.btcmap.http.UserAgentSettingInterceptor
-import java.util.concurrent.TimeUnit
+import io.ktor.client.HttpClient
+import io.ktor.client.plugins.DefaultRequest
+import io.ktor.client.plugins.HttpTimeout
+import io.ktor.client.request.header
+import io.ktor.http.HttpHeaders
 
 /**
- * Builds the shared HTTP client. The session token and API URL are passed in as
- * providers because they live in the platform's settings store.
+ * Builds the shared HTTP client.
+ *
+ * The session token and the API URL are not baked in here: [Api] attaches the
+ * token per request, so it can tell whether a rejected request actually carried
+ * it. This client only carries the transport settings that are the same for
+ * every call.
  */
-fun apiHttpClient(
-    userAgent: String,
-    token: () -> String?,
-    apiUrl: () -> HttpUrl,
-): OkHttpClient {
-    return OkHttpClient.Builder()
-        .connectTimeout(15, TimeUnit.SECONDS)
-        .readTimeout(60, TimeUnit.SECONDS)
-        .writeTimeout(30, TimeUnit.SECONDS)
-        .addInterceptor(BrotliInterceptor)
-        .addInterceptor(UserAgentSettingInterceptor(userAgent))
-        .addInterceptor(TokenSettingInterceptor(token = token, apiUrl = apiUrl))
-        .addInterceptor(RateLimitingInterceptor)
-        .build()
+fun apiHttpClient(userAgent: String): HttpClient {
+    return HttpClient {
+        expectSuccess = false
+        install(HttpTimeout) {
+            connectTimeoutMillis = 15_000
+            requestTimeoutMillis = 60_000
+            socketTimeoutMillis = 60_000
+        }
+        install(DefaultRequest) {
+            header(HttpHeaders.UserAgent, userAgent)
+        }
+    }
 }

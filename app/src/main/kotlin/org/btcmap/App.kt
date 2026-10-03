@@ -111,12 +111,9 @@ class App : Application(), SingletonImageLoader.Factory {
 
     private val defaultApi: Api by lazy {
         Api(
-            httpClient = apiHttpClient(
-                userAgent = userAgent,
-                token = { prefs.authToken },
-                apiUrl = { prefs.apiUrl },
-            ),
+            httpClient = apiHttpClient(userAgent),
             baseUrl = { prefs.apiUrl },
+            token = { prefs.authToken },
             onUnauthorized = { handleUnauthorized(it) },
             userAgent = userAgent,
         )

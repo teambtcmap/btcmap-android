@@ -11,7 +11,7 @@ import org.btcmap.db.Database
 import org.btcmap.db.table.area.Area
 import org.btcmap.db.table.event.Event
 import org.btcmap.db.table.place.Place
-import okhttp3.HttpUrl.Companion.toHttpUrl
+import org.btcmap.util.toUrl
 import org.btcmap.map.EVENT_ICON
 import org.btcmap.search.SearchAdapterItem
 
@@ -160,7 +160,7 @@ class MapSearchTest {
         lat = lat,
         lon = lon,
         name = name,
-        website = website?.toHttpUrl(),
+        website = website?.toUrl(),
         startsAt = ZonedDateTime.parse("2999-01-01T18:00:00Z"),
         endsAt = null,
     )

@@ -1,13 +1,11 @@
 package org.btcmap.api
 
+import io.ktor.http.HttpMethod
+import io.ktor.http.Url
 import kotlinx.serialization.json.JsonObject
-import okhttp3.HttpUrl
-import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
-import okhttp3.Request
-import okio.BufferedSource
-import org.btcmap.auth.withoutAuth
 import org.btcmap.util.toJsonArray
 import org.btcmap.util.toJsonObject
+import org.btcmap.util.toUrlOrNull
 import java.time.ZonedDateTime
 import java.time.format.DateTimeParseException
 
@@ -19,7 +17,7 @@ data class GetEventsItem(
     val lat: Double,
     val lon: Double,
     val name: String,
-    val website: HttpUrl?,
+    val website: Url?,
     val startsAt: ZonedDateTime,
     val endsAt: ZonedDateTime?,
 )
@@ -34,7 +32,7 @@ data class GetEventsDeltaItem(
     val lat: Double,
     val lon: Double,
     val name: String,
-    val website: HttpUrl?,
+    val website: Url?,
     val startsAt: ZonedDateTime,
     val endsAt: ZonedDateTime?,
     val updatedAt: String,
@@ -47,17 +45,19 @@ suspend fun Api.getEvents(updatedSince: ZonedDateTime, limit: Long): List<GetEve
         // legacy full snapshot, which omits updated_at and so cannot seed a
         // cursor for the next sync.
         addUpdatedSince(updatedSince)
-        addQueryParameter("limit", "$limit")
-        addQueryParameter("include_deleted", "true")
+        parameters.append("limit", "$limit")
+        parameters.append("include_deleted", "true")
     }
 
-    return call(Request.Builder().withoutAuth().url(url).build()) { it.toGetEventsDeltaItems() }
+    return call(HttpMethod.Get, url, withoutAuth = true) { it.toGetEventsDeltaItems() }
 }
 
 suspend fun Api.getEvent(id: Long): GetEventsItem {
     val url = buildUrl("v4", "events", "$id")
 
-    return call(Request.Builder().withoutAuth().url(url).build()) { it.toJsonObject().toGetEventsItem() }
+    return call(HttpMethod.Get, url, withoutAuth = true) { body ->
+        body.toJsonObject().toGetEventsItem()
+    }
 }
 
 internal fun JsonObject.toGetEventsItem(): GetEventsItem {
@@ -66,7 +66,7 @@ internal fun JsonObject.toGetEventsItem(): GetEventsItem {
         lat = double("lat"),
         lon = double("lon"),
         name = string("name"),
-        website = nonBlankStringOrNull("website")?.toHttpUrlOrNull(),
+        website = nonBlankStringOrNull("website")?.toUrlOrNull(),
         startsAt = string("starts_at").toApiZonedDateTime("starts_at"),
         endsAt = stringOrNull("ends_at")?.toApiZonedDateTime("ends_at"),
     )
@@ -95,6 +95,6 @@ private fun String.toApiZonedDateTime(field: String): ZonedDateTime {
     }
 }
 
-private fun BufferedSource.toGetEventsDeltaItems(): List<GetEventsDeltaItem> {
+private fun String.toGetEventsDeltaItems(): List<GetEventsDeltaItem> {
     return toJsonArray().map { it.toGetEventsDeltaItem() }
 }

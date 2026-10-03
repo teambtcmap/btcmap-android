@@ -1,8 +1,8 @@
 package org.btcmap.settings
 
-import okhttp3.HttpUrl
-import okhttp3.HttpUrl.Companion.toHttpUrl
-import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
+import io.ktor.http.Url
+import org.btcmap.util.toUrl
+import org.btcmap.util.toUrlOrNull
 import java.time.ZoneOffset
 import java.time.ZonedDateTime
 
@@ -96,10 +96,10 @@ private const val DEFAULT_API_URL = "https://api.btcmap.org"
  * to the public API instead of throwing, so a malformed preference cannot take
  * down every request. `TokenSettingInterceptor` therefore never has to guess.
  */
-var Settings.apiUrl: HttpUrl
+var Settings.apiUrl: Url
     get() = (getString(KEY_API_URL, null) ?: DEFAULT_API_URL)
-        .toHttpUrlOrNull()
-        ?: DEFAULT_API_URL.toHttpUrl()
+        .toUrlOrNull()
+        ?: DEFAULT_API_URL.toUrl()
     set(value) {
         putString(KEY_API_URL, value.toString())
     }

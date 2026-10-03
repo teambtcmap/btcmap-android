@@ -20,14 +20,24 @@ kotlin {
     sourceSets {
         commonMain.dependencies {
             implementation(libs.androidx.sqlite)
-            // Multiplatform JSON, the Gson replacement.
-            implementation(libs.kotlinx.serialization.json)
+            // Multiplatform JSON, the Gson replacement. Exposed because the
+            // shared DTOs carry kotlinx.serialization `JsonObject` fields.
+            api(libs.kotlinx.serialization.json)
             implementation(libs.kotlinx.serialization.json.okio)
+            // Multiplatform HTTP, the OkHttp replacement. Exposed because the
+            // shared DTOs carry Ktor `Url` fields.
+            api(libs.ktor.client.core)
             // The java.io replacement: streaming sources and file access.
             implementation(libs.okio)
             implementation(libs.kotlinx.coroutines.core)
-            implementation(libs.okhttp.brotli)
-            implementation(libs.okhttp.coroutines)
+        }
+
+        androidMain.dependencies {
+            implementation(libs.ktor.client.cio)
+        }
+
+        jvmMain.dependencies {
+            implementation(libs.ktor.client.cio)
         }
 
         jvmTest.dependencies {

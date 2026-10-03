@@ -15,7 +15,8 @@ import kotlinx.coroutines.test.setMain
 import mockwebserver3.MockResponse
 import mockwebserver3.MockWebServer
 import mockwebserver3.junit4.MockWebServerRule
-import okhttp3.OkHttpClient
+import org.btcmap.api.apiHttpClient
+import org.btcmap.util.toUrl
 import org.btcmap.api.Api
 import org.btcmap.api.ApiException
 import org.btcmap.db.Database
@@ -63,8 +64,8 @@ class AuthViewModelTest {
     }
 
     private fun api(): Api = Api(
-        httpClient = OkHttpClient(),
-        baseUrl = { server.url("/") },
+        httpClient = apiHttpClient("test-user-agent"),
+        baseUrl = { server.url("/").toString().toUrl() },
     )
 
     private fun viewModel(): AuthViewModel = AuthViewModel(api(), db, settings)

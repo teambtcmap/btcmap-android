@@ -1,8 +1,8 @@
 package org.btcmap.api
 
+import io.ktor.http.HttpMethod
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
-import okhttp3.Request
 import org.btcmap.util.toJsonObject
 
 data class SubmitPlaceResponse(
@@ -34,14 +34,7 @@ suspend fun Api.submitPlace(
         put("extra_fields", extra)
     }
 
-    return call(
-        Request.Builder()
-            .post(jsonBody(req))
-            .url(url)
-            .build()
-    ) { stream ->
-        val body = stream.toJsonObject()
-
-        SubmitPlaceResponse(id = body.long("id"))
+    return call(HttpMethod.Post, url, body = req) { body ->
+        SubmitPlaceResponse(id = body.toJsonObject().long("id"))
     }
 }

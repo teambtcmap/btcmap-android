@@ -48,7 +48,7 @@ androidx-browser = "1.10.0"
 # Material design components
 # https://github.com/material-components/material-components-android/releases
 material = "1.14.0"
-# Modern HTTP client
+# Modern HTTP client, used only by the MockWebServer test dependency now.
 # https://github.com/square/okhttp/blob/master/CHANGELOG.md
 okhttp = "5.5.0"
 
@@ -110,9 +110,6 @@ androidx-test-runner = { group = "androidx.test", name = "runner", version.ref =
 androidx-test-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "android-test-espresso" }
 
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
-okhttp = { group = "com.squareup.okhttp3", name = "okhttp", version.ref = "okhttp" }
-okhttp-coroutines = { group = "com.squareup.okhttp3", name = "okhttp-coroutines", version.ref = "okhttp" }
-okhttp-brotli = { group = "com.squareup.okhttp3", name = "okhttp-brotli", version.ref = "okhttp" }
 maplibre-compose = { module = "org.maplibre.compose:maplibre-compose", version.ref = "maplibre-compose" }
 maplibre-compose-runtime-opengl-android = { module = "org.maplibre.compose:maplibre-compose-runtime-opengl-android", version.ref = "maplibre-compose" }
 maplibre-compose-runtime-opengl-linux-x64 = { module = "org.maplibre.compose:maplibre-compose-runtime-opengl-linux-x64", version.ref = "maplibre-compose" }

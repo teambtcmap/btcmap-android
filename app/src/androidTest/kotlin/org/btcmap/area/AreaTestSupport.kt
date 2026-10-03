@@ -8,7 +8,7 @@ import androidx.test.core.app.ApplicationProvider
 import mockwebserver3.Dispatcher
 import mockwebserver3.MockResponse
 import mockwebserver3.RecordedRequest
-import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
+import org.btcmap.util.toUrlOrNull
 import org.btcmap.Activity
 import org.btcmap.App
 import org.btcmap.R
@@ -146,7 +146,7 @@ internal fun event(
         lat = lat,
         lon = lon,
         name = name,
-        website = "https://example.com/events/$id".toHttpUrlOrNull(),
+        website = "https://example.com/events/$id".toUrlOrNull(),
         startsAt = ZonedDateTime.parse(startsAt),
         endsAt = endsAt?.let { ZonedDateTime.parse(it) },
         updatedAt = ZonedDateTime.parse("2024-01-01T00:00:00Z"),

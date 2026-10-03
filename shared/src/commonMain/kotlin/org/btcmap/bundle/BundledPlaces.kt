@@ -13,7 +13,6 @@ import kotlinx.serialization.json.DecodeSequenceMode
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.okio.decodeBufferedSourceToSequence
-import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import okio.Source
 import okio.buffer
 import org.btcmap.api.toVerifiedAt
@@ -23,6 +22,7 @@ import org.btcmap.db.table.place.INDEX_NAMES
 import org.btcmap.db.table.place.Place
 import org.btcmap.json.btcmapJson
 import org.btcmap.util.rethrowIfCancellation
+import org.btcmap.util.toUrlOrNull
 import org.btcmap.util.toZonedDateTimeOrNull
 import java.time.ZonedDateTime
 import java.time.format.DateTimeParseException
@@ -280,16 +280,16 @@ internal fun BundledPlaceJson.toPlace(): Place {
         address = address,
         openingHours = openingHours,
         phone = phone,
-        website = website?.toHttpUrlOrNull(),
+        website = website?.toUrlOrNull(),
         email = email,
-        twitter = twitter?.toHttpUrlOrNull(),
-        facebook = facebook?.toHttpUrlOrNull(),
-        instagram = instagram?.toHttpUrlOrNull(),
-        line = line?.toHttpUrlOrNull(),
-        requiredAppUrl = requiredAppUrl?.toHttpUrlOrNull(),
+        twitter = twitter?.toUrlOrNull(),
+        facebook = facebook?.toUrlOrNull(),
+        instagram = instagram?.toUrlOrNull(),
+        line = line?.toUrlOrNull(),
+        requiredAppUrl = requiredAppUrl?.toUrlOrNull(),
         boostedUntil = boostedUntil?.toZonedDateTimeOrNull(),
         comments = comments,
-        telegram = telegram?.toHttpUrlOrNull(),
+        telegram = telegram?.toUrlOrNull(),
         osmId = osmId,
     )
 }
