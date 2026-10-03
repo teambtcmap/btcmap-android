@@ -30,6 +30,8 @@ import kotlinx.coroutines.launch
 import androidx.compose.runtime.rememberCoroutineScope
 import org.btcmap.api.ActivityFeedItem
 import org.btcmap.api.getActivity
+import org.btcmap.api.getPlaceImages
+import org.btcmap.api.placeImageUrl
 import org.btcmap.feed.feedKey
 import org.btcmap.feed.iconGlyph
 import org.btcmap.map.DEFAULT_MAP_CENTER_LAT
@@ -71,6 +73,7 @@ import org.btcmap.place.ReportType
 import org.btcmap.place.submitReport
 import org.btcmap.sync.Sync
 import org.btcmap.sync.SyncManager
+import org.btcmap.util.rethrowIfCancellation
 import org.btcmap.settings.KEY_AUTH_TOKEN
 import org.btcmap.settings.MapColor
 import org.btcmap.settings.MapStyle
@@ -199,8 +202,28 @@ private fun runApp() = application {
                     var reportPlace by remember { mutableStateOf<Pair<Long, String>?>(null) }
                     var reportType by remember { mutableStateOf<String?>(null) }
                     var bookmarked by remember { mutableStateOf(false) }
+                    // The selected place's photo thumbnails, loaded from the image
+                    // endpoint the way the Android map does. Empty until they
+                    // arrive, and for a place without photos.
+                    var selectedPhotos by remember { mutableStateOf<List<String>>(emptyList()) }
                     LaunchedEffect(selectedPlaceId) {
-                        bookmarked = selectedPlaceId?.let { SavedItems.isPlaceSaved(db, it) } ?: false
+                        val placeId = selectedPlaceId
+                        bookmarked = placeId?.let { SavedItems.isPlaceSaved(db, it) } ?: false
+                        selectedPhotos = placeId?.let { id ->
+                            try {
+                                api.getPlaceImages(id).map { image ->
+                                    api.placeImageUrl(
+                                        placeId = id,
+                                        imageId = image.id,
+                                        width = PLACE_PHOTO_SIZE,
+                                        height = PLACE_PHOTO_SIZE,
+                                    )
+                                }
+                            } catch (t: Throwable) {
+                                t.rethrowIfCancellation()
+                                emptyList()
+                            }
+                        } ?: emptyList()
                     }
                     // The place a feed row asked the map to show. Leaving the
                     // map disposes it and coming back rebuilds it, so opening a
@@ -258,6 +281,7 @@ private fun runApp() = application {
                             },
                             onOpenFeed = { route = Route.Feed },
                             bookmarked = bookmarked,
+                            photos = selectedPhotos,
                             onPlaceSelected = { selectedPlaceId = it.id },
                             onPlaceDismissed = {
                                 selectedPlaceId = null
@@ -708,6 +732,9 @@ private fun relativeDate(date: String): String = runCatching {
 private const val API_URL = "https://api.btcmap.org"
 private const val USER_AGENT = "btcmap-desktop"
 private const val HOSTED_STYLE_URL = "https://tiles.openfreemap.org/styles/liberty"
+
+/** The square thumbnail size of a place's photos in the sheet. */
+private const val PLACE_PHOTO_SIZE = 144
 
 /** The per-user data directory the desktop app keeps its database in. */
 private class DesktopHome {

@@ -34,6 +34,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Replace a place's Comments button with a Watch/Unwatch action, drop Save from its overflow menu and remove the separate comments screen
 - Show a place's opening hours as a week, one line per weekday with today underlined, instead of the raw OpenStreetMap value
 - Move the place action buttons directly below the photo carousel and give them icons
+- Load and show a place's photos in the desktop place sheet, matching Android
 
 ## [1.2.0] - 2026-09-30
 
