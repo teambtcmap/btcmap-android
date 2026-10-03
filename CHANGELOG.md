@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+- Open the desktop map's area chips and search results on the shared area and event screens
+- Fix a crash when an area screen renders a boosted merchant's expiry date
 - Fix a crash when the map loads places and events whose API timestamp omits the zero seconds (`2025-02-03T00:00Z`)
 - Fix a crash from concurrent database access, caused by the multiplatform database refactor dropping the shared connection's serialization lock
 - Add a WebAssembly (wasmJs) target to the shared core, moving its database layer onto a suspending API

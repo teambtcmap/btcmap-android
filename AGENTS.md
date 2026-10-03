@@ -238,9 +238,64 @@ Shares `:shared` and `:ui`; it opens the shared database under `$BTCMAP_HOME` or
   `ScreenshotArea` rejects the call. A native Wayland window (e.g. Loupe, the
   image viewer) does not appear in the X11 window list, so `import` cannot
   capture it.
-- Input cannot be injected into the window here: it is an XWayland client and
-  GNOME leaves its pointer virtual, so verify a screen by booting into it with a
-  temporary route and screenshotting.
+- Input **can** be injected into the window here, but only with `ydotool`
+  (uinput) — not `xdotool`, and not the GNOME RemoteDesktop portal.
+  `xdotool` is X11-only and mutter ignores its XTEST/warp (its pointer reading
+  does not track `ydotool`/uinput motion, so it stays frozen), and the
+  RemoteDesktop portal (libei) shows an "Allow remote interaction" dialog on
+  every session with no persistent grant. `ydotool` writes through
+  `/dev/uinput` and never prompts, so it drives the map, buttons and keys
+  directly.
+  - Prerequisites: the `uinput` kernel module must be loaded and
+    `ydotool.service` active (`systemctl --user status ydotool`). Arch's `extra`
+    `ydotool` package ships `ydotool`, `ydotoold`, the user unit and
+    `80-uinput.rules`. A static `/dev/uinput` node can exist (from the Steam
+    `uaccess` rule) with no driver behind it, so opening it returns ENODEV until
+    the module is loaded. After a kernel upgrade the running kernel's module tree
+    may be gone — reboot so it matches, and persist with
+    `/etc/modules-load.d/uinput.conf`. The `uaccess` ACL already grants the user
+    access, so adding the user to the `input` group is not needed (it would also
+    expose every `/dev/input/event*`).
+  - Commands (socket is `$XDG_RUNTIME_DIR/.ydotool_socket`): mouse move
+    `ydotool mousemove -- <dx> <dy>` (relative; always use the `--` positional
+    form — `ydotool` rejects a single axis, and `-y -1` parses the negative as an
+    option), wheel `ydotool mousemove -w -- 0 1` (up, zoom in) / `-w -- 0 -1`
+    (down, zoom out), click `ydotool click 0xC0` (left; `0xC1` right, `0xC2`
+    middle), keys `ydotool key 125:1 103:1 103:0 125:0` (Super+Up), typing into a
+    focused field `ydotool type -d 60 -- "text"`. `ydotool mousemove --absolute
+    -a` does not move the pointer here (the virtual device is relative-only), so
+    position by relative moves from a known origin, below.
+  - **Check focus, then position the pointer from a known origin.** The app must
+    be the active window (`xdotool getactivewindow` matches its client id), or
+    the events land on the desktop and nothing happens. `xdotool`/`wmctrl` cannot
+    move or resize the window (GNOME ignores X configure requests) — maximize
+    with Super+Up instead.
+  - `ydotool` moves in the compositor's **logical** pixels, but
+    `xdotool getwindowgeometry`, `import` captures and `xrandr` are in
+    **physical** pixels: on this 2×-scale display logical = physical/2 (the same
+    factor the map logs as `MapExtent(... scale=2.0)`). A point seen at image
+    `(ix, iy)` inside a window whose geometry starts at physical `(wx, wy)` is at
+    logical `(wx/2 + ix/2, wy/2 + iy/2)`; the logical screen is `xrandr`'s
+    reported size / 2.
+  - `xdotool getmouselocation` does **not** track a `ydotool`-driven pointer (the
+    uinput device bypasses X, so the reading stays frozen even as the pointer
+    moves), so a feedback loop on it cannot work. Instead, flatten the
+    acceleration for the session
+    (`gsettings set org.gnome.desktop.peripherals.mouse accel-profile flat`,
+    restoring the original value afterwards) so moves are 1:1, saturate the
+    pointer into the bottom-right corner with repeated large moves
+    (`for i in $(seq 1 40); do ydotool mousemove -- 2000 2000; done`), then move
+    once by `target - corner` to the logical target. Without the flat profile a
+    single large move overshoots wildly.
+  - Only the **top** corners are GNOME hotspots (top-left Activities, top-right
+    system menu), so clamp into the bottom edge rather than the top. A move alone
+    cannot trigger a hotspot; only a stray click can, so do not click until the
+    pointer is over the intended target. After the final move, pause ~0.4 s
+    before clicking; the first click may only focus/hover, so click again.
+  - Verify an event actually reached GNOME with the idle monitor — a mouse or key
+    event resets it: `gdbus call --session --dest org.gnome.Mutter.IdleMonitor
+    --object-path /org/gnome/Mutter/IdleMonitor/Core --method
+    org.gnome.Mutter.IdleMonitor.GetIdletime` (returns ms).
 
 ## Bundled Assets
 

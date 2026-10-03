@@ -18,6 +18,9 @@ build/
 # Gradle cache
 .gradle
 
+# Kotlin build session files
+.kotlin/
+
 # Signed APK dirs
 app/fdroid
 app/play

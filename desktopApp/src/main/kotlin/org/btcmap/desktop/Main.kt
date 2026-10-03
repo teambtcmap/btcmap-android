@@ -18,12 +18,16 @@ import java.awt.Color as AwtColor
 import androidx.compose.ui.graphics.Color
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -115,8 +119,23 @@ import org.btcmap.ui.SettingsPage
 import org.btcmap.ui.SettingsPageLabels
 import org.btcmap.ui.StatsScreen
 import org.btcmap.ui.UserProfileLabels
+import org.btcmap.ui.AreaScreen
+import org.btcmap.ui.AreaStrings
+import org.btcmap.ui.EventScreen
+import org.btcmap.ui.EventScreenLabels
 import org.btcmap.ui.areaChipPalette
 import org.btcmap.ui.markerPalette
+import org.btcmap.api.GetEventsItem
+import org.btcmap.area.AreaIssues
+import org.btcmap.area.AreaPlaceIssue
+import org.btcmap.area.AreaSections
+import org.btcmap.area.websiteDisplayText
+import org.btcmap.db.table.area.Area
+import org.btcmap.db.table.event.Event
+import org.btcmap.db.table.place.Place
+import org.btcmap.i18n.getLocalizedDescription
+import org.btcmap.i18n.getLocalizedName
+import org.btcmap.map.toEventGeoJson
 import java.io.File
 import java.net.URLDecoder
 import okio.Source
@@ -237,6 +256,13 @@ private fun runApp() = application {
                     var addPlace by remember { mutableStateOf<Pair<Double, Double>?>(null) }
                     // The place a boost or comment payment screen is for.
                     var paymentPlace by remember { mutableStateOf<Pair<Long, String>?>(null) }
+                    // The area a chip (or an area search result) opened, and the
+                    // event an area row or search result opened.
+                    var selectedAreaId by remember { mutableStateOf<Long?>(null) }
+                    var selectedEvent by remember { mutableStateOf<Event?>(null) }
+                    // Where an opened event returns to: the area that listed it,
+                    // or the map when it came from a search result.
+                    var eventBackRoute by remember { mutableStateOf(Route.Map) }
 
                     // The bundled style, shared by the map and the add-place map.
                     // Its sprite and glyph URLs are served from the app's
@@ -335,8 +361,15 @@ private fun runApp() = application {
                                     else -> handlePlaceAction(place, action)
                                 }
                             },
-                            onSelectEvent = {},
-                            onSelectArea = {},
+                            onSelectEvent = { event ->
+                                selectedEvent = event
+                                eventBackRoute = Route.Map
+                                route = Route.Event
+                            },
+                            onSelectArea = { areaId ->
+                                selectedAreaId = areaId
+                                route = Route.Area
+                            },
                             onCameraIdle = { lat, lon, _ ->
                                 mapCenterLat = lat
                                 mapCenterLon = lon
@@ -470,6 +503,56 @@ private fun runApp() = application {
                             )
                         }
 
+                        // An area opened from a map chip or an area search
+                        // result: the shared body under its own header.
+                        Route.Area -> {
+                            val areaId = selectedAreaId
+                            if (areaId == null) {
+                                LaunchedEffect(Unit) { route = Route.Map }
+                            } else {
+                                DesktopAreaScreen(
+                                    areaId = areaId,
+                                    db = db,
+                                    api = api,
+                                    onBack = { route = Route.Map },
+                                    onOpenPlace = { placeId ->
+                                        feedPlaceId = placeId
+                                        route = Route.Map
+                                    },
+                                    onOpenEvent = { event ->
+                                        selectedEvent = event
+                                        eventBackRoute = Route.Area
+                                        route = Route.Event
+                                    },
+                                )
+                            }
+                        }
+
+                        // An event opened from an area row or an event search
+                        // result: its own map, dates and website.
+                        Route.Event -> {
+                            val event = selectedEvent
+                            if (event == null) {
+                                LaunchedEffect(Unit) { route = Route.Map }
+                            } else {
+                                ScreenPage(
+                                    title = event.name,
+                                    onBack = { route = eventBackRoute },
+                                ) {
+                                    EventScreen(
+                                        event = event,
+                                        geoJson = listOf(event).toEventGeoJson(),
+                                        styleUrl = HOSTED_STYLE_URL,
+                                        styleJson = styleJson,
+                                        palette = markerPalette(settings),
+                                        iconFont = iconFont,
+                                        usingOpenFreeMap = true,
+                                        labels = EVENT_SCREEN_LABELS,
+                                    )
+                                }
+                            }
+                        }
+
                         Route.Feed -> ScreenPage(
                             title = "Activity",
                             onBack = { route = Route.Map },
@@ -514,8 +597,115 @@ internal fun ScreenPage(
     }
 }
 
+/**
+ * The area screen: the shared [AreaScreen] body under a back affordance, with
+ * the area and its boosted merchant, event and issue sections loaded from the
+ * shared cache and API. The desktop has no offline packs, so the offline panel
+ * is not shown.
+ */
+@androidx.compose.runtime.Composable
+private fun DesktopAreaScreen(
+    areaId: Long,
+    db: Database,
+    api: Api,
+    onBack: () -> Unit,
+    onOpenPlace: (Long) -> Unit,
+    onOpenEvent: (Event) -> Unit,
+) {
+    var area by remember(areaId) { mutableStateOf<Area?>(null) }
+    var missing by remember(areaId) { mutableStateOf(false) }
+    var boostedMerchants by remember(areaId) { mutableStateOf(emptyList<Place>()) }
+    var events by remember(areaId) { mutableStateOf(emptyList<GetEventsItem>()) }
+    var issues by remember(areaId) { mutableStateOf<AreaIssues?>(null) }
+
+    LaunchedEffect(areaId) {
+        val loaded = db.area.selectById(areaId)
+        if (loaded == null) {
+            missing = true
+            return@LaunchedEffect
+        }
+        area = loaded
+        boostedMerchants = loadSection { AreaSections.boostedMerchants(db, loaded) } ?: emptyList()
+        events = loadSection { AreaSections.events(db, loaded) } ?: emptyList()
+        issues = loadSection { AreaSections.placeIssues(api, db, areaId) }
+    }
+
+    Column(modifier = Modifier.fillMaxSize()) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(8.dp),
+        ) {
+            IconButton(onClick = onBack) {
+                MaterialSymbol(glyph = "arrow_back", contentDescription = null)
+            }
+            Text(
+                text = area?.getLocalizedName() ?: "Area",
+                style = MaterialTheme.typography.titleLarge,
+            )
+        }
+
+        val loaded = area
+        when {
+            loaded != null -> AreaScreen(
+                description = loaded.getLocalizedDescription(),
+                websiteText = loaded.websiteUrl.takeIf { it.isNotBlank() }?.let(::websiteDisplayText),
+                boostedMerchants = boostedMerchants,
+                events = events,
+                issues = issues,
+                offlineState = null,
+                offlineStyleMatches = { true },
+                strings = DESKTOP_AREA_STRINGS,
+                onOpenPlace = onOpenPlace,
+                onOpenEvent = { onOpenEvent(it.toEvent()) },
+                onOpenIssue = { openUrl(it.osmEditUrl()) },
+                onJoinUs = { openUrl(JOIN_US_URL) },
+                onDownload = {},
+                onDelete = {},
+                modifier = Modifier.verticalScroll(rememberScrollState()),
+            )
+
+            missing -> Text(
+                text = "This area is not available.",
+                modifier = Modifier.padding(16.dp),
+            )
+
+            else -> Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier.fillMaxSize(),
+            ) {
+                CircularProgressIndicator()
+            }
+        }
+    }
+}
+
+/** Reads a secondary section, hiding it when the read or fetch fails. */
+private suspend fun <T> loadSection(block: suspend () -> T): T? = try {
+    block()
+} catch (t: Throwable) {
+    t.rethrowIfCancellation()
+    null
+}
+
+private fun GetEventsItem.toEvent(): Event = Event(
+    id = id,
+    lat = lat,
+    lon = lon,
+    name = name,
+    website = website,
+    startsAt = startsAt,
+    endsAt = endsAt,
+)
+
+private fun AreaPlaceIssue.osmEditUrl(): String =
+    "https://www.openstreetmap.org/edit?$elementOsmType=$elementOsmId"
+
+private const val JOIN_US_URL = "https://btcmap.org/join-us"
+
 /** The desktop app's full-window pages. */
-private enum class Route { Map, Feed, Settings, Colors, DbStats, Account, Report, AddPlace, AddComment, Boost }
+private enum class Route { Map, Area, Event, Feed, Settings, Colors, DbStats, Account, Report, AddPlace, AddComment, Boost }
 
 private const val SCREENSHOT_ARG = "--screenshot="
 
@@ -1076,3 +1266,68 @@ private val PLACE_SHEET_STRINGS = org.btcmap.ui.PlaceSheetStrings(
     openingHoursClosed = "Closed",
     openingHoursOpen24_7 = "Open 24/7",
 )
+
+private val DESKTOP_AREA_STRINGS = AreaStrings(
+    readMore = "Read more",
+    collapse = "Collapse",
+    boostedMerchants = "Boosted merchants",
+    events = "Events",
+    howToHelp = "How to help?",
+    offlineMap = "Offline map",
+    offlineDownload = "Download map",
+    offlineDownloadAgain = "Download again",
+    offlineDelete = "Delete",
+    cancel = "Cancel",
+    boosted = "Boosted",
+    boostedUntil = { date -> "Boosted until $date" },
+    issues = { shown, total ->
+        if (shown < total) "Issues ($shown of $total)" else "Issues ($total)"
+    },
+    issueDescription = ::desktopIssueDescription,
+    offlineStatusDownloading = { size -> "Downloading… $size" },
+    offlineStatusProgress = { percent, size -> "Downloading… $percent% ($size)" },
+    offlineStatusDownloaded = { size, minZoom, maxZoom ->
+        "Downloaded · $size · zoom $minZoom–$maxZoom"
+    },
+    offlineStyleMismatch = "Downloaded for a different map style. Download again to " +
+        "use it with the current style.",
+    offlineStatusFailed = { message -> "Download failed: $message" },
+    offlineDialogDescription = { areaName ->
+        "Download the map of $areaName for offline use, so it stays available " +
+            "without a connection."
+    },
+    offlineDialogStyle = { styleName -> "Map style: $styleName" },
+    offlineDialogMaxZoom = { zoom -> "Maximum zoom: $zoom" },
+    offlineDialogEstimatedSize = { size -> "Estimated size: ~$size" },
+    offlineDialogTooLarge = { size -> "Too large to download offline (estimated $size)." },
+    offlineDialogEstimateNote = "This is only an estimate. The actual size depends " +
+        "on how much map data the area contains.",
+    formatBytes = ::formatBytes,
+)
+
+private val EVENT_SCREEN_LABELS = EventScreenLabels(
+    dateRange = { date, start, end -> "$date, $start - $end" },
+)
+
+/** The issue codes the API returns, matching the Android resource strings. */
+private fun desktopIssueDescription(code: String): String = when {
+    code == "outdated" -> "Outdated, needs verification"
+    code == "outdated_soon" -> "Will be outdated soon"
+    code == "not_verified" -> "Not verified"
+    code == "missing_icon" -> "Missing icon"
+    code.startsWith("invalid_tag_value:") ->
+        "Invalid value for ${code.substringAfter("invalid_tag_value:")}"
+
+    code.startsWith("misspelled_tag_name:") ->
+        "Misspelled tag name: ${code.substringAfter("misspelled_tag_name:")}"
+
+    else -> "Unknown issue"
+}
+
+/** A human-readable byte size for the offline estimate. */
+private fun formatBytes(bytes: Long): String = when {
+    bytes < 1024 -> "$bytes B"
+    bytes < 1024 * 1024 -> "%.1f kB".format(bytes / 1024.0)
+    bytes < 1024L * 1024 * 1024 -> "%.1f MB".format(bytes / (1024.0 * 1024))
+    else -> "%.1f GB".format(bytes / (1024.0 * 1024 * 1024))
+}

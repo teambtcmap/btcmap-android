@@ -11,7 +11,7 @@ import java.time.format.DateTimeFormatter
  * moves to kotlinx-datetime with the rest of the locale work.
  */
 internal fun Instant.format(formatter: DateTimeFormatter): String =
-    formatter.format(toJavaInstant())
+    formatter.format(toJavaInstant().atZone(ZoneId.systemDefault()))
 
 /** The device-zone calendar date of this instant. */
 internal fun Instant.toLocalDate(): java.time.LocalDate =
