@@ -63,6 +63,7 @@ import org.btcmap.bundle.BundledAreas
 import org.btcmap.bundle.BundledComments
 import org.btcmap.bundle.BundledEvents
 import org.btcmap.bundle.BundledPlaces
+import org.btcmap.boost.BoostPlan
 import org.btcmap.db.Database
 import org.btcmap.dbstats.DbStatsLabels
 import org.btcmap.payment.PaymentInvoice
@@ -88,11 +89,19 @@ import org.btcmap.ui.AccountScreen
 import org.btcmap.ui.AddPlaceForm
 import org.btcmap.ui.AddPlaceLabels
 import org.btcmap.ui.AddPlaceScreen
+import org.btcmap.ui.AddCommentLabels
 import org.btcmap.ui.AppTheme
+import org.btcmap.ui.BoostScreen
+import org.btcmap.ui.BoostScreenLabels
 import org.btcmap.ui.ColorsPage
 import org.btcmap.ui.ColorsPageLabels
+import org.btcmap.ui.CommentScreen
+import org.btcmap.ui.CommentScreenLabels
 import org.btcmap.ui.DbStatsPage
 import org.btcmap.ui.DbStatsPageLabels
+import org.btcmap.ui.InvoicePaymentLabels
+import org.btcmap.ui.InvoicePaymentSection
+import org.btcmap.ui.InvoicePaymentSectionLabels
 import org.btcmap.ui.MapScreen
 import org.btcmap.ui.ProfileFormLabels
 import org.btcmap.ui.ProfileScreen
@@ -352,19 +361,33 @@ private fun runApp() = application {
                             )
                         }
 
-                        Route.AddComment -> DesktopAddCommentScreen(
-                            api = api,
-                            placeId = paymentPlace?.first ?: 0L,
-                            placeName = paymentPlace?.second.orEmpty(),
+                        Route.AddComment -> ScreenPage(
+                            title = paymentPlace?.second?.ifBlank { "Add comment" } ?: "Add comment",
                             onBack = { route = Route.Map },
-                        )
+                        ) {
+                            CommentScreen(
+                                api = api,
+                                placeId = paymentPlace?.first ?: 0L,
+                                labels = COMMENT_LABELS,
+                                onPay = { openUrl("lightning:$it") },
+                                onCopy = { copyToClipboard(it) },
+                                onBack = { route = Route.Map },
+                            )
+                        }
 
-                        Route.Boost -> DesktopBoostScreen(
-                            api = api,
-                            placeId = paymentPlace?.first ?: 0L,
-                            placeName = paymentPlace?.second.orEmpty(),
+                        Route.Boost -> ScreenPage(
+                            title = paymentPlace?.second?.ifBlank { "Boost merchant" } ?: "Boost merchant",
                             onBack = { route = Route.Map },
-                        )
+                        ) {
+                            BoostScreen(
+                                api = api,
+                                placeId = paymentPlace?.first ?: 0L,
+                                labels = BOOST_LABELS,
+                                onPay = { openUrl("lightning:$it") },
+                                onCopy = { copyToClipboard(it) },
+                                onBack = { route = Route.Map },
+                            )
+                        }
 
                         Route.Settings -> ScreenPage(
                             title = "Settings",
@@ -557,6 +580,9 @@ private fun renderScreen(spec: String) {
 
                     "payment" -> InvoicePaymentSection(
                         invoice = PaymentInvoice(id = "demo", bolt11 = "lnbc1u1p3exampleinvoice"),
+                        labels = INVOICE_SECTION_LABELS,
+                        onPay = {},
+                        onCopy = {},
                         onStartOver = {},
                     )
 
@@ -761,6 +787,55 @@ private fun resourceBytes(path: String): ByteArray? =
 private fun bundledSnapshot(fileName: String): InputStream =
     Thread.currentThread().contextClassLoader.getResourceAsStream(fileName)
         ?: throw java.io.FileNotFoundException(fileName)
+
+private val INVOICE_LABELS = InvoicePaymentLabels(
+    qrDescription = "Lightning invoice QR code",
+    pay = "Pay",
+    copy = "Copy",
+    startOver = "Start over",
+)
+
+private val INVOICE_SECTION_LABELS = InvoicePaymentSectionLabels(
+    invoice = INVOICE_LABELS,
+    discardMessage = "Discard this invoice? It stays payable until it expires, so " +
+        "starting over and paying the old one too would charge you twice.",
+    discard = "Discard",
+    cancel = "Cancel",
+)
+
+private val BOOST_LABELS = BoostScreenLabels(
+    active = "Your boost is active.",
+    backToMap = "Back to the map",
+    planLabel = {
+        when (it) {
+            BoostPlan.ONE_MONTH -> "1 month"
+            BoostPlan.THREE_MONTHS -> "3 months"
+            BoostPlan.TWELVE_MONTHS -> "12 months"
+        }
+    },
+    description = "Boosting a place keeps it at the top of search results and " +
+        "highlights it on the map.",
+    durationTitle = "For how long?",
+    continueLabel = "Continue",
+    invoice = INVOICE_SECTION_LABELS,
+)
+
+private val COMMENT_LABELS = CommentScreenLabels(
+    posted = "Your comment has been posted.",
+    backToMap = "Back to the map",
+    form = AddCommentLabels(
+        disclosure = "A comment carries a small anti-spam fee, paid in sats over the " +
+            "Lightning Network.",
+        currentFee = "Current fee",
+        comment = "Comment",
+        placeholder = "Your comment",
+        continueLabel = "Continue",
+        emptyComment = "The comment cannot be empty.",
+        failedToLoad = "The fee could not be loaded.",
+        tapToRetry = "Tap to retry",
+    ),
+    invoice = INVOICE_SECTION_LABELS,
+)
 
 private val VERIFIED_FILTER_YEARS = listOf(1, 2, 3)
 

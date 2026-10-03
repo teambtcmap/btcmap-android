@@ -1,4 +1,4 @@
-package org.btcmap.desktop
+package org.btcmap.ui
 
 import androidx.compose.ui.graphics.toPixelMap
 import com.google.zxing.BinaryBitmap
@@ -8,15 +8,15 @@ import com.google.zxing.common.HybridBinarizer
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-/** The QR the desktop draws for a Lightning invoice must scan back to it. */
-class QrBitmapTest {
+/** The QR the shared generator draws for a Lightning invoice must scan back to it. */
+class QrCodeTest {
 
     private val invoice = "lnbc1u1p3exampleinvoice"
 
     @Test
     fun encodesScannableQr() {
         val size = 256
-        val pixels = generateQrBitmap(invoice, size).toPixelMap().let { map ->
+        val pixels = qrBitmap(invoice, size).toPixelMap().let { map ->
             IntArray(size * size) { index ->
                 val color = map[index % size, index / size]
                 (((color.red * 255).toInt()) shl 16) or

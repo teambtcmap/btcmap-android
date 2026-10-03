@@ -5,11 +5,7 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
-import android.graphics.Color
-import androidmads.library.qrgenearator.QRGContents
-import androidmads.library.qrgenearator.QRGEncoder
 import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.graphics.asImageBitmap
 import androidx.core.net.toUri
 import androidx.fragment.app.Fragment
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -17,6 +13,7 @@ import org.btcmap.Activity
 import org.btcmap.R
 import org.btcmap.ui.InvoicePaymentComposeView
 import org.btcmap.ui.InvoicePaymentLabels
+import org.btcmap.ui.qrBitmap
 
 /**
  * Renders a Lightning invoice and wires its pay, copy and start-over actions.
@@ -59,12 +56,7 @@ internal class InvoicePaymentController(
         shownInvoice = null
     }
 
-    private fun generateQr(invoice: String): ImageBitmap {
-        val qrEncoder = QRGEncoder(invoice, null, QRGContents.Type.TEXT, QR_SIZE)
-        qrEncoder.colorBlack = Color.BLACK
-        qrEncoder.colorWhite = Color.WHITE
-        return qrEncoder.getBitmap(0).asImageBitmap()
-    }
+    private fun generateQr(invoice: String): ImageBitmap = qrBitmap(invoice, QR_SIZE)
 
     /**
      * Confirms before discarding an invoice. There is no endpoint to cancel it,

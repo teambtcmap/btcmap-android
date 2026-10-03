@@ -48,6 +48,18 @@ internal val TEST_PROFILE_FORM_LABELS = ProfileFormLabels(
     passwordChanged = "Password changed.",
 )
 
+internal val TEST_INVOICE_SECTION_LABELS = InvoicePaymentSectionLabels(
+    invoice = InvoicePaymentLabels(
+        qrDescription = "Lightning invoice QR code",
+        pay = "Pay",
+        copy = "Copy",
+        startOver = "Start over",
+    ),
+    discardMessage = "Discard this invoice?",
+    discard = "Discard",
+    cancel = "Cancel",
+)
+
 internal val TEST_SETTINGS_PAGE_LABELS = SettingsPageLabels(
     account = "Account",
     logIn = "Log in",

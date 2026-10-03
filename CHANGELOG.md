@@ -24,6 +24,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Share the boost plans, saved-item name localization and database stats cards between the Android and desktop apps
 - Move the add-place, report and account screens into shared Compose UI, so the desktop and Android render the same forms
 - Move the profile, settings, colour and database stats screens into shared Compose UI
+- Move the boost, comment and invoice-payment screens into shared Compose UI and generate invoice QR codes in shared code
 
 ## [1.2.0] - 2026-09-30
 

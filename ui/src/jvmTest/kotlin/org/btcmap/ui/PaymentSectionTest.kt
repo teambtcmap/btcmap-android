@@ -1,4 +1,4 @@
-package org.btcmap.desktop
+package org.btcmap.ui
 
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertIsDisplayed
@@ -10,10 +10,9 @@ import kotlin.test.Test
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 import org.btcmap.payment.PaymentInvoice
-import org.btcmap.ui.AppTheme
 
 /**
- * The shared invoice block with the desktop's actions. The QR is generated
+ * The shared invoice block with the host's actions. The QR is generated
  * locally from the invoice, so no network takes part.
  */
 class PaymentSectionTest {
@@ -24,7 +23,13 @@ class PaymentSectionTest {
         runComposeUiTest {
             setContent {
                 AppTheme {
-                    InvoicePaymentSection(invoice = PaymentInvoice("id", BOLT11), onStartOver = {})
+                    InvoicePaymentSection(
+                        invoice = PaymentInvoice("id", BOLT11),
+                        labels = TEST_INVOICE_SECTION_LABELS,
+                        onPay = {},
+                        onCopy = {},
+                        onStartOver = {},
+                    )
                 }
             }
             onNodeWithText("Pay").assertIsDisplayed()
@@ -42,6 +47,9 @@ class PaymentSectionTest {
                 AppTheme {
                     InvoicePaymentSection(
                         invoice = PaymentInvoice("id", BOLT11),
+                        labels = TEST_INVOICE_SECTION_LABELS,
+                        onPay = {},
+                        onCopy = {},
                         onStartOver = { discarded = true },
                     )
                 }

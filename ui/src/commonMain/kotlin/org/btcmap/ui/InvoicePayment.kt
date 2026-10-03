@@ -15,6 +15,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
+import java.text.NumberFormat
+
+/** A sat amount with thousands separators, as the Android `d_sat` string shows. */
+fun formatSat(sat: Long): String = "${NumberFormat.getNumberInstance().format(sat)} sat"
 
 /** The already-resolved strings the invoice block renders. */
 data class InvoicePaymentLabels(
