@@ -179,7 +179,7 @@ fun MapScreen(
      * link. The map selects it and moves to it, as a tap on its marker would.
      */
     openPlaceId: Long? = null,
-    photos: List<String> = emptyList(),
+    photos: List<PlacePhoto> = emptyList(),
     bookmarked: Boolean = false,
     onPlaceSelected: (Place) -> Unit = {},
     /**
@@ -188,6 +188,11 @@ fun MapScreen(
      */
     onPlaceDismissed: () -> Unit = {},
     onPlaceAction: (Place, PlaceAction) -> Unit,
+    /**
+     * Deletes a photo the signed-in user is allowed to remove; null when the
+     * host does not offer deletion. The map closes the viewer after calling it.
+     */
+    onDeletePhoto: ((PlacePhoto) -> Unit)? = null,
     onSelectEvent: (Event) -> Unit,
     onSelectArea: (Long) -> Unit,
     formatDistance: (Double) -> String,
@@ -632,6 +637,7 @@ fun MapScreen(
                     bookmarked = bookmarked,
                     strings = placeSheetStrings,
                     onAction = { onPlaceAction(place, it) },
+                    onDeletePhoto = onDeletePhoto,
                     onDismiss = {
                         selectedPlace = null
                         onPlaceDismissed()

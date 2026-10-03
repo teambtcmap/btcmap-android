@@ -149,6 +149,11 @@
     <string name="account_created_sign_in_failed">Your account was created, but sign-in failed. Please sign in.</string>
     <string name="click_to_see_your_profile">Click to see your profile</string>
     <string name="delete">Delete</string>
+    <string name="uploaded_images">Uploaded images</string>
+    <string name="uploaded_images_empty">You haven\'t uploaded any images yet.</string>
+    <string name="uploaded_images_failed">Couldn\'t delete the image.</string>
+    <string name="uploaded_images_place">Place #%1$d</string>
+    <string name="retry">Retry</string>
     <string name="sync">Sync</string>
     <string name="database_stats">Database</string>
     <string name="database_stats_secondary">Database metadata and table management</string>
@@ -285,6 +290,8 @@
     <string name="report_photos_optional">Evidence photos (optional)</string>
     <string name="report_photos_hint">Up to 5 photos showing the current state of the place. These help editors review your report.</string>
     <string name="add_photo">Add photo</string>
+    <string name="uploaded_by">Uploaded by %1$s</string>
+    <string name="delete_photo">Delete photo</string>
     <string name="report_photo_take">Take photo</string>
     <string name="report_photo_choose">Choose from gallery</string>
     <string name="report_photo_remove">Remove photo</string>

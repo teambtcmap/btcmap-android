@@ -28,8 +28,8 @@ import org.btcmap.R
 import org.btcmap.api
 import org.btcmap.api.getEvent
 import org.btcmap.api.getPlaceCoordinates
+import org.btcmap.api.deletePlaceImage
 import org.btcmap.api.getPlaceImages
-import org.btcmap.api.placeImageUrl
 import org.btcmap.area.ARG_AREA_ID
 import org.btcmap.area.AreaFragment
 import org.btcmap.auth.registerAuthResultListener
@@ -49,6 +49,7 @@ import org.btcmap.place.btcmapUrl
 import org.btcmap.place.osmEditUrl
 import org.btcmap.place.osmMapUrl
 import org.btcmap.place.PlacePhotoUploader
+import org.btcmap.place.canDeletePlaceImage
 import org.btcmap.place.placeSheetStrings
 import org.btcmap.place.osmUrl
 import org.btcmap.saved.isPlaceSaved
@@ -77,6 +78,8 @@ import org.btcmap.settings.verifiedFilterMinVerifiedAt
 import org.btcmap.sync.SyncState
 import org.btcmap.syncController
 import org.btcmap.ui.PlaceAction
+import org.btcmap.ui.PlacePhoto
+import org.btcmap.ui.toPlacePhoto
 import org.btcmap.ui.map.SearchActions
 import org.btcmap.ui.map.bundledStyleJsonFor
 import org.btcmap.util.DeepLink
@@ -266,6 +269,7 @@ class MapFragment : Fragment() {
     private fun refreshSheet(place: Place) {
         viewLifecycleOwner.lifecycleScope.launch {
             binding.map.bookmarked = isPlaceSaved(place.id)
+            val user = withContext(Dispatchers.IO) { db().user.select() }
             val images = try {
                 api().getPlaceImages(place.id)
             } catch (t: Throwable) {
@@ -273,8 +277,26 @@ class MapFragment : Fragment() {
                 emptyList()
             }
             binding.map.photos = images.map {
-                api().placeImageUrl(place.id, it.id, width = 144, height = 144)
+                api().toPlacePhoto(it, canDelete = user?.canDeletePlaceImage(it) ?: false)
             }
+            binding.map.onDeletePhoto = { photo -> deletePhoto(place, photo) }
+        }
+    }
+
+    /**
+     * Deletes a gallery photo the signed-in user is allowed to remove, then
+     * reloads the strip. A rejected delete (for example a stale role cache) is
+     * surfaced and the strip is left as the server has it.
+     */
+    private fun deletePhoto(place: Place, photo: PlacePhoto) {
+        viewLifecycleOwner.lifecycleScope.launch {
+            try {
+                api().deletePlaceImage(placeId = photo.placeId, imageId = photo.imageId)
+            } catch (t: Throwable) {
+                t.rethrowIfCancellation()
+                showError(t)
+            }
+            refreshSheet(place)
         }
     }
 

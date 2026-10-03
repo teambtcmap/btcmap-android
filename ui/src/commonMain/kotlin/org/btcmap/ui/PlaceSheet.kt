@@ -84,11 +84,12 @@ const val PLACE_ADD_PHOTO_TAG = "place-add-photo"
 fun PlaceSheet(
     place: Place,
     comments: List<CommentsAdapterItem>,
-    photos: List<String>,
+    photos: List<PlacePhoto>,
     bookmarked: Boolean,
     strings: PlaceSheetStrings,
     onAction: (PlaceAction) -> Unit,
     onDismiss: () -> Unit,
+    onDeletePhoto: ((PlacePhoto) -> Unit)? = null,
     previewMap: (@Composable () -> Unit)? = null,
 ) {
     // Open at the half-expanded height the Views sheet used, so the map stays
@@ -102,6 +103,7 @@ fun PlaceSheet(
             bookmarked = bookmarked,
             strings = strings,
             onAction = onAction,
+            onDeletePhoto = onDeletePhoto,
             previewMap = previewMap,
             showHeader = true,
         )
@@ -118,10 +120,11 @@ fun PlaceSheet(
 fun PlaceDetails(
     place: Place,
     comments: List<CommentsAdapterItem>,
-    photos: List<String>,
+    photos: List<PlacePhoto>,
     bookmarked: Boolean,
     strings: PlaceSheetStrings,
     onAction: (PlaceAction) -> Unit,
+    onDeletePhoto: ((PlacePhoto) -> Unit)? = null,
     previewMap: (@Composable () -> Unit)? = null,
     showHeader: Boolean = true,
 ) {
@@ -162,9 +165,9 @@ fun PlaceDetails(
                 contentPadding = PaddingValues(horizontal = 16.dp),
                 modifier = Modifier.padding(top = 8.dp),
             ) {
-                itemsIndexed(photos) { index, url ->
+                itemsIndexed(photos) { index, photo ->
                     AsyncImage(
-                        model = url,
+                        model = photo.thumbnailUrl,
                         contentDescription = null,
                         contentScale = ContentScale.Crop,
                         modifier = Modifier
@@ -208,6 +211,14 @@ fun PlaceDetails(
             PlacePhotoViewer(
                 photos = photos,
                 initialIndex = index,
+                uploadedBy = strings.uploadedBy,
+                deleteDescription = strings.deletePhoto,
+                onDelete = onDeletePhoto?.let { delete ->
+                    { photo ->
+                        delete(photo)
+                        viewerIndex = null
+                    }
+                },
                 onDismiss = { viewerIndex = null },
             )
         }

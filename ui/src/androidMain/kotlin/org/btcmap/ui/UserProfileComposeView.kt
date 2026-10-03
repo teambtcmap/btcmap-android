@@ -32,6 +32,14 @@ class UserProfileComposeView @JvmOverloads constructor(
 
     var formLabels: ProfileFormLabels? by mutableStateOf(null)
 
+    var imagesLabels: UploadedImagesLabels? by mutableStateOf(null)
+
+    /**
+     * Whether the profile is showing the uploaded-images sub-screen. The host's
+     * back arrow reads it to return to the profile page before leaving it.
+     */
+    var uploadedImagesOpen: Boolean by mutableStateOf(false)
+
     var iconTypeface: Typeface? by mutableStateOf(null)
 
     var onLoggedOut: () -> Unit = {}
@@ -43,6 +51,7 @@ class UserProfileComposeView @JvmOverloads constructor(
         val settings = settings ?: return
         val profileLabels = profileLabels ?: return
         val formLabels = formLabels ?: return
+        val imagesLabels = imagesLabels ?: return
         AppTheme(iconFont = iconTypeface?.let { FontFamily(it) }) {
             ProfileScreen(
                 api = api,
@@ -50,6 +59,9 @@ class UserProfileComposeView @JvmOverloads constructor(
                 settings = settings,
                 profileLabels = profileLabels,
                 formLabels = formLabels,
+                imagesLabels = imagesLabels,
+                showUploadedImages = uploadedImagesOpen,
+                onShowUploadedImagesChange = { uploadedImagesOpen = it },
                 onLoggedOut = onLoggedOut,
             )
         }

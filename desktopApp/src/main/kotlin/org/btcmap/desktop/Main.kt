@@ -35,14 +35,15 @@ import kotlinx.coroutines.launch
 import androidx.compose.runtime.rememberCoroutineScope
 import org.btcmap.api.ActivityFeedItem
 import org.btcmap.api.getActivity
+import org.btcmap.api.deletePlaceImage
 import org.btcmap.api.getPlaceImages
-import org.btcmap.api.placeImageUrl
 import org.btcmap.feed.feedKey
 import org.btcmap.feed.iconGlyph
 import org.btcmap.map.DEFAULT_MAP_CENTER_LAT
 import org.btcmap.map.DEFAULT_MAP_CENTER_LON
 import org.btcmap.map.DEFAULT_MAP_ZOOM
 import org.btcmap.map.MapAreasController
+import org.btcmap.place.canDeletePlaceImage
 import org.btcmap.ui.ActivityFeedRow
 import org.btcmap.ui.ActivityFeedScreen
 import org.btcmap.ui.ActivityFeedState
@@ -64,6 +65,8 @@ import org.btcmap.api.Api
 import org.btcmap.api.signIn
 import org.btcmap.api.submitPlace
 import org.btcmap.ui.PlaceAction
+import org.btcmap.ui.PlacePhoto
+import org.btcmap.ui.toPlacePhoto
 import org.btcmap.api.apiHttpClient
 import org.btcmap.saved.SavedItems
 import org.btcmap.bundle.BundledAreas
@@ -113,6 +116,7 @@ import org.btcmap.ui.InvoicePaymentSectionLabels
 import org.btcmap.ui.MapScreen
 import org.btcmap.ui.ProfileFormLabels
 import org.btcmap.ui.ProfileScreen
+import org.btcmap.ui.UploadedImagesLabels
 import org.btcmap.ui.ReportPlaceLabels
 import org.btcmap.ui.ReportPlaceScreen
 import org.btcmap.ui.SettingsPage
@@ -223,18 +227,19 @@ private fun runApp() = application {
                     // The selected place's photo thumbnails, loaded from the image
                     // endpoint the way the Android map does. Empty until they
                     // arrive, and for a place without photos.
-                    var selectedPhotos by remember { mutableStateOf<List<String>>(emptyList()) }
-                    LaunchedEffect(selectedPlaceId) {
+                    var selectedPhotos by remember { mutableStateOf<List<PlacePhoto>>(emptyList()) }
+                    // Bumped after a photo is deleted to reload the strip.
+                    var photosReloadKey by remember { mutableStateOf(0) }
+                    LaunchedEffect(selectedPlaceId, photosReloadKey) {
                         val placeId = selectedPlaceId
                         bookmarked = placeId?.let { SavedItems.isPlaceSaved(db, it) } ?: false
                         selectedPhotos = placeId?.let { id ->
                             try {
+                                val user = db.user.select()
                                 api.getPlaceImages(id).map { image ->
-                                    api.placeImageUrl(
-                                        placeId = id,
-                                        imageId = image.id,
-                                        width = PLACE_PHOTO_SIZE,
-                                        height = PLACE_PHOTO_SIZE,
+                                    api.toPlacePhoto(
+                                        image,
+                                        canDelete = user?.canDeletePlaceImage(image) ?: false,
                                     )
                                 }
                             } catch (t: Throwable) {
@@ -307,6 +312,16 @@ private fun runApp() = application {
                             onOpenFeed = { route = Route.Feed },
                             bookmarked = bookmarked,
                             photos = selectedPhotos,
+                            onDeletePhoto = { photo ->
+                                scope.launch {
+                                    try {
+                                        api.deletePlaceImage(photo.placeId, photo.imageId)
+                                    } catch (t: Throwable) {
+                                        t.rethrowIfCancellation()
+                                    }
+                                    photosReloadKey++
+                                }
+                            },
                             onPlaceSelected = { selectedPlaceId = it.id },
                             onPlaceDismissed = {
                                 selectedPlaceId = null
@@ -480,27 +495,51 @@ private fun runApp() = application {
                             )
                         }
 
-                        Route.Account -> ScreenPage(
-                            title = "Account",
-                            onBack = { route = Route.Settings },
-                        ) {
-                            AccountScreen(
-                                api = api,
-                                db = db,
-                                settings = settings,
-                                tokenLabel = DESKTOP_TOKEN_LABEL,
-                                labels = ACCOUNT_LABELS,
-                                profile = { onLoggedOut ->
-                                    ProfileScreen(
-                                        api = api,
-                                        db = db,
-                                        settings = settings,
-                                        profileLabels = PROFILE_LABELS,
-                                        formLabels = PROFILE_FORM_LABELS,
-                                        onLoggedOut = onLoggedOut,
-                                    )
+                        Route.Account -> {
+                            // Uploaded images is inside the profile, so the
+                            // screen's back arrow returns to the profile page
+                            // before leaving the account screen.
+                            var showUploadedImages by remember { mutableStateOf(false) }
+                            ScreenPage(
+                                title = if (showUploadedImages) {
+                                    PROFILE_LABELS.uploadedImages
+                                } else {
+                                    "Account"
                                 },
-                            )
+                                onBack = {
+                                    if (showUploadedImages) {
+                                        showUploadedImages = false
+                                    } else {
+                                        route = Route.Settings
+                                    }
+                                },
+                            ) {
+                                AccountScreen(
+                                    api = api,
+                                    db = db,
+                                    settings = settings,
+                                    tokenLabel = DESKTOP_TOKEN_LABEL,
+                                    labels = ACCOUNT_LABELS,
+                                    profile = { onLoggedOut ->
+                                        ProfileScreen(
+                                            api = api,
+                                            db = db,
+                                            settings = settings,
+                                            profileLabels = PROFILE_LABELS,
+                                            formLabels = PROFILE_FORM_LABELS,
+                                            imagesLabels = UPLOADED_IMAGES_LABELS,
+                                            showUploadedImages = showUploadedImages,
+                                            onShowUploadedImagesChange = {
+                                                showUploadedImages = it
+                                            },
+                                            onLoggedOut = {
+                                                showUploadedImages = false
+                                                onLoggedOut()
+                                            },
+                                        )
+                                    },
+                                )
+                            }
                         }
 
                         // An area opened from a map chip or an area search
@@ -772,6 +811,7 @@ private fun renderScreen(spec: String) {
                             token = { settings.getString(KEY_AUTH_TOKEN, null) },
                             userAgent = USER_AGENT,
                         )
+                        var showUploadedImages by remember { mutableStateOf(false) }
                         AccountScreen(
                             api = api,
                             db = db,
@@ -785,6 +825,11 @@ private fun renderScreen(spec: String) {
                                     settings = settings,
                                     profileLabels = PROFILE_LABELS,
                                     formLabels = PROFILE_FORM_LABELS,
+                                    imagesLabels = UPLOADED_IMAGES_LABELS,
+                                    showUploadedImages = showUploadedImages,
+                                    onShowUploadedImagesChange = {
+                                        showUploadedImages = it
+                                    },
                                     onLoggedOut = onLoggedOut,
                                 )
                             },
@@ -919,9 +964,6 @@ private fun relativeDate(date: String): String = runCatching {
 private const val API_URL = "https://api.btcmap.org"
 private const val USER_AGENT = "btcmap-desktop"
 private const val HOSTED_STYLE_URL = "https://tiles.openfreemap.org/styles/liberty"
-
-/** The square thumbnail size of a place's photos in the sheet. */
-private const val PLACE_PHOTO_SIZE = 144
 
 /** The per-user data directory the desktop app keeps its database in. */
 private class DesktopHome {
@@ -1168,6 +1210,15 @@ private val PROFILE_LABELS = UserProfileLabels(
     editUsername = "Change username",
     editPassword = "Change password",
     delete = "Delete",
+    uploadedImages = "Uploaded images",
+)
+
+private val UPLOADED_IMAGES_LABELS = UploadedImagesLabels(
+    empty = "You haven't uploaded any images yet.",
+    delete = "Delete",
+    failed = "Couldn't delete the image.",
+    retry = "Retry",
+    unknownPlace = { "Place #$it" },
 )
 
 private val PROFILE_FORM_LABELS = ProfileFormLabels(
@@ -1264,6 +1315,8 @@ private val PLACE_SHEET_STRINGS = org.btcmap.ui.PlaceSheetStrings(
     watch = "Watch",
     unwatch = "Unwatch",
     addPhoto = "Add photo",
+    uploadedBy = { "Uploaded by $it" },
+    deletePhoto = "Delete photo",
     openingHoursClosed = "Closed",
     openingHoursOpen24_7 = "Open 24/7",
 )

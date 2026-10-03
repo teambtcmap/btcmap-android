@@ -26,8 +26,8 @@ import kotlinx.coroutines.withContext
 import org.btcmap.Activity
 import org.btcmap.R
 import org.btcmap.api
+import org.btcmap.api.deletePlaceImage
 import org.btcmap.api.getPlaceImages
-import org.btcmap.api.placeImageUrl
 import org.btcmap.app
 import org.btcmap.auth.registerAuthResultListener
 import org.btcmap.auth.showAuthDialog
@@ -54,6 +54,8 @@ import org.btcmap.settings.uri
 import org.btcmap.sync.SyncEvent
 import org.btcmap.syncController
 import org.btcmap.ui.PlaceAction
+import org.btcmap.ui.PlacePhoto
+import org.btcmap.ui.toPlacePhoto
 import org.btcmap.util.iconTypeface
 import org.btcmap.util.openDialer
 import org.btcmap.util.openEmail
@@ -85,9 +87,6 @@ class PlaceFragment : Fragment() {
         private const val AUTH_ACTION_TOGGLE_SAVED = "toggle-saved"
         private const val AUTH_ACTION_OPEN_REPORT = "open-report"
         private const val AUTH_ACTION_ADD_PHOTO = "add-photo"
-
-        /** The thumbnail strip asks the API for small, square renditions. */
-        private const val PHOTO_SIZE = 320
 
         /** A place screen from a place id, e.g. a tapped activity-feed row. */
         fun create(placeId: Long): PlaceFragment {
@@ -289,13 +288,9 @@ class PlaceFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             val photos = try {
                 withContext(Dispatchers.IO) {
-                    api().getPlaceImages(placeId).map { image ->
-                        api().placeImageUrl(
-                            placeId = placeId,
-                            imageId = image.id,
-                            width = PHOTO_SIZE,
-                            height = PHOTO_SIZE,
-                        )
+                    val user = db().user.select()
+                    api().getPlaceImages(placeId).map {
+                        api().toPlacePhoto(it, canDelete = user?.canDeletePlaceImage(it) ?: false)
                     }
                 }
             } catch (t: Throwable) {
@@ -304,6 +299,24 @@ class PlaceFragment : Fragment() {
             }
 
             _binding?.placeContent?.photos = photos
+            _binding?.placeContent?.onDeletePhoto = { photo -> deletePhoto(placeId, photo) }
+        }
+    }
+
+    /**
+     * Deletes a gallery photo the signed-in user is allowed to remove, then
+     * reloads the strip. A rejected delete is surfaced and the strip is left as
+     * the server has it.
+     */
+    private fun deletePhoto(placeId: Long, photo: PlacePhoto) {
+        viewLifecycleOwner.lifecycleScope.launch {
+            try {
+                api().deletePlaceImage(placeId = photo.placeId, imageId = photo.imageId)
+            } catch (t: Throwable) {
+                t.rethrowIfCancellation()
+                showError(t)
+            }
+            renderPhotos(placeId)
         }
     }
 

@@ -1,5 +1,9 @@
 package org.btcmap.ui
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
@@ -41,12 +45,16 @@ class ProfileScreenTest {
         runComposeUiTest {
             setContent {
                 AppTheme {
+                    var showUploadedImages by remember { mutableStateOf(false) }
                     ProfileScreen(
                         api = testApi(),
                         db = db,
                         settings = settings,
                         profileLabels = TEST_PROFILE_LABELS,
                         formLabels = TEST_PROFILE_FORM_LABELS,
+                        imagesLabels = TEST_UPLOADED_IMAGES_LABELS,
+                        showUploadedImages = showUploadedImages,
+                        onShowUploadedImagesChange = { showUploadedImages = it },
                         onLoggedOut = { loggedOut = true },
                     )
                 }

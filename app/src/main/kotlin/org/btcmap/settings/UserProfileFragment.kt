@@ -4,12 +4,17 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.addCallback
+import androidx.compose.runtime.snapshotFlow
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.launch
 import org.btcmap.R
 import org.btcmap.api
 import org.btcmap.databinding.UserProfileFragmentBinding
 import org.btcmap.db
 import org.btcmap.ui.ProfileFormLabels
+import org.btcmap.ui.UploadedImagesLabels
 import org.btcmap.ui.UserProfileLabels
 
 /**
@@ -33,16 +38,36 @@ class UserProfileFragment : Fragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        val content = binding.userProfileList
+
         binding.topAppBar.setNavigationOnClickListener {
-            parentFragmentManager.popBackStack()
+            requireActivity().onBackPressedDispatcher.onBackPressed()
         }
 
-        val content = binding.userProfileList
+        // Uploaded images is Compose state inside the profile rather than a
+        // back-stack entry, so back returns to the profile page first.
+        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner) {
+            if (content.uploadedImagesOpen) {
+                content.uploadedImagesOpen = false
+            } else {
+                parentFragmentManager.popBackStack()
+            }
+        }
+
+        // The uploaded-images body carries no title, so the toolbar title names
+        // the profile's current sub-screen.
+        viewLifecycleOwner.lifecycleScope.launch {
+            snapshotFlow { content.uploadedImagesOpen }.collect { open ->
+                binding.topAppBar.setTitle(if (open) R.string.uploaded_images else R.string.profile)
+            }
+        }
+
         content.api = api()
         content.database = db()
         content.settings = prefs
         content.profileLabels = profileLabels()
         content.formLabels = formLabels()
+        content.imagesLabels = imagesLabels()
         content.iconTypeface = org.btcmap.util.iconTypeface
         content.onLoggedOut = { parentFragmentManager.popBackStack() }
     }
@@ -63,6 +88,15 @@ class UserProfileFragment : Fragment() {
         editUsername = getString(R.string.change_username),
         editPassword = getString(R.string.change_password),
         delete = getString(R.string.delete),
+        uploadedImages = getString(R.string.uploaded_images),
+    )
+
+    private fun imagesLabels(): UploadedImagesLabels = UploadedImagesLabels(
+        empty = getString(R.string.uploaded_images_empty),
+        delete = getString(R.string.delete),
+        failed = getString(R.string.uploaded_images_failed),
+        retry = getString(R.string.retry),
+        unknownPlace = { getString(R.string.uploaded_images_place, it) },
     )
 
     private fun formLabels(): ProfileFormLabels = ProfileFormLabels(

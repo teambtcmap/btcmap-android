@@ -91,12 +91,14 @@ class MapComposeView @JvmOverloads constructor(
             watch = "",
             unwatch = "",
             addPhoto = "",
+            uploadedBy = { it },
+            deletePhoto = "",
             openingHoursClosed = "",
             openingHoursOpen24_7 = "",
         )
     )
 
-    var photos: List<String> by mutableStateOf(emptyList())
+    var photos: List<PlacePhoto> by mutableStateOf(emptyList())
 
     var bookmarked: Boolean by mutableStateOf(false)
 
@@ -105,6 +107,9 @@ class MapComposeView @JvmOverloads constructor(
     var onPlaceDismissed: () -> Unit by mutableStateOf({})
 
     var onPlaceAction: (Place, PlaceAction) -> Unit by mutableStateOf({ _, _ -> })
+
+    /** Deletes a gallery photo the signed-in user may remove; null hides the action. */
+    var onDeletePhoto: ((PlacePhoto) -> Unit)? by mutableStateOf(null)
 
     var onEventSelected: (Event) -> Unit by mutableStateOf({})
 
@@ -194,6 +199,7 @@ class MapComposeView @JvmOverloads constructor(
             onPlaceSelected = onPlaceSelected,
             onPlaceDismissed = onPlaceDismissed,
             onPlaceAction = onPlaceAction,
+            onDeletePhoto = onDeletePhoto,
             onSelectEvent = onEventSelected,
             onSelectArea = onAreaSelected,
             formatDistance = formatDistance,

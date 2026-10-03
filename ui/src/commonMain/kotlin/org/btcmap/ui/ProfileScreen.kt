@@ -31,12 +31,16 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.btcmap.account.AccountSession
 import org.btcmap.api.Api
+import org.btcmap.api.deletePlaceImage
+import org.btcmap.api.getMyPlaceImages
+import org.btcmap.api.placeImageUrl
 import org.btcmap.api.signOut
 import org.btcmap.api.updatePassword
 import org.btcmap.auth.AuthError
 import org.btcmap.auth.AuthValidation
 import org.btcmap.db.Database
 import org.btcmap.db.table.user.User
+import org.btcmap.i18n.getLocalizedName
 import org.btcmap.saved.SavedItems
 import org.btcmap.saved.withLocalizedAreaNames
 import org.btcmap.saved.withLocalizedPlaceNames
@@ -87,6 +91,9 @@ fun ProfileScreen(
     settings: Settings,
     profileLabels: UserProfileLabels,
     formLabels: ProfileFormLabels,
+    imagesLabels: UploadedImagesLabels,
+    showUploadedImages: Boolean,
+    onShowUploadedImagesChange: (Boolean) -> Unit,
     onLoggedOut: () -> Unit,
 ) {
     var account by remember { mutableStateOf<User?>(null) }
@@ -123,6 +130,30 @@ fun ProfileScreen(
             withContext(Dispatchers.IO) { settings.clearSession(db) }
             onLoggedOut()
         }
+
+        showUploadedImages -> UploadedImagesScreen(
+            labels = imagesLabels,
+            load = {
+                api.getMyPlaceImages().map { image ->
+                    UploadedImageUi(
+                        placeId = image.placeId,
+                        imageId = image.id,
+                        thumbnailUrl = api.placeImageUrl(
+                            placeId = image.placeId,
+                            imageId = image.id,
+                            width = PLACE_PHOTO_THUMBNAIL_SIZE,
+                            height = PLACE_PHOTO_THUMBNAIL_SIZE,
+                        ),
+                        placeName = withContext(Dispatchers.IO) {
+                            db.place.selectById(image.placeId)?.getLocalizedName()
+                        } ?: imagesLabels.unknownPlace(image.placeId),
+                    )
+                }
+            },
+            delete = { image ->
+                api.deletePlaceImage(placeId = image.placeId, imageId = image.imageId)
+            },
+        )
 
         editing == ProfileEdit.Username -> ChangeUsernameForm(
             currentName = current.name,
@@ -167,6 +198,10 @@ fun ProfileScreen(
                 onEditPassword = {
                     message = null
                     editing = ProfileEdit.Password
+                },
+                onOpenUploadedImages = {
+                    message = null
+                    onShowUploadedImagesChange(true)
                 },
                 onDeletePlace = { id ->
                     scope.launch {

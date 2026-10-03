@@ -12,6 +12,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -38,6 +39,7 @@ data class UserProfileLabels(
     val editUsername: String,
     val editPassword: String,
     val delete: String,
+    val uploadedImages: String,
 )
 
 data class UserProfileUiState(
@@ -53,6 +55,7 @@ fun UserProfileScreen(
     state: UserProfileUiState,
     onEditUsername: () -> Unit,
     onEditPassword: () -> Unit,
+    onOpenUploadedImages: () -> Unit,
     onDeletePlace: (id: Long) -> Unit,
     onDeleteArea: (id: Long) -> Unit,
     onLogOut: () -> Unit,
@@ -85,6 +88,15 @@ fun UserProfileScreen(
             state.savedAreas.forEach { item ->
                 SavedItemRow(item, state.labels.delete) { onDeleteArea(item.id) }
             }
+        }
+
+        OutlinedButton(
+            onClick = onOpenUploadedImages,
+            modifier = Modifier
+                .padding(start = 16.dp, end = 16.dp, top = 24.dp)
+                .fillMaxWidth(),
+        ) {
+            Text(state.labels.uploadedImages)
         }
 
         Button(

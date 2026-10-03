@@ -40,7 +40,7 @@ class PlaceComposeView @JvmOverloads constructor(
 
     var comments: List<CommentsAdapterItem> by mutableStateOf(emptyList())
 
-    var photos: List<String> by mutableStateOf(emptyList())
+    var photos: List<PlacePhoto> by mutableStateOf(emptyList())
 
     var bookmarked: Boolean by mutableStateOf(false)
 
@@ -67,6 +67,9 @@ class PlaceComposeView @JvmOverloads constructor(
 
     var onAction: (PlaceAction) -> Unit = {}
 
+    /** Deletes a gallery photo the signed-in user may remove; null hides the action. */
+    var onDeletePhoto: ((PlacePhoto) -> Unit)? by mutableStateOf(null)
+
     var onPreviewMapClick: (() -> Unit)? by mutableStateOf(null)
 
     @Composable
@@ -86,6 +89,7 @@ class PlaceComposeView @JvmOverloads constructor(
                 bookmarked = bookmarked,
                 strings = strings,
                 onAction = onAction,
+                onDeletePhoto = onDeletePhoto,
                 showHeader = false,
                 previewMap = if (styleUrl.isEmpty()) {
                     null

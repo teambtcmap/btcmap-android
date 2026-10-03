@@ -18,7 +18,8 @@ class PlaceImageApiTest : ApiTestBase() {
                     "height": 768,
                     "size_bytes": 184320,
                     "created_at": "2026-10-01T04:22:53.706Z",
-                    "created_by": 17
+                    "created_by": 17,
+                    "author": { "id": 17, "name": "satoshi" }
                 }
             ]
             """.trimIndent()
@@ -39,6 +40,7 @@ class PlaceImageApiTest : ApiTestBase() {
         Assert.assertEquals(184320L, image.sizeBytes)
         Assert.assertEquals("2026-10-01T04:22:53.706Z", image.createdAt)
         Assert.assertEquals(17L, image.createdBy)
+        Assert.assertEquals("satoshi", image.authorName)
     }
 
     @Test
@@ -59,7 +61,9 @@ class PlaceImageApiTest : ApiTestBase() {
             """.trimIndent()
         )
 
-        Assert.assertNull(api().getPlaceImages(placeId = 42).single().createdBy)
+        val image = api().getPlaceImages(placeId = 42).single()
+        Assert.assertNull(image.createdBy)
+        Assert.assertNull(image.authorName)
     }
 
     @Test
@@ -97,6 +101,65 @@ class PlaceImageApiTest : ApiTestBase() {
         Assert.assertEquals(4L, image.id)
         Assert.assertEquals("user", image.type)
         Assert.assertEquals(17L, image.createdBy)
+    }
+
+    @Test
+    fun getMyPlaceImages_listsUploadsAcrossPlaces() = runTest {
+        enqueueJson(
+            """
+            [
+                {
+                    "id": 3,
+                    "place_id": 42,
+                    "type": "user",
+                    "width": 1024,
+                    "height": 768,
+                    "size_bytes": 184320,
+                    "created_at": "2026-10-01T04:22:53.706Z",
+                    "created_by": 17,
+                    "author": { "id": 17, "name": "satoshi" }
+                }
+            ]
+            """.trimIndent()
+        )
+
+        val images = api().getMyPlaceImages()
+
+        val request = takeRequest()
+        Assert.assertEquals("GET", request.method)
+        Assert.assertEquals("/v4/users/me/place-images", request.url.encodedPath)
+
+        val image = images.single()
+        Assert.assertEquals(3L, image.id)
+        Assert.assertEquals(42L, image.placeId)
+        Assert.assertEquals("satoshi", image.authorName)
+    }
+
+    @Test
+    fun deletePlaceImage_deletesAndParsesTheDeletedImage() = runTest {
+        enqueueJson(
+            """
+            {
+                "id": 4,
+                "place_id": 42,
+                "type": "user",
+                "width": 1024,
+                "height": 768,
+                "size_bytes": 184320,
+                "created_at": "2026-10-01T04:22:53.706Z",
+                "created_by": 17,
+                "author": { "id": 17, "name": "satoshi" }
+            }
+            """.trimIndent()
+        )
+
+        val image = api().deletePlaceImage(placeId = 42, imageId = 4)
+
+        val request = takeRequest()
+        Assert.assertEquals("DELETE", request.method)
+        Assert.assertEquals("/v4/places/42/images/4", request.url.encodedPath)
+        Assert.assertEquals(4L, image.id)
+        Assert.assertEquals(42L, image.placeId)
     }
 
     @Test

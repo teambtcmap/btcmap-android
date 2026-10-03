@@ -105,4 +105,13 @@ internal val TEST_PROFILE_LABELS = UserProfileLabels(
     editUsername = "Change username",
     editPassword = "Change password",
     delete = "Delete",
+    uploadedImages = "Uploaded images",
+)
+
+internal val TEST_UPLOADED_IMAGES_LABELS = UploadedImagesLabels(
+    empty = "You haven't uploaded any images yet.",
+    delete = "Delete",
+    failed = "Couldn't delete the image.",
+    retry = "Retry",
+    unknownPlace = { "Place #$it" },
 )

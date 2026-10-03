@@ -6,6 +6,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+- Show a place's photos at full resolution in the viewer, captioned with the uploader's username
+- Let users delete their own place photos from the gallery; admins and root may delete any
+- Add an Uploaded images screen to the profile, listing the account's photos with a delete action
 - Show the area's header image on the desktop area screen
 - Align the area screen's Read more/Collapse button with the text above it
 - Open the desktop map's area chips and search results on the shared area and event screens

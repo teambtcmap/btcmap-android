@@ -19,6 +19,8 @@ data class PlaceImage(
     val sizeBytes: Long,
     val createdAt: String,
     val createdBy: Long?,
+    /** The uploader's display name, when the API resolves an `author` for it. */
+    val authorName: String?,
 )
 
 /** Lists the metadata of every image stored against a place, newest first. */
@@ -42,6 +44,30 @@ suspend fun Api.addPlaceImage(placeId: Long, photo: ByteArray): PlaceImage {
     }
 
     return call(HttpMethod.Post, url, body = req) { body ->
+        body.toJsonObject().toPlaceImage()
+    }
+}
+
+/**
+ * Lists the images the signed-in user uploaded, across all places, newest
+ * first. Requires a Bearer token.
+ */
+suspend fun Api.getMyPlaceImages(): List<PlaceImage> {
+    val url = buildUrl("v4", "users", "me", "place-images")
+
+    return call(HttpMethod.Get, url) { body ->
+        body.toJsonArray().map { it.toPlaceImage() }
+    }
+}
+
+/**
+ * Deletes an image from a place. A regular user may only delete their own
+ * uploads; the server rejects anyone else's with 403.
+ */
+suspend fun Api.deletePlaceImage(placeId: Long, imageId: Long): PlaceImage {
+    val url = buildUrl("v4", "places", "$placeId", "images", "$imageId")
+
+    return call(HttpMethod.Delete, url) { body ->
         body.toJsonObject().toPlaceImage()
     }
 }
@@ -72,5 +98,6 @@ private fun JsonObject.toPlaceImage(): PlaceImage {
         sizeBytes = long("size_bytes"),
         createdAt = string("created_at"),
         createdBy = longOrNull("created_by"),
+        authorName = objectOrNull("author")?.nonBlankStringOrNull("name"),
     )
 }
