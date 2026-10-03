@@ -12,6 +12,7 @@ import org.btcmap.api.toDbUser
 import org.btcmap.db.Database
 import org.btcmap.db.table.user.SavedItem
 import org.btcmap.db.table.user.User as DbUser
+import org.btcmap.i18n.getLocalizedName
 
 /**
  * Reads and updates the signed-in user's saved places and areas, so Android and
@@ -128,6 +129,29 @@ object SavedItems {
         }
 
         return updated
+    }
+}
+
+/**
+ * Re-resolves each saved place's name against the local cache, which holds the
+ * localized name the server omitted (the user endpoint returns the base name
+ * with no `lang`). A name missing locally falls back to the server's.
+ */
+suspend fun List<SavedItem>.withLocalizedPlaceNames(db: Database): List<SavedItem> =
+    mapLocalizedNames { db.place.selectById(it.id)?.getLocalizedName() }
+
+/** [withLocalizedPlaceNames] for saved areas. */
+suspend fun List<SavedItem>.withLocalizedAreaNames(db: Database): List<SavedItem> =
+    mapLocalizedNames { db.area.selectById(it.id)?.getLocalizedName() }
+
+private suspend fun List<SavedItem>.mapLocalizedNames(
+    localizedName: suspend (SavedItem) -> String?,
+): List<SavedItem> = withContext(Dispatchers.IO) {
+    map { item ->
+        localizedName(item)
+            ?.takeIf { it.isNotBlank() }
+            ?.let { item.copy(name = it) }
+            ?: item
     }
 }
 

@@ -27,14 +27,10 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.btcmap.db.Database
-import org.btcmap.db.table.area.TABLE as AREA_TABLE
-import org.btcmap.db.table.comment.TABLE as COMMENT_TABLE
-import org.btcmap.db.table.event.TABLE as EVENT_TABLE
-import org.btcmap.db.table.place.TABLE as PLACE_TABLE
-import org.btcmap.db.table.preference.TABLE as PREF_TABLE
 import org.btcmap.dbstats.DatabaseFile
+import org.btcmap.dbstats.DbStatsLabels
 import org.btcmap.dbstats.DbStatsReader
-import org.btcmap.dbstats.TableStats
+import org.btcmap.dbstats.dbStatsSections
 import org.btcmap.settings.MapColor
 import org.btcmap.settings.MapStyle
 import org.btcmap.settings.Settings
@@ -59,7 +55,6 @@ import org.btcmap.ui.map.AreaChipPalette
 import org.btcmap.ui.map.MarkerPalette
 import org.btcmap.ui.mapColorItems
 import org.btcmap.ui.settingsItems
-import java.text.NumberFormat
 
 /** The marker colours the user configured, or their defaults. */
 internal fun markerPalette(settings: Settings): MarkerPalette = MarkerPalette(
@@ -258,7 +253,7 @@ internal fun DesktopDbStatsScreen(
 ) {
     var sections by remember { mutableStateOf<List<StatsSection>>(emptyList()) }
     LaunchedEffect(syncState) {
-        sections = withContext(Dispatchers.IO) { dbStatsSections(db, settings.apiUrl.toString(), syncState) }
+        sections = withContext(Dispatchers.IO) { loadDbStatsSections(db, settings.apiUrl.toString(), syncState) }
     }
 
     ScreenPage(title = "Database", onBack = onBack) {
@@ -401,7 +396,7 @@ private fun formatBytes(bytes: Long): String {
     return if (unit == 0) "$bytes ${units[unit]}" else "%.1f %s".format(value, units[unit])
 }
 
-private fun dbStatsSections(
+private fun loadDbStatsSections(
     db: Database,
     apiUrl: String,
     syncState: SyncState,
@@ -410,37 +405,18 @@ private fun dbStatsSections(
     val file = DatabaseFile.read(db.path)
     val version = reader.readUserVersion()
     val tables = reader.readTables()
-    val formatter = NumberFormat.getIntegerInstance()
 
     return buildList {
-        add(
-            StatsSection(
-                key = "database",
-                title = "Database",
-                icon = "database",
-                entries = buildList {
-                    file?.let { add(StatsEntry("File", it.name)) }
-                    add(StatsEntry("Version", version.toString()))
-                    file?.let { add(StatsEntry("Size", formatBytes(it.sizeBytes))) }
-                },
-            )
+        addAll(
+            dbStatsSections(
+                file = file,
+                version = version,
+                tables = tables,
+                bundles = emptyMap(),
+                labels = DESKTOP_DB_STATS_LABELS,
+                formatBytes = ::formatBytes,
+            ),
         )
-
-        tables
-            .sortedBy { table ->
-                TABLE_ORDER.indexOf(table.name).let { if (it == -1) TABLE_ORDER.size else it }
-            }
-            .forEach { table ->
-                add(
-                    StatsSection(
-                        key = "table:${table.name}",
-                        title = "Table ${table.name}",
-                        icon = "table",
-                        entries = tableEntries(table, formatter),
-                    )
-                )
-            }
-
         add(
             StatsSection(
                 key = "sync",
@@ -455,13 +431,21 @@ private fun dbStatsSections(
     }
 }
 
-private fun tableEntries(table: TableStats, formatter: NumberFormat): List<StatsEntry> = buildList {
-    add(StatsEntry("Rows", formatter.format(table.rowCount)))
-    table.visibleRowCount?.let { add(StatsEntry("Visible rows", formatter.format(it))) }
-    table.deletedRowCount?.let { add(StatsEntry("Deleted rows", formatter.format(it))) }
-    table.futureRowCount?.let { add(StatsEntry("Future rows", formatter.format(it))) }
-    table.maxUpdatedAt?.let { add(StatsEntry("Newest update", it)) }
-}
+/** The desktop's labels for the shared database stats cards. */
+private val DESKTOP_DB_STATS_LABELS = DbStatsLabels(
+    database = "Database",
+    file = "File",
+    version = "Version",
+    size = "Size",
+    table = { "Table $it" },
+    bundle = { "Bundle $it" },
+    location = "Location",
+    visibleRows = "Visible rows",
+    deletedRows = "Deleted rows",
+    futureRows = "Future rows",
+    rows = "Rows",
+    newestUpdate = "Newest update",
+)
 
 private fun syncStateLabel(state: SyncState): String = when (state) {
     SyncState.Idle -> "Idle"
@@ -507,12 +491,3 @@ private const val NOT_LOGGED_IN = "Account"
 private const val LOG_IN = "Log in"
 
 private val VERIFIED_FILTER_YEARS = listOf(1, 2, 3)
-
-/** Display order of the database table cards, matching Android's. */
-private val TABLE_ORDER = listOf(
-    PLACE_TABLE,
-    COMMENT_TABLE,
-    AREA_TABLE,
-    EVENT_TABLE,
-    PREF_TABLE,
-)

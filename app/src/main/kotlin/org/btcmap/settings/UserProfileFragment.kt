@@ -14,19 +14,18 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.btcmap.R
+import org.btcmap.account.AccountSession
 import org.btcmap.api
-import org.btcmap.api.toDbUser
-import org.btcmap.api.updateUsername
 import org.btcmap.app
 import org.btcmap.auth.registerChangePasswordResultListener
 import org.btcmap.auth.showChangePasswordDialog
 import org.btcmap.db
-import org.btcmap.db.table.user.SavedItem
 import org.btcmap.db.table.user.User
 import org.btcmap.databinding.UserProfileFragmentBinding
-import org.btcmap.i18n.getLocalizedName
 import org.btcmap.saved.removeSavedArea
 import org.btcmap.saved.removeSavedPlace
+import org.btcmap.saved.withLocalizedAreaNames
+import org.btcmap.saved.withLocalizedPlaceNames
 import org.btcmap.ui.SavedItemUi
 import org.btcmap.ui.UserProfileLabels
 import org.btcmap.ui.UserProfileUiState
@@ -109,37 +108,15 @@ class UserProfileFragment : Fragment() {
             username = user.name,
             password = getString(R.string.password_mask),
             savedPlaces = user.savedPlaces
-                .withLocalizedPlaceNames()
+                .withLocalizedPlaceNames(db())
                 .map { SavedItemUi(it.id, it.name) },
             savedAreas = user.savedAreas
-                .withLocalizedAreaNames()
+                .withLocalizedAreaNames(db())
                 .map { SavedItemUi(it.id, it.name) },
             labels = labels,
         )
 
         _binding?.userProfileList?.state = state
-    }
-
-    /**
-     * The user endpoint returns each saved entity's base name, with no `lang`,
-     * so the names are re-resolved against the local cache when it holds the
-     * entity. A name that is missing locally falls back to the server's.
-     */
-    private suspend fun List<SavedItem>.withLocalizedAreaNames(): List<SavedItem> =
-        mapSavedNames { db().area.selectById(it.id)?.getLocalizedName() }
-
-    private suspend fun List<SavedItem>.withLocalizedPlaceNames(): List<SavedItem> =
-        mapSavedNames { db().place.selectById(it.id)?.getLocalizedName() }
-
-    private suspend fun List<SavedItem>.mapSavedNames(
-        localizedName: suspend (SavedItem) -> String?,
-    ): List<SavedItem> = withContext(Dispatchers.IO) {
-        this@mapSavedNames.map { item ->
-            localizedName(item)
-                ?.takeIf { it.isNotBlank() }
-                ?.let { item.copy(name = it) }
-                ?: item
-        }
     }
 
     private fun showChangeUsernameDialog() {
@@ -171,23 +148,7 @@ class UserProfileFragment : Fragment() {
     private fun changeUsername(newName: String) {
         viewLifecycleOwner.lifecycleScope.launch {
             try {
-                val user = api().updateUsername(newName)
-                val updated = user.toDbUser()
-                withContext(Dispatchers.IO) {
-                    val database = db()
-                    val existing = database.user.select()
-                    database.transaction {
-                        database.user.delete()
-                        database.user.insert(
-                            updated.copy(
-                                // The username endpoint returns the saved lists
-                                // empty, so keep the cached ones.
-                                savedPlaces = existing?.savedPlaces ?: updated.savedPlaces,
-                                savedAreas = existing?.savedAreas ?: updated.savedAreas,
-                            )
-                        )
-                    }
-                }
+                AccountSession.changeUsername(api(), db(), newName)
                 loadUser()
                 Toast.makeText(context, R.string.username_changed, Toast.LENGTH_SHORT).show()
             } catch (e: Throwable) {
@@ -205,26 +166,15 @@ class UserProfileFragment : Fragment() {
         val application = app()
         viewLifecycleOwner.lifecycleScope.launch {
             try {
-                val token = withContext(Dispatchers.IO) { prefs.authToken }
                 // Clear only the session this screen saw: a sign-in that raced
                 // this logout committed a new token, which must not be dropped.
-                val cleared = withContext(Dispatchers.IO) {
-                    val stored = token?.takeIf { it.isNotBlank() }
-                    if (stored == null) {
-                        prefs.clearSession(db())
-                        false
-                    } else {
-                        prefs.clearSessionIfTokenMatches(db(), stored)
-                    }
-                }
+                val cleared = AccountSession.clearSession(db(), prefs)
                 parentFragmentManager.popBackStack()
 
                 // Revoke the token server-side, but only the one that was just
                 // cleared. This is best-effort and runs on the app scope so it
                 // also completes if it outlives this screen.
-                if (cleared) {
-                    token?.let { application.revokeToken(it) }
-                }
+                cleared?.let { application.revokeToken(it) }
             } catch (e: Exception) {
                 e.rethrowIfCancellation()
                 showError(e)

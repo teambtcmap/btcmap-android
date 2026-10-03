@@ -18,10 +18,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import org.btcmap.api.Api
-import org.btcmap.api.PlaceBoostQuoteResponse
 import org.btcmap.api.awaitPaidInvoice
 import org.btcmap.api.boostPlace
 import org.btcmap.api.getPlaceBoostQuote
+import org.btcmap.boost.BoostPlan
 import org.btcmap.payment.InvoicePaymentFlow
 import org.btcmap.payment.PaymentInvoice
 import org.btcmap.ui.BoostForm
@@ -29,21 +29,11 @@ import org.btcmap.ui.BoostFormUiState
 import org.btcmap.ui.BoostOption
 import org.btcmap.util.rethrowIfCancellation
 
-/** The boost durations the API accepts, mirroring the app's enum. */
-private data class BoostDuration(val key: String, val days: Long, val label: String)
-
-private val BOOST_DURATIONS = listOf(
-    BoostDuration("ONE_MONTH", 30L, "1 month"),
-    BoostDuration("THREE_MONTHS", 90L, "3 months"),
-    BoostDuration("TWELVE_MONTHS", 365L, "12 months"),
-)
-
-private const val DEFAULT_BOOST_KEY = "THREE_MONTHS"
-
-private fun BoostDuration.priceSat(quote: PlaceBoostQuoteResponse): Long = when (key) {
-    "ONE_MONTH" -> quote.quote30dSat
-    "THREE_MONTHS" -> quote.quote90dSat
-    else -> quote.quote365dSat
+/** The desktop's label for a shared boost plan. */
+private fun BoostPlan.label(): String = when (this) {
+    BoostPlan.ONE_MONTH -> "1 month"
+    BoostPlan.THREE_MONTHS -> "3 months"
+    BoostPlan.TWELVE_MONTHS -> "12 months"
 }
 
 /**
@@ -104,11 +94,11 @@ internal fun DesktopBoostScreen(
                 return@Column
             }
 
-            val options = BOOST_DURATIONS.map { duration ->
-                val price = state.quote?.let { formatSat(duration.priceSat(it)) }
+            val options = BoostPlan.entries.map { plan ->
+                val price = state.quote?.let { formatSat(plan.priceSat(it)) }
                 BoostOption(
-                    key = duration.key,
-                    label = price?.let { "${duration.label} - $it" } ?: duration.label,
+                    key = plan.name,
+                    label = price?.let { "${plan.label()} - $it" } ?: plan.label(),
                 )
             }
 
@@ -119,16 +109,16 @@ internal fun DesktopBoostScreen(
                     durationTitle = "For how long?",
                     options = options,
                     continueLabel = "Continue",
-                    selectedKey = DEFAULT_BOOST_KEY,
+                    selectedKey = BoostPlan.THREE_MONTHS.name,
                     optionsEnabled = state.quote != null && !state.ordering && state.invoice == null,
                     actionsEnabled = state.actionsEnabled,
                     showContinue = state.invoice == null,
                 ),
                 onContinue = { key ->
-                    BOOST_DURATIONS.firstOrNull { it.key == key }?.let { duration ->
+                    BoostPlan.entries.firstOrNull { it.name == key }?.let { plan ->
                         error = null
                         flow.order {
-                            val response = api.boostPlace(placeId = placeId, days = duration.days)
+                            val response = api.boostPlace(placeId = placeId, days = plan.days)
                             PaymentInvoice(id = response.invoiceId, bolt11 = response.invoice)
                         }
                     }

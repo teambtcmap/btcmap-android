@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.annotation.StringRes
 import androidx.fragment.app.Fragment
 import org.btcmap.Activity
 import org.btcmap.R
@@ -77,7 +78,7 @@ class BoostFragment : Fragment() {
         )
 
         binding.boostForm.onContinue = { key ->
-            BoostDuration.entries.firstOrNull { it.name == key }?.let { duration ->
+            BoostPlan.entries.firstOrNull { it.name == key }?.let { duration ->
                 viewModel.order {
                     val response = api().boostPlace(placeId = args.placeId, days = duration.days)
                     PaymentInvoice(id = response.invoiceId, bolt11 = response.invoice)
@@ -93,8 +94,8 @@ class BoostFragment : Fragment() {
         payment: InvoicePaymentController,
     ) {
         val quote = state.quote
-        val options = BoostDuration.entries.map { duration ->
-            val label = getString(duration.labelRes)
+        val options = BoostPlan.entries.map { duration ->
+            val label = getString(duration.labelRes())
             val price = when {
                 quote != null -> getString(
                     R.string.d_sat,
@@ -118,7 +119,7 @@ class BoostFragment : Fragment() {
             durationTitle = getString(R.string.boost_duration),
             options = options,
             continueLabel = getString(R.string.btn_continue),
-            selectedKey = BoostDuration.THREE_MONTHS.name,
+            selectedKey = BoostPlan.THREE_MONTHS.name,
             optionsEnabled = state.actionsEnabled,
             actionsEnabled = state.actionsEnabled,
             // The invoice block replaces the order controls, so the continue
@@ -138,4 +139,12 @@ class BoostFragment : Fragment() {
         super.onDestroyView()
         _binding = null
     }
+}
+
+/** The Android label resource for each shared plan. */
+@StringRes
+private fun BoostPlan.labelRes(): Int = when (this) {
+    BoostPlan.ONE_MONTH -> R.string.months_1
+    BoostPlan.THREE_MONTHS -> R.string.months_3
+    BoostPlan.TWELVE_MONTHS -> R.string.months_12
 }

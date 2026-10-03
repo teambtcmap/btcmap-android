@@ -29,19 +29,18 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.btcmap.account.AccountSession
 import org.btcmap.api.Api
 import org.btcmap.api.signOut
-import org.btcmap.api.toDbUser
 import org.btcmap.api.updatePassword
-import org.btcmap.api.updateUsername
 import org.btcmap.auth.AuthError
 import org.btcmap.auth.AuthValidation
 import org.btcmap.saved.SavedItems
+import org.btcmap.saved.withLocalizedAreaNames
+import org.btcmap.saved.withLocalizedPlaceNames
 import org.btcmap.db.Database
 import org.btcmap.db.table.user.User
-import org.btcmap.i18n.getLocalizedName
 import org.btcmap.settings.Settings
-import org.btcmap.settings.authToken
 import org.btcmap.ui.SavedItemUi
 import org.btcmap.ui.UserProfileLabels
 import org.btcmap.ui.UserProfileScreen
@@ -99,12 +98,8 @@ internal fun DesktopProfile(
         account = withContext(Dispatchers.IO) {
             val user = db.user.select() ?: return@withContext null
             user.copy(
-                savedPlaces = user.savedPlaces.map {
-                    it.copy(name = localName(db, it.id, isPlace = true) ?: it.name)
-                },
-                savedAreas = user.savedAreas.map {
-                    it.copy(name = localName(db, it.id, isPlace = false) ?: it.name)
-                },
+                savedPlaces = user.savedPlaces.withLocalizedPlaceNames(db),
+                savedAreas = user.savedAreas.withLocalizedAreaNames(db),
             )
         }
         loaded = true
@@ -379,35 +374,9 @@ internal fun ChangePasswordForm(
     }
 }
 
-/** The cached name of a saved entity, localized when the local cache has it. */
-private suspend fun localName(db: Database, id: Long, isPlace: Boolean): String? =
-    withContext(Dispatchers.IO) {
-        val localized = if (isPlace) {
-            db.place.selectById(id)?.getLocalizedName()
-        } else {
-            db.area.selectById(id)?.getLocalizedName()
-        }
-        localized?.takeIf { it.isNotBlank() }
-    }
-
-/**
- * Renames the account, keeping the cached saved lists: the username endpoint
- * returns them empty, so the cached ones are copied into the updated user.
- */
+/** Renames the account, keeping the cached saved lists (see [AccountSession]). */
 private suspend fun changeUsername(api: Api, db: Database, name: String) {
-    val updated = api.updateUsername(name).toDbUser()
-    withContext(Dispatchers.IO) {
-        val existing = db.user.select()
-        db.transaction {
-            db.user.delete()
-            db.user.insert(
-                updated.copy(
-                    savedPlaces = existing?.savedPlaces ?: updated.savedPlaces,
-                    savedAreas = existing?.savedAreas ?: updated.savedAreas,
-                ),
-            )
-        }
-    }
+    AccountSession.changeUsername(api, db, name)
 }
 
 /**
@@ -416,15 +385,9 @@ private suspend fun changeUsername(api: Api, db: Database, name: String) {
  * not dropped.
  */
 private suspend fun logOut(api: Api, db: Database, settings: Settings) {
-    val token = settings.authToken
-    withContext(Dispatchers.IO) {
-        if (token.isNullOrBlank()) {
-            settings.clearSession(db)
-        } else {
-            settings.clearSessionIfTokenMatches(db, token)
-        }
-    }
-    if (!token.isNullOrBlank()) {
+    // Clear only the session this caller saw, then revoke that token
+    // best-effort; a sign-in that raced this logout keeps its new session.
+    AccountSession.clearSession(db, settings)?.let { token ->
         runCatching { api.signOut(token) }
     }
 }
