@@ -1,8 +1,10 @@
 package org.btcmap.settings
 
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
 import androidx.fragment.app.commitNow
 import androidx.fragment.app.replace
 import androidx.test.core.app.ActivityScenario
@@ -13,7 +15,6 @@ import org.btcmap.Activity
 import org.btcmap.App
 import org.btcmap.R
 import org.btcmap.db.table.user.User
-import org.btcmap.ui.UserProfileComposeView
 import org.btcmap.util.AppTestCase
 import org.btcmap.util.waitUntil
 import org.junit.Assert
@@ -47,28 +48,18 @@ class UserLogoutTest : AppTestCase() {
         app.mapStyleUriForTesting = OFFLINE_STYLE_URI
         try {
             ActivityScenario.launch(Activity::class.java).use { scenario ->
-                lateinit var profile: UserProfileFragment
                 scenario.onActivity { activity ->
-                    profile = UserProfileFragment()
                     activity.supportFragmentManager.commitNow {
                         setReorderingAllowed(true)
-                        replace(R.id.fragmentContainerView, profile, PROFILE_TAG)
+                        replace(R.id.fragmentContainerView, UserProfileFragment(), PROFILE_TAG)
                     }
                 }
 
-                waitUntil {
-                    var ready = false
-                    scenario.onActivity {
-                        ready = profile.requireView()
-                            .findViewById<UserProfileComposeView>(R.id.userProfileList)
-                            .state != null
-                    }
-                    ready
+                val logOut = app.getString(R.string.logout)
+                composeTestRule.waitUntil(5_000) {
+                    composeTestRule.onAllNodesWithText(logOut).fetchSemanticsNodes().isNotEmpty()
                 }
-
-                composeTestRule
-                    .onNodeWithText(app.getString(R.string.logout))
-                    .performClick()
+                composeTestRule.onNodeWithText(logOut).performScrollTo().performClick()
 
                 waitUntil { prefs.authToken == null && databaseRule.db.user.select() == null }
 

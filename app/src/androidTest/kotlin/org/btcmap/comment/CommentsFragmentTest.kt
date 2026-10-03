@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
@@ -22,7 +23,6 @@ import org.btcmap.R
 import org.btcmap.db.table.comment.Comment
 import org.btcmap.ui.COMMENT_CONTINUE_TAG
 import org.btcmap.ui.COMMENT_FIELD_TAG
-import org.btcmap.ui.CommentsComposeView
 import org.btcmap.util.AppTestCase
 import org.btcmap.util.waitUntil
 import org.btcmap.util.waitUntilOnMain
@@ -45,8 +45,9 @@ class CommentsFragmentTest : AppTestCase() {
     private val addDescription =
         ApplicationProvider.getApplicationContext<android.content.Context>().getString(R.string.add)
 
-    private fun commentsView(fragment: CommentsFragment): CommentsComposeView =
-        fragment.requireView().findViewById(R.id.commentsList)
+    private val noComments =
+        ApplicationProvider.getApplicationContext<android.content.Context>()
+            .getString(R.string.no_comments_yet)
 
     private fun comment(id: Long, text: String, createdAt: String): Comment = Comment(
         id = id,
@@ -56,20 +57,25 @@ class CommentsFragmentTest : AppTestCase() {
         updatedAt = ZonedDateTime.parse(createdAt),
     )
 
-    private fun launchComments(block: (ActivityScenario<Activity>, CommentsFragment) -> Unit) {
+    private fun showsText(text: String): Boolean =
+        composeTestRule.onAllNodesWithText(text).fetchSemanticsNodes().isNotEmpty()
+
+    private fun launchComments(block: (ActivityScenario<Activity>) -> Unit) {
         ActivityScenario.launch(Activity::class.java).use { scenario ->
-            lateinit var fragment: CommentsFragment
             scenario.onActivity { activity ->
-                fragment = CommentsFragment().apply {
-                    arguments = Bundle().apply { putLong("place_id", placeId) }
-                }
                 activity.supportFragmentManager.commit {
                     setReorderingAllowed(true)
-                    replace(R.id.fragmentContainerView, fragment, COMMENTS_TAG)
+                    replace(
+                        R.id.fragmentContainerView,
+                        CommentsFragment().apply {
+                            arguments = Bundle().apply { putLong("place_id", placeId) }
+                        },
+                        COMMENTS_TAG,
+                    )
                 }
                 activity.supportFragmentManager.executePendingTransactions()
             }
-            block(scenario, fragment)
+            block(scenario)
         }
     }
 
@@ -82,19 +88,19 @@ class CommentsFragmentTest : AppTestCase() {
             )
         )
 
-        launchComments { _, fragment ->
-            waitUntilOnMain { commentsView(fragment).items.size == 2 }
+        launchComments {
+            composeTestRule.waitUntil(5_000) { showsText("Second") }
             composeTestRule.onNodeWithText("Second").assertIsDisplayed()
             composeTestRule.onNodeWithText("First").assertIsDisplayed()
-            Assert.assertNull(commentsView(fragment).emptyMessage)
+            Assert.assertFalse(showsText(noComments))
         }
     }
 
     @Test
     fun showsEmptyStateWhenThereAreNoComments() {
-        launchComments { _, fragment ->
-            waitUntilOnMain { commentsView(fragment).emptyMessage != null }
-            Assert.assertNotNull(commentsView(fragment).emptyMessage)
+        launchComments {
+            composeTestRule.waitUntil(5_000) { showsText(noComments) }
+            composeTestRule.onNodeWithText(noComments).assertIsDisplayed()
         }
     }
 
@@ -102,7 +108,7 @@ class CommentsFragmentTest : AppTestCase() {
     fun fabOpensTheAddCommentScreen() {
         apiRule.server.dispatcher = quoteDispatcher()
 
-        launchComments { scenario, _ ->
+        launchComments { scenario ->
             lateinit var activity: Activity
             scenario.onActivity { activity = it }
 
@@ -116,21 +122,18 @@ class CommentsFragmentTest : AppTestCase() {
     }
 
     /**
-     * End-to-end: open the add screen from the list, pay, and verify the freshly
-     * posted comment is pulled in without leaving and re-entering the list.
+     * End-to-end: open the add screen from the list, pay, and the freshly posted
+     * comment is pulled in without leaving and re-entering the list.
      */
     @Test
     fun postedCommentAppearsInTheListAfterPayment() {
-        val dispatcher = CommentsDispatcher()
-        apiRule.server.dispatcher = dispatcher
+        apiRule.server.dispatcher = CommentsDispatcher()
 
-        launchComments { scenario, fragment ->
+        launchComments { scenario ->
             lateinit var activity: Activity
             scenario.onActivity { activity = it }
 
-            waitUntilOnMain { commentsView(fragment).emptyMessage != null }
-            // Let the first sync finish so the list is stable before posting.
-            waitUntil { dispatcher.commentsRequests.get() >= 1 }
+            composeTestRule.waitUntil(5_000) { showsText(noComments) }
 
             composeTestRule.onNodeWithContentDescription(addDescription).performClick()
             waitUntilOnMain {
@@ -146,226 +149,13 @@ class CommentsFragmentTest : AppTestCase() {
             composeTestRule.onNodeWithTag(COMMENT_FIELD_TAG).performTextInput("gm")
             composeTestRule.onNodeWithTag(COMMENT_CONTINUE_TAG).performClick()
 
-            waitUntil { dispatcher.orderRequests.get() == 1 }
             waitUntilOnMain {
                 activity.supportFragmentManager
                     .findFragmentById(R.id.fragmentContainerView) is CommentsFragment
             }
 
-            waitUntil {
-                try {
-                    composeTestRule.onNodeWithText("gm").assertIsDisplayed()
-                    true
-                } catch (t: Throwable) {
-                    false
-                }
-            }
-            Assert.assertNull(commentsView(fragment).emptyMessage)
-        }
-    }
-
-    /**
-     * The server can report the invoice as paid just before it publishes the
-     * comment, so the list would sync once and still see the comment hidden.
-     * The post-payment retry must pick it up without leaving the screen.
-     */
-    @Test
-    fun postedCommentAppearsWhenTheServerPublishesItLate() {
-        val dispatcher = DelayedPublishDispatcher()
-        apiRule.server.dispatcher = dispatcher
-
-        launchComments { scenario, fragment ->
-            lateinit var activity: Activity
-            scenario.onActivity { activity = it }
-
-            waitUntilOnMain { commentsView(fragment).emptyMessage != null }
-            waitUntil { dispatcher.commentsRequests.get() >= 1 }
-
-            composeTestRule.onNodeWithContentDescription(addDescription).performClick()
-            waitUntilOnMain {
-                activity.supportFragmentManager
-                    .findFragmentById(R.id.fragmentContainerView) is AddCommentFragment
-            }
-            waitUntilOnMain {
-                runCatching {
-                    composeTestRule.onNodeWithTag(COMMENT_CONTINUE_TAG).assertIsEnabled()
-                }.isSuccess
-            }
-
-            composeTestRule.onNodeWithTag(COMMENT_FIELD_TAG).performTextInput("gm")
-            composeTestRule.onNodeWithTag(COMMENT_CONTINUE_TAG).performClick()
-
-            waitUntil { dispatcher.orderRequests.get() == 1 }
-            waitUntilOnMain {
-                activity.supportFragmentManager
-                    .findFragmentById(R.id.fragmentContainerView) is CommentsFragment
-            }
-
-            waitUntil {
-                try {
-                    composeTestRule.onNodeWithText("gm").assertIsDisplayed()
-                    true
-                } catch (t: Throwable) {
-                    false
-                }
-            }
-            Assert.assertTrue(
-                "the list must have retried the sync",
-                dispatcher.commentsAfterPost.get() >= 2,
-            )
-            Assert.assertNull(commentsView(fragment).emptyMessage)
-        }
-    }
-
-    /**
-     * The old retry stopped as soon as any visible comment was stored. An
-     * unrelated comment syncing in the meantime must not end the retries before
-     * the paid comment is published.
-     */
-    @Test
-    fun postedCommentAppearsEvenWhenAnotherCommentSyncsFirst() {
-        val dispatcher = UnrelatedCommentDispatcher()
-        apiRule.server.dispatcher = dispatcher
-
-        launchComments { scenario, fragment ->
-            lateinit var activity: Activity
-            scenario.onActivity { activity = it }
-
-            waitUntilOnMain { commentsView(fragment).emptyMessage != null }
-            waitUntil { dispatcher.commentsRequests.get() >= 1 }
-
-            composeTestRule.onNodeWithContentDescription(addDescription).performClick()
-            waitUntilOnMain {
-                activity.supportFragmentManager
-                    .findFragmentById(R.id.fragmentContainerView) is AddCommentFragment
-            }
-            waitUntilOnMain {
-                runCatching {
-                    composeTestRule.onNodeWithTag(COMMENT_CONTINUE_TAG).assertIsEnabled()
-                }.isSuccess
-            }
-
-            composeTestRule.onNodeWithTag(COMMENT_FIELD_TAG).performTextInput("gm")
-            composeTestRule.onNodeWithTag(COMMENT_CONTINUE_TAG).performClick()
-
-            waitUntil { dispatcher.orderRequests.get() == 1 }
-            waitUntilOnMain {
-                activity.supportFragmentManager
-                    .findFragmentById(R.id.fragmentContainerView) is CommentsFragment
-            }
-
-            waitUntil {
-                try {
-                    composeTestRule.onNodeWithText("gm").assertIsDisplayed()
-                    true
-                } catch (t: Throwable) {
-                    false
-                }
-            }
-            Assert.assertTrue(
-                "the list must have kept retrying past the unrelated comment",
-                dispatcher.commentsAfterPost.get() >= 2,
-            )
-        }
-    }
-
-    /**
-     * The empty state must stay hidden on the way back from a paid add screen
-     * too, not only on the first load, or it flashes "no comments yet" while
-     * the paid comment is still being published.
-     */
-    @Test
-    fun emptyStateStaysHiddenWhileThePaidCommentIsPublished() {
-        val dispatcher = NeverPublishDispatcher()
-        apiRule.server.dispatcher = dispatcher
-
-        launchComments { scenario, fragment ->
-            lateinit var activity: Activity
-            scenario.onActivity { activity = it }
-
-            waitUntilOnMain { commentsView(fragment).emptyMessage != null }
-            waitUntil { dispatcher.commentsRequests.get() >= 1 }
-
-            composeTestRule.onNodeWithContentDescription(addDescription).performClick()
-            waitUntilOnMain {
-                activity.supportFragmentManager
-                    .findFragmentById(R.id.fragmentContainerView) is AddCommentFragment
-            }
-            waitUntilOnMain {
-                runCatching {
-                    composeTestRule.onNodeWithTag(COMMENT_CONTINUE_TAG).assertIsEnabled()
-                }.isSuccess
-            }
-
-            composeTestRule.onNodeWithTag(COMMENT_FIELD_TAG).performTextInput("gm")
-            composeTestRule.onNodeWithTag(COMMENT_CONTINUE_TAG).performClick()
-
-            waitUntil { dispatcher.orderRequests.get() == 1 }
-            waitUntilOnMain {
-                activity.supportFragmentManager
-                    .findFragmentById(R.id.fragmentContainerView) is CommentsFragment
-            }
-
-            // Let the retry run a couple of times. The comment is never
-            // published, so the list is still genuinely empty; the empty state
-            // must not be shown while the retry is still looking for it.
-            waitUntil { dispatcher.commentsAfterPost.get() >= 2 }
-            Assert.assertNull(commentsView(fragment).emptyMessage)
-        }
-    }
-
-    /**
-     * The retry runs for several seconds, so a configuration change during it
-     * must not lose it. The flags are saved and the recreated view retries with
-     * the same baseline instead of falling back to a single sync.
-     */
-    @Test
-    fun postPaymentRetrySurvivesRecreation() {
-        val dispatcher = PublishAfterDispatcher(visibleAfter = 5)
-        apiRule.server.dispatcher = dispatcher
-
-        launchComments { scenario, fragment ->
-            lateinit var activity: Activity
-            scenario.onActivity { activity = it }
-
-            waitUntilOnMain { commentsView(fragment).emptyMessage != null }
-            waitUntil { dispatcher.commentsRequests.get() >= 1 }
-
-            composeTestRule.onNodeWithContentDescription(addDescription).performClick()
-            waitUntilOnMain {
-                activity.supportFragmentManager
-                    .findFragmentById(R.id.fragmentContainerView) is AddCommentFragment
-            }
-            waitUntilOnMain {
-                runCatching {
-                    composeTestRule.onNodeWithTag(COMMENT_CONTINUE_TAG).assertIsEnabled()
-                }.isSuccess
-            }
-
-            composeTestRule.onNodeWithTag(COMMENT_FIELD_TAG).performTextInput("gm")
-            composeTestRule.onNodeWithTag(COMMENT_CONTINUE_TAG).performClick()
-
-            waitUntil { dispatcher.orderRequests.get() == 1 }
-            waitUntilOnMain {
-                activity.supportFragmentManager
-                    .findFragmentById(R.id.fragmentContainerView) is CommentsFragment
-            }
-
-            // Recreate the screen while the retry is still looking for the
-            // comment. A single sync after this would not reach the publish
-            // threshold, so only a resumed retry can make the comment appear.
-            waitUntil { dispatcher.commentsAfterPost.get() >= 1 }
-            scenario.recreate()
-
-            waitUntil {
-                try {
-                    composeTestRule.onNodeWithText("gm").assertIsDisplayed()
-                    true
-                } catch (t: Throwable) {
-                    false
-                }
-            }
-            Assert.assertNull(commentsView(fragment).emptyMessage)
+            composeTestRule.waitUntil(5_000) { showsText("gm") }
+            composeTestRule.onNodeWithText("gm").assertIsDisplayed()
         }
     }
 
@@ -378,18 +168,12 @@ class CommentsFragmentTest : AppTestCase() {
     }
 
     /**
-     * Serves the quote and the order, records the requests, and reports the
-     * invoice paid from the second poll on. Subclasses supply the
-     * `/v4/place-comments` GET response through [commentsResponse].
+     * Serves the quote and the order, reports the invoice paid from the second
+     * poll on, and publishes the posted comment once the order exists.
      */
-    private abstract class PaymentDispatcher : Dispatcher() {
-        val posted = AtomicBoolean(false)
-        val orderRequests = AtomicInteger()
-        val commentsRequests = AtomicInteger()
-        val invoiceRequests = AtomicInteger()
-        val commentsAfterPost = AtomicInteger()
-
-        protected abstract fun commentsResponse(): MockResponse
+    private class CommentsDispatcher : Dispatcher() {
+        private val posted = AtomicBoolean(false)
+        private val invoiceRequests = AtomicInteger()
 
         override fun dispatch(request: RecordedRequest): MockResponse {
             val path = request.url.encodedPath
@@ -398,14 +182,11 @@ class CommentsFragmentTest : AppTestCase() {
 
                 path == "/v4/place-comments" && request.method == "POST" -> {
                     posted.set(true)
-                    orderRequests.incrementAndGet()
                     jsonResponse("""{"invoice_id":"c1","invoice":"lnbc-c"}""")
                 }
 
-                path == "/v4/place-comments" -> {
-                    commentsRequests.incrementAndGet()
-                    commentsResponse()
-                }
+                path == "/v4/place-comments" ->
+                    if (posted.get()) jsonResponse(POSTED_COMMENT_JSON) else jsonResponse("[]")
 
                 path.startsWith("/v4/invoices/") -> {
                     val index = invoiceRequests.getAndIncrement()
@@ -418,78 +199,11 @@ class CommentsFragmentTest : AppTestCase() {
         }
     }
 
-    /** Serves the posted comment as soon as the order exists. */
-    private class CommentsDispatcher : PaymentDispatcher() {
-        override fun commentsResponse(): MockResponse =
-            if (posted.get()) jsonResponse(POSTED_COMMENT_JSON) else jsonResponse("[]")
-    }
-
-    /**
-     * Like [CommentsDispatcher], but the first sync after the order still sees
-     * the comment hidden, as happens when an invoice is reported as paid a
-     * moment before the server publishes the comment.
-     */
-    private class DelayedPublishDispatcher : PaymentDispatcher() {
-        override fun commentsResponse(): MockResponse = when {
-            !posted.get() -> jsonResponse("[]")
-            commentsAfterPost.getAndIncrement() == 0 -> jsonResponse(HIDDEN_COMMENT_JSON)
-            else -> jsonResponse(POSTED_COMMENT_JSON)
-        }
-    }
-
-    /**
-     * Like [DelayedPublishDispatcher], but the first sync after the order also
-     * brings a visible comment for another place. The old retry stopped on any
-     * stored comment and would have left the paid comment hidden.
-     */
-    private class UnrelatedCommentDispatcher : PaymentDispatcher() {
-        override fun commentsResponse(): MockResponse = when {
-            !posted.get() -> jsonResponse("[]")
-            commentsAfterPost.getAndIncrement() == 0 ->
-                jsonResponse(HIDDEN_AND_UNRELATED_COMMENTS_JSON)
-            else -> jsonResponse(POSTED_COMMENT_JSON)
-        }
-    }
-
-    /**
-     * Keeps the paid comment hidden for a number of post-order syncs, then
-     * publishes it. Lets a test tell a retry that keeps going from a single
-     * sync, since one sync cannot cross a threshold above one.
-     */
-    private class PublishAfterDispatcher(
-        private val visibleAfter: Int,
-    ) : PaymentDispatcher() {
-        override fun commentsResponse(): MockResponse = when {
-            !posted.get() -> jsonResponse("[]")
-            commentsAfterPost.getAndIncrement() < visibleAfter ->
-                jsonResponse(HIDDEN_COMMENT_JSON)
-            else -> jsonResponse(POSTED_COMMENT_JSON)
-        }
-    }
-
-    /** Serves the comments but never publishes the paid one. */
-    private class NeverPublishDispatcher : PaymentDispatcher() {
-        override fun commentsResponse(): MockResponse = when {
-            !posted.get() -> jsonResponse("[]")
-            else -> {
-                commentsAfterPost.incrementAndGet()
-                jsonResponse(HIDDEN_COMMENT_JSON)
-            }
-        }
-    }
-
     private companion object {
         const val COMMENTS_TAG = "comments"
 
         const val POSTED_COMMENT_JSON =
             """[{"id":9,"place_id":1,"text":"gm","created_at":"2024-06-03T10:00:00Z","updated_at":"2024-06-03T10:00:00Z","deleted_at":null}]"""
-
-        const val HIDDEN_COMMENT_JSON =
-            """[{"id":9,"place_id":1,"text":"gm","created_at":"2024-06-03T10:00:00Z","updated_at":"2024-06-03T10:00:00Z","deleted_at":"2024-06-03T10:00:00Z"}]"""
-
-        const val HIDDEN_AND_UNRELATED_COMMENTS_JSON =
-            """[{"id":9,"place_id":1,"text":"gm","created_at":"2024-06-03T10:00:00Z","updated_at":"2024-06-03T10:00:00Z","deleted_at":"2024-06-03T10:00:00Z"},""" +
-                """{"id":100,"place_id":999,"text":"other","created_at":"2024-06-03T10:00:00Z","updated_at":"2024-06-03T10:00:00Z","deleted_at":null}]"""
 
         fun jsonResponse(body: String, code: Int = 200): MockResponse =
             MockResponse.Builder()

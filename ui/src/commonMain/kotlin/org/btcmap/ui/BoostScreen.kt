@@ -54,6 +54,7 @@ fun BoostScreen(
     onPay: (bolt11: String) -> Unit,
     onCopy: (bolt11: String) -> Unit,
     onBack: () -> Unit,
+    onPosted: () -> Unit = {},
 ) {
     val scope = rememberCoroutineScope()
     val flow = remember(api, placeId) {
@@ -65,6 +66,8 @@ fun BoostScreen(
     val state by flow.state.collectAsState()
     var submitted by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<String?>(null) }
+
+    LaunchedEffect(submitted) { if (submitted) onPosted() }
 
     LaunchedEffect(flow) { flow.loadQuote() }
 

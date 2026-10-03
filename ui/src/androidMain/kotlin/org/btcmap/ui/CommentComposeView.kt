@@ -9,44 +9,47 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.AbstractComposeView
 import androidx.compose.ui.text.font.FontFamily
-import org.btcmap.db.Database
+import org.btcmap.api.Api
 
 /**
- * Hosts [CommentsPage] inside the Android Views hierarchy. The app sets the
- * database, the place, the labels, the sync and the add callback; this view
- * holds no state of its own. [reloadKey] re-runs the sync and the read.
+ * Hosts [CommentScreen] inside the Android Views hierarchy. The app sets the
+ * API, the place, the labels and the pay/copy/back callbacks; this view holds no
+ * state of its own.
  */
-class CommentsComposeView @JvmOverloads constructor(
+class CommentComposeView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
 ) : AbstractComposeView(context, attrs) {
 
-    var database: Database? by mutableStateOf(null)
+    var api: Api? by mutableStateOf(null)
 
     var placeId: Long by mutableStateOf(0L)
 
-    var labels: CommentsLabels? by mutableStateOf(null)
-
-    var sync: suspend () -> Boolean = { true }
-
-    var reloadKey: Int by mutableStateOf(0)
+    var labels: CommentScreenLabels? by mutableStateOf(null)
 
     var iconTypeface: Typeface? by mutableStateOf(null)
 
-    var onAddComment: () -> Unit = {}
+    var onPay: (bolt11: String) -> Unit = {}
+
+    var onCopy: (bolt11: String) -> Unit = {}
+
+    var onBack: () -> Unit = {}
+
+    var onPosted: () -> Unit = {}
 
     @Composable
     override fun Content() {
-        val db = database ?: return
+        val api = api ?: return
         val labels = labels ?: return
         AppTheme(iconFont = iconTypeface?.let { FontFamily(it) }) {
-            CommentsPage(
-                db = db,
+            CommentScreen(
+                api = api,
                 placeId = placeId,
                 labels = labels,
-                onAddComment = onAddComment,
-                sync = sync,
-                reloadKey = reloadKey,
+                onPay = onPay,
+                onCopy = onCopy,
+                onBack = onBack,
+                onPosted = onPosted,
             )
         }
     }

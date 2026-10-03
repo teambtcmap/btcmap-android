@@ -9,42 +9,48 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.AbstractComposeView
 import androidx.compose.ui.text.font.FontFamily
+import org.btcmap.api.Api
+import org.btcmap.db.Database
+import org.btcmap.settings.Settings
 
 /**
- * Hosts [UserProfileScreen] inside the Android Views hierarchy. The app sets
- * [state], [iconTypeface] and the callbacks; this view holds no state of its
- * own.
+ * Hosts [ProfileScreen] inside the Android Views hierarchy. The app sets the
+ * API, database, settings and labels; this view holds no state of its own.
  */
 class UserProfileComposeView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
 ) : AbstractComposeView(context, attrs) {
 
-    var state: UserProfileUiState? by mutableStateOf(null)
+    var api: Api? by mutableStateOf(null)
+
+    var database: Database? by mutableStateOf(null)
+
+    var settings: Settings? by mutableStateOf(null)
+
+    var profileLabels: UserProfileLabels? by mutableStateOf(null)
+
+    var formLabels: ProfileFormLabels? by mutableStateOf(null)
 
     var iconTypeface: Typeface? by mutableStateOf(null)
 
-    var onEditUsername: () -> Unit = {}
-
-    var onEditPassword: () -> Unit = {}
-
-    var onDeletePlace: (id: Long) -> Unit = {}
-
-    var onDeleteArea: (id: Long) -> Unit = {}
-
-    var onLogOut: () -> Unit = {}
+    var onLoggedOut: () -> Unit = {}
 
     @Composable
     override fun Content() {
-        val current = state ?: return
+        val api = api ?: return
+        val database = database ?: return
+        val settings = settings ?: return
+        val profileLabels = profileLabels ?: return
+        val formLabels = formLabels ?: return
         AppTheme(iconFont = iconTypeface?.let { FontFamily(it) }) {
-            UserProfileScreen(
-                state = current,
-                onEditUsername = onEditUsername,
-                onEditPassword = onEditPassword,
-                onDeletePlace = onDeletePlace,
-                onDeleteArea = onDeleteArea,
-                onLogOut = onLogOut,
+            ProfileScreen(
+                api = api,
+                db = database,
+                settings = settings,
+                profileLabels = profileLabels,
+                formLabels = formLabels,
+                onLoggedOut = onLoggedOut,
             )
         }
     }

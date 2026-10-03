@@ -6,28 +6,35 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageButton
 import android.widget.Toast
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.StringRes
-import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.withResumed
-import coil3.load
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import kotlinx.coroutines.CancellableContinuation
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.suspendCancellableCoroutine
 import org.btcmap.R
 import org.btcmap.api
-import org.btcmap.databinding.ReportPhotoItemBinding
 import org.btcmap.databinding.ReportPlaceFragmentBinding
+import org.btcmap.ui.ReportPlaceLabels
 import org.btcmap.util.createPhotoCaptureTarget
 import org.btcmap.util.encodePhoto
 import org.btcmap.util.rethrowIfCancellation
 import java.io.File
+import kotlin.coroutines.resume
 
+/**
+ * The report screen: a toolbar over the shared
+ * [org.btcmap.ui.ReportPlaceScreen], which owns the reasons, the note, the
+ * evidence photos and the submit. This fragment supplies the labels, the
+ * [androidx.compose.runtime.snapshots.SnapshotStateList] of photos (kept in a
+ * [ReportPlaceViewModel] so they survive a configuration change) and the photo
+ * picker and submit callbacks.
+ */
 class ReportPlaceFragment : Fragment() {
 
     private data class Args(
@@ -48,20 +55,15 @@ class ReportPlaceFragment : Fragment() {
 
     private val viewModel by lazy { ViewModelProvider(this)[ReportPlaceViewModel::class.java] }
 
-    private val photos get() = viewModel.photos
-    private val removeButtons = mutableListOf<ImageButton>()
-
-    private var submitting = false
-    private var encoding = false
-
     private var _binding: ReportPlaceFragmentBinding? = null
     private val binding get() = _binding!!
 
-    private val pickPhotos = registerForActivityResult(
+    /** The continuation awaiting the user's next photo pick, if any. */
+    private var photoContinuation: CancellableContinuation<List<ByteArray>>? = null
+
+    private val pickMedia = registerForActivityResult(
         ActivityResultContracts.PickMultipleVisualMedia(MAX_REPORT_PHOTOS),
-    ) { uris ->
-        if (uris.isNotEmpty()) addPhotos(uris)
-    }
+    ) { uris -> finishPhotoPick(uris) }
 
     private val capturePhoto = registerForActivityResult(
         ActivityResultContracts.TakePicture(),
@@ -70,7 +72,12 @@ class ReportPlaceFragment : Fragment() {
         val file = viewModel.pendingCameraFile
         viewModel.pendingCameraUri = null
         viewModel.pendingCameraFile = null
-        if (success && uri != null) addPhotos(listOf(uri), file) else file?.delete()
+        if (success && uri != null) {
+            finishPhotoPick(listOf(uri), file)
+        } else {
+            file?.delete()
+            resumePhotos(emptyList())
+        }
     }
 
     override fun onCreateView(
@@ -91,22 +98,24 @@ class ReportPlaceFragment : Fragment() {
 
         binding.topAppBar.title = args.placeName
 
-        binding.reportType.setOnCheckedChangeListener { _, checkedId ->
-            if (!submitting) binding.btnSubmit.isEnabled = checkedId != View.NO_ID
+        binding.reportContent.apply {
+            initialType = args.defaultType
+            labels = reportLabels()
+            photos = viewModel.photos
+            pickPhotos = ::pickPhotos
+            submit = { draft -> api().submitReport(placeId = args.placeId, draft = draft) }
+            onBack = { parentFragmentManager.popBackStack() }
         }
+    }
 
-        when (ReportType.fromValue(args.defaultType)) {
-            ReportType.Verified -> binding.reportType.check(R.id.typeVerified)
-            ReportType.RefusedSats -> binding.reportType.check(R.id.typeRefusedSats)
-            ReportType.OutOfBusiness -> binding.reportType.check(R.id.typeOutOfBusiness)
-            null -> Unit
-        }
-
-        binding.btnAddPhoto.setOnClickListener { showAddPhotoDialog() }
-        binding.btnSubmit.setOnClickListener { submit() }
-
-        renderPhotos()
-        setFormEnabled(true)
+    /**
+     * The shared screen's photo picker: asks whether to take or choose, then
+     * suspends until the launcher returns the encoded photos.
+     */
+    private suspend fun pickPhotos(): List<ByteArray> = suspendCancellableCoroutine { cont ->
+        photoContinuation = cont
+        cont.invokeOnCancellation { if (photoContinuation === cont) photoContinuation = null }
+        showAddPhotoDialog()
     }
 
     private fun showAddPhotoDialog() {
@@ -120,11 +129,12 @@ class ReportPlaceFragment : Fragment() {
             ) { _, which ->
                 when (which) {
                     0 -> startCamera()
-                    1 -> pickPhotos.launch(
+                    1 -> pickMedia.launch(
                         PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly),
                     )
                 }
             }
+            .setOnCancelListener { resumePhotos(emptyList()) }
             .show()
     }
 
@@ -141,137 +151,73 @@ class ReportPlaceFragment : Fragment() {
             viewModel.pendingCameraUri = null
             file.delete()
             showToast(R.string.report_photo_no_camera)
+            resumePhotos(emptyList())
         }
     }
 
     /**
-     * Reads and re-encodes the picked images, then appends whichever decoded
-     * successfully to the report. [cleanupFile] is the temporary capture that
-     * backs a camera result; it is removed once the photo has been read.
+     * Reads and re-encodes the picked images, then resumes the picker with
+     * whichever decoded successfully. [cleanupFile] is the temporary capture
+     * that backs a camera result; it is removed once the photo has been read.
      */
-    private fun addPhotos(uris: List<Uri>, cleanupFile: File? = null) {
-        if (_binding == null) {
+    private fun finishPhotoPick(uris: List<Uri>, cleanupFile: File? = null) {
+        val appContext = context?.applicationContext
+        if (appContext == null) {
             cleanupFile?.delete()
+            resumePhotos(emptyList())
             return
         }
-
-        val remaining = MAX_REPORT_PHOTOS - photos.size
-        if (remaining <= 0) {
-            cleanupFile?.delete()
-            showToast(R.string.report_photo_limit)
-            return
-        }
-
-        val accepted = uris.take(remaining)
-        if (accepted.size < uris.size) showToast(R.string.report_photo_limit)
-
-        val context = requireContext().applicationContext
-        encoding = true
-        updatePhotoControls()
 
         viewLifecycleOwner.lifecycleScope.launch {
             try {
                 var failed = false
-                val encoded = accepted.mapNotNull { uri ->
+                val encoded = uris.mapNotNull { uri ->
                     try {
-                        context.encodePhoto(uri)
+                        appContext.encodePhoto(uri)
                     } catch (t: Throwable) {
                         t.rethrowIfCancellation()
                         failed = true
                         null
                     }
                 }
-
-                if (_binding == null) return@launch
-
-                photos += encoded
-                renderPhotos()
                 if (failed) showToast(R.string.report_photo_failed)
+                resumePhotos(encoded)
             } finally {
                 cleanupFile?.delete()
-                encoding = false
-                if (_binding != null) updatePhotoControls()
             }
         }
     }
 
-    private fun renderPhotos() {
-        val container = binding.photos
-        container.removeAllViews()
-        removeButtons.clear()
-
-        binding.photosScroll.isVisible = photos.isNotEmpty()
-
-        photos.forEachIndexed { index, bytes ->
-            val item = ReportPhotoItemBinding.inflate(layoutInflater, container, false)
-            item.photoImage.load(bytes)
-            item.btnRemove.apply {
-                isEnabled = !submitting
-                setOnClickListener {
-                    photos.removeAt(index)
-                    renderPhotos()
-                    updatePhotoControls()
-                }
-            }
-            removeButtons += item.btnRemove
-            container.addView(item.root)
-        }
-
-        updatePhotoControls()
+    private fun resumePhotos(photos: List<ByteArray>) {
+        val continuation = photoContinuation
+        photoContinuation = null
+        if (continuation?.isActive == true) continuation.resume(photos)
     }
 
-    private fun setFormEnabled(enabled: Boolean) {
-        submitting = !enabled
-        binding.reportType.isEnabled = enabled
-        binding.comment.isEnabled = enabled
-        binding.btnSubmit.isEnabled = enabled && binding.reportType.checkedRadioButtonId != View.NO_ID
-        updatePhotoControls()
+    private fun reportLabels(): ReportPlaceLabels = ReportPlaceLabels(
+        intro = getString(R.string.verify_or_report_description),
+        reasonLabel = { getString(it.labelRes()) },
+        reasonDescription = { getString(it.descriptionRes()) },
+        noteHint = getString(R.string.report_comment_optional),
+        addPhoto = { _, _ -> getString(R.string.add_photo) },
+        removePhoto = getString(R.string.delete),
+        submit = getString(R.string.btn_submit),
+        submitted = getString(R.string.report_submitted),
+        backToMap = getString(R.string.back_to_map),
+    )
+
+    @StringRes
+    private fun ReportType.labelRes(): Int = when (this) {
+        ReportType.Verified -> R.string.report_type_verified
+        ReportType.RefusedSats -> R.string.report_type_refused_sats
+        ReportType.OutOfBusiness -> R.string.report_type_out_of_business
     }
 
-    private fun updatePhotoControls() {
-        if (_binding == null) return
-        binding.btnAddPhoto.isEnabled = !submitting && !encoding && photos.size < MAX_REPORT_PHOTOS
-        removeButtons.forEach { it.isEnabled = !submitting }
-    }
-
-    private fun submit() {
-        val type = when (binding.reportType.checkedRadioButtonId) {
-            R.id.typeVerified -> ReportType.Verified
-            R.id.typeRefusedSats -> ReportType.RefusedSats
-            R.id.typeOutOfBusiness -> ReportType.OutOfBusiness
-            else -> return
-        }
-
-        val note = binding.comment.text?.toString().orEmpty()
-
-        setFormEnabled(false)
-
-        viewLifecycleOwner.lifecycleScope.launch {
-            try {
-                api().submitReport(
-                    placeId = args.placeId,
-                    draft = ReportDraft(type = type, note = note, photos = photos.toList()),
-                )
-                withResumed {
-                    Toast.makeText(
-                        requireContext(),
-                        R.string.report_submitted,
-                        Toast.LENGTH_LONG,
-                    ).show()
-                    parentFragmentManager.popBackStack()
-                }
-            } catch (t: Throwable) {
-                t.rethrowIfCancellation()
-                withResumed {
-                    setFormEnabled(true)
-                    MaterialAlertDialogBuilder(requireContext())
-                        .setTitle(R.string.error)
-                        .setMessage(t.toString())
-                        .setPositiveButton(android.R.string.ok, null)
-                        .show()
-                }
-            }
-        }
+    @StringRes
+    private fun ReportType.descriptionRes(): Int = when (this) {
+        ReportType.Verified -> R.string.report_type_verified_description
+        ReportType.RefusedSats -> R.string.report_type_refused_sats_description
+        ReportType.OutOfBusiness -> R.string.report_type_out_of_business_description
     }
 
     private fun showToast(@StringRes message: Int) {

@@ -51,6 +51,7 @@ fun CommentScreen(
     onPay: (bolt11: String) -> Unit,
     onCopy: (bolt11: String) -> Unit,
     onBack: () -> Unit,
+    onPosted: () -> Unit = {},
 ) {
     val scope = rememberCoroutineScope()
     val flow = remember(api, placeId) {
@@ -63,6 +64,8 @@ fun CommentScreen(
     var submitted by remember { mutableStateOf(false) }
     var quoteFailed by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<String?>(null) }
+
+    LaunchedEffect(submitted) { if (submitted) onPosted() }
 
     LaunchedEffect(flow) { flow.loadQuote() }
 

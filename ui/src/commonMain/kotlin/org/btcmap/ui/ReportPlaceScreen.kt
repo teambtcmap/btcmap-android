@@ -27,6 +27,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -71,10 +72,12 @@ fun ReportPlaceScreen(
     submit: suspend (ReportDraft) -> Unit,
     onBack: () -> Unit,
     pickPhotos: suspend () -> List<ByteArray> = { emptyList() },
+    // Hoisted so a host that survives a configuration change (the Android
+    // ViewModel) can keep the attached photos across it.
+    photos: SnapshotStateList<ByteArray> = remember { mutableStateListOf() },
 ) {
     var type by remember { mutableStateOf(ReportType.fromValue(initialType)) }
     var note by remember { mutableStateOf("") }
-    val photos = remember { mutableStateListOf<ByteArray>() }
     var busy by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<String?>(null) }
     var submitted by remember { mutableStateOf(false) }

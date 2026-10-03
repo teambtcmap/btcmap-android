@@ -1,28 +1,30 @@
 package org.btcmap.boost
 
+import android.content.ActivityNotFoundException
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.StringRes
+import androidx.core.net.toUri
 import androidx.fragment.app.Fragment
 import org.btcmap.Activity
 import org.btcmap.R
 import org.btcmap.api
-import org.btcmap.api.PlaceBoostQuoteResponse
-import org.btcmap.api.boostPlace
-import org.btcmap.api.getPlaceBoostQuote
 import org.btcmap.databinding.BoostFragmentBinding
-import org.btcmap.payment.InvoicePaymentController
-import org.btcmap.payment.InvoicePaymentState
-import org.btcmap.payment.InvoicePaymentViewModel
-import org.btcmap.payment.PaymentInvoice
-import org.btcmap.payment.invoicePaymentViewModel
-import org.btcmap.payment.observeInvoicePayment
-import org.btcmap.ui.BoostFormUiState
-import org.btcmap.ui.BoostOption
-import java.text.NumberFormat
+import org.btcmap.ui.BoostScreenLabels
+import org.btcmap.ui.InvoicePaymentLabels
+import org.btcmap.ui.InvoicePaymentSectionLabels
 
+/**
+ * The boost screen: a toolbar over the shared [org.btcmap.ui.BoostScreen], which
+ * owns the quote, the duration choices, the invoice and the payment poll. This
+ * fragment supplies the labels and the wallet/clipboard actions.
+ */
 class BoostFragment : Fragment() {
 
     private data class Args(val placeId: Long, val placeName: String?)
@@ -36,10 +38,6 @@ class BoostFragment : Fragment() {
 
     private var _binding: BoostFragmentBinding? = null
     private val binding get() = _binding!!
-
-    private val viewModel: InvoicePaymentViewModel<PlaceBoostQuoteResponse> by lazy {
-        invoicePaymentViewModel { api().getPlaceBoostQuote() }
-    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -56,88 +54,65 @@ class BoostFragment : Fragment() {
         binding.topAppBar.setNavigationOnClickListener {
             parentFragmentManager.popBackStack()
         }
-
         binding.topAppBar.title = args.placeName ?: getString(R.string.boost_merchant)
 
-        val payment = InvoicePaymentController(
-            fragment = this,
-            view = binding.invoicePayment,
-            paymentRequestLabel = getString(R.string.btc_map_boost_payment_request),
-            onStartOver = viewModel::startOver,
-        )
-
-        observeInvoicePayment(
-            viewModel = viewModel,
-            onState = { render(it, payment) },
-            onPaid = {
-                (activity as? Activity)?.showMessage(
-                    getString(R.string.your_boost_is_active),
-                )
-                parentFragmentManager.popBackStack()
-            },
-        )
-
-        binding.boostForm.onContinue = { key ->
-            BoostPlan.entries.firstOrNull { it.name == key }?.let { duration ->
-                viewModel.order {
-                    val response = api().boostPlace(placeId = args.placeId, days = duration.days)
-                    PaymentInvoice(id = response.invoiceId, bolt11 = response.invoice)
-                }
-            }
-        }
-
-        viewModel.loadQuote()
-    }
-
-    private fun render(
-        state: InvoicePaymentState<PlaceBoostQuoteResponse>,
-        payment: InvoicePaymentController,
-    ) {
-        val quote = state.quote
-        val options = BoostPlan.entries.map { duration ->
-            val label = getString(duration.labelRes())
-            val price = when {
-                quote != null -> getString(
-                    R.string.d_sat,
-                    NumberFormat.getNumberInstance().format(duration.priceSat(quote)),
-                )
-
-                state.loadingQuote -> getString(R.string.loading_quote)
-                else -> null
-            }
-            BoostOption(
-                key = duration.name,
-                label = price?.let { getString(R.string.duration_with_price, label, it) } ?: label,
-            )
-        }
-
-        // The options and continue button are locked until the quote is loaded,
-        // while an order is in flight, and once an invoice exists, so a second
-        // boost cannot be ordered (and charged) by tapping continue again.
-        _binding?.boostForm?.state = BoostFormUiState(
-            description = getString(R.string.boost_description),
-            durationTitle = getString(R.string.boost_duration),
-            options = options,
-            continueLabel = getString(R.string.btn_continue),
-            selectedKey = BoostPlan.THREE_MONTHS.name,
-            optionsEnabled = state.actionsEnabled,
-            actionsEnabled = state.actionsEnabled,
-            // The invoice block replaces the order controls, so the continue
-            // button that started the order is hidden once one exists.
-            showContinue = state.invoice == null,
-        )
-
-        val invoice = state.invoice
-        if (invoice == null) {
-            payment.hide()
-        } else {
-            payment.show(invoice)
+        val content = binding.boostContent
+        content.api = api()
+        content.placeId = args.placeId
+        content.labels = boostLabels()
+        content.iconTypeface = org.btcmap.util.iconTypeface
+        content.onPay = { openWallet(it) }
+        content.onCopy = { copyToClipboard(it) }
+        content.onBack = { parentFragmentManager.popBackStack() }
+        content.onPosted = {
+            (activity as? Activity)?.showMessage(getString(R.string.your_boost_is_active))
+            parentFragmentManager.popBackStack()
         }
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+
+    private fun boostLabels(): BoostScreenLabels = BoostScreenLabels(
+        active = getString(R.string.your_boost_is_active),
+        backToMap = getString(R.string.back_to_map),
+        planLabel = { getString(it.labelRes()) },
+        description = getString(R.string.boost_description),
+        durationTitle = getString(R.string.boost_duration),
+        continueLabel = getString(R.string.btn_continue),
+        invoice = invoiceLabels(),
+    )
+
+    private fun invoiceLabels(): InvoicePaymentSectionLabels = InvoicePaymentSectionLabels(
+        invoice = InvoicePaymentLabels(
+            qrDescription = getString(R.string.qr_code),
+            pay = getString(R.string.pay),
+            copy = getString(android.R.string.copy),
+            startOver = getString(R.string.start_over),
+        ),
+        discardMessage = getString(R.string.discard_invoice_confirmation),
+        discard = getString(R.string.start_over),
+        cancel = getString(android.R.string.cancel),
+    )
+
+    private fun openWallet(bolt11: String) {
+        val intent = Intent(Intent.ACTION_VIEW, "lightning:$bolt11".toUri())
+        try {
+            startActivity(intent)
+        } catch (e: ActivityNotFoundException) {
+            (activity as? Activity)?.showMessage(getString(R.string.you_dont_have_a_compatible_wallet))
+        }
+    }
+
+    private fun copyToClipboard(bolt11: String) {
+        val clipboard =
+            requireContext().getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+        clipboard.setPrimaryClip(
+            ClipData.newPlainText(getString(R.string.btc_map_boost_payment_request), bolt11)
+        )
+        (activity as? Activity)?.showMessage(getString(R.string.copied_to_clipboard))
     }
 }
 

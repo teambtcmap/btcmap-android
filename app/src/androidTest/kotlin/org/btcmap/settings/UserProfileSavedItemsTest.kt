@@ -2,6 +2,7 @@ package org.btcmap.settings
 
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
 import androidx.compose.ui.test.onAllNodesWithContentDescription
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.performClick
 import androidx.fragment.app.commitNow
@@ -17,10 +18,8 @@ import org.btcmap.App
 import org.btcmap.R
 import org.btcmap.db.table.user.SavedItem
 import org.btcmap.db.table.user.User
-import org.btcmap.ui.UserProfileComposeView
 import org.btcmap.util.AppTestCase
 import org.btcmap.util.waitUntil
-import org.btcmap.util.waitUntilOnMain
 import org.junit.Assert
 import org.junit.Rule
 import org.junit.Test
@@ -63,17 +62,12 @@ class UserProfileSavedItemsTest : AppTestCase() {
             }
         }
 
-        withProfile { _, profile ->
-            val view = profile.requireView().findViewById<UserProfileComposeView>(R.id.userProfileList)
-            waitUntilOnMain { view.state?.savedPlaces?.size == 2 }
-
-            composeTestRule
-                .onAllNodesWithContentDescription(app.getString(R.string.delete))
-                .onFirst()
-                .performClick()
+        withProfile {
+            waitForText("One")
+            deleteFirst()
 
             waitUntil { savedPlaceIds() == listOf(2L) }
-            waitUntilOnMain { view.state?.savedPlaces?.size == 1 }
+            waitUntil { !showsText("One") }
             Assert.assertEquals(0, userFetches.get())
         }
     }
@@ -93,17 +87,11 @@ class UserProfileSavedItemsTest : AppTestCase() {
             }
         }
 
-        withProfile { _, profile ->
-            val view = profile.requireView().findViewById<UserProfileComposeView>(R.id.userProfileList)
-            waitUntilOnMain { view.state?.savedAreas?.size == 2 }
-
-            composeTestRule
-                .onAllNodesWithContentDescription(app.getString(R.string.delete))
-                .onFirst()
-                .performClick()
+        withProfile {
+            waitForText("Grand Paris")
+            deleteFirst()
 
             waitUntil { savedAreaIds() == listOf(11L) }
-            waitUntilOnMain { view.state?.savedAreas?.size == 1 }
         }
     }
 
@@ -130,14 +118,9 @@ class UserProfileSavedItemsTest : AppTestCase() {
             }
         }
 
-        withProfile { _, profile ->
-            val view = profile.requireView().findViewById<UserProfileComposeView>(R.id.userProfileList)
-            waitUntilOnMain { view.state?.savedPlaces?.size == 1 }
-
-            composeTestRule
-                .onAllNodesWithContentDescription(app.getString(R.string.delete))
-                .onFirst()
-                .performClick()
+        withProfile {
+            waitForText("One")
+            deleteFirst()
 
             waitUntil { savedPlaceIds() == listOf(2L) }
             waitUntil { userFetches.get() == 1 }
@@ -145,19 +128,31 @@ class UserProfileSavedItemsTest : AppTestCase() {
         }
     }
 
-    private fun withProfile(block: (ActivityScenario<Activity>, UserProfileFragment) -> Unit) {
+    private fun waitForText(text: String) {
+        composeTestRule.waitUntil(5_000) { showsText(text) }
+    }
+
+    private fun showsText(text: String): Boolean =
+        composeTestRule.onAllNodesWithText(text).fetchSemanticsNodes().isNotEmpty()
+
+    private fun deleteFirst() {
+        composeTestRule
+            .onAllNodesWithContentDescription(app.getString(R.string.delete))
+            .onFirst()
+            .performClick()
+    }
+
+    private fun withProfile(block: () -> Unit) {
         app.mapStyleUriForTesting = OFFLINE_STYLE_URI
         try {
             ActivityScenario.launch(Activity::class.java).use { scenario ->
-                lateinit var profile: UserProfileFragment
                 scenario.onActivity { activity ->
-                    profile = UserProfileFragment()
                     activity.supportFragmentManager.commitNow {
                         setReorderingAllowed(true)
-                        replace(R.id.fragmentContainerView, profile, PROFILE_TAG)
+                        replace(R.id.fragmentContainerView, UserProfileFragment(), PROFILE_TAG)
                     }
                 }
-                block(scenario, profile)
+                block()
             }
         } finally {
             app.mapStyleUriForTesting = null

@@ -20,16 +20,6 @@ internal data class AuthCredentials(
         "AuthCredentials(mode=$mode, username=$username, password=***)"
 }
 
-/** A submitted change-password form. */
-internal data class ChangePasswordCredentials(
-    val currentPassword: String,
-    val newPassword: String,
-) {
-    // See AuthCredentials.toString(): never render the passwords.
-    override fun toString(): String =
-        "ChangePasswordCredentials(currentPassword=***, newPassword=***)"
-}
-
 /**
  * A credential form's submitted values, waiting to be consumed by the fragment
  * that showed the form.
@@ -49,9 +39,6 @@ internal data class ChangePasswordCredentials(
 internal class AuthFormResultViewModel : ViewModel() {
     /** Set by an auth form, cleared by the host once it has read it. */
     var credentials: AuthCredentials? = null
-
-    /** Set by a change-password form, cleared by the host once it has read it. */
-    var changePassword: ChangePasswordCredentials? = null
 }
 
 /** The holder on this fragment, which consumes the forms it showed. */

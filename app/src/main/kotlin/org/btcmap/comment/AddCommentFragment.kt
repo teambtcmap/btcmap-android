@@ -1,28 +1,31 @@
 package org.btcmap.comment
 
+import android.content.ActivityNotFoundException
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.net.toUri
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProvider
 import org.btcmap.Activity
 import org.btcmap.R
 import org.btcmap.api
-import org.btcmap.api.CommentQuoteResponse
-import org.btcmap.api.addComment
-import org.btcmap.api.getCommentQuote
 import org.btcmap.databinding.AddCommentFragmentBinding
-import org.btcmap.payment.InvoicePaymentController
-import org.btcmap.payment.InvoicePaymentState
-import org.btcmap.payment.InvoicePaymentViewModel
-import org.btcmap.payment.PaymentInvoice
-import org.btcmap.payment.invoicePaymentViewModel
-import org.btcmap.payment.observeInvoicePayment
 import org.btcmap.ui.AddCommentLabels
-import org.btcmap.ui.AddCommentUiState
-import java.text.NumberFormat
+import org.btcmap.ui.CommentScreenLabels
+import org.btcmap.ui.InvoicePaymentLabels
+import org.btcmap.ui.InvoicePaymentSectionLabels
 
+/**
+ * The add-comment screen: a toolbar over the shared
+ * [org.btcmap.ui.CommentScreen], which owns the form, the fee quote, the invoice
+ * and the payment poll. This fragment supplies the labels and the
+ * wallet/clipboard actions.
+ */
 class AddCommentFragment : Fragment() {
 
     private data class Args(
@@ -41,14 +44,6 @@ class AddCommentFragment : Fragment() {
 
     private var _binding: AddCommentFragmentBinding? = null
     private val binding get() = _binding!!
-
-    private val viewModel: InvoicePaymentViewModel<CommentQuoteResponse> by lazy {
-        invoicePaymentViewModel { api().getCommentQuote() }
-    }
-
-    private val addCommentViewModel: AddCommentViewModel by lazy {
-        ViewModelProvider(this)[AddCommentViewModel::class.java]
-    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -70,93 +65,23 @@ class AddCommentFragment : Fragment() {
         // the static title is the fallback when it was not passed along.
         args.placeName?.let { binding.topAppBar.title = it }
 
-        val payment = InvoicePaymentController(
-            fragment = this,
-            view = binding.invoicePayment,
-            paymentRequestLabel = getString(R.string.btc_map_comment_payment_request),
-            onStartOver = viewModel::startOver,
-        )
-
-        observeInvoicePayment(
-            viewModel = viewModel,
-            onState = { render(it, payment) },
-            onPaid = {
-                (activity as? Activity)?.showMessage(
-                    getString(R.string.your_comment_has_been_posted),
-                )
-                // Only the comments list opened from CommentsFragment waits
-                // for this. A comment posted straight from the place screen
-                // must not leave a result behind that a later list visit
-                // would consume as a fresh payment. The posted text rides
-                // along so the list can tell this comment apart from an
-                // unrelated one for the same place.
-                if (args.notifyOnPosted) {
-                    parentFragmentManager.setFragmentResult(
-                        REQUEST_KEY,
-                        Bundle().apply {
-                            putString(ARG_POSTED_COMMENT, addCommentViewModel.postedComment)
-                        },
-                    )
-                }
-                parentFragmentManager.popBackStack()
-            },
-            // A failed quote is rendered inline with a retry instead of
-            // closing the screen, since retrying is the only thing it can do.
-            onQuoteFailure = {},
-        )
-
-        binding.addCommentForm.onRetry = { viewModel.loadQuote() }
-
-        binding.addCommentForm.onContinue = { commentText ->
-            viewModel.order {
-                val response = api().addComment(
-                    placeId = args.placeId,
-                    comment = commentText,
-                )
-                addCommentViewModel.postedComment = commentText
-                PaymentInvoice(id = response.invoiceId, bolt11 = response.invoice)
+        val content = binding.commentContent
+        content.api = api()
+        content.placeId = args.placeId
+        content.labels = commentLabels()
+        content.iconTypeface = org.btcmap.util.iconTypeface
+        content.onPay = { openWallet(it) }
+        content.onCopy = { copyToClipboard(it) }
+        content.onBack = { parentFragmentManager.popBackStack() }
+        content.onPosted = {
+            (activity as? Activity)?.showMessage(getString(R.string.your_comment_has_been_posted))
+            // Only the comments list opened from CommentsFragment waits for
+            // this; a comment posted straight from the place screen must not
+            // leave a result behind that a later list visit would consume.
+            if (args.notifyOnPosted) {
+                parentFragmentManager.setFragmentResult(REQUEST_KEY, Bundle())
             }
-        }
-
-        viewModel.loadQuote()
-    }
-
-    private fun render(
-        state: InvoicePaymentState<CommentQuoteResponse>,
-        payment: InvoicePaymentController,
-    ) {
-        val quote = state.quote
-        val quoteFailed = quote == null && !state.loadingQuote && state.invoice == null
-
-        _binding?.addCommentForm?.state = AddCommentUiState(
-            quote = quote?.let {
-                getString(R.string.d_sat, NumberFormat.getNumberInstance().format(it.quoteSat))
-            },
-            loadingQuote = state.loadingQuote,
-            quoteFailed = quoteFailed,
-            inputEnabled = state.inputEnabled,
-            actionsEnabled = state.actionsEnabled,
-            ordering = state.ordering,
-            // The invoice block replaces the order controls, so the continue
-            // button that started the order is hidden once one exists.
-            showContinue = state.invoice == null,
-            labels = AddCommentLabels(
-                disclosure = getString(R.string.add_element_comment_disclosure_1),
-                currentFee = getString(R.string.current_fee),
-                comment = getString(R.string.comment),
-                placeholder = getString(R.string.comment_placeholder),
-                continueLabel = getString(R.string.btn_continue),
-                emptyComment = getString(R.string.comment_cannot_be_empty),
-                failedToLoad = getString(R.string.failed_to_load),
-                tapToRetry = getString(R.string.tap_to_retry),
-            ),
-        )
-
-        val invoice = state.invoice
-        if (invoice == null) {
-            payment.hide()
-        } else {
-            payment.show(invoice)
+            parentFragmentManager.popBackStack()
         }
     }
 
@@ -165,10 +90,56 @@ class AddCommentFragment : Fragment() {
         _binding = null
     }
 
+    private fun commentLabels(): CommentScreenLabels = CommentScreenLabels(
+        posted = getString(R.string.your_comment_has_been_posted),
+        backToMap = getString(R.string.back_to_map),
+        form = AddCommentLabels(
+            disclosure = getString(R.string.add_element_comment_disclosure_1),
+            currentFee = getString(R.string.current_fee),
+            comment = getString(R.string.comment),
+            placeholder = getString(R.string.comment_placeholder),
+            continueLabel = getString(R.string.btn_continue),
+            emptyComment = getString(R.string.comment_cannot_be_empty),
+            failedToLoad = getString(R.string.failed_to_load),
+            tapToRetry = getString(R.string.tap_to_retry),
+        ),
+        invoice = invoiceLabels(),
+    )
+
+    private fun invoiceLabels(): InvoicePaymentSectionLabels = InvoicePaymentSectionLabels(
+        invoice = InvoicePaymentLabels(
+            qrDescription = getString(R.string.qr_code),
+            pay = getString(R.string.pay),
+            copy = getString(android.R.string.copy),
+            startOver = getString(R.string.start_over),
+        ),
+        discardMessage = getString(R.string.discard_invoice_confirmation),
+        discard = getString(R.string.start_over),
+        cancel = getString(android.R.string.cancel),
+    )
+
+    private fun openWallet(bolt11: String) {
+        val intent = Intent(Intent.ACTION_VIEW, "lightning:$bolt11".toUri())
+        try {
+            startActivity(intent)
+        } catch (e: ActivityNotFoundException) {
+            (activity as? Activity)?.showMessage(getString(R.string.you_dont_have_a_compatible_wallet))
+        }
+    }
+
+    private fun copyToClipboard(bolt11: String) {
+        val clipboard =
+            requireContext().getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+        clipboard.setPrimaryClip(
+            ClipData.newPlainText(getString(R.string.btc_map_comment_payment_request), bolt11)
+        )
+        (activity as? Activity)?.showMessage(getString(R.string.copied_to_clipboard))
+    }
+
     companion object {
         /**
          * Fragment result set right before this screen closes once the comment
-         * was paid for; `CommentsFragment` listens for it to retry its sync.
+         * was paid for; `CommentsFragment` listens for it to re-run its sync.
          */
         const val REQUEST_KEY = "org.btcmap.comment.posted"
 
@@ -178,13 +149,5 @@ class AddCommentFragment : Fragment() {
          * this screen directly and does not listen for the result.
          */
         const val ARG_NOTIFY_ON_POSTED = "notify_on_posted"
-
-        /**
-         * The posted text inside the [REQUEST_KEY] result bundle, so the list
-         * can tell the paid comment apart from an unrelated one for the same
-         * place. Absent when the text is unknown; the retry then falls back to
-         * any new comment id.
-         */
-        const val ARG_POSTED_COMMENT = "posted_comment"
     }
 }

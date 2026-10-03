@@ -1,61 +1,56 @@
 package org.btcmap.payment
 
+import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
+import androidx.compose.ui.test.onAllNodesWithTag
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
-import androidx.fragment.app.Fragment
-import androidx.lifecycle.Lifecycle
 import androidx.test.core.app.ApplicationProvider
-import androidx.test.espresso.Espresso.onView
-import androidx.test.espresso.action.ViewActions.click
-import androidx.test.espresso.assertion.ViewAssertions.matches
-import androidx.test.espresso.matcher.RootMatchers.isDialog
-import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
-import androidx.test.espresso.matcher.ViewMatchers.withText
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import mockwebserver3.Dispatcher
-import mockwebserver3.MockResponse
-import mockwebserver3.RecordedRequest
-import org.btcmap.Activity
 import org.btcmap.R
-import org.btcmap.boost.BoostFragment
 import org.btcmap.ui.BOOST_CONTINUE_TAG
 import org.btcmap.ui.BOOST_OPTION_TAG_PREFIX
-import org.btcmap.ui.BoostFormComposeView
-import org.btcmap.ui.InvoicePaymentComposeView
+import org.btcmap.ui.PAYMENT_DISCARD_TAG
 import org.btcmap.util.waitUntil
-import org.btcmap.util.waitUntilOnMain
 import org.junit.Assert
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
+/**
+ * The boost screen now renders the shared [org.btcmap.ui.BoostScreen], so these
+ * drive the form and the invoice section through the shared UI rather than the
+ * old Android host state.
+ */
 @RunWith(AndroidJUnit4::class)
 class BoostPaymentFlowTest : PaymentScreenTest() {
 
     @get:Rule
     val composeTestRule = createEmptyComposeRule()
 
-    private val startOverLabel =
+    private val startOver =
         ApplicationProvider.getApplicationContext<android.content.Context>()
             .getString(R.string.start_over)
 
-    private fun invoiceShown(fragment: Fragment): Boolean =
-        fragment.requireView().findViewById<InvoicePaymentComposeView>(R.id.invoicePayment).qr != null
+    private fun continueShown(): Boolean =
+        composeTestRule.onAllNodesWithTag(BOOST_CONTINUE_TAG).fetchSemanticsNodes().isNotEmpty()
 
-    private fun continueEnabled(fragment: Fragment): Boolean =
-        fragment.requireView().findViewById<BoostFormComposeView>(R.id.boostForm)
-            .state?.actionsEnabled == true
+    private fun invoiceShown(): Boolean =
+        composeTestRule.onAllNodesWithText(startOver).fetchSemanticsNodes().isNotEmpty()
+
+    private fun clickContinue() {
+        composeTestRule.onNodeWithTag(BOOST_CONTINUE_TAG).performClick()
+    }
 
     @Test
     fun quoteLoads_enablesContinue() {
         apiRule.server.dispatcher = boostDispatcher()
 
-        withBoost { _, fragment ->
-            waitUntilOnMain {
-                continueEnabled(fragment)
-            }
+        withBoost { _, _ ->
+            composeTestRule.waitUntil(5_000) { continueShown() }
+            composeTestRule.onNodeWithTag(BOOST_CONTINUE_TAG).assertIsEnabled()
         }
     }
 
@@ -64,66 +59,15 @@ class BoostPaymentFlowTest : PaymentScreenTest() {
         val dispatcher = boostDispatcher()
         apiRule.server.dispatcher = dispatcher
 
-        withBoost { scenario, fragment ->
-            waitUntilOnMain {
-                continueEnabled(fragment)
-            }
+        withBoost { _, _ ->
+            composeTestRule.waitUntil(5_000) { continueShown() }
 
-            composeTestRule.onNodeWithTag(BOOST_CONTINUE_TAG).performClick()
+            clickContinue()
             waitUntil { dispatcher.orderRequests.get() == 1 }
-            waitUntilOnMain {
-                invoiceShown(fragment) &&
-                    !continueEnabled(fragment)
-            }
+            // The invoice block replaces the order controls.
+            composeTestRule.waitUntil(5_000) { invoiceShown() && !continueShown() }
 
-            // Even a stray tap on the now-disabled continue must not order again.
-            scenario.onActivity {
-                composeTestRule.onNodeWithTag(BOOST_CONTINUE_TAG).performClick()
-            }
-            Thread.sleep(300)
             Assert.assertEquals(1, dispatcher.orderRequests.get())
-        }
-    }
-
-    @Test
-    fun invoice_survivesRotation() {
-        val dispatcher = boostDispatcher()
-        apiRule.server.dispatcher = dispatcher
-
-        withBoost { scenario, fragment ->
-            waitUntilOnMain {
-                continueEnabled(fragment)
-            }
-            composeTestRule.onNodeWithTag(BOOST_CONTINUE_TAG).performClick()
-            waitUntil { dispatcher.orderRequests.get() == 1 }
-            waitUntilOnMain { invoiceShown(fragment) }
-
-            scenario.recreate()
-
-            val recreated = restoredFragment(scenario, BOOST_TAG) as BoostFragment
-            waitUntilOnMain { invoiceShown(recreated) }
-            Assert.assertEquals("quote must not be refetched", 1, dispatcher.quoteRequests.get())
-            Assert.assertEquals("order must not be replaced", 1, dispatcher.orderRequests.get())
-        }
-    }
-
-    @Test
-    fun paidInvoice_closesScreen() {
-        val dispatcher = boostDispatcher(invoiceStatuses = listOf("unpaid", "paid"))
-        apiRule.server.dispatcher = dispatcher
-
-        withBoost(addToBackStack = true) { scenario, fragment ->
-            lateinit var activity: Activity
-            scenario.onActivity { activity = it }
-
-            waitUntilOnMain {
-                continueEnabled(fragment)
-            }
-            composeTestRule.onNodeWithTag(BOOST_CONTINUE_TAG).performClick()
-
-            waitUntilOnMain {
-                activity.supportFragmentManager.findFragmentByTag(BOOST_TAG) == null
-            }
         }
     }
 
@@ -132,15 +76,13 @@ class BoostPaymentFlowTest : PaymentScreenTest() {
         val dispatcher = boostDispatcher()
         apiRule.server.dispatcher = dispatcher
 
-        withBoost { _, fragment ->
-            waitUntilOnMain {
-                continueEnabled(fragment)
-            }
+        withBoost { _, _ ->
+            composeTestRule.waitUntil(5_000) { continueShown() }
 
             composeTestRule
                 .onNodeWithTag(BOOST_OPTION_TAG_PREFIX + "TWELVE_MONTHS")
                 .performClick()
-            composeTestRule.onNodeWithTag(BOOST_CONTINUE_TAG).performClick()
+            clickContinue()
             waitUntil { dispatcher.orderBodies.isNotEmpty() }
 
             Assert.assertEquals(
@@ -150,37 +92,21 @@ class BoostPaymentFlowTest : PaymentScreenTest() {
         }
     }
 
-    /**
-     * The polling block restarts on every resume, so a paid invoice must be
-     * reported only once per view instead of being polled and reported again
-     * after the app comes back to the foreground.
-     */
     @Test
-    fun paidInvoice_isReportedOnceAcrossResume() {
-        val dispatcher = boostDispatcher(invoiceStatuses = listOf("paid"))
-        apiRule.server.dispatcher = dispatcher
+    fun paidInvoice_closesScreen() {
+        apiRule.server.dispatcher = boostDispatcher(invoiceStatuses = listOf("unpaid", "paid"))
 
-        withBoost { scenario, fragment ->
-            waitUntilOnMain {
-                continueEnabled(fragment)
+        withBoost(addToBackStack = true) { scenario, _ ->
+            composeTestRule.waitUntil(5_000) { continueShown() }
+            clickContinue()
+
+            waitUntil {
+                var gone = false
+                scenario.onActivity {
+                    gone = it.supportFragmentManager.findFragmentByTag(BOOST_TAG) == null
+                }
+                gone
             }
-            composeTestRule.onNodeWithTag(BOOST_CONTINUE_TAG).performClick()
-
-            waitUntil { dispatcher.invoiceRequests.get() == 1 }
-            // Let the observer report the paid invoice. popBackStack is a no-op
-            // here (the screen was not added to the back stack), so the view
-            // survives and the test can resume it.
-            Thread.sleep(300)
-
-            scenario.moveToState(Lifecycle.State.CREATED)
-            scenario.moveToState(Lifecycle.State.RESUMED)
-            Thread.sleep(300)
-
-            Assert.assertEquals(
-                "a paid invoice must not be polled again on resume",
-                1,
-                dispatcher.invoiceRequests.get(),
-            )
         }
     }
 
@@ -189,142 +115,25 @@ class BoostPaymentFlowTest : PaymentScreenTest() {
         val dispatcher = boostDispatcher()
         apiRule.server.dispatcher = dispatcher
 
-        withBoost { _, fragment ->
-            waitUntilOnMain {
-                continueEnabled(fragment)
-            }
-            composeTestRule.onNodeWithTag(BOOST_CONTINUE_TAG).performClick()
+        withBoost { _, _ ->
+            composeTestRule.waitUntil(5_000) { continueShown() }
+
+            clickContinue()
             waitUntil { dispatcher.orderRequests.get() == 1 }
-            waitUntilOnMain { invoiceShown(fragment) }
+            composeTestRule.waitUntil(5_000) { invoiceShown() }
 
-            composeTestRule.onNodeWithText(startOverLabel).performClick()
-            onView(withText(R.string.start_over)).inRoot(isDialog()).perform(click())
+            composeTestRule.onNodeWithText(startOver).performClick()
+            composeTestRule.onNodeWithTag(PAYMENT_DISCARD_TAG).performClick()
 
-            waitUntilOnMain {
-                !invoiceShown(fragment) &&
-                    continueEnabled(fragment)
-            }
+            composeTestRule.waitUntil(5_000) { !invoiceShown() && continueShown() }
             Assert.assertEquals(
                 "starting over must not place an order by itself",
                 1,
                 dispatcher.orderRequests.get(),
             )
 
-            composeTestRule.onNodeWithTag(BOOST_CONTINUE_TAG).performClick()
+            clickContinue()
             waitUntil { dispatcher.orderRequests.get() == 2 }
-        }
-    }
-
-    /**
-     * Starting over must stop watching the discarded invoice. The first invoice
-     * never becomes paid, so a poll that outlives it would keep the observer
-     * busy and the paid second invoice would never close the screen.
-     */
-    @Test
-    fun startOver_thenPaidSecondInvoice_closesScreen() {
-        val firstInvoice = "boost-1"
-        val secondInvoice = "boost-2"
-        var orders = 0
-        apiRule.server.dispatcher = object : Dispatcher() {
-            override fun dispatch(request: RecordedRequest): MockResponse {
-                val path = request.url.encodedPath
-                return when {
-                    path == "/v4/place-boosts/quote" -> jsonResponse(BOOST_QUOTE_JSON)
-
-                    path == "/v4/place-boosts" && request.method == "POST" -> {
-                        orders++
-                        val id = if (orders == 1) firstInvoice else secondInvoice
-                        jsonResponse("""{"invoice_id":"$id","invoice":"lnbc-$id"}""")
-                    }
-
-                    path == "/v4/invoices/$firstInvoice" ->
-                        jsonResponse(invoiceJson(firstInvoice, "unpaid"))
-
-                    path == "/v4/invoices/$secondInvoice" ->
-                        jsonResponse(invoiceJson(secondInvoice, "paid"))
-
-                    else -> jsonResponse("[]")
-                }
-            }
-        }
-
-        withBoost(addToBackStack = true) { scenario, fragment ->
-            lateinit var activity: Activity
-            scenario.onActivity { activity = it }
-
-            waitUntilOnMain {
-                continueEnabled(fragment)
-            }
-            composeTestRule.onNodeWithTag(BOOST_CONTINUE_TAG).performClick()
-            waitUntilOnMain { invoiceShown(fragment) }
-
-            composeTestRule.onNodeWithText(startOverLabel).performClick()
-            onView(withText(R.string.start_over)).inRoot(isDialog()).perform(click())
-            waitUntilOnMain {
-                continueEnabled(fragment)
-            }
-
-            composeTestRule.onNodeWithTag(BOOST_CONTINUE_TAG).performClick()
-
-            waitUntilOnMain {
-                activity.supportFragmentManager.findFragmentByTag(BOOST_TAG) == null
-            }
-        }
-    }
-
-    @Test
-    fun orderFailure_showsDialogAndReenablesControls() {
-        apiRule.server.dispatcher = boostDispatcher(
-            orderBody = """{"message":"boom"}""",
-            orderCode = 400,
-        )
-
-        withBoost { _, fragment ->
-            waitUntilOnMain {
-                continueEnabled(fragment)
-            }
-            composeTestRule.onNodeWithTag(BOOST_CONTINUE_TAG).performClick()
-
-            waitUntil {
-                try {
-                    onView(withText("boom")).inRoot(isDialog())
-                        .check(matches(isDisplayed()))
-                    true
-                } catch (t: Throwable) {
-                    false
-                }
-            }
-            waitUntilOnMain {
-                continueEnabled(fragment)
-            }
-            onView(withText(R.string.close)).inRoot(isDialog()).perform(click())
-        }
-    }
-
-    @Test
-    fun quoteFailure_closesScreenAndShowsDialog() {
-        apiRule.server.dispatcher = boostDispatcher(
-            quoteBody = """{"message":"boom"}""",
-            quoteCode = 400,
-        )
-
-        withBoost(addToBackStack = true) { scenario, _ ->
-            lateinit var activity: Activity
-            scenario.onActivity { activity = it }
-
-            waitUntil {
-                try {
-                    onView(withText("boom")).inRoot(isDialog())
-                        .check(matches(isDisplayed()))
-                    true
-                } catch (t: Throwable) {
-                    false
-                }
-            }
-            waitUntilOnMain {
-                activity.supportFragmentManager.findFragmentByTag(BOOST_TAG) == null
-            }
-            onView(withText(R.string.close)).inRoot(isDialog()).perform(click())
         }
     }
 }

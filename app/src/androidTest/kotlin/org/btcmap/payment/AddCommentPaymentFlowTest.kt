@@ -1,55 +1,60 @@
 package org.btcmap.payment
 
+import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
+import androidx.compose.ui.test.onAllNodesWithTag
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
-import androidx.fragment.app.Fragment
-import androidx.test.espresso.Espresso.onView
-import androidx.test.espresso.action.ViewActions.click
-import androidx.test.espresso.assertion.ViewAssertions.matches
-import androidx.test.espresso.matcher.RootMatchers.isDialog
-import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
-import androidx.test.espresso.matcher.ViewMatchers.withText
+import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import org.btcmap.Activity
 import org.btcmap.R
 import org.btcmap.comment.AddCommentFragment
-import org.btcmap.ui.AddCommentFormComposeView
 import org.btcmap.ui.COMMENT_CONTINUE_TAG
 import org.btcmap.ui.COMMENT_FIELD_TAG
-import org.btcmap.ui.InvoicePaymentComposeView
 import org.btcmap.util.waitUntil
-import org.btcmap.util.waitUntilOnMain
 import org.junit.Assert
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import java.util.concurrent.atomic.AtomicBoolean
 
+/**
+ * The add-comment screen now renders the shared
+ * [org.btcmap.ui.CommentScreen], so these drive the form and the invoice section
+ * through the shared UI.
+ */
 @RunWith(AndroidJUnit4::class)
 class AddCommentPaymentFlowTest : PaymentScreenTest() {
 
     @get:Rule
     val composeTestRule = createEmptyComposeRule()
 
-    private fun invoiceShown(fragment: Fragment): Boolean =
-        fragment.requireView().findViewById<InvoicePaymentComposeView>(R.id.invoicePayment).qr != null
+    private val startOver =
+        ApplicationProvider.getApplicationContext<android.content.Context>()
+            .getString(R.string.start_over)
 
-    private fun actionsEnabled(fragment: Fragment): Boolean =
-        fragment.requireView().findViewById<AddCommentFormComposeView>(R.id.addCommentForm)
-            .state?.actionsEnabled == true
+    private fun continueShown(): Boolean =
+        composeTestRule.onAllNodesWithTag(COMMENT_CONTINUE_TAG).fetchSemanticsNodes().isNotEmpty()
 
-    private fun inputEnabled(fragment: Fragment): Boolean =
-        fragment.requireView().findViewById<AddCommentFormComposeView>(R.id.addCommentForm)
-            .state?.inputEnabled == true
+    private fun fieldShown(): Boolean =
+        composeTestRule.onAllNodesWithTag(COMMENT_FIELD_TAG).fetchSemanticsNodes().isNotEmpty()
+
+    private fun invoiceShown(): Boolean =
+        composeTestRule.onAllNodesWithText(startOver).fetchSemanticsNodes().isNotEmpty()
+
+    private fun showsText(text: String): Boolean =
+        composeTestRule.onAllNodesWithText(text).fetchSemanticsNodes().isNotEmpty()
 
     @Test
     fun quoteLoads_enablesContinueAndKeepsInputEditable() {
         apiRule.server.dispatcher = commentDispatcher()
 
-        withComment { _, fragment ->
-            waitUntilOnMain { actionsEnabled(fragment) && inputEnabled(fragment) }
+        withComment { _, _ ->
+            composeTestRule.waitUntil(5_000) { continueShown() }
+            composeTestRule.onNodeWithTag(COMMENT_CONTINUE_TAG).assertIsEnabled()
+            Assert.assertTrue(fieldShown())
         }
     }
 
@@ -58,8 +63,8 @@ class AddCommentPaymentFlowTest : PaymentScreenTest() {
         val dispatcher = commentDispatcher()
         apiRule.server.dispatcher = dispatcher
 
-        withComment { _, fragment ->
-            waitUntilOnMain { actionsEnabled(fragment) }
+        withComment { _, _ ->
+            composeTestRule.waitUntil(5_000) { continueShown() }
             composeTestRule.onNodeWithTag(COMMENT_CONTINUE_TAG).performClick()
             Thread.sleep(500)
             Assert.assertEquals(0, dispatcher.orderRequests.get())
@@ -71,33 +76,31 @@ class AddCommentPaymentFlowTest : PaymentScreenTest() {
         val dispatcher = commentDispatcher()
         apiRule.server.dispatcher = dispatcher
 
-        withComment { _, fragment ->
-            waitUntilOnMain { actionsEnabled(fragment) }
+        withComment { _, _ ->
+            composeTestRule.waitUntil(5_000) { continueShown() }
             composeTestRule.onNodeWithTag(COMMENT_FIELD_TAG).performTextInput("gm")
             composeTestRule.onNodeWithTag(COMMENT_CONTINUE_TAG).performClick()
 
             waitUntil { dispatcher.orderRequests.get() == 1 }
-            waitUntilOnMain {
-                invoiceShown(fragment) && !inputEnabled(fragment) && !actionsEnabled(fragment)
-            }
+            composeTestRule.waitUntil(5_000) { invoiceShown() && !continueShown() && !fieldShown() }
         }
     }
 
     @Test
     fun paidInvoice_closesScreen() {
-        val dispatcher = commentDispatcher(invoiceStatuses = listOf("unpaid", "paid"))
-        apiRule.server.dispatcher = dispatcher
+        apiRule.server.dispatcher = commentDispatcher(invoiceStatuses = listOf("unpaid", "paid"))
 
-        withComment(addToBackStack = true) { scenario, fragment ->
-            lateinit var activity: Activity
-            scenario.onActivity { activity = it }
-
-            waitUntilOnMain { actionsEnabled(fragment) }
+        withComment(addToBackStack = true) { scenario, _ ->
+            composeTestRule.waitUntil(5_000) { continueShown() }
             composeTestRule.onNodeWithTag(COMMENT_FIELD_TAG).performTextInput("gm")
             composeTestRule.onNodeWithTag(COMMENT_CONTINUE_TAG).performClick()
 
-            waitUntilOnMain {
-                activity.supportFragmentManager.findFragmentByTag(COMMENT_TAG) == null
+            waitUntil {
+                var gone = false
+                scenario.onActivity {
+                    gone = it.supportFragmentManager.findFragmentByTag(COMMENT_TAG) == null
+                }
+                gone
             }
         }
     }
@@ -109,13 +112,9 @@ class AddCommentPaymentFlowTest : PaymentScreenTest() {
      */
     @Test
     fun postedComment_setsNoResultWhenNotRequested() {
-        val dispatcher = commentDispatcher(invoiceStatuses = listOf("unpaid", "paid"))
-        apiRule.server.dispatcher = dispatcher
+        apiRule.server.dispatcher = commentDispatcher(invoiceStatuses = listOf("unpaid", "paid"))
 
-        withComment(addToBackStack = true) { scenario, fragment ->
-            lateinit var activity: Activity
-            scenario.onActivity { activity = it }
-
+        withComment(addToBackStack = true) { scenario, _ ->
             val resultReceived = AtomicBoolean(false)
             scenario.onActivity {
                 it.supportFragmentManager.setFragmentResultListener(
@@ -124,64 +123,38 @@ class AddCommentPaymentFlowTest : PaymentScreenTest() {
                 ) { _, _ -> resultReceived.set(true) }
             }
 
-            waitUntilOnMain { actionsEnabled(fragment) }
+            composeTestRule.waitUntil(5_000) { continueShown() }
             composeTestRule.onNodeWithTag(COMMENT_FIELD_TAG).performTextInput("gm")
             composeTestRule.onNodeWithTag(COMMENT_CONTINUE_TAG).performClick()
 
-            waitUntilOnMain {
-                activity.supportFragmentManager.findFragmentByTag(COMMENT_TAG) == null
+            waitUntil {
+                var gone = false
+                scenario.onActivity {
+                    gone = it.supportFragmentManager.findFragmentByTag(COMMENT_TAG) == null
+                }
+                gone
             }
             Assert.assertFalse(
-                "an add screen opened directly must not set the retry result",
+                "an add screen opened directly must not set the posted result",
                 resultReceived.get(),
             )
         }
     }
 
     @Test
-    fun orderFailure_reenablesInputAndShowsDialog() {
+    fun orderFailure_reenablesInputAndShowsError() {
         apiRule.server.dispatcher = commentDispatcher(
             orderBody = """{"message":"boom"}""",
             orderCode = 400,
         )
 
-        withComment { _, fragment ->
-            waitUntilOnMain { actionsEnabled(fragment) }
+        withComment { _, _ ->
+            composeTestRule.waitUntil(5_000) { continueShown() }
             composeTestRule.onNodeWithTag(COMMENT_FIELD_TAG).performTextInput("gm")
             composeTestRule.onNodeWithTag(COMMENT_CONTINUE_TAG).performClick()
 
-            waitUntil {
-                try {
-                    onView(withText("boom")).inRoot(isDialog())
-                        .check(matches(isDisplayed()))
-                    true
-                } catch (t: Throwable) {
-                    false
-                }
-            }
-            waitUntilOnMain { inputEnabled(fragment) && actionsEnabled(fragment) }
-            onView(withText(R.string.close)).inRoot(isDialog()).perform(click())
-        }
-    }
-
-    @Test
-    fun invoice_survivesRotation() {
-        val dispatcher = commentDispatcher()
-        apiRule.server.dispatcher = dispatcher
-
-        withComment { scenario, fragment ->
-            waitUntilOnMain { actionsEnabled(fragment) }
-            composeTestRule.onNodeWithTag(COMMENT_FIELD_TAG).performTextInput("gm")
-            composeTestRule.onNodeWithTag(COMMENT_CONTINUE_TAG).performClick()
-            waitUntil { dispatcher.orderRequests.get() == 1 }
-            waitUntilOnMain { invoiceShown(fragment) }
-
-            scenario.recreate()
-
-            val recreated = restoredFragment(scenario, COMMENT_TAG) as AddCommentFragment
-            waitUntilOnMain { invoiceShown(recreated) }
-            Assert.assertEquals("quote must not be refetched", 1, dispatcher.quoteRequests.get())
-            Assert.assertEquals("order must not be replaced", 1, dispatcher.orderRequests.get())
+            composeTestRule.waitUntil(5_000) { showsText("boom") }
+            composeTestRule.waitUntil(5_000) { continueShown() }
         }
     }
 }

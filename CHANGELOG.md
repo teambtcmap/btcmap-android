@@ -26,6 +26,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Move the profile, settings, colour and database stats screens into shared Compose UI
 - Move the boost, comment and invoice-payment screens into shared Compose UI and generate invoice QR codes in shared code
 - Move the Android settings, colour and event screens onto the shared Compose UI, dropping the colour picker library
+- Move the Android add-place, report, account, comments, boost and add-comment screens onto the shared Compose UI
 
 ## [1.2.0] - 2026-09-30
 

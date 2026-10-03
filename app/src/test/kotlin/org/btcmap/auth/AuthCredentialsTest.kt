@@ -25,17 +25,4 @@ class AuthCredentialsTest {
         Assert.assertFalse(text.contains("hunter2"))
         Assert.assertTrue(text.contains("satoshi"))
     }
-
-    @Test
-    fun changePasswordCredentials_toString_redactsBothPasswords() {
-        val credentials = ChangePasswordCredentials(
-            currentPassword = "old-secret",
-            newPassword = "new-secret",
-        )
-
-        val text = credentials.toString()
-
-        Assert.assertFalse(text.contains("old-secret"))
-        Assert.assertFalse(text.contains("new-secret"))
-    }
 }

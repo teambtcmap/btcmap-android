@@ -2,6 +2,7 @@ package org.btcmap.settings
 
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
 import androidx.compose.ui.test.onAllNodesWithContentDescription
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.performClick
 import androidx.fragment.app.commitNow
@@ -22,11 +23,8 @@ import org.btcmap.R
 import org.btcmap.db.Database
 import org.btcmap.db.table.user.SavedItem
 import org.btcmap.db.table.user.User
-import org.btcmap.ui.UserProfileComposeView
 import org.btcmap.util.AppTestCase
 import org.btcmap.util.assertNoUncaughtException
-import org.btcmap.util.waitUntilOnMain
-import org.junit.Assert
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -64,17 +62,16 @@ class UserProfileErrorHandlingTest : AppTestCase() {
         app.mapStyleUriForTesting = OFFLINE_STYLE_URI
         try {
             ActivityScenario.launch(Activity::class.java).use { scenario ->
-                lateinit var profile: UserProfileFragment
                 scenario.onActivity { activity ->
-                    profile = UserProfileFragment()
                     activity.supportFragmentManager.commitNow {
                         setReorderingAllowed(true)
-                        replace(R.id.fragmentContainerView, profile, PROFILE_TAG)
+                        replace(R.id.fragmentContainerView, UserProfileFragment(), PROFILE_TAG)
                     }
                 }
-                val view = profile.requireView()
-                    .findViewById<UserProfileComposeView>(R.id.userProfileList)
-                waitUntilOnMain { view.state?.savedPlaces?.isNotEmpty() == true }
+
+                composeTestRule.waitUntil(5_000) {
+                    composeTestRule.onAllNodesWithText("Test Place").fetchSemanticsNodes().isNotEmpty()
+                }
 
                 assertNoUncaughtException(
                     "Exception escaped the user profile screen's coroutine to the uncaught handler",

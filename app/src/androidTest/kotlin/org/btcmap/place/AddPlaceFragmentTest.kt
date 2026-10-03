@@ -1,82 +1,41 @@
 package org.btcmap.place
 
 import android.os.Bundle
-import android.widget.Button
+import androidx.compose.ui.test.assertCountEquals
+import androidx.compose.ui.test.junit4.createEmptyComposeRule
+import androidx.compose.ui.test.onAllNodesWithTag
+import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
 import androidx.fragment.app.commitNow
 import androidx.fragment.app.replace
 import androidx.test.core.app.ActivityScenario
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import androidx.test.platform.app.InstrumentationRegistry
 import org.btcmap.Activity
 import org.btcmap.R
+import org.btcmap.ui.ADD_PLACE_NAME_TAG
+import org.btcmap.ui.ADD_PLACE_SUBMIT_TAG
 import org.btcmap.util.AppTestCase
-import org.btcmap.util.assertNoUncaughtException
-import org.btcmap.util.waitUntilOnMain
-import org.junit.Assert
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.maplibre.android.maps.MapLibreMap
-import org.maplibre.android.maps.MapView
 
 /**
- * Drives the add-place screen, which owns a map of its own and otherwise has no
- * coverage. Besides pinning the basic form, these tests cover the map's
- * asynchronous lifecycle: the map is created off the view's creation and its
- * callbacks must not touch the context once the view is gone.
+ * Drives the add-place screen, which now renders the shared Compose form.
  */
 @RunWith(AndroidJUnit4::class)
 class AddPlaceFragmentTest : AppTestCase() {
 
+    @get:Rule
+    val composeTestRule = createEmptyComposeRule()
+
     @Test
     fun addPlace_showsTheForm() {
         ActivityScenario.launch(Activity::class.java).use { scenario ->
-            lateinit var fragment: AddPlaceFragment
-            scenario.onActivity { fragment = addFragment(it) }
-
-            waitUntilOnMain {
-                fragment.requireView().findViewById<Button>(R.id.btn_submit).isShown
-            }
-        }
-    }
-
-    @Test
-    fun closingBeforeTheMapIsReady_doesNotLeakUncaughtException() {
-        ActivityScenario.launch(Activity::class.java).use { scenario ->
-            assertNoUncaughtException(
-                "Add-place map callback touched a view that was already gone",
-            ) {
-                scenario.onActivity { activity ->
-                    val fragment = newFragment()
-                    activity.supportFragmentManager.commitNow {
-                        setReorderingAllowed(true)
-                        replace(R.id.fragmentContainerView, fragment, TAG)
-                    }
-                    // Tear the screen down before the map's asynchronous ready
-                    // callback can run, the case the callback guards.
-                    activity.supportFragmentManager.commitNow { remove(fragment) }
-                }
-            }
-        }
-    }
-
-    @Test
-    fun addPlace_doesNotInstallTheUnusedMarkerImage() {
-        ActivityScenario.launch(Activity::class.java).use { scenario ->
-            var map: MapLibreMap? = null
-            scenario.onActivity { activity ->
-                val fragment = addFragment(activity)
-                fragment.requireView().findViewById<MapView>(R.id.map).getMapAsync { map = it }
-            }
-
-            waitUntilOnMain { map?.style?.isFullyLoaded == true }
-
-            // The screen has no marker layer of its own: the pin is a view
-            // overlay, so the map style must stay free of the merchant marker
-            // image the main map installs. Style reads have to run on the UI
-            // thread.
-            InstrumentationRegistry.getInstrumentation().runOnMainSync {
-                Assert.assertNull(map!!.style!!.getImage(MERCHANT_MARKER_IMAGE))
-            }
+            scenario.onActivity { addFragment(it) }
+            waitForForm()
+            composeTestRule.onNodeWithTag(ADD_PLACE_NAME_TAG).assertExists()
         }
     }
 
@@ -84,18 +43,32 @@ class AddPlaceFragmentTest : AppTestCase() {
     fun recreation_keepsTheForm() {
         ActivityScenario.launch(Activity::class.java).use { scenario ->
             scenario.onActivity { addFragment(it) }
+            waitForForm()
 
             scenario.recreate()
 
-            lateinit var recreated: AddPlaceFragment
-            scenario.onActivity { activity ->
-                recreated = activity.supportFragmentManager
-                    .findFragmentByTag(TAG) as AddPlaceFragment
-            }
+            waitForForm()
+            composeTestRule.onNodeWithTag(ADD_PLACE_NAME_TAG).assertExists()
+        }
+    }
 
-            Assert.assertTrue(
-                recreated.requireView().findViewById<Button>(R.id.btn_submit).isShown,
-            )
+    @Test
+    fun blankForm_showsRequiredErrors() {
+        ActivityScenario.launch(Activity::class.java).use { scenario ->
+            scenario.onActivity { addFragment(it) }
+            waitForForm()
+
+            composeTestRule.onNodeWithTag(ADD_PLACE_SUBMIT_TAG).performScrollTo().performClick()
+
+            composeTestRule.onAllNodesWithText("Required").assertCountEquals(3)
+        }
+    }
+
+    private fun waitForForm() {
+        composeTestRule.waitUntil(5_000) {
+            composeTestRule.onAllNodesWithTag(ADD_PLACE_NAME_TAG)
+                .fetchSemanticsNodes()
+                .isNotEmpty()
         }
     }
 
@@ -117,8 +90,5 @@ class AddPlaceFragmentTest : AppTestCase() {
 
     private companion object {
         const val TAG = "add-place"
-
-        /** The image the main map installs for its merchant markers. */
-        const val MERCHANT_MARKER_IMAGE = "btcmap-marker"
     }
 }

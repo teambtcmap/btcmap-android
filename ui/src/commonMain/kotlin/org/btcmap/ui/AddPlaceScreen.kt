@@ -35,10 +35,10 @@ import org.maplibre.compose.style.BaseStyle
 import org.maplibre.spatialk.geojson.Position
 
 /** Test tags so a test can drive the add-place form. */
-internal const val ADD_PLACE_NAME_TAG = "add-place-name"
-internal const val ADD_PLACE_CATEGORY_TAG = "add-place-category"
-internal const val ADD_PLACE_ADDRESS_TAG = "add-place-address"
-internal const val ADD_PLACE_SUBMIT_TAG = "add-place-submit"
+const val ADD_PLACE_NAME_TAG = "add-place-name"
+const val ADD_PLACE_CATEGORY_TAG = "add-place-category"
+const val ADD_PLACE_ADDRESS_TAG = "add-place-address"
+const val ADD_PLACE_SUBMIT_TAG = "add-place-submit"
 
 /** The fields a new place is submitted with, positioned at the map centre. */
 data class AddPlaceDraft(
