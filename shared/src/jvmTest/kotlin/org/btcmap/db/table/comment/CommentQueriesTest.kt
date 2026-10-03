@@ -1,5 +1,6 @@
 package org.btcmap.db.table.comment
 
+import kotlinx.coroutines.runBlocking
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import org.btcmap.db.Database
 import org.junit.Assert
@@ -8,8 +9,8 @@ import kotlin.time.Instant
 
 class CommentQueriesTest {
 
-    private fun createDatabase(): Database {
-        return Database(BundledSQLiteDriver(), ":memory:")
+    private fun createDatabase(): Database = runBlocking {
+        org.btcmap.db.testDatabase().apply { connect() }
     }
 
     private fun comment(
@@ -31,7 +32,7 @@ class CommentQueriesTest {
     }
 
     @Test
-    fun insert_and_selectByPlaceId() {
+    fun insert_and_selectByPlaceId() = runBlocking<Unit> {
         val db = createDatabase()
         val comment = Comment(
             id = 1L,
@@ -51,7 +52,7 @@ class CommentQueriesTest {
     }
 
     @Test
-    fun insert_replacesAnExistingComment() {
+    fun insert_replacesAnExistingComment() = runBlocking<Unit> {
         val db = createDatabase()
         val original = Comment(
             id = 1L,
@@ -78,7 +79,7 @@ class CommentQueriesTest {
     }
 
     @Test
-    fun insert_isIdempotentWhenARowIsFetchedTwice() {
+    fun insert_isIdempotentWhenARowIsFetchedTwice() = runBlocking<Unit> {
         // The delta sync can hand out the same comment again, for example when
         // it was hidden on the first fetch and published on the next.
         val db = createDatabase()
@@ -99,7 +100,7 @@ class CommentQueriesTest {
     }
 
     @Test
-    fun selectByPlaceId_returnsEmptyListWhenNoComments() {
+    fun selectByPlaceId_returnsEmptyListWhenNoComments() = runBlocking<Unit> {
         val db = createDatabase()
 
         val results = db.comment.selectByPlaceId(999L)
@@ -108,7 +109,7 @@ class CommentQueriesTest {
     }
 
     @Test
-    fun selectCount_excludesTombstonesUnlessAsked() {
+    fun selectCount_excludesTombstonesUnlessAsked() = runBlocking<Unit> {
         val db = createDatabase()
         val deletedAt = Instant.parse("2024-01-02T10:00:00Z")
         db.comment.insert(
@@ -136,7 +137,7 @@ class CommentQueriesTest {
     }
 
     @Test
-    fun selectByPlaceId_ordersByCreatedAtDesc() {
+    fun selectByPlaceId_ordersByCreatedAtDesc() = runBlocking<Unit> {
         val db = createDatabase()
         val comment1 = Comment(
             id = 1L,
@@ -161,7 +162,7 @@ class CommentQueriesTest {
     }
 
     @Test
-    fun selectByPlaceId_breaksCreatedAtTiesByIdDesc() {
+    fun selectByPlaceId_breaksCreatedAtTiesByIdDesc() = runBlocking<Unit> {
         val db = createDatabase()
         val sameTime = Instant.parse("2024-01-01T10:00:00Z")
         val lowerId = Comment(
@@ -188,7 +189,7 @@ class CommentQueriesTest {
     }
 
     @Test
-    fun selectMaxUpdatedAt_returnsNullWhenEmpty() {
+    fun selectMaxUpdatedAt_returnsNullWhenEmpty() = runBlocking<Unit> {
         val db = createDatabase()
 
         val result = db.comment.selectMaxUpdatedAt()
@@ -197,7 +198,7 @@ class CommentQueriesTest {
     }
 
     @Test
-    fun selectMaxUpdatedAt_returnsMaxDate() {
+    fun selectMaxUpdatedAt_returnsMaxDate() = runBlocking<Unit> {
         val db = createDatabase()
         val comment1 = Comment(
             id = 1L,
@@ -221,7 +222,7 @@ class CommentQueriesTest {
     }
 
     @Test
-    fun selectMaxUpdatedAt_comparesByInstantNotByText() {
+    fun selectMaxUpdatedAt_comparesByInstantNotByText() = runBlocking<Unit> {
         val db = createDatabase()
         // Instant.toString() drops a zero fraction, so the earlier
         // "2024-01-01T10:00Z" sorts after "2024-01-01T10:00:00.500Z" as text.
@@ -249,7 +250,7 @@ class CommentQueriesTest {
     }
 
     @Test
-    fun selectByPlaceId_ordersByInstantNotByText() {
+    fun selectByPlaceId_ordersByInstantNotByText() = runBlocking<Unit> {
         val db = createDatabase()
         val earlier = Comment(
             id = 1L,
@@ -274,7 +275,7 @@ class CommentQueriesTest {
     }
 
     @Test
-    fun selectByPlaceId_limitReturnsTheNewestComments() {
+    fun selectByPlaceId_limitReturnsTheNewestComments() = runBlocking<Unit> {
         val db = createDatabase()
         db.comment.insert(
             listOf(
@@ -290,7 +291,7 @@ class CommentQueriesTest {
     }
 
     @Test
-    fun selectByPlaceId_limitDoesNotCountTombstones() {
+    fun selectByPlaceId_limitDoesNotCountTombstones() = runBlocking<Unit> {
         val db = createDatabase()
         db.comment.insert(
             listOf(
@@ -312,7 +313,7 @@ class CommentQueriesTest {
     }
 
     @Test
-    fun selectCountByPlaceId_countsOnlyVisibleComments() {
+    fun selectCountByPlaceId_countsOnlyVisibleComments() = runBlocking<Unit> {
         val db = createDatabase()
         db.comment.insert(
             listOf(
@@ -332,7 +333,7 @@ class CommentQueriesTest {
     }
 
     @Test
-    fun insert_keepsTombstoneButHidesItFromSelects() {
+    fun insert_keepsTombstoneButHidesItFromSelects() = runBlocking<Unit> {
         val db = createDatabase()
         val deletedAt = Instant.parse("2024-01-02T10:00:00Z")
         db.comment.insert(

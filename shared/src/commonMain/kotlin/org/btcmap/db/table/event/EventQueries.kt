@@ -9,7 +9,7 @@ import org.btcmap.db.getInstantOrNull
 import kotlin.time.Instant
 
 class EventQueries(private val conn: SQLiteConnection) {
-    fun insert(rows: List<Event>) {
+    suspend fun insert(rows: List<Event>) {
         if (rows.isEmpty()) return
 
         // OR REPLACE, not a plain INSERT: the delta sync can return the same
@@ -38,7 +38,7 @@ class EventQueries(private val conn: SQLiteConnection) {
         }
     }
 
-    fun selectAll(): List<Event> {
+    suspend fun selectAll(): List<Event> {
         conn.prepare(
             """
             SELECT ${FullProjection.COLUMNS}
@@ -54,7 +54,7 @@ class EventQueries(private val conn: SQLiteConnection) {
         }
     }
 
-    fun selectByBounds(
+    suspend fun selectByBounds(
         minLat: Double,
         maxLat: Double,
         minLon: Double,
@@ -80,7 +80,7 @@ class EventQueries(private val conn: SQLiteConnection) {
         }
     }
 
-    fun selectById(id: Long): Event? {
+    suspend fun selectById(id: Long): Event? {
         conn.prepare(
             """
             SELECT ${FullProjection.COLUMNS}
@@ -96,7 +96,7 @@ class EventQueries(private val conn: SQLiteConnection) {
         }
     }
 
-    fun selectBySearchString(searchString: String): List<SearchEvent> {
+    suspend fun selectBySearchString(searchString: String): List<SearchEvent> {
         // Only the fields search needs, so a broad match does not materialize
         // every event column.
         conn.prepare(
@@ -116,7 +116,7 @@ class EventQueries(private val conn: SQLiteConnection) {
         }
     }
 
-    fun selectMaxUpdatedAt(): Instant? {
+    suspend fun selectMaxUpdatedAt(): Instant? {
         // julianday, not plain max(): timestamps are stored as text and
         // Instant.toString() is not fixed-width (it drops a zero second
         // and a zero fraction), so text ordering is not chronological.
@@ -142,7 +142,7 @@ class EventQueries(private val conn: SQLiteConnection) {
      * deleted events is still already populated and re-seeding it would
      * resurrect events that were deleted after the snapshot was built.
      */
-    fun selectCount(includeDeleted: Boolean = false): Long {
+    suspend fun selectCount(includeDeleted: Boolean = false): Long {
         val where = if (includeDeleted) "" else " WHERE $DELETED_AT IS NULL"
         conn.prepare("SELECT count(*) FROM $TABLE$where;").use {
             it.step()

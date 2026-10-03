@@ -2,6 +2,7 @@
 
 package org.btcmap.bundle
 
+import org.btcmap.util.useSource
 import org.btcmap.platform.ioDispatcher
 import kotlin.time.Duration
 import kotlin.time.TimeSource
@@ -83,7 +84,7 @@ object BundledAreas {
                     return@withContext
                 }
 
-                source.buffer().use { buffered ->
+                source.buffer().useSource { buffered ->
                     db.transaction {
                         var batch = mutableListOf<Area>()
                         for (record in btcmapJson.decodeBufferedSourceToSequence<BundledAreaJson>(

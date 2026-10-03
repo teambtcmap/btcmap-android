@@ -1,9 +1,14 @@
 package org.btcmap.settings
 
+import kotlin.concurrent.Volatile
+import org.btcmap.platform.PlatformLock
 import org.btcmap.platform.ioDispatcher
+import org.btcmap.platform.withLock
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import org.btcmap.db.Database
 import org.btcmap.db.table.user.User
 
@@ -46,17 +51,20 @@ class Settings(
     private val clearLegacyValues: (Set<String>) -> Unit = {},
 ) {
     /** Protects [cache] and [sessionToken]; held only for quick in-memory reads and writes. */
-    private val lock = Any()
+    private val lock = PlatformLock()
 
     /**
      * Serializes the session mutations ([replaceSession], [clearSession],
      * [clearSessionIfTokenMatches] and [setAuthTokenForTesting]) so their compare
      * and write steps cannot interleave. It is separate from [lock] so that the
      * database transaction of a session write does not block main-thread setting
-     * reads, which only take [lock]. Lock ordering is always [sessionLock] then
+     * reads, which only take [lock]. Lock ordering is always [sessionMutex] then
      * [lock].
      */
-    private val sessionLock = Any()
+    private val sessionMutex = Mutex()
+
+    /** Serializes loading the cache from the database. */
+    private val loadMutex = Mutex()
 
     private val cache = HashMap<String, String>()
     private val writeScope = CoroutineScope(SupervisorJob() + ioDispatcher.limitedParallelism(1))
@@ -78,18 +86,23 @@ class Settings(
      * Returns the database the cache is loaded from, loading it first when it has
      * not been loaded yet or the provider now returns a different database.
      */
-    private fun ensureLoaded(): Database {
+    private suspend fun ensureLoaded(): Database {
         val db = dbProvider()
-        synchronized(lock) {
-            if (boundDb === db) return db
+        lock.withLock { if (boundDb === db) return db }
+
+        loadMutex.withLock {
+            lock.withLock { if (boundDb === db) return db }
 
             importLegacy(db)
-            cache.clear()
-            cache.putAll(db.preference.selectAll())
-            sessionToken = cache[KEY_AUTH_TOKEN]
-            boundDb = db
-            return db
+            val values = db.preference.selectAll()
+            lock.withLock {
+                cache.clear()
+                cache.putAll(values)
+                sessionToken = values[KEY_AUTH_TOKEN]
+                boundDb = db
+            }
         }
+        return db
     }
 
     /**
@@ -99,7 +112,7 @@ class Settings(
      * thread, accepting the one-time open (and any pending schema migration)
      * in exchange for never reporting a signed-in user as signed out.
      */
-    fun preload() {
+    suspend fun preload() {
         ensureLoaded()
     }
 
@@ -108,7 +121,7 @@ class Settings(
      * so an upgrade keeps the user's configuration and session. The imported
      * legacy values are then removed so no copy is left behind.
      */
-    private fun importLegacy(db: Database) {
+    private suspend fun importLegacy(db: Database) {
         if (db.preference.select(KEY_LEGACY_IMPORTED) != null) return
 
         // If the legacy values cannot be read, leave the import unmarked so the
@@ -146,8 +159,7 @@ class Settings(
     }
 
     fun getString(key: String, default: String?): String? {
-        ensureLoaded()
-        val stored = synchronized(lock) { cache[key] }
+        val stored = lock.withLock { cache[key] }
         return stored ?: default
     }
 
@@ -173,11 +185,12 @@ class Settings(
     }
 
     fun putString(key: String, value: String?) {
-        val db = ensureLoaded()
-        synchronized(lock) {
+        val db = boundDb ?: dbProvider()
+        lock.withLock {
             if (value == null) cache.remove(key) else cache[key] = value
         }
         writeScope.launch {
+            db.connect()
             if (value == null) db.preference.delete(key) else db.preference.upsert(key, value)
         }
     }
@@ -205,9 +218,9 @@ class Settings(
      * main-thread setting reads. Runs synchronously, so call it off the main
      * thread.
      */
-    fun replaceSession(db: Database, token: String?, user: User?) {
+    suspend fun replaceSession(db: Database, token: String?, user: User?) {
         ensureLoaded()
-        synchronized(sessionLock) {
+        sessionMutex.withLock {
             db.transaction {
                 if (token == null) {
                     db.preference.delete(KEY_AUTH_TOKEN)
@@ -217,7 +230,7 @@ class Settings(
                 db.user.delete()
                 if (user != null) db.user.insert(user)
             }
-            synchronized(lock) {
+            lock.withLock {
                 if (token == null) cache.remove(KEY_AUTH_TOKEN) else cache[KEY_AUTH_TOKEN] = token
                 sessionToken = token
             }
@@ -228,14 +241,14 @@ class Settings(
      * Atomically clears the stored session token and the cached user. Runs
      * synchronously, so call it off the main thread.
      */
-    fun clearSession(db: Database) {
+    suspend fun clearSession(db: Database) {
         ensureLoaded()
-        synchronized(sessionLock) {
+        sessionMutex.withLock {
             db.transaction {
                 db.preference.delete(KEY_AUTH_TOKEN)
                 db.user.delete()
             }
-            synchronized(lock) {
+            lock.withLock {
                 cache.remove(KEY_AUTH_TOKEN)
                 sessionToken = null
             }
@@ -253,16 +266,16 @@ class Settings(
      * Returns true when the session was cleared. Runs synchronously, so call it
      * off the main thread.
      */
-    fun clearSessionIfTokenMatches(db: Database, expected: String): Boolean {
+    suspend fun clearSessionIfTokenMatches(db: Database, expected: String): Boolean {
         ensureLoaded()
-        synchronized(sessionLock) {
-            if (synchronized(lock) { cache[KEY_AUTH_TOKEN] } != expected) return false
+        sessionMutex.withLock {
+            if (lock.withLock { cache[KEY_AUTH_TOKEN] } != expected) return false
 
             db.transaction {
                 db.preference.delete(KEY_AUTH_TOKEN)
                 db.user.delete()
             }
-            synchronized(lock) {
+            lock.withLock {
                 cache.remove(KEY_AUTH_TOKEN)
                 sessionToken = null
             }
@@ -276,16 +289,16 @@ class Settings(
      * particular session state; production code must use [replaceSession] so the
      * token and the cached account stay consistent.
      */
-    fun setAuthTokenForTesting(token: String?) {
+    suspend fun setAuthTokenForTesting(token: String?) {
         ensureLoaded()
         val db = dbProvider()
-        synchronized(sessionLock) {
+        sessionMutex.withLock {
             if (token == null) {
                 db.preference.delete(KEY_AUTH_TOKEN)
             } else {
                 db.preference.upsert(KEY_AUTH_TOKEN, token)
             }
-            synchronized(lock) {
+            lock.withLock {
                 if (token == null) cache.remove(KEY_AUTH_TOKEN) else cache[KEY_AUTH_TOKEN] = token
                 sessionToken = token
             }
@@ -293,7 +306,7 @@ class Settings(
     }
 
     /** Drops the cached values and stored settings, reloading them on next use. */
-    fun clearForTesting() {
+    suspend fun clearForTesting() {
         ensureLoaded()
         try {
             dbProvider().preference.deleteAll()
@@ -301,7 +314,7 @@ class Settings(
             // The in-memory state is dropped even when the database cannot be
             // reached, so a test that deliberately breaks the database still
             // starts its next case from a clean cache.
-            synchronized(lock) {
+            lock.withLock {
                 cache.clear()
                 sessionToken = null
             }

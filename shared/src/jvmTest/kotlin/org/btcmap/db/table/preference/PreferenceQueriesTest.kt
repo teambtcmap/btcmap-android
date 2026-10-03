@@ -1,5 +1,6 @@
 package org.btcmap.db.table.preference
 
+import kotlinx.coroutines.runBlocking
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import org.btcmap.db.Database
 import org.junit.Assert
@@ -7,12 +8,12 @@ import org.junit.Test
 
 class PreferenceQueriesTest {
 
-    private fun createDatabase(): Database {
-        return Database(BundledSQLiteDriver(), ":memory:")
+    private fun createDatabase(): Database = runBlocking {
+        org.btcmap.db.testDatabase().apply { connect() }
     }
 
     @Test
-    fun upsert_and_select() {
+    fun upsert_and_select() = runBlocking<Unit> {
         val db = createDatabase()
 
         db.preference.upsert("mapStyle", "dark")
@@ -21,14 +22,14 @@ class PreferenceQueriesTest {
     }
 
     @Test
-    fun select_returnsNullWhenAbsent() {
+    fun select_returnsNullWhenAbsent() = runBlocking<Unit> {
         val db = createDatabase()
 
         Assert.assertNull(db.preference.select("mapStyle"))
     }
 
     @Test
-    fun upsert_replacesExistingValue() {
+    fun upsert_replacesExistingValue() = runBlocking<Unit> {
         val db = createDatabase()
 
         db.preference.upsert("mapStyle", "dark")
@@ -38,7 +39,7 @@ class PreferenceQueriesTest {
     }
 
     @Test
-    fun selectAll_returnsEveryRow() {
+    fun selectAll_returnsEveryRow() = runBlocking<Unit> {
         val db = createDatabase()
 
         db.preference.upsert("mapStyle", "dark")
@@ -51,7 +52,7 @@ class PreferenceQueriesTest {
     }
 
     @Test
-    fun delete_removesKey() {
+    fun delete_removesKey() = runBlocking<Unit> {
         val db = createDatabase()
         db.preference.upsert("mapStyle", "dark")
 
@@ -61,7 +62,7 @@ class PreferenceQueriesTest {
     }
 
     @Test
-    fun delete_doesNothingWhenAbsent() {
+    fun delete_doesNothingWhenAbsent() = runBlocking<Unit> {
         val db = createDatabase()
 
         db.preference.delete("mapStyle")
@@ -70,7 +71,7 @@ class PreferenceQueriesTest {
     }
 
     @Test
-    fun deleteAll_removesEveryRow() {
+    fun deleteAll_removesEveryRow() = runBlocking<Unit> {
         val db = createDatabase()
         db.preference.upsert("mapStyle", "dark")
         db.preference.upsert("verified_filter_years", "1")

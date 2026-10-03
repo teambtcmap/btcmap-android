@@ -35,7 +35,7 @@ class SessionExpiryTest : AppTestCase() {
     private val server = MockWebServer()
 
     @Before
-    fun startServer() {
+    fun startServer() = runBlocking<Unit> {
         server.start()
         // This test exercises the real app API, whose onUnauthorized handler
         // clears the session. Drop the mock API installed by AppTestCase so
@@ -44,12 +44,12 @@ class SessionExpiryTest : AppTestCase() {
     }
 
     @After
-    fun stopServer() {
+    fun stopServer() = runBlocking<Unit> {
         server.close()
     }
 
     @Test
-    fun rejectedToken_clearsStoredTokenAndCachedUser() {
+    fun rejectedToken_clearsStoredTokenAndCachedUser() = runBlocking<Unit> {
         prefs.apiUrl = server.url("/").toString().toUrl()
         prefs.setAuthTokenForTesting("stale-token")
         databaseRule.db.user.insert(signedInUser())
@@ -74,15 +74,15 @@ class SessionExpiryTest : AppTestCase() {
         Assert.assertEquals("Bearer stale-token", server.takeRequest().headers["Authorization"])
 
         waitUntil {
-            prefs.authToken == null && databaseRule.db.user.select() == null
+            prefs.authToken == null && runBlocking { databaseRule.db.user.select() } == null
         }
 
         Assert.assertNull(prefs.authToken)
-        Assert.assertNull(databaseRule.db.user.select())
+        Assert.assertNull(runBlocking { databaseRule.db.user.select() })
     }
 
     @Test
-    fun staleRejectedToken_doesNotClearNewerSession() {
+    fun staleRejectedToken_doesNotClearNewerSession() = runBlocking<Unit> {
         prefs.setAuthTokenForTesting("new-token")
         databaseRule.db.user.insert(signedInUser())
 
@@ -95,14 +95,14 @@ class SessionExpiryTest : AppTestCase() {
     }
 
     @Test
-    fun matchingRejectedToken_clearsSession() {
+    fun matchingRejectedToken_clearsSession() = runBlocking<Unit> {
         prefs.setAuthTokenForTesting("same-token")
         databaseRule.db.user.insert(signedInUser())
 
         runBlocking { app.handleUnauthorized("same-token") }
 
         Assert.assertNull(prefs.authToken)
-        Assert.assertNull(databaseRule.db.user.select())
+        Assert.assertNull(runBlocking { databaseRule.db.user.select() })
     }
 
     private fun signedInUser() = User(

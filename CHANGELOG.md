@@ -6,6 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+- Add a WebAssembly (wasmJs) target to the shared core, moving its database layer onto a suspending API
 - Move the shared locale, number-formatting, locking and dispatcher services onto multiplatform code, groundwork for a future web target
 - Move the shared date/time handling off java.time onto kotlinx-datetime, groundwork for a future web target
 - Move the shared HTTP layer off OkHttp onto Ktor, groundwork for a future web target

@@ -8,7 +8,7 @@ import kotlin.time.Instant
 import kotlin.use
 
 class CommentQueries(private val conn: SQLiteConnection) {
-    fun insert(rows: List<Comment>) {
+    suspend fun insert(rows: List<Comment>) {
         if (rows.isEmpty()) return
 
         // OR REPLACE, not a plain INSERT: a comment can be returned by the delta
@@ -40,7 +40,7 @@ class CommentQueries(private val conn: SQLiteConnection) {
      * [limit] caps the read for a caller that only shows a few (the place
      * preview); null reads them all (the comments screen).
      */
-    fun selectByPlaceId(placeId: Long, limit: Long? = null): List<Comment> {
+    suspend fun selectByPlaceId(placeId: Long, limit: Long? = null): List<Comment> {
         val limitClause = if (limit == null) "" else "LIMIT ?2"
         conn.prepare(
             """
@@ -66,7 +66,7 @@ class CommentQueries(private val conn: SQLiteConnection) {
      * Visible comment count for a place. The place preview reads only the
      * newest few, so it needs the total separately to label the button.
      */
-    fun selectCountByPlaceId(placeId: Long): Long {
+    suspend fun selectCountByPlaceId(placeId: Long): Long {
         conn.prepare(
             """
             SELECT count(*) FROM $TABLE
@@ -79,7 +79,7 @@ class CommentQueries(private val conn: SQLiteConnection) {
         }
     }
 
-    fun selectMaxUpdatedAt(): Instant? {
+    suspend fun selectMaxUpdatedAt(): Instant? {
         // julianday, not plain max(): timestamps are stored as text and
         // Instant.toString() is not fixed-width (it drops a zero second
         // and a zero fraction), so text ordering is not chronological.
@@ -105,7 +105,7 @@ class CommentQueries(private val conn: SQLiteConnection) {
      * deleted comments is still already populated and re-seeding it would
      * resurrect comments that were deleted after the snapshot was built.
      */
-    fun selectCount(includeDeleted: Boolean = false): Long {
+    suspend fun selectCount(includeDeleted: Boolean = false): Long {
         val where = if (includeDeleted) "" else " WHERE $DELETED_AT IS NULL"
         conn.prepare("SELECT count(*) FROM $TABLE$where;").use {
             it.step()

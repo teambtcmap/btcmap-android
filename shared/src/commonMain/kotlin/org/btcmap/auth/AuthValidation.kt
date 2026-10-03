@@ -54,5 +54,5 @@ object AuthValidation {
         if (new.isNotEmpty() && new != confirmation) add(AuthError.PasswordsDoNotMatch)
     }
 
-    private fun String.characterCount(): Int = codePointCount(0, length)
+    private fun String.characterCount(): Int = count { !it.isLowSurrogate() }
 }

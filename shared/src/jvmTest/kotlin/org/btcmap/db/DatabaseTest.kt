@@ -1,5 +1,6 @@
 package org.btcmap.db
 
+import kotlinx.coroutines.runBlocking
 import androidx.sqlite.SQLiteConnection
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import androidx.sqlite.execSQL
@@ -142,8 +143,8 @@ private const val VERSION_106_PLACE_CREATE = """
 class DatabaseTest {
 
     @Test
-    fun newDatabase_createsTheSchemaAtTheCurrentVersion() {
-        val db = Database(BundledSQLiteDriver(), newPath())
+    fun newDatabase_createsTheSchemaAtTheCurrentVersion() = runBlocking<Unit> {
+        val db = Database(BundledSQLiteDriver(), newPath()).apply { connect() }
 
         try {
             Assert.assertEquals(Database.VERSION, userVersion(db.conn))
@@ -157,11 +158,11 @@ class DatabaseTest {
     }
 
     @Test
-    fun staleDatabase_isDiscardedAndRecreated() {
+    fun staleDatabase_isDiscardedAndRecreated() = runBlocking<Unit> {
         val path = existingPath()
         createStaleDatabase(path, version = 1)
 
-        val db = Database(BundledSQLiteDriver(), path)
+        val db = Database(BundledSQLiteDriver(), path).apply { connect() }
 
         try {
             // The stale table is gone because the file was deleted rather than
@@ -175,13 +176,13 @@ class DatabaseTest {
     }
 
     @Test
-    fun version100Database_isMigratedWithTheAreaTable() {
+    fun version100Database_isMigratedWithTheAreaTable() = runBlocking<Unit> {
         val path = existingPath()
         // Reproduces the last schema before areas were cached: version 100 with
         // the then-current tables, and a row worth preserving.
         createVersion100Database(path)
 
-        val db = Database(BundledSQLiteDriver(), path)
+        val db = Database(BundledSQLiteDriver(), path).apply { connect() }
 
         try {
             // Our own databases are upgraded in place, not discarded: the
@@ -203,13 +204,13 @@ class DatabaseTest {
     }
 
     @Test
-    fun version101Database_isMigratedWithGeoJson() {
+    fun version101Database_isMigratedWithGeoJson() = runBlocking<Unit> {
         val path = existingPath()
         // Reproduces the last schema before geo_json was cached: version 101
         // with the area table, but no geo_json column on it.
         createVersion101Database(path)
 
-        val db = Database(BundledSQLiteDriver(), path)
+        val db = Database(BundledSQLiteDriver(), path).apply { connect() }
 
         try {
             // Migration 101 adds the geo_json column. This opens at the current
@@ -224,13 +225,13 @@ class DatabaseTest {
     }
 
     @Test
-    fun version102Database_isMigratedWithoutTheBundledColumn() {
+    fun version102Database_isMigratedWithoutTheBundledColumn() = runBlocking<Unit> {
         val path = existingPath()
         // Reproduces the last schema before the bundled flag was dropped:
         // version 102 with a place table that still carries the column.
         createVersion102Database(path)
 
-        val db = Database(BundledSQLiteDriver(), path)
+        val db = Database(BundledSQLiteDriver(), path).apply { connect() }
 
         try {
             // The table is rebuilt without the `bundled` column. The place
@@ -245,14 +246,14 @@ class DatabaseTest {
     }
 
     @Test
-    fun version103Database_isMigratedWithTheNewIndexes() {
+    fun version103Database_isMigratedWithTheNewIndexes() = runBlocking<Unit> {
         val path = existingPath()
         // Reproduces the last schema before the place, event and area indexes
         // were added: version 103 with the current tables but only the comment
         // indexes.
         createVersion103Database(path)
 
-        val db = Database(BundledSQLiteDriver(), path)
+        val db = Database(BundledSQLiteDriver(), path).apply { connect() }
 
         try {
             Assert.assertEquals(Database.VERSION, userVersion(db.conn))
@@ -272,13 +273,13 @@ class DatabaseTest {
     }
 
     @Test
-    fun version104Database_isMigratedWithoutTheLegacyEventAreaIdColumn() {
+    fun version104Database_isMigratedWithoutTheLegacyEventAreaIdColumn() = runBlocking<Unit> {
         val path = existingPath()
         // Reproduces the last schema before the event area_id column was
         // dropped: version 104 with event still carrying the column.
         createVersion104Database(path)
 
-        val db = Database(BundledSQLiteDriver(), path)
+        val db = Database(BundledSQLiteDriver(), path).apply { connect() }
 
         try {
             // The table is rebuilt without the column in place, keeping the
@@ -296,14 +297,14 @@ class DatabaseTest {
     }
 
     @Test
-    fun version105Database_isMigratedByClearingTheAreaCache() {
+    fun version105Database_isMigratedByClearingTheAreaCache() = runBlocking<Unit> {
         val path = existingPath()
         // Reproduces the last schema before areas cached per-language names and
         // descriptions: version 105 with the area table but without the
         // localized columns.
         createVersion105Database(path)
 
-        val db = Database(BundledSQLiteDriver(), path)
+        val db = Database(BundledSQLiteDriver(), path).apply { connect() }
 
         try {
             // The migration adds the columns and empties the cache, so the next
@@ -321,13 +322,13 @@ class DatabaseTest {
     }
 
     @Test
-    fun version106Database_isMigratedWithoutTheLocalizedOpeningHoursColumn() {
+    fun version106Database_isMigratedWithoutTheLocalizedOpeningHoursColumn() = runBlocking<Unit> {
         val path = existingPath()
         // Reproduces the last schema before the per-language opening-hours map
         // was dropped: version 106 with place still carrying the column.
         createVersion106Database(path)
 
-        val db = Database(BundledSQLiteDriver(), path)
+        val db = Database(BundledSQLiteDriver(), path).apply { connect() }
 
         try {
             // The table is rebuilt without the column and emptied, so the
@@ -345,11 +346,11 @@ class DatabaseTest {
     }
 
     @Test
-    fun newerDatabase_isDiscardedAndRecreated() {
+    fun newerDatabase_isDiscardedAndRecreated() = runBlocking<Unit> {
         val path = existingPath()
         createStaleDatabase(path, version = Database.VERSION + 1)
 
-        val db = Database(BundledSQLiteDriver(), path)
+        val db = Database(BundledSQLiteDriver(), path).apply { connect() }
 
         try {
             // A database from a newer build cannot be read safely, so it is
@@ -363,11 +364,11 @@ class DatabaseTest {
     }
 
     @Test
-    fun databaseWithoutAVersion_isDiscardedAndRecreated() {
+    fun databaseWithoutAVersion_isDiscardedAndRecreated() = runBlocking<Unit> {
         val path = existingPath()
         createStaleDatabase(path, version = null)
 
-        val db = Database(BundledSQLiteDriver(), path)
+        val db = Database(BundledSQLiteDriver(), path).apply { connect() }
 
         try {
             Assert.assertFalse(hasTable(db.conn, "stale"))
@@ -379,7 +380,7 @@ class DatabaseTest {
     }
 
     @Test
-    fun needsMigration_isTrueForAnOlderOwnVersion() {
+    fun needsMigration_isTrueForAnOlderOwnVersion() = runBlocking<Unit> {
         val path = existingPath()
         createVersion100Database(path)
 
@@ -387,7 +388,7 @@ class DatabaseTest {
     }
 
     @Test
-    fun needsMigration_isTrueForTheNewestMigratableVersion() {
+    fun needsMigration_isTrueForTheNewestMigratableVersion() = runBlocking<Unit> {
         val path = existingPath()
         createVersion106Database(path)
 
@@ -395,15 +396,15 @@ class DatabaseTest {
     }
 
     @Test
-    fun needsMigration_isFalseForACurrentDatabase() {
+    fun needsMigration_isFalseForACurrentDatabase() = runBlocking<Unit> {
         val path = existingPath()
-        Database(BundledSQLiteDriver(), path).conn.close()
+        Database(BundledSQLiteDriver(), path).apply { connect() }.conn.close()
 
         Assert.assertFalse(Database.needsMigration(BundledSQLiteDriver(), path))
     }
 
     @Test
-    fun needsMigration_isFalseForAMissingDatabase() {
+    fun needsMigration_isFalseForAMissingDatabase() = runBlocking<Unit> {
         // A missing file is created rather than migrated, so it is cheap enough
         // to open on the main thread.
         val path = newPath()
@@ -412,7 +413,7 @@ class DatabaseTest {
     }
 
     @Test
-    fun needsMigration_isFalseForADatabaseThatIsDiscarded() {
+    fun needsMigration_isFalseForADatabaseThatIsDiscarded() = runBlocking<Unit> {
         // A file from an unrelated app is deleted and recreated, not migrated.
         val path = existingPath()
         createStaleDatabase(path, version = 1)
@@ -421,7 +422,7 @@ class DatabaseTest {
     }
 
     @Test
-    fun needsMigration_isFalseForANewerDatabase() {
+    fun needsMigration_isFalseForANewerDatabase() = runBlocking<Unit> {
         // A newer database is recreated, not migrated, so it is cheap enough to
         // open on the main thread.
         val path = existingPath()
@@ -431,11 +432,11 @@ class DatabaseTest {
     }
 
     @Test
-    fun unreadableDatabase_isDiscardedAndRecreated() {
+    fun unreadableDatabase_isDiscardedAndRecreated() = runBlocking<Unit> {
         val path = existingPath()
         File(path).writeBytes(byteArrayOf(1, 2, 3, 4))
 
-        val db = Database(BundledSQLiteDriver(), path)
+        val db = Database(BundledSQLiteDriver(), path).apply { connect() }
 
         try {
             Assert.assertTrue(hasTable(db.conn, "place"))
@@ -446,14 +447,14 @@ class DatabaseTest {
     }
 
     @Test
-    fun currentDatabase_isReopenedWithoutLosingData() {
+    fun currentDatabase_isReopenedWithoutLosingData() = runBlocking<Unit> {
         val path = existingPath()
 
-        val first = Database(BundledSQLiteDriver(), path)
+        val first = Database(BundledSQLiteDriver(), path).apply { connect() }
         first.preference.upsert("mapStyle", "dark")
         first.conn.close()
 
-        val second = Database(BundledSQLiteDriver(), path)
+        val second = Database(BundledSQLiteDriver(), path).apply { connect() }
 
         try {
             Assert.assertEquals("dark", second.preference.select("mapStyle"))

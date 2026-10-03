@@ -1,5 +1,6 @@
 package org.btcmap.db
 
+import kotlinx.coroutines.sync.withLock
 import androidx.sqlite.SQLiteConnection
 import androidx.sqlite.SQLiteDriver
 import androidx.sqlite.execSQL
@@ -48,12 +49,12 @@ class Database(driver: SQLiteDriver, val path: String) {
          * or above-[VERSION] file is not a migration: it is created or
          * discarded, which is cheap.
          */
-        fun needsMigration(driver: SQLiteDriver, path: String): Boolean {
+        suspend fun needsMigration(driver: SQLiteDriver, path: String): Boolean {
             val version = readUserVersion(driver, path)
             return version >= FIRST_OWN_VERSION && version < VERSION
         }
 
-        private fun readUserVersion(driver: SQLiteDriver, path: String): Int {
+        private suspend fun readUserVersion(driver: SQLiteDriver, path: String): Int {
             return try {
                 driver.open(path).use { readUserVersion(it) }
             } catch (_: Exception) {
@@ -63,31 +64,38 @@ class Database(driver: SQLiteDriver, val path: String) {
             }
         }
 
-        private fun readUserVersion(conn: SQLiteConnection): Int {
+        private suspend fun readUserVersion(conn: SQLiteConnection): Int {
             conn.prepare(USER_VERSION_QUERY).use {
                 return if (it.step()) it.getInt(0) else 0
             }
         }
     }
 
-    /**
-     * The single connection every query object in this database shares.
-     *
-     * Wrapped in [LockingSQLiteConnection] so a read cursor is never
-     * interleaved with a write on another thread: Android refills a cursor's
-     * window lazily, so a write between two refills would make the next
-     * `step()`/`get*()` throw `Couldn't read row N from CursorWindow`. The
-     * public type stays [SQLiteConnection] so the wrapper is an implementation
-     * detail.
-     */
-    val conn: SQLiteConnection = LockingSQLiteConnection(initialize(driver, path))
+    private val driver = driver
 
-    val place = PlaceQueries(conn)
-    val comment = CommentQueries(conn)
-    val event = EventQueries(conn)
-    val area = AreaQueries(conn)
-    val preference = PreferenceQueries(conn)
-    val user = UserStore(preference)
+    /**
+     * The single connection every query object in this database shares. Wrapped
+     * in the platform's serialization layer by [openDatabaseConnection]; the
+     * public type stays [SQLiteConnection] so the wrapper is an implementation
+     * detail. Only available after [connect].
+     */
+    val conn: SQLiteConnection
+        get() = connection ?: error("Database.connect() has not been called")
+
+    private var connection: SQLiteConnection? = null
+
+    lateinit var place: PlaceQueries
+        private set
+    lateinit var comment: CommentQueries
+        private set
+    lateinit var event: EventQueries
+        private set
+    lateinit var area: AreaQueries
+        private set
+    lateinit var preference: PreferenceQueries
+        private set
+    lateinit var user: UserStore
+        private set
 
     /**
      * Guards [transaction] against reentrancy on the calling thread. It is a
@@ -97,18 +105,40 @@ class Database(driver: SQLiteDriver, val path: String) {
      */
     private val transactionLock = PlatformLock()
 
-    init {
-        // [initialize] discards every database this version cannot upgrade
-        // (foreign, unreadable or from a newer build), so a version of 0 here
-        // means the file was just created (or a creation was interrupted before
-        // the version was stamped, in which case it was deleted and retried) and
-        // the schema has to be built. A database at an older own version is
-        // upgraded in place by [migrate].
-        val version = readUserVersion(conn)
-        if (version == 0) {
-            createSchema(conn)
-        } else if (version < VERSION) {
-            transaction { migrate(conn, version) }
+    /** Serializes opening the connection so two concurrent callers cannot race. */
+    private val connectMutex = kotlinx.coroutines.sync.Mutex()
+
+    /**
+     * Opens the connection and prepares the schema. It is a separate step
+     * because opening and migrating are suspending on the web target.
+     *
+     * [initialize] discards every database this version cannot upgrade (foreign,
+     * unreadable or from a newer build), so a version of 0 here means the file
+     * was just created (or a creation was interrupted before the version was
+     * stamped, in which case it was deleted and retried) and the schema has to
+     * be built. A database at an older own version is upgraded in place.
+     */
+    suspend fun connect() {
+        if (connection != null) return
+
+        connectMutex.withLock {
+            if (connection != null) return
+
+            val conn = initialize(driver, path)
+            connection = conn
+            place = PlaceQueries(conn)
+            comment = CommentQueries(conn)
+            event = EventQueries(conn)
+            area = AreaQueries(conn)
+            preference = PreferenceQueries(conn)
+            user = UserStore(preference)
+
+            val version = readUserVersion(conn)
+            if (version == 0) {
+                createSchema(conn)
+            } else if (version < VERSION) {
+                transaction { migrate(conn, version) }
+            }
         }
     }
 
@@ -125,7 +155,7 @@ class Database(driver: SQLiteDriver, val path: String) {
      * database left by a newer app version cannot be read safely and is
      * discarded like a foreign one.
      */
-    private fun initialize(driver: SQLiteDriver, path: String): SQLiteConnection {
+    private suspend fun initialize(driver: SQLiteDriver, path: String): SQLiteConnection {
         if (path != MEMORY_PATH) {
             val fileSystem = platformFileSystem
             if (fileSystem != null) {
@@ -150,7 +180,7 @@ class Database(driver: SQLiteDriver, val path: String) {
     private fun isDiscardable(version: Int): Boolean =
         version < FIRST_OWN_VERSION || version > VERSION
 
-    private fun createSchema(conn: SQLiteConnection) {
+    private suspend fun createSchema(conn: SQLiteConnection) {
         conn.execSQL(org.btcmap.db.table.place.CREATE)
         conn.execSQL(org.btcmap.db.table.event.CREATE)
         conn.execSQL(org.btcmap.db.table.comment.CREATE)
@@ -176,7 +206,7 @@ class Database(driver: SQLiteDriver, val path: String) {
      * and aborts rather than leaving a half-upgraded database behind; the
      * caller's next launch re-reads the version it stopped at.
      */
-    private fun migrate(conn: SQLiteConnection, from: Int) {
+    private suspend fun migrate(conn: SQLiteConnection, from: Int) {
         var version = from
         while (version < VERSION) {
             when (version) {
@@ -424,11 +454,11 @@ class Database(driver: SQLiteDriver, val path: String) {
      * Nesting is not supported: a second [transaction] on the same thread throws
      * instead of silently reusing the outer transaction.
      */
-    fun transaction(block: () -> Unit) {
+    suspend fun transaction(block: suspend () -> Unit) {
         check(!transactionLock.isHeldByCurrentThread()) { "Database.transaction cannot be nested" }
         transactionLock.lock()
         try {
-            conn.transaction(block)
+            withTransaction(conn, block)
         } finally {
             transactionLock.unlock()
         }

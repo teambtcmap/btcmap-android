@@ -340,8 +340,7 @@ private fun loadDbStatsSections(
 ): List<StatsSection> {
     val reader = DbStatsReader(db.conn)
     val file = DatabaseFile.read(db.path)
-    val version = reader.readUserVersion()
-    val tables = reader.readTables()
+    val (version, tables) = runDbBlocking { reader.readUserVersion() to reader.readTables() }
 
     return buildList {
         addAll(

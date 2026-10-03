@@ -12,7 +12,7 @@ import kotlin.time.Instant
 
 class BundledCommentsTest {
 
-    private fun createDatabase(): Database = Database(BundledSQLiteDriver(), ":memory:")
+    private fun createDatabase(): Database = org.btcmap.db.testDatabase()
 
     private fun comment(id: Long, deletedAt: Instant? = null) = Comment(
         id = id,

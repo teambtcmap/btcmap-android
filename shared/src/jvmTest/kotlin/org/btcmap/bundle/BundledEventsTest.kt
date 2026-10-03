@@ -12,7 +12,7 @@ import kotlin.time.Instant
 
 class BundledEventsTest {
 
-    private fun createDatabase(): Database = Database(BundledSQLiteDriver(), ":memory:")
+    private fun createDatabase(): Database = org.btcmap.db.testDatabase()
 
     private fun event(id: Long, deletedAt: Instant? = null) = Event(
         id = id,

@@ -1,5 +1,8 @@
 package org.btcmap.map
 
+import org.btcmap.platform.PlatformLock
+import org.btcmap.platform.withLock
+
 /**
  * The number of features a viewport cache keeps before it drops the ones the
  * user has panned away from. Queries hit the local database, so rebuilding the
@@ -22,19 +25,19 @@ class FeatureStore<T>(
     private val idOf: (T) -> Long,
     private val maxItems: Int = MAX_CACHED_FEATURES,
 ) {
-    private val lock = Any()
+    private val lock = PlatformLock()
     private val seenIds = mutableSetOf<Long>()
     private val items = mutableSetOf<T>()
 
     /** The retained features, or null when [fetched] added nothing new. */
-    fun merge(fetched: Collection<T>): Set<T>? = synchronized(lock) {
+    fun merge(fetched: Collection<T>): Set<T>? = lock.withLock {
         if (items.size + fetched.size > maxItems) {
             seenIds.clear()
             items.clear()
         }
 
         val newOnes = fetched.filter { idOf(it) !in seenIds }
-        if (newOnes.isEmpty()) return@synchronized null
+        if (newOnes.isEmpty()) return@withLock null
 
         seenIds.addAll(newOnes.map(idOf))
         items.addAll(newOnes)
@@ -42,12 +45,12 @@ class FeatureStore<T>(
     }
 
     fun clear() {
-        synchronized(lock) {
+        lock.withLock {
             seenIds.clear()
             items.clear()
         }
     }
 
     val size: Int
-        get() = synchronized(lock) { items.size }
+        get() = lock.withLock { items.size }
 }

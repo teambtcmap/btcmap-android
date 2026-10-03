@@ -1,5 +1,6 @@
 package org.btcmap.settings
 
+import kotlinx.coroutines.runBlocking
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import org.btcmap.db.Database
 import org.btcmap.db.table.user.SavedItem
@@ -10,7 +11,7 @@ import org.junit.Test
 class SettingsSessionTest {
 
     private fun createDatabase(): Database {
-        return Database(BundledSQLiteDriver(), ":memory:")
+        return runBlocking { Database(BundledSQLiteDriver(), ":memory:").apply { connect() } }
     }
 
     private fun createSettings(
@@ -40,7 +41,7 @@ class SettingsSessionTest {
     }
 
     @Test
-    fun replaceSession_storesTokenAndUser() {
+    fun replaceSession_storesTokenAndUser() = runBlocking<Unit> {
         val db = createDatabase()
         val settings = createSettings(db)
 
@@ -52,7 +53,7 @@ class SettingsSessionTest {
     }
 
     @Test
-    fun replaceSession_replacesPreviousAccount() {
+    fun replaceSession_replacesPreviousAccount() = runBlocking<Unit> {
         val db = createDatabase()
         val settings = createSettings(db)
 
@@ -67,7 +68,7 @@ class SettingsSessionTest {
     }
 
     @Test
-    fun replaceSession_nullTokenClearsSession() {
+    fun replaceSession_nullTokenClearsSession() = runBlocking<Unit> {
         val db = createDatabase()
         val settings = createSettings(db)
         settings.replaceSession(db, token = "token-1", user = user(1, "satoshi"))
@@ -79,7 +80,7 @@ class SettingsSessionTest {
     }
 
     @Test
-    fun clearSession_clearsTokenAndUser() {
+    fun clearSession_clearsTokenAndUser() = runBlocking<Unit> {
         val db = createDatabase()
         val settings = createSettings(db)
         settings.replaceSession(db, token = "token-1", user = user(1, "satoshi"))
@@ -91,7 +92,7 @@ class SettingsSessionTest {
     }
 
     @Test
-    fun clearSessionIfTokenMatches_clearsMatchingToken() {
+    fun clearSessionIfTokenMatches_clearsMatchingToken() = runBlocking<Unit> {
         val db = createDatabase()
         val settings = createSettings(db)
         settings.replaceSession(db, token = "token-1", user = user(1, "satoshi"))
@@ -104,7 +105,7 @@ class SettingsSessionTest {
     }
 
     @Test
-    fun clearSessionIfTokenMatches_ignoresStaleToken() {
+    fun clearSessionIfTokenMatches_ignoresStaleToken() = runBlocking<Unit> {
         val db = createDatabase()
         val settings = createSettings(db)
         settings.replaceSession(db, token = "old-token", user = user(1, "satoshi"))
@@ -119,7 +120,7 @@ class SettingsSessionTest {
     }
 
     @Test
-    fun clearSessionIfTokenMatches_doesNothingWhenSignedOut() {
+    fun clearSessionIfTokenMatches_doesNothingWhenSignedOut() = runBlocking<Unit> {
         val db = createDatabase()
         val settings = createSettings(db)
 
@@ -128,7 +129,7 @@ class SettingsSessionTest {
     }
 
     @Test
-    fun authToken_doesNotLoadFromDatabase() {
+    fun authToken_doesNotLoadFromDatabase() = runBlocking<Unit> {
         // The main-thread session reads must never open the database, so a
         // provider that would fail proves the getter stays in memory.
         val settings = Settings(
@@ -141,7 +142,7 @@ class SettingsSessionTest {
     }
 
     @Test
-    fun importLegacy_keepsPlaintextTokenAndUser() {
+    fun importLegacy_keepsPlaintextTokenAndUser() = runBlocking<Unit> {
         val db = createDatabase()
         db.user.insert(user(1, "satoshi"))
 
@@ -156,7 +157,7 @@ class SettingsSessionTest {
     }
 
     @Test
-    fun importLegacy_dropsUndecryptableTokenAndStaleUser() {
+    fun importLegacy_dropsUndecryptableTokenAndStaleUser() = runBlocking<Unit> {
         val db = createDatabase()
         // The previous version cached the account while the token was stored in
         // SharedPreferences, so a leftover row exists.
@@ -173,7 +174,7 @@ class SettingsSessionTest {
     }
 
     @Test
-    fun importLegacy_clearsImportedLegacyValues() {
+    fun importLegacy_clearsImportedLegacyValues() = runBlocking<Unit> {
         val db = createDatabase()
         val cleared = mutableSetOf<String>()
 
@@ -188,7 +189,7 @@ class SettingsSessionTest {
     }
 
     @Test
-    fun importLegacy_retriesWhenLegacyValuesCannotBeRead() {
+    fun importLegacy_retriesWhenLegacyValuesCannotBeRead() = runBlocking<Unit> {
         val db = createDatabase()
 
         // A transient failure while reading the legacy values must not mark the
@@ -202,7 +203,7 @@ class SettingsSessionTest {
     }
 
     @Test
-    fun importLegacy_clearsUnusableEncryptedToken() {
+    fun importLegacy_clearsUnusableEncryptedToken() = runBlocking<Unit> {
         val db = createDatabase()
         val cleared = mutableSetOf<String>()
 

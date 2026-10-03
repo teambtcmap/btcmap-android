@@ -52,7 +52,7 @@ object AreaSections {
      * pre-filter and point-in-polygon test the server applies, and the boost
      * must still be active; the longest-running boost is the most prominent.
      */
-    fun boostedMerchants(
+    suspend fun boostedMerchants(
         db: Database,
         area: Area,
         now: Instant = Clock.System.now(),
@@ -78,7 +78,7 @@ object AreaSections {
      * the same rule is applied to the cached area geometry here. Past events
      * are dropped and the rest are sorted soonest first.
      */
-    fun events(
+    suspend fun events(
         db: Database,
         area: Area,
         now: Instant = Clock.System.now(),

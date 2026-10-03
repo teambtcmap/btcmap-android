@@ -1,5 +1,6 @@
 package org.btcmap.settings
 
+import kotlinx.coroutines.runBlocking
 import androidx.core.graphics.toColorInt
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.btcmap.util.toUrl
@@ -16,7 +17,7 @@ class SettingsPersistenceTest : AppTestCase() {
     private val prefs get() = preferencesRule.prefs
 
     @Test
-    fun mapStyle_defaultsToAuto_andPersistsSelection() {
+    fun mapStyle_defaultsToAuto_andPersistsSelection() = runBlocking<Unit> {
         Assert.assertEquals(MapStyle.Auto, prefs.mapStyle)
 
         prefs.mapStyle = MapStyle.Dark
@@ -25,7 +26,7 @@ class SettingsPersistenceTest : AppTestCase() {
     }
 
     @Test
-    fun verifiedFilterYears_defaultsToThree_andPersistsSelection() {
+    fun verifiedFilterYears_defaultsToThree_andPersistsSelection() = runBlocking<Unit> {
         Assert.assertEquals(3, prefs.verifiedFilterYears)
 
         prefs.verifiedFilterYears = 1
@@ -34,7 +35,7 @@ class SettingsPersistenceTest : AppTestCase() {
     }
 
     @Test
-    fun apiUrl_defaultsToPublicApi_andPersistsOverride() {
+    fun apiUrl_defaultsToPublicApi_andPersistsOverride() = runBlocking<Unit> {
         Assert.assertEquals("https://api.btcmap.org", prefs.apiUrl.toString())
 
         prefs.apiUrl = "https://staging.example.com".toUrl()
@@ -43,7 +44,7 @@ class SettingsPersistenceTest : AppTestCase() {
     }
 
     @Test
-    fun toggles_persistSelection() {
+    fun toggles_persistSelection() = runBlocking<Unit> {
         prefs.showAttribution = false
         prefs.mapRotationEnabled = true
 
@@ -52,7 +53,7 @@ class SettingsPersistenceTest : AppTestCase() {
     }
 
     @Test
-    fun authToken_persistsAndReflectsAuthorization() {
+    fun authToken_persistsAndReflectsAuthorization() = runBlocking<Unit> {
         Assert.assertNull(prefs.authToken)
         Assert.assertFalse(prefs.authorized)
 
@@ -67,7 +68,7 @@ class SettingsPersistenceTest : AppTestCase() {
     }
 
     @Test
-    fun customMarkerColor_persists_andResetsToDefault() {
+    fun customMarkerColor_persists_andResetsToDefault() = runBlocking<Unit> {
         val custom = "#123456".toColorInt()
 
         prefs.setMarkerBackgroundColor(custom)
@@ -83,7 +84,7 @@ class SettingsPersistenceTest : AppTestCase() {
     }
 
     @Test
-    fun mapStyle_rendersLocalizedResourceName() {
+    fun mapStyle_rendersLocalizedResourceName() = runBlocking<Unit> {
         Assert.assertEquals(
             preferencesRule.context.getString(R.string.style_dark),
             MapStyle.Dark.name(preferencesRule.context),
@@ -91,7 +92,7 @@ class SettingsPersistenceTest : AppTestCase() {
     }
 
     @Test
-    fun verifiedFilterYears_rendersLocalizedResourceName() {
+    fun verifiedFilterYears_rendersLocalizedResourceName() = runBlocking<Unit> {
         Assert.assertEquals(
             preferencesRule.context.getString(R.string.verified_filter_2_years),
             2.toVerifiedFilterYears(preferencesRule.context),
@@ -99,7 +100,7 @@ class SettingsPersistenceTest : AppTestCase() {
     }
 
     @Test
-    fun activityInterval_rendersLocalizedResourceName() {
+    fun activityInterval_rendersLocalizedResourceName() = runBlocking<Unit> {
         Assert.assertEquals(
             preferencesRule.context.getString(R.string.activity_interval_week),
             ActivityInterval.Week.name(preferencesRule.context),

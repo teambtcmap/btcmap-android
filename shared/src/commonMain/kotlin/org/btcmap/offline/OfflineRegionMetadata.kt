@@ -20,7 +20,7 @@ data class OfflineRegionMetadata(
 )
 
 fun OfflineRegionMetadata.toBytes(): ByteArray =
-    btcmapJson.encodeToString(this).toByteArray(Charsets.UTF_8)
+    btcmapJson.encodeToString(this).encodeToByteArray()
 
 /**
  * Parses [bytes] written by [toBytes]. Returns null for metadata this app did
@@ -28,7 +28,7 @@ fun OfflineRegionMetadata.toBytes(): ByteArray =
  * an unknown pack is ignored rather than crashing.
  */
 fun parseOfflineRegionMetadata(bytes: ByteArray?): OfflineRegionMetadata? {
-    val json = bytes?.toString(Charsets.UTF_8) ?: return null
+    val json = bytes?.decodeToString() ?: return null
     val parsed =
         runCatching { btcmapJson.decodeFromString<OfflineRegionMetadataJson>(json) }.getOrNull()
             ?: return null

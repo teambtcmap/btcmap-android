@@ -16,7 +16,7 @@ class ApiHttpClientTest {
     val serverRule = MockWebServerRule()
 
     @Test
-    fun apiHttpClient_sendsTheConfiguredUserAgent() = runBlocking {
+    fun apiHttpClient_sendsTheConfiguredUserAgent() = runBlocking<Unit> {
         serverRule.server.enqueue(MockResponse.Builder().body("ok").build())
 
         apiHttpClient("test-agent")

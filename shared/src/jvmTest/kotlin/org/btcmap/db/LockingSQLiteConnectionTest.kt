@@ -1,5 +1,6 @@
 package org.btcmap.db
 
+import kotlinx.coroutines.runBlocking
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import androidx.sqlite.execSQL
 import org.junit.Assert
@@ -58,7 +59,7 @@ class LockingSQLiteConnectionTest {
     }
 
     @Test
-    fun transactionIsReentrantAndCommits() {
+    fun transactionIsReentrantAndCommits() = runBlocking<Unit> {
         val conn = LockingSQLiteConnection(driver.open(":memory:"))
         conn.execSQL("CREATE TABLE t (id INTEGER PRIMARY KEY);")
 

@@ -26,7 +26,7 @@ class RemoteImageLoadingTest {
     val serverRule = MockWebServerRule()
 
     @Test
-    fun defaultLoaderFetchesHttpImages() = runBlocking {
+    fun defaultLoaderFetchesHttpImages() = runBlocking<Unit> {
         val png = ByteArrayOutputStream().also { out ->
             ImageIO.write(BufferedImage(2, 2, BufferedImage.TYPE_INT_ARGB), "png", out)
         }.toByteArray()
@@ -50,7 +50,7 @@ class RemoteImageLoadingTest {
     }
 
     @Test
-    fun defaultLoaderDecodesSvgImages() = runBlocking {
+    fun defaultLoaderDecodesSvgImages() = runBlocking<Unit> {
         val svg = """
             <svg xmlns="http://www.w3.org/2000/svg" width="2" height="2">
               <rect width="2" height="2" fill="#0e95af"/>

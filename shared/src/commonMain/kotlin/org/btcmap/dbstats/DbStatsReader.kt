@@ -7,7 +7,7 @@ import kotlin.use
 class DbStatsReader(private val conn: SQLiteConnection) {
 
     /** Lists the user tables and their row stats, ordered by name. */
-    fun readTables(): List<TableStats> {
+    suspend fun readTables(): List<TableStats> {
         val tableNames = mutableListOf<String>()
         conn.prepare(
             """
@@ -22,17 +22,21 @@ class DbStatsReader(private val conn: SQLiteConnection) {
             }
         }
 
-        return tableNames.map(::readTable)
+        val stats = mutableListOf<TableStats>()
+        for (name in tableNames) {
+            stats.add(readTable(name))
+        }
+        return stats
     }
 
     /** The schema version stored in the database's `user_version` pragma. */
-    fun readUserVersion(): Int {
+    suspend fun readUserVersion(): Int {
         conn.prepare("SELECT user_version FROM pragma_user_version;").use {
             return if (it.step()) it.getInt(0) else 0
         }
     }
 
-    private fun readTable(name: String): TableStats {
+    private suspend fun readTable(name: String): TableStats {
         val table = quote(name)
         val columns = readColumns(name)
 
@@ -110,7 +114,7 @@ class DbStatsReader(private val conn: SQLiteConnection) {
      * interpolating the name, so a table name from `sqlite_master` that needs
      * escaping cannot break out of the statement.
      */
-    private fun readColumns(name: String): Set<String> {
+    private suspend fun readColumns(name: String): Set<String> {
         val columns = mutableSetOf<String>()
         conn.prepare("SELECT name FROM pragma_table_info(?);").use { stmt ->
             stmt.bindText(1, name)
@@ -122,9 +126,9 @@ class DbStatsReader(private val conn: SQLiteConnection) {
     }
 
     /** Quotes a SQL identifier, doubling any embedded double quote. */
-    private fun quote(name: String): String = "\"" + name.replace("\"", "\"\"") + "\""
+    private suspend fun quote(name: String): String = "\"" + name.replace("\"", "\"\"") + "\""
 
-    private fun count(sql: String): Long {
+    private suspend fun count(sql: String): Long {
         conn.prepare(sql).use {
             it.step()
             return it.getLong(0)

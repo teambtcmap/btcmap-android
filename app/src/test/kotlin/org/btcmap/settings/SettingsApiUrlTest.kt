@@ -1,5 +1,6 @@
 package org.btcmap.settings
 
+import kotlinx.coroutines.runBlocking
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import org.btcmap.db.Database
 import org.btcmap.util.toUrl
@@ -8,7 +9,7 @@ import org.junit.Test
 
 class SettingsApiUrlTest {
 
-    private fun createDatabase() = Database(BundledSQLiteDriver(), ":memory:")
+    private fun createDatabase() = runBlocking { Database(BundledSQLiteDriver(), ":memory:").apply { connect() } }
 
     private fun createSettings(db: Database) = Settings(
         dbProvider = { db },
@@ -16,14 +17,14 @@ class SettingsApiUrlTest {
     )
 
     @Test
-    fun defaultsToPublicApi() {
+    fun defaultsToPublicApi() = runBlocking<Unit> {
         val settings = createSettings(createDatabase())
 
         Assert.assertEquals("https://api.btcmap.org", settings.apiUrl.toString())
     }
 
     @Test
-    fun usesStoredUrl() {
+    fun usesStoredUrl() = runBlocking<Unit> {
         val settings = createSettings(createDatabase())
 
         settings.apiUrl = "https://staging.example.com".toUrl()
@@ -32,7 +33,7 @@ class SettingsApiUrlTest {
     }
 
     @Test
-    fun malformedStoredUrlFallsBackToPublicApi() {
+    fun malformedStoredUrlFallsBackToPublicApi() = runBlocking<Unit> {
         val db = createDatabase()
         db.preference.upsert("apiUrl", "not a url")
 

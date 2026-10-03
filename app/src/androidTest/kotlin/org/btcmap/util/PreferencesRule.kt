@@ -1,5 +1,6 @@
 package org.btcmap.util
 
+import kotlinx.coroutines.runBlocking
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import org.btcmap.settings.Settings
@@ -34,6 +35,6 @@ class PreferencesRule : TestRule {
         // A test may deliberately leave a broken database driver installed, so
         // clearing the stored settings must not fail the test teardown. The
         // in-memory cache is still dropped by clearForTesting itself.
-        runCatching { appPrefs.clearForTesting() }
+        runCatching { runBlocking { appPrefs.clearForTesting() } }
     }
 }

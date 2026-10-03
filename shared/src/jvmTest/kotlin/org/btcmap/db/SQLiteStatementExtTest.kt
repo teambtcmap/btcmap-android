@@ -35,7 +35,7 @@ class SQLiteStatementExtTest {
     }
 
     private fun withStatement(value: String?, block: (SQLiteStatement) -> Unit) {
-        val db = Database(BundledSQLiteDriver(), ":memory:")
+        val db = org.btcmap.db.testDatabase()
         try {
             db.conn.prepare("SELECT ?1;").use { stmt ->
                 if (value == null) stmt.bindNull(1) else stmt.bindText(1, value)

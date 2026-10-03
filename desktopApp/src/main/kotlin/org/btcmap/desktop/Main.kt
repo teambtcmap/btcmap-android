@@ -1,5 +1,6 @@
 package org.btcmap.desktop
 
+import kotlinx.coroutines.runBlocking
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.platform.Font
@@ -139,7 +140,7 @@ fun main(args: Array<String>) {
 private fun runApp() = application {
     val home = DesktopHome()
     val db = home.database()
-    val settings = home.settings(db).apply { preload() }
+    val settings = runBlocking { home.settings(db).apply { preload() } }
 
     // The bundled snapshots are on the classpath (see the build file), so the
     // desktop seeds offline like Android and the first sync only fetches the
@@ -535,7 +536,7 @@ private fun renderScreen(spec: String) {
 
     val home = DesktopHome()
     val db = home.database()
-    val settings = home.settings(db).apply { preload() }
+    val settings = runBlocking { home.settings(db).apply { preload() } }
 
     val scene = androidx.compose.ui.ImageComposeScene(
         width = 900,
@@ -736,10 +737,12 @@ private class DesktopHome {
     private val dir: File = File(System.getenv("BTCMAP_HOME") ?: "${System.getProperty("user.home")}/.btcmap")
         .apply { mkdirs() }
 
-    fun database(): Database = Database(
-        driver = BundledSQLiteDriver(),
-        path = File(dir, "btcmap.db").absolutePath,
-    )
+    fun database(): Database = runBlocking {
+        Database(
+            driver = BundledSQLiteDriver(),
+            path = File(dir, "btcmap.db").absolutePath,
+        ).apply { connect() }
+    }
 
     fun cacheFile(): File = File(dir, "map-cache").apply { mkdirs() }.let { File(it, "cache.db") }
 

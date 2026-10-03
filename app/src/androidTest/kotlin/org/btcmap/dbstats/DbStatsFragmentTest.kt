@@ -1,5 +1,6 @@
 package org.btcmap.dbstats
 
+import kotlinx.coroutines.runBlocking
 import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
@@ -44,7 +45,7 @@ class DbStatsFragmentTest : AppTestCase() {
     val composeTestRule = createEmptyComposeRule()
 
     @Test
-    fun showsRowCountsForEachTable() {
+    fun showsRowCountsForEachTable() = runBlocking<Unit> {
         databaseRule.db.place.insert(listOf(place(1L), place(2L)))
 
         launchFragment { _, _ ->
@@ -65,7 +66,7 @@ class DbStatsFragmentTest : AppTestCase() {
     }
 
     @Test
-    fun syncButton_startsTheSync() {
+    fun syncButton_startsTheSync() = runBlocking<Unit> {
         val controller = app.syncControllerForTesting as TestSyncController
 
         launchFragment { _, _ ->
@@ -76,7 +77,7 @@ class DbStatsFragmentTest : AppTestCase() {
     }
 
     @Test
-    fun showsBundleStatsForEachSnapshot() {
+    fun showsBundleStatsForEachSnapshot() = runBlocking<Unit> {
         launchFragment { _, _ ->
             waitForSection("place bundle")
 
@@ -88,7 +89,7 @@ class DbStatsFragmentTest : AppTestCase() {
     }
 
     @Test
-    fun refreshesRowCountsWhenTheSyncFinishes() {
+    fun refreshesRowCountsWhenTheSyncFinishes() = runBlocking<Unit> {
         val controller = app.syncControllerForTesting as TestSyncController
         databaseRule.db.place.insert(listOf(place(1L)))
 
@@ -98,7 +99,7 @@ class DbStatsFragmentTest : AppTestCase() {
 
             // The sync writes a new row, reports that it is running, and only
             // then finishes; the counts must be re-read when it does.
-            databaseRule.db.place.insert(listOf(place(2L)))
+            runBlocking { databaseRule.db.place.insert(listOf(place(2L))) }
             scenario.onActivity { controller.setState(SyncState.SyncingPlaces) }
             waitForSection("Sync")
             composeTestRule.waitUntil(5_000) {
@@ -117,7 +118,7 @@ class DbStatsFragmentTest : AppTestCase() {
     }
 
     @Test
-    fun settingsButtonOpensTheScreen() {
+    fun settingsButtonOpensTheScreen() = runBlocking<Unit> {
         ActivityScenario.launch(Activity::class.java).use { scenario ->
             lateinit var activity: Activity
             scenario.onActivity {

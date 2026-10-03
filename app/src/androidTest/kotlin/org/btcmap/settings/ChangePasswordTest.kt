@@ -1,5 +1,6 @@
 package org.btcmap.settings
 
+import kotlinx.coroutines.runBlocking
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
 import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onAllNodesWithTag
@@ -41,7 +42,7 @@ class ChangePasswordTest : AppTestCase() {
     val composeTestRule = createEmptyComposeRule()
 
     @Test
-    fun changePassword_reachesTheServer() {
+    fun changePassword_reachesTheServer() = runBlocking<Unit> {
         insertSignedInUser()
 
         app.mapStyleUriForTesting = OFFLINE_STYLE_URI
@@ -120,15 +121,17 @@ class ChangePasswordTest : AppTestCase() {
     }
 
     private fun insertSignedInUser() {
-        databaseRule.db.user.insert(
-            User(
-                id = 1,
-                name = "satoshi",
-                roles = emptyList(),
-                savedPlaces = emptyList(),
-                savedAreas = emptyList(),
+        runBlocking {
+            databaseRule.db.user.insert(
+                User(
+                    id = 1,
+                    name = "satoshi",
+                    roles = emptyList(),
+                    savedPlaces = emptyList(),
+                    savedAreas = emptyList(),
+                )
             )
-        )
+        }
     }
 
     companion object {

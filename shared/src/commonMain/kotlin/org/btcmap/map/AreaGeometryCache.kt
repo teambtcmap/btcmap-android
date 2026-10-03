@@ -4,19 +4,22 @@ import kotlin.time.Instant
 import org.btcmap.db.table.area.AreaGeometry
 
 /**
- * An access-ordered LRU of parsed area geometries.
+ * An LRU of parsed area geometries.
  *
  * Bounded both by entry count and by the total number of points, because a
  * country's polygon can be orders of magnitude larger than a community's, so a
  * count cap alone cannot bound the memory. The most recently used entry is
  * always kept even when it alone exceeds [maxPoints], so the area under the map
  * centre is never evicted by the act of caching it.
+ *
+ * The common `LinkedHashMap` has no access-order mode, so a hit is reinserted to
+ * move it to the end and the eldest (first) entry is evicted.
  */
 internal class AreaGeometryCache(
     private val maxEntries: Int,
     private val maxPoints: Int,
 ) {
-    private val entries = LinkedHashMap<Long, CachedGeometry>(16, 0.75f, true)
+    private val entries = LinkedHashMap<Long, CachedGeometry>()
     private var totalPoints = 0
 
     val size: Int
@@ -29,7 +32,11 @@ internal class AreaGeometryCache(
      */
     fun getOrPut(id: Long, updatedAt: Instant, parse: () -> AreaGeometry): AreaGeometry {
         val cached = entries[id]
-        if (cached != null && cached.updatedAt == updatedAt) return cached.geometry
+        if (cached != null && cached.updatedAt == updatedAt) {
+            entries.remove(id)
+            entries[id] = cached
+            return cached.geometry
+        }
 
         val geometry = parse()
         entries.remove(id)?.let { totalPoints -= it.geometry.pointCount }
@@ -41,14 +48,9 @@ internal class AreaGeometryCache(
 
     private fun evictToBudget() {
         // Entries iterate least-recently used first, so the eldest are dropped.
-        val iterator = entries.entries.iterator()
-        while (
-            (entries.size > maxEntries || totalPoints > maxPoints) &&
-            entries.size > 1 &&
-            iterator.hasNext()
-        ) {
-            totalPoints -= iterator.next().value.geometry.pointCount
-            iterator.remove()
+        while ((entries.size > maxEntries || totalPoints > maxPoints) && entries.size > 1) {
+            val eldest = entries.keys.first()
+            totalPoints -= entries.remove(eldest)!!.geometry.pointCount
         }
     }
 

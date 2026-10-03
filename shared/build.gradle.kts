@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
+
 plugins {
     alias(libs.plugins.kotlin.multiplatform)
     alias(libs.plugins.android.kotlin.multiplatform.library)
@@ -16,6 +18,14 @@ kotlin {
     }
 
     jvm()
+
+    // The web target the de-JVMing and async data-layer work was for.
+    // Compile-only for now: the browser test environment downloads Node, which
+    // the repository policy blocks, and the Compose UI (which owns the map) has
+    // no Web target yet.
+    @OptIn(ExperimentalWasmDsl::class)
+    wasmJs {
+    }
 
     sourceSets {
         commonMain.dependencies {
@@ -42,6 +52,13 @@ kotlin {
 
         jvmMain.dependencies {
             implementation(libs.ktor.client.cio)
+        }
+
+        getByName("wasmJsMain") {
+            dependencies {
+                // The browser HTTP engine the shared client resolves at runtime.
+                implementation(libs.ktor.client.js)
+            }
         }
 
         jvmTest.dependencies {

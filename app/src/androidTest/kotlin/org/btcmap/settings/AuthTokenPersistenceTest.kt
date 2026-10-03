@@ -1,5 +1,6 @@
 package org.btcmap.settings
 
+import kotlinx.coroutines.runBlocking
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.junit.Assert
 import org.junit.Rule
@@ -13,7 +14,7 @@ class AuthTokenPersistenceTest : AppTestCase() {
     private val prefs get() = preferencesRule.prefs
 
     @Test
-    fun storesTokenInTheDatabase() {
+    fun storesTokenInTheDatabase() = runBlocking<Unit> {
         prefs.setAuthTokenForTesting("secret-token")
 
         Assert.assertEquals("secret-token", prefs.authToken)
@@ -22,7 +23,7 @@ class AuthTokenPersistenceTest : AppTestCase() {
     }
 
     @Test
-    fun clearingTokenSignsOut() {
+    fun clearingTokenSignsOut() = runBlocking<Unit> {
         prefs.setAuthTokenForTesting("secret-token")
 
         prefs.clearSession(databaseRule.db)

@@ -115,7 +115,7 @@ object OfflineRegionEstimates {
 
     private fun latitudeToTile(lat: Double, zoom: Int): Long {
         val clamped = lat.coerceIn(-MAX_MERCATOR_LATITUDE, MAX_MERCATOR_LATITUDE)
-        val radians = Math.toRadians(clamped)
+        val radians = clamped * PI / 180.0
         val tiles = 1L shl zoom
         val mercator = 1.0 - ln(tan(radians) + 1.0 / cos(radians)) / PI
         return floor(mercator / 2.0 * tiles).toLong()

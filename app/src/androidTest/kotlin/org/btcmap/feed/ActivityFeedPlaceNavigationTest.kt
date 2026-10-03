@@ -1,5 +1,6 @@
 package org.btcmap.feed
 
+import kotlinx.coroutines.runBlocking
 import android.os.Bundle
 import androidx.appcompat.widget.Toolbar
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
@@ -38,7 +39,7 @@ class ActivityFeedPlaceNavigationTest : AppTestCase() {
     val composeTestRule = createEmptyComposeRule()
 
     @Test
-    fun tappingRow_opensThePlaceWithItsPreviewMap() {
+    fun tappingRow_opensThePlaceWithItsPreviewMap() = runBlocking<Unit> {
         apiRule.server.dispatcher = object : Dispatcher() {
             override fun dispatch(request: RecordedRequest): MockResponse {
                 return if (request.url.encodedPath == "/v4/activity") {

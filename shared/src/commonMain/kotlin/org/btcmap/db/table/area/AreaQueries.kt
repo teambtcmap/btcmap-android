@@ -11,7 +11,7 @@ import org.btcmap.db.getInstantOrNull
 import kotlin.time.Instant
 
 class AreaQueries(private val conn: SQLiteConnection) {
-    fun insert(rows: List<Area>) {
+    suspend fun insert(rows: List<Area>) {
         if (rows.isEmpty()) return
 
         // OR REPLACE, not a plain INSERT: the delta sync can return the same
@@ -48,7 +48,7 @@ class AreaQueries(private val conn: SQLiteConnection) {
         }
     }
 
-    fun selectById(id: Long): Area? {
+    suspend fun selectById(id: Long): Area? {
         conn.prepare(
             """
             SELECT ${FullProjection.COLUMNS}
@@ -64,7 +64,7 @@ class AreaQueries(private val conn: SQLiteConnection) {
         }
     }
 
-    fun selectBySearchString(searchString: String): List<SearchArea> {
+    suspend fun selectBySearchString(searchString: String): List<SearchArea> {
         // The base name plus the raw `localized_name` JSON, so a query in any
         // cached language matches. The caller re-checks the parsed names, so
         // the JSON match only has to be a superset. Only the fields search
@@ -88,7 +88,7 @@ class AreaQueries(private val conn: SQLiteConnection) {
         }
     }
 
-    fun selectAll(): List<Area> {
+    suspend fun selectAll(): List<Area> {
         conn.prepare(
             """
             SELECT ${FullProjection.COLUMNS}
@@ -111,7 +111,7 @@ class AreaQueries(private val conn: SQLiteConnection) {
      * so the caller has to expand the query box a little to catch areas whose
      * bbox does not contain the point but whose polygon does.
      */
-    fun selectByBbox(
+    suspend fun selectByBbox(
         west: Double,
         south: Double,
         east: Double,
@@ -140,7 +140,7 @@ class AreaQueries(private val conn: SQLiteConnection) {
         }
     }
 
-    fun selectMaxUpdatedAt(): Instant? {
+    suspend fun selectMaxUpdatedAt(): Instant? {
         // See CommentQueries.selectMaxUpdatedAt: text ordering of
         // Instant.toString() values is not chronological.
         conn.prepare(
@@ -165,7 +165,7 @@ class AreaQueries(private val conn: SQLiteConnection) {
      * deleted areas is still already populated and re-seeding it would
      * resurrect areas that were deleted after the snapshot was built.
      */
-    fun selectCount(includeDeleted: Boolean = false): Long {
+    suspend fun selectCount(includeDeleted: Boolean = false): Long {
         val where = if (includeDeleted) "" else " WHERE $DELETED_AT IS NULL"
         conn.prepare("SELECT count(*) FROM $TABLE$where;").use {
             it.step()

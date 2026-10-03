@@ -1,5 +1,6 @@
 package org.btcmap.map
 
+import kotlinx.coroutines.runBlocking
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.btcmap.db.table.area.Area
 import org.btcmap.util.AppTestCase
@@ -12,7 +13,7 @@ import org.junit.runner.RunWith
 class MapAreasControllerTest : AppTestCase() {
 
     @Test
-    fun geometryCache_isBoundedWhenManyAreasAreTouched() {
+    fun geometryCache_isBoundedWhenManyAreasAreTouched() = runBlocking<Unit> {
         val count = MapAreasController.MAX_CACHED_GEOMETRIES + 5
         databaseRule.db.area.insert((1..count).map { area(it.toLong()) })
 
@@ -34,7 +35,7 @@ class MapAreasControllerTest : AppTestCase() {
     }
 
     @Test
-    fun reload_reusesCachedGeometryForUnchangedAreas() {
+    fun reload_reusesCachedGeometryForUnchangedAreas() = runBlocking<Unit> {
         databaseRule.db.area.insert(listOf(area(1L)))
 
         val controller = MapAreasController(db = databaseRule.db)

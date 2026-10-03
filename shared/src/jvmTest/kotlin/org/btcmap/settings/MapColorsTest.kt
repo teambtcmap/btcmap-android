@@ -12,7 +12,7 @@ import org.junit.Test
 class MapColorsTest {
 
     private fun settings(): Settings {
-        val db = Database(BundledSQLiteDriver(), ":memory:")
+        val db = org.btcmap.db.testDatabase()
         return Settings(dbProvider = { db }, legacyValues = { emptyMap() })
     }
 

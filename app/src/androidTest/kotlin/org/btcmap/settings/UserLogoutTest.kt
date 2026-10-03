@@ -1,5 +1,6 @@
 package org.btcmap.settings
 
+import kotlinx.coroutines.runBlocking
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
@@ -33,7 +34,7 @@ class UserLogoutTest : AppTestCase() {
     val composeTestRule = createEmptyComposeRule()
 
     @Test
-    fun logout_clearsLocalSessionAndRevokesTokenServerSide() {
+    fun logout_clearsLocalSessionAndRevokesTokenServerSide() = runBlocking<Unit> {
         prefs.setAuthTokenForTesting("token-1")
         databaseRule.db.user.insert(
             User(
@@ -61,9 +62,9 @@ class UserLogoutTest : AppTestCase() {
                 }
                 composeTestRule.onNodeWithText(logOut).performScrollTo().performClick()
 
-                waitUntil { prefs.authToken == null && databaseRule.db.user.select() == null }
+                waitUntil { prefs.authToken == null && runBlocking { databaseRule.db.user.select() } == null }
 
-                Assert.assertNull(databaseRule.db.user.select())
+                Assert.assertNull(runBlocking { databaseRule.db.user.select() })
                 Assert.assertNull(prefs.authToken)
 
                 val request = waitForSignOutRequest()

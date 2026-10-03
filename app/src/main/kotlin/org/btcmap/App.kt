@@ -11,6 +11,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import okio.Path.Companion.toPath
 import okio.Source
@@ -188,13 +189,13 @@ class App : Application(), SingletonImageLoader.Factory {
         // whole tables, so that case runs on [ioScope] and [databaseReady] holds
         // the first screen back instead of blocking the main thread.
         val databasePath = getDatabasePath(DATABASE_NAME)
-        if (Database.needsMigration(AndroidSQLiteDriver(), databasePath.absolutePath)) {
+        if (runBlocking { Database.needsMigration(AndroidSQLiteDriver(), databasePath.absolutePath) }) {
             ioScope.launch {
                 preloadSettings()
                 databaseReady.complete(Unit)
             }
         } else {
-            preloadSettings()
+            runBlocking { preloadSettings() }
             databaseReady.complete(Unit)
         }
 
@@ -231,8 +232,9 @@ class App : Application(), SingletonImageLoader.Factory {
      * is available without touching the database. A failure leaves the cache
      * empty (the user reads as signed out) instead of crashing the start.
      */
-    private fun preloadSettings() {
+    private suspend fun preloadSettings() {
         try {
+            db.connect()
             prefs.preload()
         } catch (t: Throwable) {
             t.rethrowIfCancellation()

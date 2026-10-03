@@ -1,5 +1,6 @@
 package org.btcmap.db.table.user
 
+import kotlinx.coroutines.runBlocking
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import org.btcmap.db.Database
 import org.junit.Assert
@@ -7,12 +8,12 @@ import org.junit.Test
 
 class UserStoreTest {
 
-    private fun createDatabase(): Database {
-        return Database(BundledSQLiteDriver(), ":memory:")
+    private fun createDatabase(): Database = runBlocking {
+        org.btcmap.db.testDatabase().apply { connect() }
     }
 
     @Test
-    fun insert_and_select() {
+    fun insert_and_select() = runBlocking<Unit> {
         val db = createDatabase()
         val user = createUser(id = 1L, name = "Test User")
 
@@ -25,7 +26,7 @@ class UserStoreTest {
     }
 
     @Test
-    fun insert_and_select_roundTripsRolesAndSavedItems() {
+    fun insert_and_select_roundTripsRolesAndSavedItems() = runBlocking<Unit> {
         val db = createDatabase()
         val user = createUser(
             id = 1L,
@@ -44,7 +45,7 @@ class UserStoreTest {
     }
 
     @Test
-    fun select_returnsNullWhenAbsent() {
+    fun select_returnsNullWhenAbsent() = runBlocking<Unit> {
         val db = createDatabase()
 
         val result = db.user.select()
@@ -53,7 +54,7 @@ class UserStoreTest {
     }
 
     @Test
-    fun select_returnsNullForCorruptJson() {
+    fun select_returnsNullForCorruptJson() = runBlocking<Unit> {
         val db = createDatabase()
         // A value written by an older or broken build must read as "no user"
         // instead of throwing out of a read.
@@ -63,7 +64,7 @@ class UserStoreTest {
     }
 
     @Test
-    fun insert_replacesExistingUser() {
+    fun insert_replacesExistingUser() = runBlocking<Unit> {
         val db = createDatabase()
         val user1 = createUser(id = 1L, name = "Original Name")
         val user2 = createUser(id = 1L, name = "Updated Name")
@@ -77,7 +78,7 @@ class UserStoreTest {
     }
 
     @Test
-    fun delete_removesUser() {
+    fun delete_removesUser() = runBlocking<Unit> {
         val db = createDatabase()
         val user = createUser(id = 1L, name = "Test User")
 
@@ -90,7 +91,7 @@ class UserStoreTest {
     }
 
     @Test
-    fun delete_doesNothingWhenAbsent() {
+    fun delete_doesNothingWhenAbsent() = runBlocking<Unit> {
         val db = createDatabase()
 
         db.user.delete()

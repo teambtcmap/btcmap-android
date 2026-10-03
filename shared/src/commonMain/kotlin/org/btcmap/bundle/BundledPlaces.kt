@@ -2,6 +2,7 @@
 
 package org.btcmap.bundle
 
+import org.btcmap.util.useSource
 import org.btcmap.platform.ioDispatcher
 import androidx.sqlite.execSQL
 import kotlin.time.Duration
@@ -109,7 +110,7 @@ object BundledPlaces {
                     return@withContext
                 }
 
-                source.buffer().use { buffered ->
+                source.buffer().useSource { buffered ->
                     // The indexes are rebuilt once on the finished table:
                     // maintaining the updated_at expression index and the
                     // bounds index for every seeded row costs more than one
@@ -169,7 +170,7 @@ object BundledPlaces {
      * over rows that sync has since refreshed. Counting tombstones also stops a
      * table holding only deleted places from resurrecting them.
      */
-    private fun alreadySeeded(db: Database): Boolean {
+    private suspend fun alreadySeeded(db: Database): Boolean {
         when (db.preference.select(SEED_STATE_KEY)) {
             SEED_COMPLETE -> return true
             SEED_IN_PROGRESS -> {
@@ -187,21 +188,21 @@ object BundledPlaces {
         return false
     }
 
-    private fun insertBatch(db: Database, batch: List<Place>): Long {
+    private suspend fun insertBatch(db: Database, batch: List<Place>): Long {
         db.transaction { db.place.insert(batch) }
         return batch.size.toLong()
     }
 
-    private fun dropPlaceIndexes(db: Database) {
+    private suspend fun dropPlaceIndexes(db: Database) {
         db.transaction { INDEX_NAMES.forEach { db.conn.execSQL("DROP INDEX IF EXISTS $it;") } }
     }
 
-    private fun createPlaceIndexes(db: Database) {
+    private suspend fun createPlaceIndexes(db: Database) {
         db.transaction { CREATE_INDEXES.forEach { db.conn.execSQL(it) } }
     }
 
     /** Best-effort removal of a seed that did not finish, so it is retried. */
-    private fun discardPartialSeed(db: Database) {
+    private suspend fun discardPartialSeed(db: Database) {
         try {
             db.place.deleteAll()
         } catch (t: Exception) {

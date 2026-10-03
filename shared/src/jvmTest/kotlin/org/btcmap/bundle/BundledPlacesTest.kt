@@ -13,7 +13,7 @@ import kotlin.time.Instant
 
 class BundledPlacesTest {
 
-    private fun createDatabase(): Database = Database(BundledSQLiteDriver(), ":memory:")
+    private fun createDatabase(): Database = org.btcmap.db.testDatabase()
 
     private fun place(id: Long, deletedAt: Instant? = null) = Place(
         id = id,

@@ -1,5 +1,6 @@
 package org.btcmap.area
 
+import kotlinx.coroutines.runBlocking
 import android.view.View
 import androidx.appcompat.widget.Toolbar
 import androidx.compose.ui.test.assertTextContains
@@ -36,7 +37,7 @@ class AreaContentTest : AreaScreenTest() {
     val composeTestRule = createEmptyComposeRule()
 
     @Test
-    fun loadSuccess_showsTitleDescriptionAndWebsite() {
+    fun loadSuccess_showsTitleDescriptionAndWebsite() = runBlocking<Unit> {
         apiRule.server.dispatcher = areaDispatcher()
         databaseRule.db.area.insert(listOf(area(description = "Greater Paris")))
 
@@ -60,7 +61,7 @@ class AreaContentTest : AreaScreenTest() {
     }
 
     @Test
-    fun singleParagraphDescription_hidesReadMoreToggle() {
+    fun singleParagraphDescription_hidesReadMoreToggle() = runBlocking<Unit> {
         apiRule.server.dispatcher = areaDispatcher()
         databaseRule.db.area.insert(listOf(area(description = "Greater Paris")))
 
@@ -73,7 +74,7 @@ class AreaContentTest : AreaScreenTest() {
     }
 
     @Test
-    fun multiParagraphDescription_canBeExpandedAndCollapsed() {
+    fun multiParagraphDescription_canBeExpandedAndCollapsed() = runBlocking<Unit> {
         apiRule.server.dispatcher = areaDispatcher()
         databaseRule.db.area.insert(
             listOf(area(description = "First paragraph.\n\nSecond paragraph.")),
@@ -100,7 +101,7 @@ class AreaContentTest : AreaScreenTest() {
     }
 
     @Test
-    fun upcomingEvents_areSortedAscendingAndPastEventsHidden() {
+    fun upcomingEvents_areSortedAscendingAndPastEventsHidden() = runBlocking<Unit> {
         apiRule.server.dispatcher = areaDispatcher()
         databaseRule.db.area.insert(listOf(area()))
         databaseRule.db.event.insert(
@@ -121,7 +122,7 @@ class AreaContentTest : AreaScreenTest() {
     }
 
     @Test
-    fun noUpcomingEvents_hidesEventsSection() {
+    fun noUpcomingEvents_hidesEventsSection() = runBlocking<Unit> {
         apiRule.server.dispatcher = areaDispatcher()
         databaseRule.db.area.insert(listOf(area()))
 
@@ -133,7 +134,7 @@ class AreaContentTest : AreaScreenTest() {
     }
 
     @Test
-    fun clickingUpcomingEvent_opensEventScreen() {
+    fun clickingUpcomingEvent_opensEventScreen() = runBlocking<Unit> {
         apiRule.server.dispatcher = areaDispatcher()
         databaseRule.db.area.insert(listOf(area()))
         databaseRule.db.event.insert(
@@ -156,7 +157,7 @@ class AreaContentTest : AreaScreenTest() {
     }
 
     @Test
-    fun placeIssues_renderCardsAndTruncatedCount() {
+    fun placeIssues_renderCardsAndTruncatedCount() = runBlocking<Unit> {
         apiRule.server.dispatcher = areaDispatcher(
             issuesBody = issuesJson(
                 total = 5,
@@ -179,7 +180,7 @@ class AreaContentTest : AreaScreenTest() {
     }
 
     @Test
-    fun placeIssues_fullCountHasNoTruncationSuffix() {
+    fun placeIssues_fullCountHasNoTruncationSuffix() = runBlocking<Unit> {
         apiRule.server.dispatcher = areaDispatcher(
             issuesBody = issuesJson(
                 total = 1,
@@ -198,7 +199,7 @@ class AreaContentTest : AreaScreenTest() {
     }
 
     @Test
-    fun placeIssues_parameterizedAndUnknownCodesAreRendered() {
+    fun placeIssues_parameterizedAndUnknownCodesAreRendered() = runBlocking<Unit> {
         apiRule.server.dispatcher = areaDispatcher(
             issuesBody = issuesJson(
                 total = 2,
@@ -217,7 +218,7 @@ class AreaContentTest : AreaScreenTest() {
     }
 
     @Test
-    fun noPlaceIssues_hidesIssuesSection() {
+    fun noPlaceIssues_hidesIssuesSection() = runBlocking<Unit> {
         apiRule.server.dispatcher = areaDispatcher(issuesBody = EMPTY_ISSUES_JSON)
         databaseRule.db.area.insert(listOf(area()))
 
@@ -229,7 +230,7 @@ class AreaContentTest : AreaScreenTest() {
     }
 
     @Test
-    fun headerImage_isHiddenWhenAreaHasNoIcon() {
+    fun headerImage_isHiddenWhenAreaHasNoIcon() = runBlocking<Unit> {
         apiRule.server.dispatcher = areaDispatcher()
         databaseRule.db.area.insert(listOf(area(icon = null)))
 
@@ -241,7 +242,7 @@ class AreaContentTest : AreaScreenTest() {
     }
 
     @Test
-    fun headerImage_isShownWhenAreaHasIcon() {
+    fun headerImage_isShownWhenAreaHasIcon() = runBlocking<Unit> {
         apiRule.server.dispatcher = areaDispatcher()
         databaseRule.db.area.insert(
             listOf(area(icon = "https://example.com/icon.png")),
@@ -257,7 +258,7 @@ class AreaContentTest : AreaScreenTest() {
     }
 
     @Test
-    fun boostedMerchants_renderOnlyActiveBoosts() {
+    fun boostedMerchants_renderOnlyActiveBoosts() = runBlocking<Unit> {
         apiRule.server.dispatcher = areaDispatcher()
         databaseRule.db.area.insert(listOf(area()))
         databaseRule.db.place.insert(
@@ -300,7 +301,7 @@ class AreaContentTest : AreaScreenTest() {
     }
 
     @Test
-    fun noBoostedMerchants_hidesBoostedSection() {
+    fun noBoostedMerchants_hidesBoostedSection() = runBlocking<Unit> {
         apiRule.server.dispatcher = areaDispatcher()
         databaseRule.db.area.insert(listOf(area()))
         databaseRule.db.place.insert(

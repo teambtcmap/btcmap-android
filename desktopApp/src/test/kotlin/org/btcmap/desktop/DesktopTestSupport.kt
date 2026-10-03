@@ -1,5 +1,6 @@
 package org.btcmap.desktop
 
+import kotlinx.coroutines.runBlocking
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import org.btcmap.api.Api
 import org.btcmap.api.apiHttpClient
@@ -15,11 +16,13 @@ import java.nio.file.Files
  * through without a server or a window.
  */
 
-internal fun testDatabase(): Database =
-    Database(BundledSQLiteDriver(), Files.createTempFile("desktop-test", ".db").toString())
+internal fun testDatabase(): Database = runBlocking {
+    Database(BundledSQLiteDriver(), Files.createTempFile("desktop-test", ".db").toString()).apply { connect() }
+}
 
-internal fun testSettings(db: Database): Settings =
+internal fun testSettings(db: Database): Settings = runBlocking {
     Settings(dbProvider = { db }, legacyValues = { emptyMap() }).apply { preload() }
+}
 
 internal fun testApi(): Api = Api(
     httpClient = apiHttpClient("btcmap-desktop-test"),

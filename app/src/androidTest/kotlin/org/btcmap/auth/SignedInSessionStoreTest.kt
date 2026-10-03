@@ -24,7 +24,7 @@ class SignedInSessionStoreTest : AppTestCase() {
     private val prefs get() = preferencesRule.prefs
 
     @Test
-    fun storesTokenAndCachedUser() = runBlocking {
+    fun storesTokenAndCachedUser() = runBlocking<Unit> {
         storeSignedInSession(databaseRule.db, prefs, response("token-1"))
 
         Assert.assertEquals("token-1", prefs.authToken)
@@ -35,7 +35,7 @@ class SignedInSessionStoreTest : AppTestCase() {
     }
 
     @Test
-    fun replacesCachedUserWhenSigningInAsDifferentAccount() = runBlocking {
+    fun replacesCachedUserWhenSigningInAsDifferentAccount() = runBlocking<Unit> {
         // A stale row from an earlier session must not survive a sign-in as a
         // different account: the table is keyed by user id and select() has no
         // ordering, so a leftover row could otherwise be shown instead.
@@ -50,7 +50,7 @@ class SignedInSessionStoreTest : AppTestCase() {
     }
 
     @Test
-    fun rollsBackTokenWhenCachedUserCannotBeStored() = runBlocking {
+    fun rollsBackTokenWhenCachedUserCannotBeStored() = runBlocking<Unit> {
         val db = Database(FailingUserInsertDriver(), ":memory:")
 
         val error = try {
@@ -66,7 +66,7 @@ class SignedInSessionStoreTest : AppTestCase() {
     }
 
     @Test
-    fun restoresPreviousSessionWhenCachedUserCannotBeStored() = runBlocking {
+    fun restoresPreviousSessionWhenCachedUserCannotBeStored() = runBlocking<Unit> {
         // Both the token and the cached user of the previous session must come
         // back when storing the new cached user fails, instead of the user being
         // silently signed out.

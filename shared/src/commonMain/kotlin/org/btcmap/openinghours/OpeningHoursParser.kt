@@ -143,7 +143,9 @@ private fun String.toMinutes(): Int? {
 }
 
 private fun formatMinutes(minutes: Int): String =
-    "%02d:%02d".format(minutes / 60, minutes % 60)
+    "${pad2(minutes / 60)}:${pad2(minutes % 60)}"
+
+private fun pad2(value: Int): String = if (value < 10) "0$value" else value.toString()
 
 private const val DAY_MINUTES = 24 * 60
 
@@ -442,7 +444,7 @@ private fun normalizeTime(value: String): String? {
     val minutes = parts.getOrNull(1)?.toIntOrNull() ?: return null
     if (hours !in 0..24 || minutes !in 0..59) return null
     if (hours == 24 && minutes != 0) return null
-    return "%02d:%02d".format(hours, minutes)
+    return "${pad2(hours)}:${pad2(minutes)}"
 }
 
 private fun String.normalizePunctuation(): String = buildString(length) {

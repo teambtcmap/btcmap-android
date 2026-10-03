@@ -114,7 +114,7 @@ class Sync(val api: Api, val db: Database) {
         cursor: suspend () -> Instant?,
         fetch: suspend (since: Instant?, limit: Long) -> List<T>,
         updatedAt: (T) -> String,
-        apply: (List<T>) -> Unit,
+        apply: suspend (List<T>) -> Unit,
     ): Report = withContext(ioDispatcher) {
         val startedAt = Clock.System.now()
         var rowsAffected = 0L

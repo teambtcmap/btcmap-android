@@ -14,11 +14,11 @@ import org.btcmap.json.btcmapJson
  */
 class UserStore(private val preference: PreferenceQueries) {
 
-    fun insert(user: User) {
+    suspend fun insert(user: User) {
         preference.upsert(KEY, btcmapJson.encodeToString(user))
     }
 
-    fun select(): User? {
+    suspend fun select(): User? {
         val json = preference.select(KEY) ?: return null
         // Corrupt or pre-format JSON is treated as absent, like a missing
         // session, instead of throwing out of settings preload (which swallows
@@ -26,7 +26,7 @@ class UserStore(private val preference: PreferenceQueries) {
         return runCatching { btcmapJson.decodeFromString<User>(json) }.getOrNull()
     }
 
-    fun delete() {
+    suspend fun delete() {
         preference.delete(KEY)
     }
 

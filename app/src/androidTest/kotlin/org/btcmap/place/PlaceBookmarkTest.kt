@@ -1,5 +1,6 @@
 package org.btcmap.place
 
+import kotlinx.coroutines.runBlocking
 import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.commitNow
 import androidx.fragment.app.replace
@@ -40,7 +41,7 @@ class PlaceBookmarkTest : AppTestCase() {
     private val app = ApplicationProvider.getApplicationContext<App>()
 
     @Test
-    fun save_whenAuthorized_postsToApiAndPersistsPlace() {
+    fun save_whenAuthorized_postsToApiAndPersistsPlace() = runBlocking<Unit> {
         preferencesRule.prefs.setAuthTokenForTesting("test-token")
         databaseRule.db.user.insert(user(savedPlaceIds = emptyList()))
         val posted = AtomicBoolean(false)
@@ -67,7 +68,7 @@ class PlaceBookmarkTest : AppTestCase() {
     }
 
     @Test
-    fun save_whenAlreadySaved_deletesFromApiAndPersistsChange() {
+    fun save_whenAlreadySaved_deletesFromApiAndPersistsChange() = runBlocking<Unit> {
         preferencesRule.prefs.setAuthTokenForTesting("test-token")
         databaseRule.db.user.insert(user(savedPlaceIds = listOf(1)))
         val deleted = AtomicBoolean(false)
@@ -94,7 +95,7 @@ class PlaceBookmarkTest : AppTestCase() {
     }
 
     @Test
-    fun save_whenUnauthorized_showsAuthDialogAndDoesNotCallApi() {
+    fun save_whenUnauthorized_showsAuthDialogAndDoesNotCallApi() = runBlocking<Unit> {
         val saving = AtomicBoolean(false)
         apiRule.server.dispatcher = object : Dispatcher() {
             override fun dispatch(request: RecordedRequest): MockResponse {
@@ -147,7 +148,7 @@ class PlaceBookmarkTest : AppTestCase() {
     }
 
     private fun savedPlaceIds(): List<Long> {
-        return databaseRule.db.user.select()
+        return runBlocking { databaseRule.db.user.select() }
             ?.savedPlaces
             ?.map { it.id }
             .orEmpty()

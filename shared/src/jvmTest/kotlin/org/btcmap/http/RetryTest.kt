@@ -41,7 +41,7 @@ class RetryTest {
     }
 
     @Test
-    fun retriesIdempotentRequestAfter429() = runBlocking {
+    fun retriesIdempotentRequestAfter429() = runBlocking<Unit> {
         server().enqueue(retryableResponse())
         server().enqueue(MockResponse.Builder().body("ok").build())
 
@@ -52,7 +52,7 @@ class RetryTest {
     }
 
     @Test
-    fun stopsAfterMaxRetryAttempts() = runBlocking {
+    fun stopsAfterMaxRetryAttempts() = runBlocking<Unit> {
         repeat(11) { server().enqueue(retryableResponse(retryAfter = "0")) }
 
         val response = client().executeIdempotent(HttpMethod.Get, url("/x"))
@@ -62,7 +62,7 @@ class RetryTest {
     }
 
     @Test
-    fun doesNotRetryNonIdempotentRequest() = runBlocking {
+    fun doesNotRetryNonIdempotentRequest() = runBlocking<Unit> {
         server().enqueue(retryableResponse())
 
         val response = client().executeIdempotent(HttpMethod.Post, url("/x"))
@@ -72,7 +72,7 @@ class RetryTest {
     }
 
     @Test
-    fun doesNotRetryWhenRetryAfterExceedsMaxDelay() = runBlocking {
+    fun doesNotRetryWhenRetryAfterExceedsMaxDelay() = runBlocking<Unit> {
         server().enqueue(retryableResponse(retryAfter = "120"))
 
         val response = client().executeIdempotent(HttpMethod.Get, url("/x"))
@@ -82,7 +82,7 @@ class RetryTest {
     }
 
     @Test
-    fun stopsRetryingWhenTheCallerIsCancelled() = runBlocking {
+    fun stopsRetryingWhenTheCallerIsCancelled() = runBlocking<Unit> {
         server().enqueue(retryableResponse(retryAfter = "30"))
         server().enqueue(MockResponse.Builder().body("ok").build())
 

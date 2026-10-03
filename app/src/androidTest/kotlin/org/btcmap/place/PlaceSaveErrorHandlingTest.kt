@@ -1,5 +1,6 @@
 package org.btcmap.place
 
+import kotlinx.coroutines.runBlocking
 import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.commitNow
 import androidx.fragment.app.replace
@@ -25,14 +26,14 @@ class PlaceSaveErrorHandlingTest : AppTestCase() {
     private val app = ApplicationProvider.getApplicationContext<App>()
 
     @Test
-    fun load_whenUserMissingFromDatabase_doesNotLeakUncaughtException() {
+    fun load_whenUserMissingFromDatabase_doesNotLeakUncaughtException() = runBlocking<Unit> {
         preferencesRule.prefs.setAuthTokenForTesting("test-token")
 
         withPlaceFragment { }
     }
 
     @Test
-    fun save_whenApiFails_doesNotLeakUncaughtException() {
+    fun save_whenApiFails_doesNotLeakUncaughtException() = runBlocking<Unit> {
         preferencesRule.prefs.setAuthTokenForTesting("test-token")
         databaseRule.db.user.insert(user())
 

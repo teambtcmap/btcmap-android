@@ -21,7 +21,7 @@ class StoreSignedInSessionTest {
 
     @Test
     fun storesTokenUserAndSavedItems() = runTest {
-        val db = Database(BundledSQLiteDriver(), ":memory:")
+        val db = org.btcmap.db.testDatabase()
         val settings = createSettings(db)
 
         storeSignedInSession(
@@ -52,7 +52,7 @@ class StoreSignedInSessionTest {
 
     @Test
     fun replacesThePreviousAccount() = runTest {
-        val db = Database(BundledSQLiteDriver(), ":memory:")
+        val db = org.btcmap.db.testDatabase()
         val settings = createSettings(db)
 
         storeSignedInSession(db, settings, response(token = "old-token", userId = 1, name = "satoshi"))

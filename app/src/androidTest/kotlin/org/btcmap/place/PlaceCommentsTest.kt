@@ -1,5 +1,6 @@
 package org.btcmap.place
 
+import kotlinx.coroutines.runBlocking
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onAllNodesWithText
@@ -38,7 +39,7 @@ class PlaceCommentsTest : AppTestCase() {
     val composeTestRule = createEmptyComposeRule()
 
     @Test
-    fun storedComments_arePreviewedInline() {
+    fun storedComments_arePreviewedInline() = runBlocking<Unit> {
         databaseRule.db.comment.insert(
             listOf(
                 comment(1L, "First", "2024-06-01T10:00:00Z"),
@@ -56,7 +57,7 @@ class PlaceCommentsTest : AppTestCase() {
     }
 
     @Test
-    fun addCommentButton_opensTheAddScreen() {
+    fun addCommentButton_opensTheAddScreen() = runBlocking<Unit> {
         // A valid quote keeps the add screen open; otherwise it pops itself as
         // soon as the quote fails to load.
         apiRule.server.dispatcher = object : Dispatcher() {

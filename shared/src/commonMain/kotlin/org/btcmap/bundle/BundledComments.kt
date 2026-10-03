@@ -2,6 +2,7 @@
 
 package org.btcmap.bundle
 
+import org.btcmap.util.useSource
 import org.btcmap.platform.ioDispatcher
 import kotlin.time.Duration
 import kotlin.time.TimeSource
@@ -79,7 +80,7 @@ object BundledComments {
                     return@withContext
                 }
 
-                source.buffer().use { buffered ->
+                source.buffer().useSource { buffered ->
                     db.transaction {
                         var batch = mutableListOf<Comment>()
                         for (record in btcmapJson.decodeBufferedSourceToSequence<BundledCommentJson>(

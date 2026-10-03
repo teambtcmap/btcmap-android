@@ -1,5 +1,6 @@
 package org.btcmap.map
 
+import org.btcmap.platform.withLock
 import org.btcmap.platform.ioDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -44,6 +45,8 @@ class MapAreasController(
     // id and invalidated on updated_at. The access-ordered LRU is bounded by
     // both entry count and total points so a long session, or areas deleted
     // server-side, cannot grow it without limit.
+    private val geometryLock = org.btcmap.platform.PlatformLock()
+
     private val geometryCache = AreaGeometryCache(
         maxEntries = MAX_CACHED_GEOMETRIES,
         maxPoints = MAX_CACHED_GEOMETRY_POINTS,
@@ -81,7 +84,7 @@ class MapAreasController(
         scope.cancel()
     }
 
-    private fun lookup(lat: Double, lon: Double): List<MapArea> {
+    private suspend fun lookup(lat: Double, lon: Double): List<MapArea> {
         val contained = db.area.selectByBbox(
             west = lon - BBOX_EXPANSION,
             south = lat - BBOX_EXPANSION,
@@ -116,21 +119,21 @@ class MapAreasController(
         // Synchronized: a superseded lookup keeps running after cancel (the
         // nullary work does not suspend), so two lookups can touch the cache at
         // once. Holding the lock while parsing also avoids parsing twice.
-        return synchronized(geometryCache) {
+        return geometryLock.withLock {
             geometryCache.getOrPut(area.id, area.updatedAt) { area.geoJsonGeometry() }
         }
     }
 
     /** The number of cached geometries; exposed so tests can assert the cap. */
     val cachedGeometryCount: Int
-        get() = synchronized(geometryCache) { geometryCache.size }
+        get() = geometryLock.withLock { geometryCache.size }
 
     /**
      * Counts the upcoming events whose location falls inside each area,
      * mirroring the server: pre-filter by the union bounding box, then run the
      * precise point-in-polygon test per area.
      */
-    private fun upcomingEventCounts(areas: List<Pair<Area, AreaGeometry>>): Map<Long, Int> {
+    private suspend fun upcomingEventCounts(areas: List<Pair<Area, AreaGeometry>>): Map<Long, Int> {
         val west = areas.mapNotNull { it.first.bboxWest }.minOrNull() ?: return emptyMap()
         val south = areas.mapNotNull { it.first.bboxSouth }.minOrNull() ?: return emptyMap()
         val east = areas.mapNotNull { it.first.bboxEast }.maxOrNull() ?: return emptyMap()

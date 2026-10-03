@@ -1,5 +1,6 @@
 package org.btcmap.area
 
+import kotlinx.coroutines.runBlocking
 import androidx.lifecycle.Lifecycle
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import mockwebserver3.Dispatcher
@@ -15,7 +16,7 @@ import java.util.concurrent.CountDownLatch
 class AreaCancellationTest : AreaScreenTest() {
 
     @Test
-    fun destroyingViewDuringIssuesLoad_doesNotRunErrorHandling() {
+    fun destroyingViewDuringIssuesLoad_doesNotRunErrorHandling() = runBlocking<Unit> {
         databaseRule.db.area.insert(listOf(area()))
         val release = CountDownLatch(1)
         apiRule.server.dispatcher = object : Dispatcher() {

@@ -1,5 +1,6 @@
 package org.btcmap.util
 
+import kotlinx.coroutines.runBlocking
 import androidx.sqlite.driver.AndroidSQLiteDriver
 import androidx.test.core.app.ApplicationProvider
 import org.btcmap.App

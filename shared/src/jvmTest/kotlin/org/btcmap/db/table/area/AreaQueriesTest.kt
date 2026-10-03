@@ -1,5 +1,6 @@
 package org.btcmap.db.table.area
 
+import kotlinx.coroutines.runBlocking
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import org.btcmap.json.parseJsonObject
 import org.btcmap.db.Database
@@ -8,8 +9,8 @@ import org.junit.Test
 import kotlin.time.Instant
 
 class AreaQueriesTest {
-    private fun createDatabase(): Database {
-        return Database(BundledSQLiteDriver(), ":memory:")
+    private fun createDatabase(): Database = runBlocking {
+        org.btcmap.db.testDatabase().apply { connect() }
     }
 
     private fun area(
@@ -39,7 +40,7 @@ class AreaQueriesTest {
     }
 
     @Test
-    fun insert_and_selectById() {
+    fun insert_and_selectById() = runBlocking<Unit> {
         val db = createDatabase()
 
         db.area.insert(listOf(area(7L)))
@@ -55,7 +56,7 @@ class AreaQueriesTest {
     }
 
     @Test
-    fun insert_and_selectLocalizedMaps() {
+    fun insert_and_selectLocalizedMaps() = runBlocking<Unit> {
         val db = createDatabase()
         val nameTranslations =
             parseJsonObject("""{"en":"Grand Paris","ru":"Большой Париж"}""")
@@ -77,7 +78,7 @@ class AreaQueriesTest {
     }
 
     @Test
-    fun insert_and_selectGeoJson() {
+    fun insert_and_selectGeoJson() = runBlocking<Unit> {
         val db = createDatabase()
         val polygon = """{"type":"Feature","properties":{},"geometry":{"type":"Polygon","coordinates":[[[2.22,48.81],[2.47,48.81],[2.47,48.91],[2.22,48.81]]]}}"""
 
@@ -88,7 +89,7 @@ class AreaQueriesTest {
     }
 
     @Test
-    fun insert_handlesNullOptionalFields() {
+    fun insert_handlesNullOptionalFields() = runBlocking<Unit> {
         val db = createDatabase()
         val row = area(7L).copy(
             icon = null,
@@ -113,7 +114,7 @@ class AreaQueriesTest {
     }
 
     @Test
-    fun insert_replacesExistingRow() {
+    fun insert_replacesExistingRow() = runBlocking<Unit> {
         val db = createDatabase()
 
         db.area.insert(listOf(area(7L, name = "Old")))
@@ -124,7 +125,7 @@ class AreaQueriesTest {
     }
 
     @Test
-    fun selectById_hidesTombstones() {
+    fun selectById_hidesTombstones() = runBlocking<Unit> {
         val db = createDatabase()
         db.area.insert(listOf(area(7L, deletedAt = Instant.parse("2024-02-01T00:00:00Z"))))
 
@@ -141,7 +142,7 @@ class AreaQueriesTest {
     }
 
     @Test
-    fun selectBySearchString_matchesNameSubstring() {
+    fun selectBySearchString_matchesNameSubstring() = runBlocking<Unit> {
         val db = createDatabase()
         db.area.insert(listOf(area(1L, name = "Grand Paris"), area(2L, name = "Berlin")))
 
@@ -152,7 +153,7 @@ class AreaQueriesTest {
     }
 
     @Test
-    fun selectBySearchString_isCaseInsensitive() {
+    fun selectBySearchString_isCaseInsensitive() = runBlocking<Unit> {
         val db = createDatabase()
         db.area.insert(listOf(area(1L, name = "Grand Paris")))
 
@@ -162,7 +163,7 @@ class AreaQueriesTest {
     }
 
     @Test
-    fun selectBySearchString_returnsEmptyWhenNoMatch() {
+    fun selectBySearchString_returnsEmptyWhenNoMatch() = runBlocking<Unit> {
         val db = createDatabase()
         db.area.insert(listOf(area(1L, name = "Grand Paris")))
 
@@ -170,7 +171,7 @@ class AreaQueriesTest {
     }
 
     @Test
-    fun selectBySearchString_hidesTombstones() {
+    fun selectBySearchString_hidesTombstones() = runBlocking<Unit> {
         val db = createDatabase()
         db.area.insert(
             listOf(area(1L, name = "Grand Paris", deletedAt = Instant.parse("2024-02-01T00:00:00Z")))
@@ -180,7 +181,7 @@ class AreaQueriesTest {
     }
 
     @Test
-    fun selectBySearchString_matchesLocalizedName() {
+    fun selectBySearchString_matchesLocalizedName() = runBlocking<Unit> {
         val db = createDatabase()
         db.area.insert(
             listOf(
@@ -197,7 +198,7 @@ class AreaQueriesTest {
     }
 
     @Test
-    fun selectBySearchString_doesNotMatchAnUnrelatedLocalizedMap() {
+    fun selectBySearchString_doesNotMatchAnUnrelatedLocalizedMap() = runBlocking<Unit> {
         val db = createDatabase()
         db.area.insert(
             listOf(
@@ -211,7 +212,7 @@ class AreaQueriesTest {
     }
 
     @Test
-    fun selectByBbox_returnsOnlyOverlappingVisibleAreas() {
+    fun selectByBbox_returnsOnlyOverlappingVisibleAreas() = runBlocking<Unit> {
         val db = createDatabase()
         db.area.insert(
             listOf(
@@ -232,7 +233,7 @@ class AreaQueriesTest {
     }
 
     @Test
-    fun selectByBbox_skipsRowsWithoutBbox() {
+    fun selectByBbox_skipsRowsWithoutBbox() = runBlocking<Unit> {
         val db = createDatabase()
         db.area.insert(
             listOf(
@@ -251,7 +252,7 @@ class AreaQueriesTest {
     }
 
     @Test
-    fun selectMaxUpdatedAt_returnsLatestEvenWithTombstones() {
+    fun selectMaxUpdatedAt_returnsLatestEvenWithTombstones() = runBlocking<Unit> {
         val db = createDatabase()
         db.area.insert(
             listOf(
@@ -268,7 +269,7 @@ class AreaQueriesTest {
     }
 
     @Test
-    fun selectMaxUpdatedAt_isNullWhenEmpty() {
+    fun selectMaxUpdatedAt_isNullWhenEmpty() = runBlocking<Unit> {
         val db = createDatabase()
 
         Assert.assertNull(db.area.selectMaxUpdatedAt())

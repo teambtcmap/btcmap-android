@@ -4,7 +4,7 @@ import androidx.sqlite.SQLiteConnection
 
 class PreferenceQueries(private val conn: SQLiteConnection) {
 
-    fun selectAll(): Map<String, String> {
+    suspend fun selectAll(): Map<String, String> {
         val rows = LinkedHashMap<String, String>()
         conn.prepare(
             """
@@ -19,7 +19,7 @@ class PreferenceQueries(private val conn: SQLiteConnection) {
         return rows
     }
 
-    fun select(key: String): String? {
+    suspend fun select(key: String): String? {
         return conn.prepare(
             """
             SELECT $VALUE
@@ -32,7 +32,7 @@ class PreferenceQueries(private val conn: SQLiteConnection) {
         }
     }
 
-    fun upsert(key: String, value: String) {
+    suspend fun upsert(key: String, value: String) {
         conn.prepare(
             """
             INSERT OR REPLACE INTO $TABLE ($KEY, $VALUE)
@@ -45,7 +45,7 @@ class PreferenceQueries(private val conn: SQLiteConnection) {
         }
     }
 
-    fun delete(key: String) {
+    suspend fun delete(key: String) {
         conn.prepare(
             """
             DELETE FROM $TABLE
@@ -57,7 +57,7 @@ class PreferenceQueries(private val conn: SQLiteConnection) {
         }
     }
 
-    fun deleteAll() {
+    suspend fun deleteAll() {
         conn.prepare("DELETE FROM $TABLE;").use { it.step() }
     }
 }

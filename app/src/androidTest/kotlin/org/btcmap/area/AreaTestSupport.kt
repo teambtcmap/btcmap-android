@@ -1,5 +1,6 @@
 package org.btcmap.area
 
+import kotlinx.coroutines.runBlocking
 import android.os.Bundle
 import androidx.fragment.app.commit
 import androidx.fragment.app.replace

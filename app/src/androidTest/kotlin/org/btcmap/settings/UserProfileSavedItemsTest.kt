@@ -1,5 +1,6 @@
 package org.btcmap.settings
 
+import kotlinx.coroutines.runBlocking
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
 import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onAllNodesWithText
@@ -40,7 +41,7 @@ class UserProfileSavedItemsTest : AppTestCase() {
     private val app = ApplicationProvider.getApplicationContext<App>()
 
     @Test
-    fun deleteSavedPlace_updatesListFromResponseWithoutRefetchingUser() {
+    fun deleteSavedPlace_updatesListFromResponseWithoutRefetchingUser() = runBlocking<Unit> {
         preferencesRule.prefs.setAuthTokenForTesting("test-token")
         databaseRule.db.user.insert(user(savedPlaces = listOf(1L to "One", 2L to "Two")))
         val userFetches = AtomicInteger(0)
@@ -73,7 +74,7 @@ class UserProfileSavedItemsTest : AppTestCase() {
     }
 
     @Test
-    fun deleteSavedArea_updatesListFromResponse() {
+    fun deleteSavedArea_updatesListFromResponse() = runBlocking<Unit> {
         preferencesRule.prefs.setAuthTokenForTesting("test-token")
         databaseRule.db.user.insert(user(savedAreas = listOf(10L to "Grand Paris", 11L to "Other")))
         apiRule.server.dispatcher = object : Dispatcher() {
@@ -96,7 +97,7 @@ class UserProfileSavedItemsTest : AppTestCase() {
     }
 
     @Test
-    fun deleteSavedPlace_whenServerReturnsUnknownId_refetchesUser() {
+    fun deleteSavedPlace_whenServerReturnsUnknownId_refetchesUser() = runBlocking<Unit> {
         preferencesRule.prefs.setAuthTokenForTesting("test-token")
         databaseRule.db.user.insert(user(savedPlaces = listOf(1L to "One")))
         val userFetches = AtomicInteger(0)
@@ -124,7 +125,7 @@ class UserProfileSavedItemsTest : AppTestCase() {
 
             waitUntil { savedPlaceIds() == listOf(2L) }
             waitUntil { userFetches.get() == 1 }
-            Assert.assertEquals("Other", databaseRule.db.user.select()?.savedPlaces?.single()?.name)
+            Assert.assertEquals("Other", runBlocking { databaseRule.db.user.select() }?.savedPlaces?.single()?.name)
         }
     }
 
@@ -160,11 +161,11 @@ class UserProfileSavedItemsTest : AppTestCase() {
     }
 
     private fun savedPlaceIds(): List<Long> {
-        return databaseRule.db.user.select()?.savedPlaces?.map { it.id }.orEmpty()
+        return runBlocking { databaseRule.db.user.select() }?.savedPlaces?.map { it.id }.orEmpty()
     }
 
     private fun savedAreaIds(): List<Long> {
-        return databaseRule.db.user.select()?.savedAreas?.map { it.id }.orEmpty()
+        return runBlocking { databaseRule.db.user.select() }?.savedAreas?.map { it.id }.orEmpty()
     }
 
     private fun user(

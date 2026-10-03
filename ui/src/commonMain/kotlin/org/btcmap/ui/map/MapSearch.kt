@@ -1,5 +1,6 @@
 package org.btcmap.ui.map
 
+import org.btcmap.ui.runDbBlocking
 import kotlin.time.Clock
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -90,7 +91,7 @@ internal fun search(
 ): List<SearchAdapterItem> {
     val now = Clock.System.now()
 
-    val areas = db.area.selectBySearchString(query).mapNotNull { area ->
+    val areas = runDbBlocking { db.area.selectBySearchString(query) }.mapNotNull { area ->
         val bbox = area.searchBbox()
         val center = bbox?.let { (it[1] + it[3]) / 2 to (it[0] + it[2]) / 2 }
 
@@ -107,7 +108,7 @@ internal fun search(
         }
     }
 
-    val places = db.place.selectBySearchString(query).mapNotNull { place ->
+    val places = runDbBlocking { db.place.selectBySearchString(query) }.mapNotNull { place ->
         val boosted = place.isBoosted(now)
         localMatch(
             query = query,
@@ -128,7 +129,7 @@ internal fun search(
         }
     }
 
-    val events = db.event.selectBySearchString(query)
+    val events = runDbBlocking { db.event.selectBySearchString(query) }
         .filter { it.startsAt.isUpcoming(now) }
         .mapNotNull { event ->
             localMatch(

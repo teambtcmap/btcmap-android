@@ -19,7 +19,7 @@ import kotlin.time.Instant
 private const val MAX_QUERY_VARIABLES = 900
 
 class PlaceQueries(private val conn: SQLiteConnection) {
-    fun insert(rows: List<Place>) {
+    suspend fun insert(rows: List<Place>) {
         conn.prepare(
             """
             INSERT OR REPLACE INTO $TABLE ($ID, $UPDATED_AT, $LAT, $LON, $ICON, $NAME, $LOCALIZED_NAME, $VERIFIED_AT, $ADDRESS, $OPENING_HOURS, $PHONE, $WEBSITE, $EMAIL, $TWITTER, $FACEBOOK, $INSTAGRAM, $LINE, $REQUIRED_APP_URL, $BOOSTED_UNTIL, $COMMENTS, $TELEGRAM, $OSM_ID, $DELETED_AT)
@@ -56,7 +56,7 @@ class PlaceQueries(private val conn: SQLiteConnection) {
         }
     }
 
-    fun selectById(id: Long): Place? {
+    suspend fun selectById(id: Long): Place? {
         conn.prepare(
             """
                 SELECT ${FullProjection.COLUMNS}
@@ -78,7 +78,7 @@ class PlaceQueries(private val conn: SQLiteConnection) {
      * as resolving the OSM link for a delete entry in the activity feed, needs
      * the tombstone's last-known data.
      */
-    fun selectByIdIncludingDeleted(id: Long): Place? {
+    suspend fun selectByIdIncludingDeleted(id: Long): Place? {
         conn.prepare(
             """
                 SELECT ${FullProjection.COLUMNS}
@@ -94,7 +94,7 @@ class PlaceQueries(private val conn: SQLiteConnection) {
         }
     }
 
-    fun selectByOsmId(osmId: String): Place? {
+    suspend fun selectByOsmId(osmId: String): Place? {
         conn.prepare(
             """
                 SELECT ${FullProjection.COLUMNS}
@@ -119,7 +119,7 @@ class PlaceQueries(private val conn: SQLiteConnection) {
      * does not exceed SQLite's bound-variable limit, and the chunks' results are
      * merged.
      */
-    fun selectByOsmIds(osmIds: Collection<String>): Map<String, Place> {
+    suspend fun selectByOsmIds(osmIds: Collection<String>): Map<String, Place> {
         val ids = osmIds.toSet()
         if (ids.isEmpty()) return emptyMap()
 
@@ -143,7 +143,7 @@ class PlaceQueries(private val conn: SQLiteConnection) {
         return places
     }
 
-    fun selectBySearchString(searchString: String): List<SearchPlace> {
+    suspend fun selectBySearchString(searchString: String): List<SearchPlace> {
         // The base name plus the raw `localized_name` JSON, so a query in any
         // cached language matches. The caller re-checks the parsed names, so
         // the JSON match only has to be a superset. Only the fields search
@@ -175,7 +175,7 @@ class PlaceQueries(private val conn: SQLiteConnection) {
      * active. The caller also narrows the box with the area's point-in-polygon
      * test where the association has to match the server's.
      */
-    fun selectByBounds(
+    suspend fun selectByBounds(
         minLat: Double,
         maxLat: Double,
         minLon: Double,
@@ -204,7 +204,7 @@ class PlaceQueries(private val conn: SQLiteConnection) {
         }
     }
 
-    fun selectMerchantsByBounds(
+    suspend fun selectMerchantsByBounds(
         minLat: Double,
         maxLat: Double,
         minLon: Double,
@@ -245,7 +245,7 @@ class PlaceQueries(private val conn: SQLiteConnection) {
         }
     }
 
-    fun selectExchanges(): List<Marker> {
+    suspend fun selectExchanges(): List<Marker> {
         conn.prepare(
             """
                 SELECT ${MarkerProjection.COLUMNS}
@@ -264,7 +264,7 @@ class PlaceQueries(private val conn: SQLiteConnection) {
         }
     }
 
-    fun selectExchangesByBounds(
+    suspend fun selectExchangesByBounds(
         minLat: Double,
         maxLat: Double,
         minLon: Double,
@@ -303,7 +303,7 @@ class PlaceQueries(private val conn: SQLiteConnection) {
         }
     }
 
-    fun selectMaxUpdatedAt(): Instant? {
+    suspend fun selectMaxUpdatedAt(): Instant? {
         // See CommentQueries.selectMaxUpdatedAt: text ordering of
         // Instant.toString() values is not chronological.
         conn.prepare(
@@ -328,7 +328,7 @@ class PlaceQueries(private val conn: SQLiteConnection) {
      * deleted places is still already populated and re-seeding it would
      * resurrect places that were deleted after the snapshot was built.
      */
-    fun selectCount(includeDeleted: Boolean = false): Long {
+    suspend fun selectCount(includeDeleted: Boolean = false): Long {
         val where = if (includeDeleted) "" else " WHERE $DELETED_AT IS NULL"
         conn.prepare("SELECT count(*) FROM $TABLE$where;").use {
             it.step()
@@ -344,7 +344,7 @@ class PlaceQueries(private val conn: SQLiteConnection) {
      * retrying, and a partial seed after a parse failure. Nothing else may call
      * this while sync rows could be present.
      */
-    fun deleteAll() {
+    suspend fun deleteAll() {
         conn.prepare("DELETE FROM $TABLE;").use { it.step() }
     }
 }

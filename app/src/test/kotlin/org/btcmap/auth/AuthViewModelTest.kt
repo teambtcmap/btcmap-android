@@ -1,5 +1,6 @@
 package org.btcmap.auth
 
+import kotlinx.coroutines.runBlocking
 import android.os.Bundle
 import androidx.lifecycle.ViewModel
 import androidx.sqlite.SQLiteConnection
@@ -52,14 +53,14 @@ class AuthViewModelTest {
     private lateinit var settings: Settings
 
     @Before
-    fun setUp() {
+    fun setUp() = runBlocking<Unit> {
         Dispatchers.setMain(Dispatchers.Default)
-        db = Database(BundledSQLiteDriver(), ":memory:")
+        db = runBlocking { Database(BundledSQLiteDriver(), ":memory:").apply { connect() } }
         settings = Settings(dbProvider = { db }, legacyValues = { emptyMap() })
     }
 
     @After
-    fun tearDown() {
+    fun tearDown() = runBlocking<Unit> {
         Dispatchers.resetMain()
     }
 
@@ -298,7 +299,7 @@ class AuthViewModelTest {
     }
 
     @Test
-    fun factory_createsAnAuthViewModel() {
+    fun factory_createsAnAuthViewModel() = runBlocking<Unit> {
         val model = AuthViewModel.Factory(api(), db, settings)
             .create(AuthViewModel::class.java)
 
@@ -306,7 +307,7 @@ class AuthViewModelTest {
     }
 
     @Test
-    fun factory_rejectsAnUnrelatedViewModelClass() {
+    fun factory_rejectsAnUnrelatedViewModelClass() = runBlocking<Unit> {
         val factory = AuthViewModel.Factory(api(), db, settings)
 
         Assert.assertThrows(IllegalArgumentException::class.java) {

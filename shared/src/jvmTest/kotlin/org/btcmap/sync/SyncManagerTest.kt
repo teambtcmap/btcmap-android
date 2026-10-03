@@ -27,7 +27,7 @@ class SyncManagerTest {
     @Rule
     val serverRule = MockWebServerRule()
 
-    private fun createDatabase() = Database(BundledSQLiteDriver(), ":memory:")
+    private fun createDatabase() = org.btcmap.db.testDatabase()
 
     private fun createApi() = Api(
         httpClient = HttpClient(CIO),

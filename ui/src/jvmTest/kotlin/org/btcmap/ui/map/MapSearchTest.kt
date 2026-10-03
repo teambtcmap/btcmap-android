@@ -1,5 +1,6 @@
 package org.btcmap.ui.map
 
+import kotlinx.coroutines.runBlocking
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import java.nio.file.Files
 import kotlin.time.Instant
@@ -26,7 +27,7 @@ class MapSearchTest {
     private val referenceLon = 2.3522
 
     @Test
-    fun matchingEvent_isReturned() {
+    fun matchingEvent_isReturned() = runBlocking<Unit> {
         val db = database()
         db.event.insert(
             listOf(event(id = 1L, name = "Bitcoin Meetup Paris", lat = 48.8570, lon = 2.3530)),
@@ -43,7 +44,7 @@ class MapSearchTest {
     }
 
     @Test
-    fun placesAndEvents_sortByDistance() {
+    fun placesAndEvents_sortByDistance() = runBlocking<Unit> {
         // The event is next to the reference point, the place is far away.
         val db = database()
         db.place.insert(listOf(place(id = 1L, name = "Bitcoin Cafe Far", lat = 48.90, lon = 2.3522)))
@@ -57,7 +58,7 @@ class MapSearchTest {
     }
 
     @Test
-    fun eventWebsite_isNotSearched() {
+    fun eventWebsite_isNotSearched() = runBlocking<Unit> {
         // The place matches on name and proves the search ran; the event only
         // matches on its website, so it must be absent.
         val db = database()
@@ -81,7 +82,7 @@ class MapSearchTest {
     }
 
     @Test
-    fun matchingArea_isReturnedWithItsBbox() {
+    fun matchingArea_isReturnedWithItsBbox() = runBlocking<Unit> {
         val db = database()
         db.area.insert(listOf(area(id = 1L, name = "Paris Bitcoin")))
 
@@ -98,7 +99,7 @@ class MapSearchTest {
     }
 
     @Test
-    fun exactNameMatch_ranksAboveSubstring() {
+    fun exactNameMatch_ranksAboveSubstring() = runBlocking<Unit> {
         // The exact match is farther away; ranking must still float it first.
         val db = database()
         db.place.insert(
@@ -121,8 +122,9 @@ class MapSearchTest {
         formatDistance = { it.toInt().toString() },
     )
 
-    private fun database(): Database =
-        Database(BundledSQLiteDriver(), Files.createTempFile("map-search", ".db").toString())
+    private fun database(): Database = runBlocking {
+        Database(BundledSQLiteDriver(), Files.createTempFile("map-search", ".db").toString()).apply { connect() }
+    }
 
     private fun place(id: Long, name: String, lat: Double, lon: Double) = Place(
         id = id,

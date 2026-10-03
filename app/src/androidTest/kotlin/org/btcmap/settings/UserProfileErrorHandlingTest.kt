@@ -1,5 +1,6 @@
 package org.btcmap.settings
 
+import kotlinx.coroutines.runBlocking
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
 import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onAllNodesWithText
@@ -38,7 +39,7 @@ class UserProfileErrorHandlingTest : AppTestCase() {
     val composeTestRule = createEmptyComposeRule()
 
     @Test
-    fun deleteSavedPlace_whenRefreshFails_doesNotLeakUncaughtException() {
+    fun deleteSavedPlace_whenRefreshFails_doesNotLeakUncaughtException() = runBlocking<Unit> {
         val driver = FailingDriver()
         val db = Database(driver, ":memory:")
         db.user.insert(user())

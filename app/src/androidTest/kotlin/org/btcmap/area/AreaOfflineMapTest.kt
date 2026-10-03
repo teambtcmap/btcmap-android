@@ -1,5 +1,6 @@
 package org.btcmap.area
 
+import kotlinx.coroutines.runBlocking
 import android.view.View
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertTextContains
@@ -39,7 +40,7 @@ class AreaOfflineMapTest : AreaScreenTest() {
     val composeTestRule = createEmptyComposeRule()
 
     @Test
-    fun areaWithBoundingBox_showsToolbarDownloadAndHidesPanel() {
+    fun areaWithBoundingBox_showsToolbarDownloadAndHidesPanel() = runBlocking<Unit> {
         apiRule.server.dispatcher = areaDispatcher()
         databaseRule.db.area.insert(listOf(area()))
 
@@ -52,7 +53,7 @@ class AreaOfflineMapTest : AreaScreenTest() {
     }
 
     @Test
-    fun areaWithoutBoundingBox_hidesToolbarDownload() {
+    fun areaWithoutBoundingBox_hidesToolbarDownload() = runBlocking<Unit> {
         apiRule.server.dispatcher = areaDispatcher()
         databaseRule.db.area.insert(
             listOf(area(bboxWest = null, bboxSouth = null, bboxEast = null, bboxNorth = null)),
@@ -67,7 +68,7 @@ class AreaOfflineMapTest : AreaScreenTest() {
     }
 
     @Test
-    fun toolbarDownload_opensDialogWithZoomSelectionAndEstimate() {
+    fun toolbarDownload_opensDialogWithZoomSelectionAndEstimate() = runBlocking<Unit> {
         apiRule.server.dispatcher = areaDispatcher()
         databaseRule.db.area.insert(listOf(area()))
 
@@ -91,7 +92,7 @@ class AreaOfflineMapTest : AreaScreenTest() {
     }
 
     @Test
-    fun failedDownload_offersRetryAndDelete() {
+    fun failedDownload_offersRetryAndDelete() = runBlocking<Unit> {
         apiRule.server.dispatcher = areaDispatcher()
         databaseRule.db.area.insert(listOf(area()))
 
@@ -108,7 +109,7 @@ class AreaOfflineMapTest : AreaScreenTest() {
     }
 
     @Test
-    fun completedDownloadForAnotherStyle_showsStyleMismatch() {
+    fun completedDownloadForAnotherStyle_showsStyleMismatch() = runBlocking<Unit> {
         apiRule.server.dispatcher = areaDispatcher()
         databaseRule.db.area.insert(listOf(area()))
         preferencesRule.prefs.mapStyle = MapStyle.Dark
@@ -125,7 +126,7 @@ class AreaOfflineMapTest : AreaScreenTest() {
     }
 
     @Test
-    fun completedAutoDownload_isNotFlaggedAfterTheThemeSwitches() {
+    fun completedAutoDownload_isNotFlaggedAfterTheThemeSwitches() = runBlocking<Unit> {
         apiRule.server.dispatcher = areaDispatcher()
         databaseRule.db.area.insert(listOf(area()))
         // Dark resolves to the dark hosted style; a pack downloaded for Auto's

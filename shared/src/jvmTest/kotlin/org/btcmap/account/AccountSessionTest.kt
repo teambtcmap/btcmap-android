@@ -10,7 +10,7 @@ import org.junit.Test
 
 class AccountSessionTest {
 
-    private fun database() = Database(BundledSQLiteDriver(), ":memory:")
+    private fun database() = org.btcmap.db.testDatabase()
 
     private fun settings(db: Database) = Settings(dbProvider = { db }, legacyValues = { emptyMap() })
 

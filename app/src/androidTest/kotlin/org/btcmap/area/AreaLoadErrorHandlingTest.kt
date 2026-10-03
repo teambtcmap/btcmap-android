@@ -1,5 +1,6 @@
 package org.btcmap.area
 
+import kotlinx.coroutines.runBlocking
 import android.view.View
 import androidx.appcompat.widget.Toolbar
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
@@ -28,7 +29,7 @@ class AreaLoadErrorHandlingTest : AreaScreenTest() {
     val composeTestRule = createEmptyComposeRule()
 
     @Test
-    fun loadSuccess_hidesLoadingIndicatorAndShowsContent() {
+    fun loadSuccess_hidesLoadingIndicatorAndShowsContent() = runBlocking<Unit> {
         apiRule.server.dispatcher = areaDispatcher()
         databaseRule.db.area.insert(listOf(area()))
 
@@ -51,7 +52,7 @@ class AreaLoadErrorHandlingTest : AreaScreenTest() {
     }
 
     @Test
-    fun missingCachedArea_showsErrorDialogAndClosesScreenOnDismiss() {
+    fun missingCachedArea_showsErrorDialogAndClosesScreenOnDismiss() = runBlocking<Unit> {
         withArea(addToBackStack = true) { scenario, area ->
             lateinit var activity: Activity
             scenario.onActivity { activity = it }
@@ -74,7 +75,7 @@ class AreaLoadErrorHandlingTest : AreaScreenTest() {
     }
 
     @Test
-    fun cachedAreaWithoutGeometry_showsContent() {
+    fun cachedAreaWithoutGeometry_showsContent() = runBlocking<Unit> {
         apiRule.server.dispatcher = areaDispatcher()
         databaseRule.db.area.insert(
             listOf(
@@ -107,7 +108,7 @@ class AreaLoadErrorHandlingTest : AreaScreenTest() {
     }
 
     @Test
-    fun issuesFailure_keepsContentVisibleWithoutErrorDialog() {
+    fun issuesFailure_keepsContentVisibleWithoutErrorDialog() = runBlocking<Unit> {
         apiRule.server.dispatcher = areaDispatcher(
             issuesBody = """{"message":"boom"}""",
             issuesCode = 500,

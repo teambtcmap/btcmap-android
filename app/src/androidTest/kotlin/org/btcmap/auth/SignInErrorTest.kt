@@ -1,5 +1,6 @@
 package org.btcmap.auth
 
+import kotlinx.coroutines.runBlocking
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -50,7 +51,7 @@ class SignInErrorTest : AppTestCase() {
     val composeTestRule = createEmptyComposeRule()
 
     @Test
-    fun signIn_whenFailureHasNoMessage_showsSignInErrorMessage() {
+    fun signIn_whenFailureHasNoMessage_showsSignInErrorMessage() = runBlocking<Unit> {
         apiRule.server.dispatcher = object : Dispatcher() {
             override fun dispatch(request: RecordedRequest): MockResponse {
                 val body = if (request.url.encodedPath == "/v4/users/satoshi/tokens") {

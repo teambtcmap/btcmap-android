@@ -1,5 +1,6 @@
 package org.btcmap.db.table.place
 
+import kotlinx.coroutines.runBlocking
 import kotlinx.datetime.plus
 import kotlinx.datetime.minus
 import kotlinx.datetime.TimeZone
@@ -16,12 +17,12 @@ import kotlin.time.Instant
 
 class PlaceQueriesTest {
 
-    private fun createDatabase(): Database {
-        return Database(BundledSQLiteDriver(), ":memory:")
+    private fun createDatabase(): Database = runBlocking {
+        org.btcmap.db.testDatabase().apply { connect() }
     }
 
     @Test
-    fun insert_and_selectById() {
+    fun insert_and_selectById() = runBlocking<Unit> {
         val db = createDatabase()
         val place = createPlace(id = 1L, name = "Coffee Shop", icon = "coffee")
 
@@ -35,7 +36,7 @@ class PlaceQueriesTest {
     }
 
     @Test
-    fun insert_and_selectById_withAllNullableFields() {
+    fun insert_and_selectById_withAllNullableFields() = runBlocking<Unit> {
         val db = createDatabase()
         val place = Place(
             id = 1L,
@@ -73,7 +74,7 @@ class PlaceQueriesTest {
     }
 
     @Test
-    fun selectById_returnsNullWhenNotFound() {
+    fun selectById_returnsNullWhenNotFound() = runBlocking<Unit> {
         val db = createDatabase()
 
         val result = db.place.selectById(999L)
@@ -82,7 +83,7 @@ class PlaceQueriesTest {
     }
 
     @Test
-    fun selectByIdIncludingDeleted_returnsTombstone() {
+    fun selectByIdIncludingDeleted_returnsTombstone() = runBlocking<Unit> {
         val db = createDatabase()
         val deletedAt = Instant.parse("2024-01-02T10:00:00Z")
         db.place.insert(
@@ -101,7 +102,7 @@ class PlaceQueriesTest {
     }
 
     @Test
-    fun selectByIdIncludingDeleted_returnsLivePlace() {
+    fun selectByIdIncludingDeleted_returnsLivePlace() = runBlocking<Unit> {
         val db = createDatabase()
         db.place.insert(listOf(createPlace(id = 2L).copy(osmId = "way:2")))
 
@@ -109,14 +110,14 @@ class PlaceQueriesTest {
     }
 
     @Test
-    fun selectByIdIncludingDeleted_returnsNullWhenNotFound() {
+    fun selectByIdIncludingDeleted_returnsNullWhenNotFound() = runBlocking<Unit> {
         val db = createDatabase()
 
         Assert.assertNull(db.place.selectByIdIncludingDeleted(99L))
     }
 
     @Test
-    fun selectByOsmId_returnsMatchingPlace() {
+    fun selectByOsmId_returnsMatchingPlace() = runBlocking<Unit> {
         val db = createDatabase()
         db.place.insert(
             listOf(
@@ -133,7 +134,7 @@ class PlaceQueriesTest {
     }
 
     @Test
-    fun selectByOsmId_returnsNullWhenNotFound() {
+    fun selectByOsmId_returnsNullWhenNotFound() = runBlocking<Unit> {
         val db = createDatabase()
         db.place.insert(listOf(createPlace(id = 1L).copy(osmId = "node:1")))
 
@@ -141,7 +142,7 @@ class PlaceQueriesTest {
     }
 
     @Test
-    fun selectByOsmIds_returnsMatchingPlacesKeyedByOsmId() {
+    fun selectByOsmIds_returnsMatchingPlacesKeyedByOsmId() = runBlocking<Unit> {
         val db = createDatabase()
         db.place.insert(
             listOf(
@@ -159,7 +160,7 @@ class PlaceQueriesTest {
     }
 
     @Test
-    fun selectByOsmIds_skipsDeletedPlacesAndEmptyInput() {
+    fun selectByOsmIds_skipsDeletedPlacesAndEmptyInput() = runBlocking<Unit> {
         val db = createDatabase()
         val deletedAt = Instant.parse("2024-01-02T10:00:00Z")
         db.place.insert(
@@ -178,7 +179,7 @@ class PlaceQueriesTest {
     }
 
     @Test
-    fun insert_orReplace_updatesExistingPlace() {
+    fun insert_orReplace_updatesExistingPlace() = runBlocking<Unit> {
         val db = createDatabase()
         val place1 = createPlace(id = 1L, name = "Original Name", icon = "coffee")
         val place2 = createPlace(id = 1L, name = "Updated Name", icon = "restaurant")
@@ -193,7 +194,7 @@ class PlaceQueriesTest {
     }
 
     @Test
-    fun selectBySearchString_findsByName() {
+    fun selectBySearchString_findsByName() = runBlocking<Unit> {
         val db = createDatabase()
         db.place.insert(listOf(createPlace(id = 1L, name = "Starbucks", icon = "coffee")))
         db.place.insert(listOf(createPlace(id = 2L, name = "McDonald's", icon = "fast_food")))
@@ -205,7 +206,7 @@ class PlaceQueriesTest {
     }
 
     @Test
-    fun selectBySearchString_caseInsensitive() {
+    fun selectBySearchString_caseInsensitive() = runBlocking<Unit> {
         val db = createDatabase()
         db.place.insert(listOf(createPlace(id = 1L, name = "STARBUCKS", icon = "coffee")))
 
@@ -215,7 +216,7 @@ class PlaceQueriesTest {
     }
 
     @Test
-    fun selectBySearchString_returnsEmptyWhenNoMatch() {
+    fun selectBySearchString_returnsEmptyWhenNoMatch() = runBlocking<Unit> {
         val db = createDatabase()
         db.place.insert(listOf(createPlace(id = 1L, name = "Coffee Shop", icon = "coffee")))
 
@@ -225,7 +226,7 @@ class PlaceQueriesTest {
     }
 
     @Test
-    fun selectBySearchString_treatsWildcardsLiterally() {
+    fun selectBySearchString_treatsWildcardsLiterally() = runBlocking<Unit> {
         val db = createDatabase()
         db.place.insert(listOf(createPlace(id = 1L, name = "50% Off Cafe")))
         db.place.insert(listOf(createPlace(id = 2L, name = "500 Satoshis Cafe")))
@@ -239,7 +240,7 @@ class PlaceQueriesTest {
     }
 
     @Test
-    fun selectBySearchString_matchesLocalizedName() {
+    fun selectBySearchString_matchesLocalizedName() = runBlocking<Unit> {
         val db = createDatabase()
         val place = createPlace(id = 1L, name = "Bakery").copy(
             localizedName = parseJsonObject("""{"ru":"Пекарня"}""")
@@ -253,7 +254,7 @@ class PlaceQueriesTest {
     }
 
     @Test
-    fun selectBySearchString_matchesRawLocalizedNameJsonAsASuperset() {
+    fun selectBySearchString_matchesRawLocalizedNameJsonAsASuperset() = runBlocking<Unit> {
         val db = createDatabase()
         val place = createPlace(id = 1L, name = "Bakery").copy(
             localizedName = parseJsonObject("""{"ru":"Пекарня"}""")
@@ -272,7 +273,7 @@ class PlaceQueriesTest {
     }
 
     @Test
-    fun selectByOsmIds_chunksLargeInput() {
+    fun selectByOsmIds_chunksLargeInput() = runBlocking<Unit> {
         val db = createDatabase()
         // Larger than the per-statement bound-variable cap, so the ids span
         // more than one query and the results have to be merged.
@@ -289,7 +290,7 @@ class PlaceQueriesTest {
     }
 
     @Test
-    fun selectByBounds_returnsOnlyPlacesInsideTheBox() {
+    fun selectByBounds_returnsOnlyPlacesInsideTheBox() = runBlocking<Unit> {
         val db = createDatabase()
         db.place.insert(
             listOf(
@@ -310,7 +311,7 @@ class PlaceQueriesTest {
     }
 
     @Test
-    fun selectByBounds_excludesDeletedPlaces() {
+    fun selectByBounds_excludesDeletedPlaces() = runBlocking<Unit> {
         val db = createDatabase()
         val deletedAt = Instant.parse("2024-01-02T10:00:00Z")
         db.place.insert(
@@ -331,7 +332,7 @@ class PlaceQueriesTest {
     }
 
     @Test
-    fun selectByBounds_withBoost_returnsOnlyPlacesCarryingABoost() {
+    fun selectByBounds_withBoost_returnsOnlyPlacesCarryingABoost() = runBlocking<Unit> {
         val db = createDatabase()
         db.place.insert(
             listOf(
@@ -353,7 +354,7 @@ class PlaceQueriesTest {
     }
 
     @Test
-    fun selectExchanges_includesOnlyAtmAndExchange() {
+    fun selectExchanges_includesOnlyAtmAndExchange() = runBlocking<Unit> {
         val db = createDatabase()
         db.place.insert(listOf(createPlace(id = 1L, icon = "restaurant")))
         db.place.insert(listOf(createPlace(id = 2L, icon = "local_atm")))
@@ -366,7 +367,7 @@ class PlaceQueriesTest {
     }
 
     @Test
-    fun selectMerchantsByBounds_returnsOnlyMerchantsWithinBounds() {
+    fun selectMerchantsByBounds_returnsOnlyMerchantsWithinBounds() = runBlocking<Unit> {
         val db = createDatabase()
         db.place.insert(listOf(createPlace(id = 1L, icon = "restaurant", lat = 40.7128, lon = -74.0060)))
         db.place.insert(listOf(createPlace(id = 2L, icon = "coffee", lat = 51.5074, lon = -0.1278)))
@@ -387,7 +388,7 @@ class PlaceQueriesTest {
     }
 
     @Test
-    fun selectMerchantsByBounds_returnsEmptyWhenNoMatch() {
+    fun selectMerchantsByBounds_returnsEmptyWhenNoMatch() = runBlocking<Unit> {
         val db = createDatabase()
         db.place.insert(listOf(createPlace(id = 1L, icon = "restaurant", lat = 40.7128, lon = -74.0060)))
 
@@ -402,7 +403,7 @@ class PlaceQueriesTest {
     }
 
     @Test
-    fun selectExchangesByBounds_returnsOnlyExchangesWithinBounds() {
+    fun selectExchangesByBounds_returnsOnlyExchangesWithinBounds() = runBlocking<Unit> {
         val db = createDatabase()
         db.place.insert(listOf(createPlace(id = 1L, icon = "restaurant", lat = 40.7128, lon = -74.0060)))
         db.place.insert(listOf(createPlace(id = 2L, icon = "local_atm", lat = 40.7128, lon = -74.0060)))
@@ -420,7 +421,7 @@ class PlaceQueriesTest {
     }
 
     @Test
-    fun selectExchangesByBounds_returnsEmptyWhenNoMatch() {
+    fun selectExchangesByBounds_returnsEmptyWhenNoMatch() = runBlocking<Unit> {
         val db = createDatabase()
         db.place.insert(listOf(createPlace(id = 1L, icon = "local_atm", lat = 40.7128, lon = -74.0060)))
 
@@ -435,7 +436,7 @@ class PlaceQueriesTest {
     }
 
     @Test
-    fun selectExchangesByBounds_withMinVerifiedAt_excludesOldAndUnverified() {
+    fun selectExchangesByBounds_withMinVerifiedAt_excludesOldAndUnverified() = runBlocking<Unit> {
         val db = createDatabase()
         val now = Clock.System.now()
         db.place.insert(listOf(createPlace(
@@ -469,7 +470,7 @@ class PlaceQueriesTest {
     }
 
     @Test
-    fun selectExchangesByBounds_withMinVerifiedAtNull_returnsAllExchanges() {
+    fun selectExchangesByBounds_withMinVerifiedAtNull_returnsAllExchanges() = runBlocking<Unit> {
         val db = createDatabase()
         val now = Clock.System.now()
         db.place.insert(listOf(createPlace(
@@ -495,7 +496,7 @@ class PlaceQueriesTest {
     }
 
     @Test
-    fun selectMaxUpdatedAt_returnsNullWhenEmpty() {
+    fun selectMaxUpdatedAt_returnsNullWhenEmpty() = runBlocking<Unit> {
         val db = createDatabase()
 
         val result = db.place.selectMaxUpdatedAt()
@@ -504,7 +505,7 @@ class PlaceQueriesTest {
     }
 
     @Test
-    fun selectMaxUpdatedAt_returnsMaxDate() {
+    fun selectMaxUpdatedAt_returnsMaxDate() = runBlocking<Unit> {
         val db = createDatabase()
         db.place.insert(listOf(createPlace(id = 1L, updatedAt = Instant.parse("2024-01-01T10:00:00Z"))))
         db.place.insert(listOf(createPlace(id = 2L, updatedAt = Instant.parse("2024-01-03T10:00:00Z"))))
@@ -516,7 +517,7 @@ class PlaceQueriesTest {
     }
 
     @Test
-    fun selectMaxUpdatedAt_comparesByInstantNotByText() {
+    fun selectMaxUpdatedAt_comparesByInstantNotByText() = runBlocking<Unit> {
         val db = createDatabase()
         // Instant.toString() drops a zero fraction, so the earlier
         // "2024-01-01T10:00Z" sorts after "2024-01-01T10:00:00.500Z" as text.
@@ -529,7 +530,7 @@ class PlaceQueriesTest {
     }
 
     @Test
-    fun selectCount_returnsCorrectCount() {
+    fun selectCount_returnsCorrectCount() = runBlocking<Unit> {
         val db = createDatabase()
         db.place.insert(listOf(createPlace(id = 1L)))
         db.place.insert(listOf(createPlace(id = 2L)))
@@ -541,7 +542,7 @@ class PlaceQueriesTest {
     }
 
     @Test
-    fun selectCount_excludesTombstonesUnlessAsked() {
+    fun selectCount_excludesTombstonesUnlessAsked() = runBlocking<Unit> {
         val db = createDatabase()
         db.place.insert(listOf(createPlace(id = 1L)))
         db.place.insert(
@@ -556,7 +557,7 @@ class PlaceQueriesTest {
     }
 
     @Test
-    fun selectMerchantsByBounds_withMinVerifiedAt_comparesByInstantNotByText() {
+    fun selectMerchantsByBounds_withMinVerifiedAt_comparesByInstantNotByText() = runBlocking<Unit> {
         val db = createDatabase()
         // "10:00:00Z" sorts after "10:00:00.500Z" as text but is earlier by
         // instant, so a text comparison would wrongly include the first place.
@@ -583,7 +584,7 @@ class PlaceQueriesTest {
     }
 
     @Test
-    fun selectMerchantsByBounds_withMinVerifiedAt_returnsOnlyRecentMerchants() {
+    fun selectMerchantsByBounds_withMinVerifiedAt_returnsOnlyRecentMerchants() = runBlocking<Unit> {
         val db = createDatabase()
         val now = Clock.System.now()
         db.place.insert(listOf(createPlace(
@@ -617,7 +618,7 @@ class PlaceQueriesTest {
     }
 
     @Test
-    fun selectMerchantsByBounds_withMinVerifiedAtNull_returnsAllMerchants() {
+    fun selectMerchantsByBounds_withMinVerifiedAtNull_returnsAllMerchants() = runBlocking<Unit> {
         val db = createDatabase()
         val now = Clock.System.now()
         db.place.insert(listOf(createPlace(
@@ -643,7 +644,7 @@ class PlaceQueriesTest {
     }
 
     @Test
-    fun selectMerchantsByBounds_withMinVerifiedAt_excludesUnverified() {
+    fun selectMerchantsByBounds_withMinVerifiedAt_excludesUnverified() = runBlocking<Unit> {
         val db = createDatabase()
         val now = Clock.System.now()
         db.place.insert(listOf(createPlace(
@@ -677,7 +678,7 @@ class PlaceQueriesTest {
     }
 
     @Test
-    fun selectMerchantsByBounds_withMinVerifiedAt_returnsEmptyWhenAllExcluded() {
+    fun selectMerchantsByBounds_withMinVerifiedAt_returnsEmptyWhenAllExcluded() = runBlocking<Unit> {
         val db = createDatabase()
         val now = Clock.System.now()
         db.place.insert(listOf(createPlace(
@@ -703,7 +704,7 @@ class PlaceQueriesTest {
     }
 
     @Test
-    fun insert_keepsTombstoneButHidesItFromReads() {
+    fun insert_keepsTombstoneButHidesItFromReads() = runBlocking<Unit> {
         val db = createDatabase()
         val deletedAt = Instant.parse("2024-01-02T10:00:00Z")
         db.place.insert(listOf(createPlace(id = 1L, icon = "coffee")))

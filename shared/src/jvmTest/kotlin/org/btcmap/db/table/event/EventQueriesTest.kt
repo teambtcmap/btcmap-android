@@ -1,5 +1,6 @@
 package org.btcmap.db.table.event
 
+import kotlinx.coroutines.runBlocking
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import org.btcmap.util.toUrl
 import org.btcmap.db.Database
@@ -8,12 +9,12 @@ import org.junit.Test
 import kotlin.time.Instant
 
 class EventQueriesTest {
-    private fun createDatabase(): Database {
-        return Database(BundledSQLiteDriver(), ":memory:")
+    private fun createDatabase(): Database = runBlocking {
+        org.btcmap.db.testDatabase().apply { connect() }
     }
 
     @Test
-    fun insert_and_selectAll() {
+    fun insert_and_selectAll() = runBlocking<Unit> {
         val db = createDatabase()
         val event = Event(
             id = 1L,
@@ -36,7 +37,7 @@ class EventQueriesTest {
     }
 
     @Test
-    fun insert_and_selectById() {
+    fun insert_and_selectById() = runBlocking<Unit> {
         val db = createDatabase()
         val event = Event(
             id = 42L,
@@ -58,7 +59,7 @@ class EventQueriesTest {
     }
 
     @Test
-    fun insert_and_selectEventWithoutWebsite() {
+    fun insert_and_selectEventWithoutWebsite() = runBlocking<Unit> {
         val db = createDatabase()
         val event = Event(
             id = 1L,
@@ -76,7 +77,7 @@ class EventQueriesTest {
     }
 
     @Test
-    fun selectById_returnsNullWhenNotFound() {
+    fun selectById_returnsNullWhenNotFound() = runBlocking<Unit> {
         val db = createDatabase()
 
         val result = db.event.selectById(999L)
@@ -85,7 +86,7 @@ class EventQueriesTest {
     }
 
     @Test
-    fun selectAll_returnsEmptyListWhenEmpty() {
+    fun selectAll_returnsEmptyListWhenEmpty() = runBlocking<Unit> {
         val db = createDatabase()
 
         val results = db.event.selectAll()
@@ -94,7 +95,7 @@ class EventQueriesTest {
     }
 
     @Test
-    fun insert_and_selectByBounds() {
+    fun insert_and_selectByBounds() = runBlocking<Unit> {
         val db = createDatabase()
         val event1 = Event(
             id = 1L,
@@ -139,7 +140,7 @@ class EventQueriesTest {
     }
 
     @Test
-    fun selectByBounds_returnsEmptyListWhenNoMatch() {
+    fun selectByBounds_returnsEmptyListWhenNoMatch() = runBlocking<Unit> {
         val db = createDatabase()
         val event = Event(
             id = 1L,
@@ -164,7 +165,7 @@ class EventQueriesTest {
     }
 
     @Test
-    fun insert_storesUpdatedAt() {
+    fun insert_storesUpdatedAt() = runBlocking<Unit> {
         val db = createDatabase()
         val event = event(id = 1L, updatedAt = "2024-05-01T10:00:00Z")
 
@@ -177,7 +178,7 @@ class EventQueriesTest {
     }
 
     @Test
-    fun insert_replacesAnExistingEvent() {
+    fun insert_replacesAnExistingEvent() = runBlocking<Unit> {
         val db = createDatabase()
         db.event.insert(listOf(event(id = 1L, name = "first")))
         db.event.insert(listOf(event(id = 1L, name = "second")))
@@ -187,7 +188,7 @@ class EventQueriesTest {
     }
 
     @Test
-    fun selectCount_excludesTombstonesUnlessAsked() {
+    fun selectCount_excludesTombstonesUnlessAsked() = runBlocking<Unit> {
         val db = createDatabase()
         val deletedAt = Instant.parse("2024-01-02T10:00:00Z")
         db.event.insert(
@@ -202,14 +203,14 @@ class EventQueriesTest {
     }
 
     @Test
-    fun selectMaxUpdatedAt_returnsNullWhenEmpty() {
+    fun selectMaxUpdatedAt_returnsNullWhenEmpty() = runBlocking<Unit> {
         val db = createDatabase()
 
         Assert.assertNull(db.event.selectMaxUpdatedAt())
     }
 
     @Test
-    fun selectMaxUpdatedAt_returnsNewestByInstantNotText() {
+    fun selectMaxUpdatedAt_returnsNewestByInstantNotText() = runBlocking<Unit> {
         val db = createDatabase()
         db.event.insert(
             listOf(
@@ -227,7 +228,7 @@ class EventQueriesTest {
     }
 
     @Test
-    fun selectBySearchString_treatsWildcardsLiterally() {
+    fun selectBySearchString_treatsWildcardsLiterally() = runBlocking<Unit> {
         val db = createDatabase()
         insertEvent(db, id = 1L, name = "50% Off Meetup")
         insertEvent(db, id = 2L, name = "500 Satoshis Meetup")
@@ -241,7 +242,7 @@ class EventQueriesTest {
     }
 
     @Test
-    fun selectBySearchString_matchesNameSubstring() {
+    fun selectBySearchString_matchesNameSubstring() = runBlocking<Unit> {
         val db = createDatabase()
         insertEvent(db, id = 1L, name = "Bitcoin Meetup")
         insertEvent(db, id = 2L, name = "Ethereum Meetup")
@@ -253,7 +254,7 @@ class EventQueriesTest {
     }
 
     @Test
-    fun selectBySearchString_isCaseInsensitive() {
+    fun selectBySearchString_isCaseInsensitive() = runBlocking<Unit> {
         val db = createDatabase()
         insertEvent(db, id = 1L, name = "Bitcoin Meetup")
 
@@ -263,7 +264,7 @@ class EventQueriesTest {
     }
 
     @Test
-    fun selectBySearchString_returnsEmptyListWhenNoMatch() {
+    fun selectBySearchString_returnsEmptyListWhenNoMatch() = runBlocking<Unit> {
         val db = createDatabase()
         insertEvent(db, id = 1L, name = "Bitcoin Meetup")
 
@@ -271,7 +272,7 @@ class EventQueriesTest {
     }
 
     @Test
-    fun selectBySearchString_doesNotMatchWebsite() {
+    fun selectBySearchString_doesNotMatchWebsite() = runBlocking<Unit> {
         val db = createDatabase()
         insertEvent(db, id = 1L, name = "London BTC", website = "https://bitcoin.example.com")
 
@@ -279,7 +280,7 @@ class EventQueriesTest {
     }
 
     @Test
-    fun selectBySearchString_returnsAllMatchesWithoutLimit() {
+    fun selectBySearchString_returnsAllMatchesWithoutLimit() = runBlocking<Unit> {
         val db = createDatabase()
         insertEvent(db, id = 1L, name = "Bitcoin Meetup Berlin")
         insertEvent(db, id = 2L, name = "Bitcoin Meetup Lisbon")
@@ -292,7 +293,7 @@ class EventQueriesTest {
     }
 
     @Test
-    fun insert_keepsTombstoneButHidesItFromSelects() {
+    fun insert_keepsTombstoneButHidesItFromSelects() = runBlocking<Unit> {
         val db = createDatabase()
         val deletedAt = Instant.parse("2024-01-02T10:00:00Z")
         db.event.insert(
@@ -336,7 +337,7 @@ class EventQueriesTest {
         )
     }
 
-    private fun insertEvent(
+    private suspend fun insertEvent(
         db: Database,
         id: Long,
         name: String,

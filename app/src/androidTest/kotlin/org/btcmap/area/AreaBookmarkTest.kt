@@ -1,5 +1,6 @@
 package org.btcmap.area
 
+import kotlinx.coroutines.runBlocking
 import android.view.View
 import androidx.appcompat.widget.Toolbar
 import androidx.core.view.isVisible
@@ -28,7 +29,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 class AreaBookmarkTest : AreaScreenTest() {
 
     @Test
-    fun save_whenAuthorized_postsToApiAndPersistsArea() {
+    fun save_whenAuthorized_postsToApiAndPersistsArea() = runBlocking<Unit> {
         preferencesRule.prefs.setAuthTokenForTesting("test-token")
         databaseRule.db.area.insert(listOf(area()))
         databaseRule.db.user.insert(user(savedAreaIds = emptyList()))
@@ -59,7 +60,7 @@ class AreaBookmarkTest : AreaScreenTest() {
     }
 
     @Test
-    fun save_whenAlreadySaved_deletesFromApiAndPersistsChange() {
+    fun save_whenAlreadySaved_deletesFromApiAndPersistsChange() = runBlocking<Unit> {
         preferencesRule.prefs.setAuthTokenForTesting("test-token")
         databaseRule.db.area.insert(listOf(area()))
         databaseRule.db.user.insert(user(savedAreaIds = listOf(1)))
@@ -90,7 +91,7 @@ class AreaBookmarkTest : AreaScreenTest() {
     }
 
     @Test
-    fun save_whenUnauthorized_showsAuthDialogAndDoesNotCallApi() {
+    fun save_whenUnauthorized_showsAuthDialogAndDoesNotCallApi() = runBlocking<Unit> {
         databaseRule.db.area.insert(listOf(area()))
         val saving = AtomicBoolean(false)
         apiRule.server.dispatcher = object : Dispatcher() {
@@ -121,7 +122,7 @@ class AreaBookmarkTest : AreaScreenTest() {
     }
 
     @Test
-    fun load_whenUserMissingFromDatabase_doesNotLeakUncaughtException() {
+    fun load_whenUserMissingFromDatabase_doesNotLeakUncaughtException() = runBlocking<Unit> {
         preferencesRule.prefs.setAuthTokenForTesting("test-token")
         databaseRule.db.area.insert(listOf(area()))
         apiRule.server.dispatcher = areaDispatcher()
@@ -139,7 +140,7 @@ class AreaBookmarkTest : AreaScreenTest() {
     }
 
     @Test
-    fun save_whenUserMissingFromDatabase_doesNotLeakUncaughtException() {
+    fun save_whenUserMissingFromDatabase_doesNotLeakUncaughtException() = runBlocking<Unit> {
         preferencesRule.prefs.setAuthTokenForTesting("test-token")
         databaseRule.db.area.insert(listOf(area()))
         apiRule.server.dispatcher = areaDispatcher()
@@ -158,7 +159,7 @@ class AreaBookmarkTest : AreaScreenTest() {
     }
 
     @Test
-    fun save_whenApiFails_doesNotLeakUncaughtException() {
+    fun save_whenApiFails_doesNotLeakUncaughtException() = runBlocking<Unit> {
         preferencesRule.prefs.setAuthTokenForTesting("test-token")
         databaseRule.db.area.insert(listOf(area()))
         databaseRule.db.user.insert(user(savedAreaIds = emptyList()))
@@ -199,7 +200,7 @@ class AreaBookmarkTest : AreaScreenTest() {
     }
 
     private fun savedAreaIds(): List<Long> {
-        return databaseRule.db.user.select()
+        return runBlocking { databaseRule.db.user.select() }
             ?.savedAreas
             ?.map { it.id }
             .orEmpty()

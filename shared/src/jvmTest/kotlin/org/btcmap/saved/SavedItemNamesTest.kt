@@ -14,7 +14,7 @@ import java.util.Locale
 
 class SavedItemNamesTest {
 
-    private fun database() = Database(BundledSQLiteDriver(), ":memory:")
+    private fun database() = org.btcmap.db.testDatabase()
 
     private fun place(id: Long, name: String?, localizedName: String?) = Place(
         id = id,

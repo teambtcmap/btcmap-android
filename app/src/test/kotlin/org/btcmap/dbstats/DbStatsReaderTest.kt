@@ -1,5 +1,6 @@
 package org.btcmap.dbstats
 
+import kotlinx.coroutines.runBlocking
 import androidx.sqlite.SQLiteConnection
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import androidx.sqlite.execSQL
@@ -9,7 +10,7 @@ import org.junit.Test
 class DbStatsReaderTest {
 
     @Test
-    fun readUserVersion_readsTheStoredSchemaVersion() {
+    fun readUserVersion_readsTheStoredSchemaVersion() = runBlocking<Unit> {
         withConnection { conn ->
             conn.execSQL("PRAGMA user_version=42;")
 
@@ -18,14 +19,14 @@ class DbStatsReaderTest {
     }
 
     @Test
-    fun readUserVersion_defaultsToZeroForANewDatabase() {
+    fun readUserVersion_defaultsToZeroForANewDatabase() = runBlocking<Unit> {
         withConnection { conn ->
             Assert.assertEquals(0, DbStatsReader(conn).readUserVersion())
         }
     }
 
     @Test
-    fun readTables_listsTablesOrderedByName() {
+    fun readTables_listsTablesOrderedByName() = runBlocking<Unit> {
         withConnection { conn ->
             conn.execSQL("CREATE TABLE place (id INTEGER PRIMARY KEY);")
             conn.execSQL("CREATE TABLE comment (id INTEGER PRIMARY KEY);")
@@ -37,7 +38,7 @@ class DbStatsReaderTest {
     }
 
     @Test
-    fun readTables_ignoresInternalTables() {
+    fun readTables_ignoresInternalTables() = runBlocking<Unit> {
         withConnection { conn ->
             // AUTOINCREMENT creates the internal sqlite_sequence table.
             conn.execSQL(
@@ -52,7 +53,7 @@ class DbStatsReaderTest {
     }
 
     @Test
-    fun readTables_ignoresAndroidMetadata() {
+    fun readTables_ignoresAndroidMetadata() = runBlocking<Unit> {
         withConnection { conn ->
             // AndroidSQLiteDriver creates android_metadata to store the locale.
             conn.execSQL("CREATE TABLE android_metadata (locale TEXT);")
@@ -65,7 +66,7 @@ class DbStatsReaderTest {
     }
 
     @Test
-    fun readTables_omitsCountSplitForTablesWithoutTrackingFields() {
+    fun readTables_omitsCountSplitForTablesWithoutTrackingFields() = runBlocking<Unit> {
         withConnection { conn ->
             conn.execSQL("CREATE TABLE user (id INTEGER PRIMARY KEY, name TEXT);")
             conn.execSQL("INSERT INTO user (name) VALUES ('a'), ('b'), ('c');")
@@ -81,7 +82,7 @@ class DbStatsReaderTest {
     }
 
     @Test
-    fun readTables_treatsMissingDeletedAtAsAllVisibleWhenUpdatedAtPresent() {
+    fun readTables_treatsMissingDeletedAtAsAllVisibleWhenUpdatedAtPresent() = runBlocking<Unit> {
         withConnection { conn ->
             conn.execSQL(
                 "CREATE TABLE place (id INTEGER PRIMARY KEY, name TEXT, updated_at TEXT);",
@@ -100,7 +101,7 @@ class DbStatsReaderTest {
     }
 
     @Test
-    fun readTables_splitsVisibleAndDeletedRowsWhenDeletedAtIsPresent() {
+    fun readTables_splitsVisibleAndDeletedRowsWhenDeletedAtIsPresent() = runBlocking<Unit> {
         withConnection { conn ->
             conn.execSQL(
                 "CREATE TABLE comment (id INTEGER PRIMARY KEY, comment TEXT, deleted_at TEXT);",
@@ -123,7 +124,7 @@ class DbStatsReaderTest {
     }
 
     @Test
-    fun readTables_readsMaxUpdatedAt() {
+    fun readTables_readsMaxUpdatedAt() = runBlocking<Unit> {
         withConnection { conn ->
             conn.execSQL(
                 "CREATE TABLE event (id INTEGER PRIMARY KEY, updated_at TEXT);",
@@ -144,7 +145,7 @@ class DbStatsReaderTest {
     }
 
     @Test
-    fun readTables_comparesUpdatedAtChronologicallyNotAsText() {
+    fun readTables_comparesUpdatedAtChronologicallyNotAsText() = runBlocking<Unit> {
         withConnection { conn ->
             conn.execSQL(
                 "CREATE TABLE event (id INTEGER PRIMARY KEY, updated_at TEXT);",
@@ -166,7 +167,7 @@ class DbStatsReaderTest {
     }
 
     @Test
-    fun readTables_returnsNullMaxUpdatedAtForEmptyTable() {
+    fun readTables_returnsNullMaxUpdatedAtForEmptyTable() = runBlocking<Unit> {
         withConnection { conn ->
             conn.execSQL(
                 "CREATE TABLE event (id INTEGER PRIMARY KEY, updated_at TEXT);",
@@ -180,7 +181,7 @@ class DbStatsReaderTest {
     }
 
     @Test
-    fun readTables_countsFutureEvents() {
+    fun readTables_countsFutureEvents() = runBlocking<Unit> {
         withConnection { conn ->
             conn.execSQL(
                 "CREATE TABLE event (id INTEGER PRIMARY KEY, starts_at TEXT, updated_at TEXT, deleted_at TEXT);",
@@ -204,7 +205,7 @@ class DbStatsReaderTest {
     }
 
     @Test
-    fun readTables_countsFutureEventsEvenWithoutSyncTrackingFields() {
+    fun readTables_countsFutureEventsEvenWithoutSyncTrackingFields() = runBlocking<Unit> {
         withConnection { conn ->
             conn.execSQL("CREATE TABLE event (id INTEGER PRIMARY KEY, starts_at TEXT);")
             conn.execSQL(
@@ -227,7 +228,7 @@ class DbStatsReaderTest {
     }
 
     @Test
-    fun readTables_handlesATableNameThatNeedsQuoting() {
+    fun readTables_handlesATableNameThatNeedsQuoting() = runBlocking<Unit> {
         withConnection { conn ->
             conn.execSQL("CREATE TABLE \"we\"\"ird\" (id INTEGER PRIMARY KEY, name TEXT);")
             conn.execSQL("INSERT INTO \"we\"\"ird\" (name) VALUES ('a');")
@@ -239,7 +240,7 @@ class DbStatsReaderTest {
         }
     }
 
-    private fun withConnection(block: (SQLiteConnection) -> Unit) {
+    private suspend fun withConnection(block: suspend (SQLiteConnection) -> Unit) {
         val conn = BundledSQLiteDriver().open(":memory:")
         try {
             block(conn)

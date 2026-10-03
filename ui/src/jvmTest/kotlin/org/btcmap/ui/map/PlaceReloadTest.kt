@@ -47,8 +47,10 @@ class PlaceReloadTest {
         assertEquals("New name", shownName)
     }
 
-    private fun database(): Database =
+    private fun database(): Database = runBlocking {
         Database(BundledSQLiteDriver(), Files.createTempFile("place-reload", ".db").toString())
+            .apply { connect() }
+    }
 
     private fun place(name: String) = Place(
         id = PLACE_ID,

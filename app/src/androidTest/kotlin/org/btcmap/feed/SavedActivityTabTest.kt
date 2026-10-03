@@ -1,5 +1,6 @@
 package org.btcmap.feed
 
+import kotlinx.coroutines.runBlocking
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
@@ -38,7 +39,7 @@ class SavedActivityTabTest : AppTestCase() {
     val composeTestRule = createEmptyComposeRule()
 
     @Test
-    fun signedOut_showsSignInMessageWithoutCallingApi() {
+    fun signedOut_showsSignInMessageWithoutCallingApi() = runBlocking<Unit> {
         val apiCalls = AtomicInteger(0)
         apiRule.server.dispatcher = countingDispatcher(apiCalls)
 
@@ -49,7 +50,7 @@ class SavedActivityTabTest : AppTestCase() {
     }
 
     @Test
-    fun signedInWithNoSavedItems_showsNoItemsMessageWithoutCallingApi() {
+    fun signedInWithNoSavedItems_showsNoItemsMessageWithoutCallingApi() = runBlocking<Unit> {
         preferencesRule.prefs.setAuthTokenForTesting("test-token")
         databaseRule.db.user.insert(user())
         val apiCalls = AtomicInteger(0)
@@ -62,7 +63,7 @@ class SavedActivityTabTest : AppTestCase() {
     }
 
     @Test
-    fun signedInWithSavedItemsAndNoActivity_showsNoActivityMessage() {
+    fun signedInWithSavedItemsAndNoActivity_showsNoActivityMessage() = runBlocking<Unit> {
         preferencesRule.prefs.setAuthTokenForTesting("test-token")
         databaseRule.db.user.insert(user(savedPlaceIds = listOf(1)))
         apiRule.server.dispatcher = object : Dispatcher() {
