@@ -10,7 +10,7 @@
 There are four Gradle modules:
 
 - **`:app`** — the Android application: the remaining Views chrome (fragments), platform glue, and the `AbstractComposeView` hosts for the shared screens. It has no Compose compiler.
-- **`:shared`** — Kotlin Multiplatform (Android + JVM): the whole portable core (`api`, `db`, `i18n`, `sync`, `openinghours`, `stats`, `settings`, the pure `map` data helpers, `offline`, `payment`, `imagestats`, `auth`/`http`). No Android dependency.
+- **`:shared`** — Kotlin Multiplatform (Android + JVM + wasmJs): the whole portable core (`api`, `db`, `i18n`, `sync`, `openinghours`, `stats`, `settings`, the pure `map` data helpers, `offline`, `payment`, `imagestats`, `auth`/`http`). No Android dependency.
 - **`:ui`** — Kotlin Multiplatform (Android + JVM): the Compose Multiplatform UI (`AppTheme`, `MaterialSymbol`, the screens, and the map: `MapScreen`, its layers, markers, chips, search and place sheet).
 - **`:desktopApp`** — the JVM Compose Desktop app, sharing `:shared` and `:ui`.
 
@@ -156,6 +156,41 @@ The UI is Compose Multiplatform, shared by Android and desktop.
 - Hiding a marker kind works on 0.19.0 (declare only the included kinds); it did
   not on 0.18.0.
 
+## Web Target (wasmJs)
+
+`:shared` targets Android, JVM and **wasmJs** (compile-only: the browser test
+environment needs a Node download the repository policy blocks, and `:ui` has no
+web target). The shared core is platform-neutral Kotlin — no `java.*`, OkHttp,
+Gson or `Dispatchers.IO` in `commonMain`. It uses Ktor, Okio,
+kotlinx.serialization, kotlinx-datetime, atomicfu, and an `org.btcmap.platform`
+`expect`/`actual` layer (`ioDispatcher`, `currentLanguage`, `formatInteger`,
+`weekdayName`, `PlatformLock`, `commentDateFormatter`; web actuals in
+`shared/src/wasmJsMain`).
+
+The data layer is **suspending**, because `androidx.sqlite`'s web
+`SQLiteDriver.open` / `SQLiteConnection.prepare` / `SQLiteStatement.step` /
+`execSQL` are `suspend` while the JVM/Android ones are synchronous:
+
+- `Database` opens in a separate `suspend fun connect()` step (not the
+  constructor); the query objects and `DbStatsReader`/`UserStore` are `suspend`.
+- The JVM-only statement-locking wrapper lives in `:shared`'s `jvmMain`/`androidMain`
+  behind `openDatabaseConnection`/`withTransaction`; the web returns the driver
+  as-is (single-threaded, so no locking).
+- `Settings` keeps its reads as an in-memory cache; only `preload`, the session
+  writes and the background writer are suspending.
+
+The Compose screens and hosts are still synchronous: `:ui`'s `runDbBlocking`
+(JVM `runBlocking`) wraps the direct `db.*` calls, and `:app`/`:desktopApp` use
+`runBlocking` for startup `connect`/`preload`. Tests use `runBlocking`.
+
+Deferred until Compose 1.13 (MapLibre Compose has no wasmJs artifact, so `:ui`
+cannot target the web):
+
+- Add a `wasmJs` target to `:ui` and a web host, then remove the `runBlocking`
+  bridge by moving the screens onto coroutines.
+- Replace the neutral web `actual`s (English language, comma grouping, English
+  weekday names, ISO comment date) with the browser `Intl` API via JS interop.
+
 ## Desktop App (`:desktopApp`)
 
 Shares `:shared` and `:ui`; it opens the shared database under `$BTCMAP_HOME` or
@@ -228,9 +263,12 @@ intentional:
 - Read existing table schema and queries before changing or adding; any schema change must include a migration
 
 ## Dependencies
-- **Networking**: OkHttp with coroutines extension
-- **JSON**: Gson
-- **Database**: androidx.sqlite (framework driver on Android, bundled on the JVM)
+- **Networking**: Ktor client (CIO engine on Android/JVM, JS engine on web)
+- **JSON**: kotlinx.serialization
+- **Date/time**: kotlinx-datetime
+- **IO**: Okio
+- **Concurrency**: Kotlin Coroutines, plus atomicfu for atomics and a common lock
+- **Database**: androidx.sqlite (androidx framework driver on Android, bundled on the JVM, the Web Worker driver on web)
 - **Maps**: `org.maplibre.compose:maplibre-compose` (Compose Multiplatform, Android + desktop), which also drives the offline pack downloads
 - **Images**: Coil
 - **UI**: Compose Multiplatform / Material 3 (Android and desktop); Material Components for the remaining Android Views
