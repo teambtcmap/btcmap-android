@@ -60,12 +60,12 @@ import org.btcmap.i18n.getLocalizedName
 import org.btcmap.openinghours.toOpeningHours
 import org.btcmap.place.osmEditUrl
 import org.btcmap.place.osmUrl
-import java.time.DayOfWeek
-import java.time.LocalDate
-import kotlin.time.Instant
+import org.btcmap.platform.currentLanguage
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
-import java.util.Locale
+import kotlin.time.Instant
+import kotlinx.datetime.DayOfWeek
+import kotlinx.datetime.todayIn
 
 /** Test tags for the place body's action buttons. */
 const val PLACE_VERIFY_TAG = "place-verify"
@@ -412,15 +412,15 @@ internal fun openingHoursText(
     raw: String,
     closedLabel: String,
     aroundTheClockLabel: String,
-    today: DayOfWeek = LocalDate.now().dayOfWeek,
-    locale: Locale = Locale.getDefault(),
+    today: DayOfWeek = Clock.System.todayIn(TimeZone.currentSystemDefault()).dayOfWeek,
+    language: String = currentLanguage(),
 ): AnnotatedString {
     val hours = raw.toOpeningHours() ?: return AnnotatedString(raw)
 
     val display = hours.toDisplayString(
         closedLabel = closedLabel,
         aroundTheClockLabel = aroundTheClockLabel,
-        locale = locale,
+        language = language,
     )
     val lineIndex = hours.todayLineIndex(today) ?: return AnnotatedString(display)
 

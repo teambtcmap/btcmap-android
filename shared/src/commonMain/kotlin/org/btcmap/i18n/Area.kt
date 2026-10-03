@@ -3,7 +3,7 @@ package org.btcmap.i18n
 import kotlinx.serialization.json.JsonObject
 import org.btcmap.db.table.area.Area
 import org.btcmap.db.table.area.SearchArea
-import java.util.Locale
+import org.btcmap.platform.currentLanguage
 
 /**
  * The area's name in the device language.
@@ -23,7 +23,7 @@ fun SearchArea.getLocalizedName(): String = areaLocalizedName(name, localizedNam
 
 /** The area's description in the device language, with the same fallback. */
 fun Area.getLocalizedDescription(): String? =
-    localizedDescription.translated(Locale.getDefault().language) ?: description
+    localizedDescription.translated(currentLanguage()) ?: description
 
 /**
  * Every name the area can be found by: its base `name` tag plus each
@@ -38,7 +38,7 @@ fun SearchArea.getSearchableNames(): List<String> =
     areaSearchableNames(name, localizedName)
 
 private fun areaLocalizedName(name: String, localizedName: JsonObject?): String =
-    localizedName.translated(Locale.getDefault().language) ?: name
+    localizedName.translated(currentLanguage()) ?: name
 
 private fun areaSearchableNames(name: String, localizedName: JsonObject?): List<String> =
     listOf(name) + localizedName.localizedValues()

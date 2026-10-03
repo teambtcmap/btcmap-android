@@ -1,6 +1,6 @@
 package org.btcmap.sync
 
-import kotlinx.coroutines.Dispatchers
+import org.btcmap.platform.ioDispatcher
 import kotlinx.coroutines.withContext
 import org.btcmap.api.Api
 import org.btcmap.api.GetAreasDeltaItem
@@ -115,7 +115,7 @@ class Sync(val api: Api, val db: Database) {
         fetch: suspend (since: Instant?, limit: Long) -> List<T>,
         updatedAt: (T) -> String,
         apply: (List<T>) -> Unit,
-    ): Report = withContext(Dispatchers.IO) {
+    ): Report = withContext(ioDispatcher) {
         val startedAt = Clock.System.now()
         var rowsAffected = 0L
         var failed = false

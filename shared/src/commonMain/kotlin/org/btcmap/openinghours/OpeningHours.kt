@@ -1,8 +1,9 @@
 package org.btcmap.openinghours
 
-import java.time.DayOfWeek
-import java.time.format.TextStyle
-import java.util.Locale
+import kotlinx.datetime.DayOfWeek
+import kotlinx.datetime.isoDayNumber
+import org.btcmap.platform.currentLanguage
+import org.btcmap.platform.weekdayName
 
 /**
  * A week's opening hours parsed from an OpenStreetMap `opening_hours` value.
@@ -26,7 +27,7 @@ data class OpeningHours(val days: Map<DayOfWeek, DaySchedule>) {
      */
     fun todayLineIndex(today: DayOfWeek): Int? {
         if (isOpenAroundTheClock || isAlwaysClosed) return null
-        return today.value - 1
+        return today.isoDayNumber - 1
     }
 
     /**
@@ -42,14 +43,14 @@ data class OpeningHours(val days: Map<DayOfWeek, DaySchedule>) {
     fun toDisplayString(
         closedLabel: String = "Closed",
         aroundTheClockLabel: String = "Open 24/7",
-        locale: Locale = Locale.getDefault(),
+        language: String = currentLanguage(),
     ): String {
         if (isOpenAroundTheClock) return aroundTheClockLabel
         if (isAlwaysClosed) return closedLabel
 
         return DayOfWeek.entries.joinToString("\n") { day ->
-            val name = day.getDisplayName(TextStyle.FULL, locale)
-                .replaceFirstChar { it.titlecase(locale) }
+            val name = weekdayName(day.isoDayNumber, language)
+                .replaceFirstChar { it.titlecase() }
             "$name: ${days[day]?.describe(closedLabel) ?: closedLabel}"
         }
     }

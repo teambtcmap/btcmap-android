@@ -2,10 +2,10 @@
 
 package org.btcmap.bundle
 
+import org.btcmap.platform.ioDispatcher
 import androidx.sqlite.execSQL
 import kotlin.time.Duration
 import kotlin.time.TimeSource
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -95,11 +95,11 @@ object BundledPlaces {
         // this call started (and so marked in progress) is safe to remove.
         var seedingStarted = false
         try {
-            if (withContext(Dispatchers.IO) { alreadySeeded(db) }) {
+            if (withContext(ioDispatcher) { alreadySeeded(db) }) {
                 return ImportResult(placesImported = 0, duration = startedAt.elapsedNow())
             }
 
-            withContext(Dispatchers.IO) {
+            withContext(ioDispatcher) {
                 seedingStarted = true
                 db.preference.upsert(SEED_STATE_KEY, SEED_IN_PROGRESS)
 

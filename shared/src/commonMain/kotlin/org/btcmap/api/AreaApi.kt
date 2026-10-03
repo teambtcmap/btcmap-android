@@ -5,7 +5,7 @@ import kotlinx.serialization.json.JsonObject
 import org.btcmap.util.toJsonArray
 import org.btcmap.util.toJsonObject
 import kotlin.time.Instant
-import java.util.Locale
+import org.btcmap.platform.currentLanguage
 
 data class GetAreaItem(
     val id: Long,
@@ -66,7 +66,7 @@ suspend fun Api.getAreas(updatedSince: Instant, limit: Long): List<GetAreasDelta
 
 suspend fun Api.getArea(
     id: String,
-    lang: String = Locale.getDefault().language,
+    lang: String = currentLanguage(),
 ): GetAreaItem {
     val url = buildUrl("v4", "areas", id) {
         if (lang.isNotBlank()) parameters.append("lang", lang)

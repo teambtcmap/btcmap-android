@@ -7,7 +7,7 @@ import org.btcmap.db.table.place.TABLE as PLACE_TABLE
 import org.btcmap.db.table.preference.TABLE as PREF_TABLE
 import org.btcmap.stats.StatsEntry
 import org.btcmap.stats.StatsSection
-import java.text.NumberFormat
+import org.btcmap.platform.formatInteger
 
 /** Display order of the database table cards, rather than alphabetical. */
 val DB_TABLE_ORDER = listOf(
@@ -94,7 +94,6 @@ private fun bundleSection(
     labels: DbStatsLabels,
     formatBytes: (Long) -> String,
 ): StatsSection {
-    val formatter = NumberFormat.getIntegerInstance()
     return StatsSection(
         key = "bundle:$table",
         title = labels.bundle(table),
@@ -102,20 +101,19 @@ private fun bundleSection(
         entries = buildList {
             add(StatsEntry(labels.location, bundle.location))
             add(StatsEntry(labels.size, formatBytes(bundle.sizeBytes)))
-            add(StatsEntry(labels.visibleRows, formatter.format(bundle.visibleCount)))
-            add(StatsEntry(labels.deletedRows, formatter.format(bundle.deletedCount)))
+            add(StatsEntry(labels.visibleRows, formatInteger(bundle.visibleCount)))
+            add(StatsEntry(labels.deletedRows, formatInteger(bundle.deletedCount)))
             bundle.maxUpdatedAt?.let { add(StatsEntry(labels.newestUpdate, it)) }
         },
     )
 }
 
 private fun tableEntries(table: TableStats, labels: DbStatsLabels): List<StatsEntry> {
-    val formatter = NumberFormat.getIntegerInstance()
     return buildList {
-        add(StatsEntry(labels.rows, formatter.format(table.rowCount)))
-        table.visibleRowCount?.let { add(StatsEntry(labels.visibleRows, formatter.format(it))) }
-        table.deletedRowCount?.let { add(StatsEntry(labels.deletedRows, formatter.format(it))) }
-        table.futureRowCount?.let { add(StatsEntry(labels.futureRows, formatter.format(it))) }
+        add(StatsEntry(labels.rows, formatInteger(table.rowCount)))
+        table.visibleRowCount?.let { add(StatsEntry(labels.visibleRows, formatInteger(it))) }
+        table.deletedRowCount?.let { add(StatsEntry(labels.deletedRows, formatInteger(it))) }
+        table.futureRowCount?.let { add(StatsEntry(labels.futureRows, formatInteger(it))) }
         table.maxUpdatedAt?.let { add(StatsEntry(labels.newestUpdate, it)) }
     }
 }

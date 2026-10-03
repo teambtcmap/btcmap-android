@@ -2,7 +2,7 @@ package org.btcmap.imagestats
 
 import org.btcmap.stats.StatsEntry
 import org.btcmap.stats.StatsSection
-import java.text.NumberFormat
+import org.btcmap.platform.formatInteger
 
 /** The per-host labels the image stats cards are built with. */
 data class ImageStatsLabels(
@@ -34,7 +34,6 @@ fun imageStatsSections(
     counters: ImageLoadCounters,
     labels: ImageStatsLabels,
 ): List<StatsSection> {
-    val numberFormatter = NumberFormat.getIntegerInstance()
     val sections = mutableListOf<StatsSection>()
 
     cache.memory?.let { memory ->
@@ -44,7 +43,7 @@ fun imageStatsSections(
                 title = labels.memoryCache,
                 icon = "memory",
                 entries = listOf(
-                    StatsEntry(labels.entries, numberFormatter.format(memory.entryCount)),
+                    StatsEntry(labels.entries, formatInteger(memory.entryCount.toLong())),
                     StatsEntry(labels.size, labels.sizeOf(memory.usedBytes, memory.maxBytes)),
                 ),
             )
@@ -71,15 +70,15 @@ fun imageStatsSections(
             title = labels.loads,
             icon = "query_stats",
             entries = buildList {
-                add(StatsEntry(labels.requests, numberFormatter.format(counters.requests)))
-                add(StatsEntry(labels.memoryHits, numberFormatter.format(counters.memoryCacheHits)))
-                add(StatsEntry(labels.diskHits, numberFormatter.format(counters.diskCacheHits)))
-                add(StatsEntry(labels.networkLoads, numberFormatter.format(counters.networkLoads)))
+                add(StatsEntry(labels.requests, formatInteger(counters.requests)))
+                add(StatsEntry(labels.memoryHits, formatInteger(counters.memoryCacheHits)))
+                add(StatsEntry(labels.diskHits, formatInteger(counters.diskCacheHits)))
+                add(StatsEntry(labels.networkLoads, formatInteger(counters.networkLoads)))
                 counters.cacheHitRatePercent?.let {
                     add(StatsEntry(labels.cacheHitRate, labels.percent(it)))
                 }
-                add(StatsEntry(labels.errors, numberFormatter.format(counters.errors)))
-                add(StatsEntry(labels.cancels, numberFormatter.format(counters.cancels)))
+                add(StatsEntry(labels.errors, formatInteger(counters.errors)))
+                add(StatsEntry(labels.cancels, formatInteger(counters.cancels)))
                 add(StatsEntry(labels.averageLoad, labels.millis(counters.averageLoadMillis)))
             },
         )

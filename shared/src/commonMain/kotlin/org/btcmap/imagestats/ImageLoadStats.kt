@@ -1,7 +1,7 @@
 package org.btcmap.imagestats
 
-import java.util.concurrent.TimeUnit
-import java.util.concurrent.atomic.AtomicLong
+import kotlinx.atomicfu.AtomicLong
+import kotlinx.atomicfu.atomic
 
 /**
  * Where a successful image load was served from.
@@ -24,14 +24,14 @@ enum class ImageLoadSource {
  */
 object ImageLoadStats {
 
-    private val requests = AtomicLong()
-    private val memoryCacheHits = AtomicLong()
-    private val diskCacheHits = AtomicLong()
-    private val networkLoads = AtomicLong()
-    private val errors = AtomicLong()
-    private val cancels = AtomicLong()
-    private val successNanos = AtomicLong()
-    private val successfulLoads = AtomicLong()
+    private val requests = atomic(0L)
+    private val memoryCacheHits = atomic(0L)
+    private val diskCacheHits = atomic(0L)
+    private val networkLoads = atomic(0L)
+    private val errors = atomic(0L)
+    private val cancels = atomic(0L)
+    private val successNanos = atomic(0L)
+    private val successfulLoads = atomic(0L)
 
     /** Records that a load started. */
     fun recordStart() {
@@ -71,31 +71,31 @@ object ImageLoadStats {
 
     /** Reads the current totals. */
     fun snapshot(): ImageLoadCounters {
-        val loads = successfulLoads.get()
+        val loads = successfulLoads.value
         return ImageLoadCounters(
-            requests = requests.get(),
-            memoryCacheHits = memoryCacheHits.get(),
-            diskCacheHits = diskCacheHits.get(),
-            networkLoads = networkLoads.get(),
-            errors = errors.get(),
-            cancels = cancels.get(),
+            requests = requests.value,
+            memoryCacheHits = memoryCacheHits.value,
+            diskCacheHits = diskCacheHits.value,
+            networkLoads = networkLoads.value,
+            errors = errors.value,
+            cancels = cancels.value,
             averageLoadMillis = if (loads == 0L) {
                 0L
             } else {
-                TimeUnit.NANOSECONDS.toMillis(successNanos.get() / loads)
+                successNanos.value / loads / 1_000_000L
             },
         )
     }
 
     /** Clears every counter, for tests. */
     fun reset() {
-        requests.set(0)
-        memoryCacheHits.set(0)
-        diskCacheHits.set(0)
-        networkLoads.set(0)
-        errors.set(0)
-        cancels.set(0)
-        successNanos.set(0)
-        successfulLoads.set(0)
+        requests.value = 0
+        memoryCacheHits.value = 0
+        diskCacheHits.value = 0
+        networkLoads.value = 0
+        errors.value = 0
+        cancels.value = 0
+        successNanos.value = 0
+        successfulLoads.value = 0
     }
 }

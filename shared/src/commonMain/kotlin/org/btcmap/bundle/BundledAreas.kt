@@ -2,9 +2,9 @@
 
 package org.btcmap.bundle
 
+import org.btcmap.platform.ioDispatcher
 import kotlin.time.Duration
 import kotlin.time.TimeSource
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -66,7 +66,7 @@ object BundledAreas {
             // The count read is inside the try as well: a database failure must
             // not escape and take down the calling screen, for the same reason a
             // missing or malformed asset must not.
-            val areasInDb = withContext(Dispatchers.IO) {
+            val areasInDb = withContext(ioDispatcher) {
                 db.area.selectCount(includeDeleted = true)
             }
             if (areasInDb > 0) {
@@ -77,7 +77,7 @@ object BundledAreas {
             // rolls back to an empty table and is retried on the next launch,
             // instead of leaving a partial seed that the count check above would
             // then treat as complete.
-            withContext(Dispatchers.IO) {
+            withContext(ioDispatcher) {
                 val source = openSource()
                 if (source == null) {
                     return@withContext

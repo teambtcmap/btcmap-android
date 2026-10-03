@@ -1,7 +1,7 @@
 package org.btcmap.settings
 
+import org.btcmap.platform.ioDispatcher
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import org.btcmap.db.Database
@@ -59,7 +59,7 @@ class Settings(
     private val sessionLock = Any()
 
     private val cache = HashMap<String, String>()
-    private val writeScope = CoroutineScope(SupervisorJob() + Dispatchers.IO.limitedParallelism(1))
+    private val writeScope = CoroutineScope(SupervisorJob() + ioDispatcher.limitedParallelism(1))
 
     @Volatile
     private var boundDb: Database? = null

@@ -1,7 +1,7 @@
 package org.btcmap.sync
 
+import org.btcmap.platform.ioDispatcher
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.channels.BufferOverflow
@@ -30,7 +30,7 @@ import kotlin.time.Duration
  */
 class SyncManager(
     private val sync: () -> Sync,
-    private val scope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.IO),
+    private val scope: CoroutineScope = CoroutineScope(SupervisorJob() + ioDispatcher),
     /**
      * Seeds the places table, invoking the callback with the running total
      * after each committed batch. The import is the slowest part of a fresh

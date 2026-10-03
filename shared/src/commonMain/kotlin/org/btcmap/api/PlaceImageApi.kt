@@ -1,12 +1,14 @@
+@file:OptIn(kotlin.io.encoding.ExperimentalEncodingApi::class)
+
 package org.btcmap.api
 
 import io.ktor.http.HttpMethod
+import kotlin.io.encoding.Base64
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
 import org.btcmap.util.toJsonArray
 import org.btcmap.util.toJsonObject
-import java.util.Base64
 
 data class PlaceImage(
     val id: Long,
@@ -36,7 +38,7 @@ suspend fun Api.addPlaceImage(placeId: Long, photo: ByteArray): PlaceImage {
     val url = buildUrl("v4", "places", "$placeId", "images")
 
     val req = buildJsonObject {
-        put("data_base64", Base64.getEncoder().encodeToString(photo))
+        put("data_base64", Base64.encode(photo))
     }
 
     return call(HttpMethod.Post, url, body = req) { body ->

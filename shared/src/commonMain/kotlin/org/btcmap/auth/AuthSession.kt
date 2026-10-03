@@ -1,7 +1,7 @@
 package org.btcmap.auth
 
+import org.btcmap.platform.ioDispatcher
 import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
@@ -195,7 +195,7 @@ suspend fun storeSignedInSession(
     prefs: Settings,
     response: CreateTokenResponse,
 ) {
-    withContext(Dispatchers.IO) {
+    withContext(ioDispatcher) {
         prefs.replaceSession(
             db = db,
             token = response.token,

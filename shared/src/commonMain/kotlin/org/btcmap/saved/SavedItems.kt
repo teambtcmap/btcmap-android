@@ -1,6 +1,6 @@
 package org.btcmap.saved
 
-import kotlinx.coroutines.Dispatchers
+import org.btcmap.platform.ioDispatcher
 import kotlinx.coroutines.withContext
 import org.btcmap.api.Api
 import org.btcmap.api.getUser
@@ -27,14 +27,14 @@ object SavedItems {
 
     /** Whether [placeId] is among the cached saved places. */
     suspend fun isPlaceSaved(db: Database, placeId: Long): Boolean =
-        withContext(Dispatchers.IO) { db.user.select() }
+        withContext(ioDispatcher) { db.user.select() }
             ?.savedPlaces
             ?.any { it.id == placeId }
             ?: false
 
     /** Whether [areaId] is among the cached saved areas. */
     suspend fun isAreaSaved(db: Database, areaId: Long): Boolean =
-        withContext(Dispatchers.IO) { db.user.select() }
+        withContext(ioDispatcher) { db.user.select() }
             ?.savedAreas
             ?.any { it.id == areaId }
             ?: false
@@ -82,7 +82,7 @@ object SavedItems {
         return replaceSaved(api, db, user, areaIds = api.removeSavedArea(areaId))
     }
 
-    private suspend fun requireUser(db: Database): DbUser = withContext(Dispatchers.IO) {
+    private suspend fun requireUser(db: Database): DbUser = withContext(ioDispatcher) {
         requireNotNull(db.user.select()) { "user is not signed in" }
     }
 
@@ -114,14 +114,14 @@ object SavedItems {
         }
 
         val updated = user.copy(savedPlaces = savedPlaces, savedAreas = savedAreas)
-        withContext(Dispatchers.IO) { db.user.insert(updated) }
+        withContext(ioDispatcher) { db.user.insert(updated) }
         return updated
     }
 
     private suspend fun refreshUser(api: Api, db: Database): DbUser {
         val updated = api.getUser().toDbUser()
 
-        withContext(Dispatchers.IO) {
+        withContext(ioDispatcher) {
             db.transaction {
                 db.user.delete()
                 db.user.insert(updated)
@@ -146,7 +146,7 @@ suspend fun List<SavedItem>.withLocalizedAreaNames(db: Database): List<SavedItem
 
 private suspend fun List<SavedItem>.mapLocalizedNames(
     localizedName: suspend (SavedItem) -> String?,
-): List<SavedItem> = withContext(Dispatchers.IO) {
+): List<SavedItem> = withContext(ioDispatcher) {
     map { item ->
         localizedName(item)
             ?.takeIf { it.isNotBlank() }

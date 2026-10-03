@@ -2,8 +2,7 @@ package org.btcmap.openinghours
 
 import org.junit.Assert
 import org.junit.Test
-import java.time.DayOfWeek
-import java.util.Locale
+import kotlinx.datetime.DayOfWeek
 
 class OpeningHoursTest {
 
@@ -15,7 +14,7 @@ class OpeningHoursTest {
         Assert.assertTrue(hours!!.isOpenAroundTheClock)
         Assert.assertEquals(
             "Open 24/7",
-            hours.toDisplayString(locale = Locale.ENGLISH),
+            hours.toDisplayString(language = "en"),
         )
     }
 
@@ -43,7 +42,7 @@ class OpeningHoursTest {
     @Test
     fun toDisplayString_weekdayRange_listsEveryDay() {
         val display = "Mo-Fr 09:00-17:00".toOpeningHours()!!
-            .toDisplayString(locale = Locale.ENGLISH)
+            .toDisplayString(language = "en")
 
         Assert.assertEquals(
             """
@@ -62,7 +61,7 @@ class OpeningHoursTest {
     @Test
     fun toDisplayString_semicolonRules_overrideDayRanges() {
         val display = "Mo-Sa 11:00-20:00; Su 12:00-18:00".toOpeningHours()!!
-            .toDisplayString(locale = Locale.ENGLISH)
+            .toDisplayString(language = "en")
 
         Assert.assertTrue(display.startsWith("Monday: 11:00–20:00"))
         Assert.assertTrue(display.endsWith("Sunday: 12:00–18:00"))
@@ -181,7 +180,7 @@ class OpeningHoursTest {
         Assert.assertTrue(hours!!.isAlwaysClosed)
         Assert.assertEquals(
             "Closed",
-            hours.toDisplayString(locale = Locale.ENGLISH),
+            hours.toDisplayString(language = "en"),
         )
     }
 
@@ -190,11 +189,11 @@ class OpeningHoursTest {
         val hours = "Mo-Fr 09:00-17:00".toOpeningHours()!!
 
         Assert.assertTrue(
-            hours.toDisplayString(locale = Locale.GERMAN).startsWith("Montag: 09:00–17:00"),
+            hours.toDisplayString(language = "de").startsWith("Montag: 09:00–17:00"),
         )
         Assert.assertTrue(
             "Понедельник: 09:00–17:00" in
-                hours.toDisplayString(locale = Locale.forLanguageTag("ru")),
+                hours.toDisplayString(language = "ru"),
         )
     }
 

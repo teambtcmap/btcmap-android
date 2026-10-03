@@ -1,42 +1,39 @@
 package org.btcmap.comment
 
+import kotlin.time.Instant
+import kotlinx.datetime.TimeZone
 import org.btcmap.db.table.comment.Comment
-import java.time.ZoneId
-import java.time.format.DateTimeFormatter
-import java.time.format.FormatStyle
-import java.util.Locale
+import org.btcmap.platform.currentLanguage
+
+/** Formats a comment's created instant for display. */
+fun interface CommentDateFormatter {
+    fun format(instant: Instant): String
+}
 
 /**
- * Builds the date formatter used for a place's comments.
+ * Builds the formatter used for a place's comments.
  *
- * The formatter is built per render rather than kept as a constant so it follows
- * the current [zone] and [locale] (the device ones by default) instead of the
- * values that were active when the process started.
+ * The formatter is built per render rather than kept as a constant so it
+ * follows the current [timeZone] and [language] (the device ones by default)
+ * instead of the values that were active when the process started.
  */
-fun commentDateFormatter(
-    zone: ZoneId = ZoneId.systemDefault(),
-    locale: Locale = Locale.getDefault(Locale.Category.FORMAT),
-): DateTimeFormatter =
-    DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM)
-        .withLocale(locale)
-        .withZone(zone)
+expect fun commentDateFormatter(
+    timeZone: String = TimeZone.currentSystemDefault().id,
+    language: String = currentLanguage(),
+): CommentDateFormatter
 
 /**
  * Maps a stored comment to its list item using an already built [formatter].
  *
- * The stored [Comment.createdAt] keeps the offset returned by the API, so the
- * formatter converts it to the device zone before formatting; otherwise a
- * comment posted late in the day could be shown with the previous day's date.
+ * The stored [Comment.createdAt] is an instant, so the formatter converts it to
+ * the device zone before formatting; otherwise a comment posted late in the day
+ * could be shown with the previous day's date.
  */
-fun Comment.toAdapterItem(formatter: DateTimeFormatter): CommentsAdapterItem =
+fun Comment.toAdapterItem(formatter: CommentDateFormatter): CommentsAdapterItem =
     CommentsAdapterItem(
         id = id,
         comment = comment,
-        localizedDate = formatter.format(
-            // Bridged to java.time until the localized date formatting moves to
-            // kotlinx-datetime with the rest of the locale work.
-            java.time.Instant.ofEpochSecond(createdAt.epochSeconds, createdAt.nanosecondsOfSecond.toLong()),
-        ),
+        localizedDate = formatter.format(createdAt),
     )
 
 /**
@@ -46,6 +43,6 @@ fun Comment.toAdapterItem(formatter: DateTimeFormatter): CommentsAdapterItem =
  * this overload exists for callers that handle a single comment.
  */
 fun Comment.toAdapterItem(
-    zone: ZoneId = ZoneId.systemDefault(),
-    locale: Locale = Locale.getDefault(Locale.Category.FORMAT),
-): CommentsAdapterItem = toAdapterItem(commentDateFormatter(zone, locale))
+    timeZone: TimeZone = TimeZone.currentSystemDefault(),
+    language: String = currentLanguage(),
+): CommentsAdapterItem = toAdapterItem(commentDateFormatter(timeZone.id, language))

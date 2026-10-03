@@ -1,8 +1,7 @@
 package org.btcmap.ui
 
 import androidx.compose.ui.text.style.TextDecoration
-import java.time.DayOfWeek
-import java.util.Locale
+import kotlinx.datetime.DayOfWeek
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -17,7 +16,7 @@ class OpeningHoursTextTest {
             closedLabel = "Closed",
             aroundTheClockLabel = "Open 24/7",
             today = DayOfWeek.WEDNESDAY,
-            locale = Locale.ENGLISH,
+            language = "en",
         ).text
 
         assertEquals(
@@ -41,7 +40,7 @@ class OpeningHoursTextTest {
             closedLabel = "Closed",
             aroundTheClockLabel = "Open 24/7",
             today = DayOfWeek.WEDNESDAY,
-            locale = Locale.ENGLISH,
+            language = "en",
         )
 
         val underlined = text.spanStyles
@@ -58,7 +57,7 @@ class OpeningHoursTextTest {
             closedLabel = "Closed",
             aroundTheClockLabel = "Open 24/7",
             today = DayOfWeek.MONDAY,
-            locale = Locale.ENGLISH,
+            language = "en",
         )
 
         assertEquals("Open 24/7", text.text)
@@ -72,7 +71,7 @@ class OpeningHoursTextTest {
             closedLabel = "Closed",
             aroundTheClockLabel = "Open 24/7",
             today = DayOfWeek.MONDAY,
-            locale = Locale.ENGLISH,
+            language = "en",
         )
 
         assertEquals("Apr-Oct", text.text)

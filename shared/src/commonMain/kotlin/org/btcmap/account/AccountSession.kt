@@ -1,6 +1,6 @@
 package org.btcmap.account
 
-import kotlinx.coroutines.Dispatchers
+import org.btcmap.platform.ioDispatcher
 import kotlinx.coroutines.withContext
 import org.btcmap.api.Api
 import org.btcmap.api.toDbUser
@@ -23,7 +23,7 @@ object AccountSession {
      */
     suspend fun changeUsername(api: Api, db: Database, name: String): DbUser {
         val updated = api.updateUsername(name).toDbUser()
-        withContext(Dispatchers.IO) {
+        withContext(ioDispatcher) {
             val existing = db.user.select()
             db.transaction {
                 db.user.delete()
@@ -48,8 +48,8 @@ object AccountSession {
      * sign-out is not dropped.
      */
     suspend fun clearSession(db: Database, settings: Settings): String? {
-        val token = withContext(Dispatchers.IO) { settings.authToken }
-        val cleared = withContext(Dispatchers.IO) {
+        val token = withContext(ioDispatcher) { settings.authToken }
+        val cleared = withContext(ioDispatcher) {
             val stored = token?.takeIf { it.isNotBlank() }
             if (stored == null) {
                 settings.clearSession(db)

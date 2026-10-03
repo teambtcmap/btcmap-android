@@ -3,7 +3,7 @@ package org.btcmap.i18n
 import kotlinx.serialization.json.JsonObject
 import org.btcmap.db.table.place.Place
 import org.btcmap.db.table.place.SearchPlace
-import java.util.Locale
+import org.btcmap.platform.currentLanguage
 
 /**
  * The place's name in the device language, or an empty string when it has none.
@@ -30,7 +30,7 @@ fun SearchPlace.getSearchableNames(): List<String> =
     placeSearchableNames(name, localizedName)
 
 private fun placeLocalizedName(name: String?, localizedName: JsonObject?): String =
-    localizedName?.stringAt(Locale.getDefault().language) ?: name.orEmpty()
+    localizedName?.stringAt(currentLanguage()) ?: name.orEmpty()
 
 private fun placeSearchableNames(name: String?, localizedName: JsonObject?): List<String> =
     listOfNotNull(name) + localizedName.localizedValues()

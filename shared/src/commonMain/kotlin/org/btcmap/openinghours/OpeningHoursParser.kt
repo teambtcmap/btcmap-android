@@ -1,6 +1,6 @@
 package org.btcmap.openinghours
 
-import java.time.DayOfWeek
+import kotlinx.datetime.DayOfWeek
 
 /**
  * Parses an OpenStreetMap `opening_hours` value into a weekly schedule.
@@ -260,11 +260,12 @@ private class TokenCursor(private val tokens: List<Token>) {
 
 private fun Token.DayRange.days(): Set<DayOfWeek> {
     val days = LinkedHashSet<DayOfWeek>()
-    var day = from
+    var index = from.ordinal
     while (true) {
+        val day = DayOfWeek.entries[index]
         days += day
         if (day == to) break
-        day = day.plus(1)
+        index = (index + 1) % DayOfWeek.entries.size
     }
     return days
 }

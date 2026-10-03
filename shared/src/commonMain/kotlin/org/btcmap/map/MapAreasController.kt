@@ -1,5 +1,6 @@
 package org.btcmap.map
 
+import org.btcmap.platform.ioDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -58,7 +59,7 @@ class MapAreasController(
 
         currentJob?.cancel("superseded by a newer map position")
         currentJob = scope.launch {
-            val found = withContext(Dispatchers.IO) { lookup(lat, lon) }
+            val found = withContext(ioDispatcher) { lookup(lat, lon) }
             _areas.value = found
         }
     }

@@ -12,6 +12,7 @@ import org.btcmap.db.table.place.PlaceQueries
 import org.btcmap.db.table.preference.PreferenceQueries
 import org.btcmap.db.table.user.UserStore
 import org.btcmap.io.platformFileSystem
+import org.btcmap.platform.PlatformLock
 
 class Database(driver: SQLiteDriver, val path: String) {
     companion object {
@@ -88,8 +89,13 @@ class Database(driver: SQLiteDriver, val path: String) {
     val preference = PreferenceQueries(conn)
     val user = UserStore(preference)
 
-    /** Guards [transaction] against reentrancy on the calling thread. */
-    private val inTransaction: ThreadLocal<Boolean> = ThreadLocal.withInitial { false }
+    /**
+     * Guards [transaction] against reentrancy on the calling thread. It is a
+     * dedicated lock rather than the connection's, so an open statement on the
+     * same thread (which holds the connection lock) does not look like a nested
+     * transaction.
+     */
+    private val transactionLock = PlatformLock()
 
     init {
         // [initialize] discards every database this version cannot upgrade
@@ -419,12 +425,12 @@ class Database(driver: SQLiteDriver, val path: String) {
      * instead of silently reusing the outer transaction.
      */
     fun transaction(block: () -> Unit) {
-        check(inTransaction.get() != true) { "Database.transaction cannot be nested" }
-        inTransaction.set(true)
+        check(!transactionLock.isHeldByCurrentThread()) { "Database.transaction cannot be nested" }
+        transactionLock.lock()
         try {
             conn.transaction(block)
         } finally {
-            inTransaction.set(false)
+            transactionLock.unlock()
         }
     }
 

@@ -1,16 +1,17 @@
 package org.btcmap.db
 
+import org.btcmap.platform.ioDispatcher
 import androidx.sqlite.SQLiteConnection
 import androidx.sqlite.SQLiteStatement
 import androidx.sqlite.execSQL
-import java.util.concurrent.locks.ReentrantLock
+import org.btcmap.platform.PlatformLock
 
 /**
  * Serializes every statement executed on a [SQLiteConnection].
  *
  * The app shares one connection between the UI's reads and the background sync,
  * seed and session writers, all of which run on the multi-threaded
- * [kotlinx.coroutines.Dispatchers.IO]. Android renders query results into a
+ * [kotlinx.coroutines.ioDispatcher]. Android renders query results into a
  * [android.database.CursorWindow] that is refilled lazily as the cursor
  * advances; a write committed on another thread between two refills changes the
  * window's row count underneath the cursor, so the next `step()`/`get*()`
@@ -30,7 +31,7 @@ internal class LockingSQLiteConnection(
     private val delegate: SQLiteConnection,
 ) : SQLiteConnection by delegate {
 
-    private val lock = ReentrantLock()
+    private val lock = PlatformLock()
 
     override fun prepare(sql: String): SQLiteStatement {
         lock.lock()
@@ -109,7 +110,7 @@ internal fun <T> SQLiteConnection.transaction(block: () -> T): T {
 
 private class LockingSQLiteStatement(
     private val delegate: SQLiteStatement,
-    private val lock: ReentrantLock,
+    private val lock: PlatformLock,
 ) : SQLiteStatement by delegate {
 
     private var closed = false

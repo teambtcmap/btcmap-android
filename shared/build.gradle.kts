@@ -31,6 +31,8 @@ kotlin {
             implementation(libs.kotlinx.datetime)
             // The java.io replacement: streaming sources and file access.
             implementation(libs.okio)
+            // The java.util.concurrent replacement: atomics and locks.
+            implementation(libs.atomicfu)
             implementation(libs.kotlinx.coroutines.core)
         }
 

@@ -65,6 +65,9 @@ kotlinx-datetime = "0.8.0"
 # Multiplatform IO, the java.io replacement on web
 # https://square.github.io/okio/
 okio = "3.18.2"
+# Multiplatform atomics and locks, the java.util.concurrent replacement on web
+# https://github.com/Kotlin/kotlinx.atomicfu
+atomicfu = "0.33.0"
 # MapLibre for Compose Multiplatform (shared map, Phase 3)
 # https://github.com/maplibre/maplibre-compose/releases
 maplibre-compose = "0.19.0"
@@ -129,6 +132,7 @@ kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serializa
 kotlinx-serialization-json-okio = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json-okio", version.ref = "kotlinx-serialization" }
 kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinx-datetime" }
 okio = { module = "com.squareup.okio:okio", version.ref = "okio" }
+atomicfu = { module = "org.jetbrains.kotlinx:atomicfu", version.ref = "atomicfu" }
 androidx-sqlite-web = { module = "androidx.sqlite:sqlite-web", version.ref = "androidx-sqlite" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 mockwebserver = { module = "com.squareup.okhttp3:mockwebserver3-junit4", version.ref = "okhttp" }
