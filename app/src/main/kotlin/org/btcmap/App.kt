@@ -21,8 +21,8 @@ import org.btcmap.bundle.BundledEvents
 import org.btcmap.bundle.BundledPlaces
 import org.btcmap.db.Database
 import org.btcmap.db.LegacyDatabases
-import org.btcmap.imagestats.ImageStatsEventListener
-import org.btcmap.offline.OfflineMaps
+import org.btcmap.ui.ImageStatsEventListener
+import org.btcmap.ui.map.OfflinePacks
 import org.btcmap.settings.apiUrl
 import org.btcmap.settings.authToken
 import org.btcmap.settings.prefs
@@ -31,7 +31,6 @@ import org.btcmap.sync.SyncController
 import org.btcmap.sync.SyncManager
 import org.btcmap.ui.map.configureBundledMapResources
 import org.btcmap.util.rethrowIfCancellation
-import org.maplibre.android.MapLibre
 import org.btcmap.settings.init as settingsInit
 import org.btcmap.util.initIconTypeface
 
@@ -139,9 +138,11 @@ class App : Application(), SingletonImageLoader.Factory {
 
     /**
      * Owns MapLibre's offline regions. App-scoped so a download started on the
-     * area screen keeps running after that screen is closed.
+     * area screen keeps running after that screen is closed. Built lazily and on
+     * first use (a screen's main thread), because it is created through the
+     * Compose map's runtime.
      */
-    internal val offlineMaps: OfflineMaps by lazy { OfflineMaps(this) }
+    internal val offlinePacks: OfflinePacks by lazy { OfflinePacks(resources.displayMetrics.density) }
 
     private val defaultDb: Database by lazy {
         Database(
@@ -157,14 +158,9 @@ class App : Application(), SingletonImageLoader.Factory {
         // building it here would add a few tens of milliseconds to every cold
         // start before the first frame.
         initIconTypeface(this, ioScope)
-        MapLibre.getInstance(this)
         // The shared (Compose) map reads the bundled styles and their sprites
         // and glyphs through its own resource provider.
         configureBundledMapResources(this)
-
-        // OfflineManager must be created on the UI thread; touching the lazy
-        // here does that before the background refresh below uses it.
-        offlineMaps
 
         // Load the settings before the first screen can read them: the session
         // token lives in this in-memory cache, so a read that raced the load
@@ -195,13 +191,11 @@ class App : Application(), SingletonImageLoader.Factory {
             syncController.start()
         }
 
-        // Delete the databases abandoned by earlier versions and re-attach to
-        // packs left incomplete by a previous run; neither is needed before the
-        // first screen, so both stay off the main thread.
+        // Delete the databases abandoned by earlier versions. It is not needed
+        // before the first screen, so it stays off the main thread.
         ioScope.launch {
             try {
                 databasePath.parentFile?.let { LegacyDatabases.delete(it, databasePath) }
-                offlineMaps.refresh()
             } catch (t: Throwable) {
                 t.rethrowIfCancellation()
             }
@@ -242,5 +236,5 @@ fun Fragment.app(): App = requireContext().applicationContext as App
 internal fun Fragment.syncController(): SyncController =
     (requireContext().applicationContext as App).syncController
 
-internal fun Fragment.offlineMaps(): OfflineMaps =
-    (requireContext().applicationContext as App).offlineMaps
+internal fun Fragment.offlinePacks(): OfflinePacks =
+    (requireContext().applicationContext as App).offlinePacks

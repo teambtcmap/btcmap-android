@@ -148,13 +148,13 @@ class AreaOfflineMapTest : AreaScreenTest() {
 
     /**
      * Publishes a pack state without going near MapLibre or the network: the
-     * app's OfflineMaps only exposes states from a real download otherwise.
+     * app's OfflinePacks only exposes states from a real download otherwise.
      */
     private fun injectState(
         scenario: ActivityScenario<Activity>,
         state: OfflineAreaState,
     ) {
-        scenario.onActivity { app.offlineMaps.setStatesForTesting(mapOf(AREA_ID to state)) }
+        scenario.onActivity { app.offlinePacks.setStatesForTesting(mapOf(AREA_ID to state)) }
     }
 
     private fun completeState(styleUrl: String) = OfflineAreaState.Complete(

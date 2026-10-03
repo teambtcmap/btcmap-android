@@ -1,10 +1,12 @@
-package org.btcmap.imagestats
+package org.btcmap.ui
 
 import coil3.EventListener
 import coil3.decode.DataSource
 import coil3.request.ErrorResult
 import coil3.request.ImageRequest
 import coil3.request.SuccessResult
+import org.btcmap.imagestats.ImageLoadSource
+import org.btcmap.imagestats.ImageLoadStats
 
 /**
  * Records every Coil load into [ImageLoadStats].

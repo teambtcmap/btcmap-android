@@ -1,15 +1,9 @@
 package org.btcmap.comment
 
-import android.content.ActivityNotFoundException
-import android.content.ClipData
-import android.content.ClipboardManager
-import android.content.Context
-import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.core.net.toUri
 import androidx.fragment.app.Fragment
 import org.btcmap.Activity
 import org.btcmap.R
@@ -19,6 +13,8 @@ import org.btcmap.ui.AddCommentLabels
 import org.btcmap.ui.CommentScreenLabels
 import org.btcmap.ui.InvoicePaymentLabels
 import org.btcmap.ui.InvoicePaymentSectionLabels
+import org.btcmap.util.copyBolt11
+import org.btcmap.util.openLightningWallet
 
 /**
  * The add-comment screen: a toolbar over the shared
@@ -70,8 +66,8 @@ class AddCommentFragment : Fragment() {
         content.placeId = args.placeId
         content.labels = commentLabels()
         content.iconTypeface = org.btcmap.util.iconTypeface
-        content.onPay = { openWallet(it) }
-        content.onCopy = { copyToClipboard(it) }
+        content.onPay = { openLightningWallet(it) }
+        content.onCopy = { copyBolt11(getString(R.string.btc_map_comment_payment_request), it) }
         content.onBack = { parentFragmentManager.popBackStack() }
         content.onPosted = {
             (activity as? Activity)?.showMessage(getString(R.string.your_comment_has_been_posted))
@@ -117,24 +113,6 @@ class AddCommentFragment : Fragment() {
         discard = getString(R.string.start_over),
         cancel = getString(android.R.string.cancel),
     )
-
-    private fun openWallet(bolt11: String) {
-        val intent = Intent(Intent.ACTION_VIEW, "lightning:$bolt11".toUri())
-        try {
-            startActivity(intent)
-        } catch (e: ActivityNotFoundException) {
-            (activity as? Activity)?.showMessage(getString(R.string.you_dont_have_a_compatible_wallet))
-        }
-    }
-
-    private fun copyToClipboard(bolt11: String) {
-        val clipboard =
-            requireContext().getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-        clipboard.setPrimaryClip(
-            ClipData.newPlainText(getString(R.string.btc_map_comment_payment_request), bolt11)
-        )
-        (activity as? Activity)?.showMessage(getString(R.string.copied_to_clipboard))
-    }
 
     companion object {
         /**

@@ -7,27 +7,25 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.withResumed
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.google.gson.JsonParser
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.OkHttpClient
-import okhttp3.Request
-import okhttp3.coroutines.executeAsync
 import org.btcmap.BuildConfig
 import org.btcmap.R
+import org.btcmap.update.AvailableUpdate
+import org.btcmap.update.UpdateCheck
 import org.btcmap.util.rethrowIfCancellation
 
 /**
  * Reports whether the published APK is newer than this build, and opens the
  * update dialog when the map's update button is tapped.
  *
- * The check is independent of the map, so the controller hands the button's
- * visibility to the shared map through [onUpdateAvailable] rather than touching
- * a view itself. The check is process-scoped: its outcome is cached and reused,
- * so a rotation or a return to the map does not re-issue it. The HTTP client is
- * shared for the whole process.
+ * The check is shared [UpdateCheck] logic; this only supplies the app's build
+ * numbers and manifest URL, hands the button's visibility to the shared map
+ * through [onUpdateAvailable], and shows the dialog. The check is process-scoped:
+ * its outcome is cached and reused, so a rotation or a return to the map does
+ * not re-issue it. The HTTP client is shared for the whole process.
  */
 class UpdateNotificationController(
     private val context: Context,
@@ -45,7 +43,14 @@ class UpdateNotificationController(
                     }
 
                     try {
-                        val update = withContext(Dispatchers.IO) { fetchLatestUpdate() }
+                        val update = withContext(Dispatchers.IO) {
+                            UpdateCheck.fetch(
+                                httpClient = sharedHttpClient,
+                                manifestUrl = manifestUrl(),
+                                currentVersionCode = BuildConfig.VERSION_CODE,
+                                isDebugBuild = BuildConfig.DEBUG,
+                            )
+                        }
                         availableUpdate = update
                         checked = true
                         onUpdateAvailable(update != null)
@@ -99,53 +104,10 @@ class UpdateNotificationController(
         @Volatile private var checked = false
         @Volatile private var availableUpdate: AvailableUpdate? = null
 
-        const val RELEASE_MANIFEST_URL = "https://static.btcmap.org/android/latest-app-ver.json"
-        const val BETA_MANIFEST_URL = "https://static.btcmap.org/android/latest-app-beta-ver.json"
-
         val isBeta: Boolean
             get() = BuildConfig.BUILD_TYPE == "beta"
 
-        fun manifestUrl(): String = if (isBeta) BETA_MANIFEST_URL else RELEASE_MANIFEST_URL
-
-        suspend fun fetchLatestUpdate(): AvailableUpdate? {
-            val latestVerJson = sharedHttpClient.newCall(
-                Request.Builder()
-                    .url(manifestUrl().toHttpUrl())
-                    .build()
-            ).executeAsync().use { it.body.string().trim() }
-
-            val latestVer = JsonParser.parseString(latestVerJson).asJsonObject
-            val latestVerCode = latestVer.get("code").asInt
-            val latestVerName = latestVer.get("name").asString
-            val latestVerUrl = latestVer.get("url").asString
-
-            if (!isUpdateAvailable(
-                    currentVersionCode = BuildConfig.VERSION_CODE,
-                    latestVersionCode = latestVerCode,
-                    isDebugBuild = BuildConfig.DEBUG,
-                )
-            ) {
-                return null
-            }
-
-            return AvailableUpdate(latestVerCode, latestVerName, latestVerUrl)
-        }
+        fun manifestUrl(): String =
+            if (isBeta) UpdateCheck.BETA_MANIFEST_URL else UpdateCheck.RELEASE_MANIFEST_URL
     }
 }
-
-private class AvailableUpdate(
-    val versionCode: Int,
-    val versionName: String,
-    val url: String,
-)
-
-/**
- * Whether the published APK is newer than this build. Debug builds are installed
- * locally and must not be nagged about the published APK, even when their
- * version code is lower.
- */
-internal fun isUpdateAvailable(
-    currentVersionCode: Int,
-    latestVersionCode: Int,
-    isDebugBuild: Boolean,
-): Boolean = !isDebugBuild && latestVersionCode > currentVersionCode

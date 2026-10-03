@@ -13,7 +13,7 @@ import org.btcmap.db.table.area.Area
 import org.btcmap.i18n.getLocalizedName
 import org.btcmap.offline.OfflineAreaState
 import org.btcmap.offline.OfflineBounds
-import org.btcmap.offlineMaps
+import org.btcmap.offlinePacks
 import org.btcmap.settings.mapStyle
 import org.btcmap.settings.name
 import org.btcmap.settings.offlineStyleFamily
@@ -65,7 +65,7 @@ internal class AreaOfflineMapController(
 
         fragment.viewLifecycleOwner.lifecycleScope.launch {
             fragment.viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
-                fragment.offlineMaps().states.collect { states ->
+                fragment.offlinePacks().states.collect { states ->
                     renderState(states[area.id])
                 }
             }
@@ -89,7 +89,7 @@ internal class AreaOfflineMapController(
     }
 
     private fun startDownload(area: Area, bounds: OfflineBounds, maxZoom: Int) {
-        fragment.offlineMaps().download(
+        fragment.offlinePacks().download(
             areaId = area.id,
             areaName = area.getLocalizedName(),
             bounds = bounds,
@@ -104,7 +104,7 @@ internal class AreaOfflineMapController(
             .setMessage(R.string.offline_map_delete_message)
             .setNegativeButton(android.R.string.cancel, null)
             .setPositiveButton(R.string.delete) { _, _ ->
-                fragment.offlineMaps().delete(area.id)
+                fragment.offlinePacks().delete(area.id)
             }
             .show()
     }

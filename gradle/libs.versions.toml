@@ -51,9 +51,6 @@ material = "1.14.0"
 # Modern HTTP client
 # https://github.com/square/okhttp/blob/master/CHANGELOG.md
 okhttp = "5.5.0"
-# Map widget with vector support
-# https://github.com/maplibre/maplibre-native/releases
-maplibre = "13.6.1"
 # MapLibre for Compose Multiplatform (shared map, Phase 3)
 # https://github.com/maplibre/maplibre-compose/releases
 maplibre-compose = "0.19.0"
@@ -105,7 +102,6 @@ material = { group = "com.google.android.material", name = "material", version.r
 okhttp = { group = "com.squareup.okhttp3", name = "okhttp", version.ref = "okhttp" }
 okhttp-coroutines = { group = "com.squareup.okhttp3", name = "okhttp-coroutines", version.ref = "okhttp" }
 okhttp-brotli = { group = "com.squareup.okhttp3", name = "okhttp-brotli", version.ref = "okhttp" }
-maplibre = { module = "org.maplibre.gl:android-sdk", version.ref = "maplibre" }
 maplibre-compose = { module = "org.maplibre.compose:maplibre-compose", version.ref = "maplibre-compose" }
 maplibre-compose-runtime-opengl-android = { module = "org.maplibre.compose:maplibre-compose-runtime-opengl-android", version.ref = "maplibre-compose" }
 maplibre-compose-runtime-opengl-linux-x64 = { module = "org.maplibre.compose:maplibre-compose-runtime-opengl-linux-x64", version.ref = "maplibre-compose" }

@@ -27,7 +27,7 @@ android {
         targetSdk {
             version = release(37)
         }
-        versionCode = 240
+        versionCode = 241
         versionName = "1.2.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -137,7 +137,6 @@ dependencies {
     implementation(libs.material)
     implementation(libs.okhttp.coroutines)
     implementation(libs.okhttp.brotli)
-    implementation(libs.maplibre)
 
 
     implementation(libs.coil)

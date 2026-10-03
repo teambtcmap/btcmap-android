@@ -25,10 +25,9 @@ import org.maplibre.compose.offline.OfflinePackDefinition
 import org.maplibre.spatialk.geojson.BoundingBox
 
 /**
- * Creates and tracks MapLibre offline regions, one per area, ported from
- * `org.btcmap.offline.OfflineMaps` to the Compose offline manager. The manager
- * keeps its own database and publishes the packs as a flow, so this only has to
- * map each pack's progress onto [OfflineAreaState].
+ * The manager keeps its own database and publishes the packs as a flow, so this
+ * only has to map each pack's progress onto [OfflineAreaState]. A pack left
+ * incomplete by a previous run is resumed when it is first observed.
  */
 class OfflinePacks(private val pixelRatio: Float) {
 
@@ -45,8 +44,31 @@ class OfflinePacks(private val pixelRatio: Float) {
      */
     private val pending = mutableSetOf<Long>()
 
+    /**
+     * Areas whose pack has been activated. A pack loaded from a previous run is
+     * resumed once, so an interrupted download continues; a fresh download is
+     * resumed by [download] itself.
+     */
+    private val resumed = mutableSetOf<Long>()
+
     private val _states = MutableStateFlow<Map<Long, OfflineAreaState>>(emptyMap())
     val states: StateFlow<Map<Long, OfflineAreaState>> = _states.asStateFlow()
+
+    /**
+     * Set by [setStatesForTesting] so a manager emission cannot overwrite the
+     * injected state while a test is driving the offline UI.
+     */
+    private var injectedForTesting = false
+
+    /**
+     * Test-only: publishes [states] as the tracked pack states without touching
+     * the manager or the network, so the offline UI can be driven to a given
+     * state in a test.
+     */
+    fun setStatesForTesting(states: Map<Long, OfflineAreaState>) {
+        injectedForTesting = true
+        _states.value = states
+    }
 
     init {
         scope.launch {
@@ -85,6 +107,7 @@ class OfflinePacks(private val pixelRatio: Float) {
                     ),
                     metadata = metadata.toBytes(),
                 )
+                resumed += areaId
                 observePack(areaId, pack, metadata)
                 manager.resume(pack)
             }.onFailure { error ->
@@ -97,6 +120,7 @@ class OfflinePacks(private val pixelRatio: Float) {
     fun delete(areaId: Long) {
         scope.launch {
             pending -= areaId
+            resumed -= areaId
             observations.remove(areaId)?.first?.cancel()
             val pack = existingPack(areaId)
             if (pack == null) {
@@ -119,6 +143,8 @@ class OfflinePacks(private val pixelRatio: Float) {
         }
 
     private fun syncPacks(packs: Set<OfflinePack>) {
+        if (injectedForTesting) return
+
         val byArea = packs.mapNotNull { pack ->
             parseOfflineRegionMetadata(pack.metadata.value)?.let { it.areaId to (pack to it) }
         }.toMap()
@@ -133,9 +159,14 @@ class OfflinePacks(private val pixelRatio: Float) {
                 observations.remove(areaId)?.first?.cancel()
                 observePack(areaId, pack, metadata)
             }
+            // Re-activate a pack left over from a previous run, the way the
+            // Views manager did on refresh; a fresh download has already been
+            // resumed by `download`, and a complete pack has nothing to fetch.
+            if (resumed.add(areaId)) manager.resume(pack)
         }
 
         val present = byArea.keys + pending
+        resumed.retainAll(present)
         _states.value = _states.value.filterKeys { it in present }
     }
 

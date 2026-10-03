@@ -231,12 +231,12 @@ intentional:
 - **Networking**: OkHttp with coroutines extension
 - **JSON**: Gson
 - **Database**: androidx.sqlite (framework driver on Android, bundled on the JVM)
-- **Maps**: `org.maplibre.compose:maplibre-compose` (Compose Multiplatform, Android + desktop) and the MapLibre Android SDK for the Views add-place map and the offline-pack downloader
+- **Maps**: `org.maplibre.compose:maplibre-compose` (Compose Multiplatform, Android + desktop), which also drives the offline pack downloads
 - **Images**: Coil
 - **UI**: Compose Multiplatform / Material 3 (Android and desktop); Material Components for the remaining Android Views
 - **Async**: Kotlin Coroutines
-- **QR Codes**: QRGenerator (Android), ZXing (desktop)
-- **Color Picker**: Colorpicker library
+- **QR Codes**: ZXing core, in shared code
+- **Color Picker**: shared Compose picker in `:ui`
 
 ## Testing
 - Unit tests (app/src/test) are the default. Run the tests for the code you
