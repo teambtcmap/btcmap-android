@@ -18,10 +18,9 @@ import org.btcmap.Activity
 import org.btcmap.App
 import org.btcmap.R
 import org.btcmap.comment.AddCommentFragment
-import org.btcmap.comment.CommentsFragment
 import org.btcmap.db.table.comment.Comment
 import org.btcmap.db.table.place.Place
-import org.btcmap.ui.PLACE_COMMENTS_TAG
+import org.btcmap.ui.PLACE_ADD_COMMENT_TAG
 import org.btcmap.ui.PlaceComposeView
 import org.btcmap.util.AppTestCase
 import org.btcmap.util.waitUntilOnMain
@@ -39,7 +38,7 @@ class PlaceCommentsTest : AppTestCase() {
     val composeTestRule = createEmptyComposeRule()
 
     @Test
-    fun commentsPreview_showsStoredCommentsAndOpensTheList() {
+    fun storedComments_arePreviewedInline() {
         databaseRule.db.comment.insert(
             listOf(
                 comment(1L, "First", "2024-06-01T10:00:00Z"),
@@ -47,24 +46,17 @@ class PlaceCommentsTest : AppTestCase() {
             )
         )
 
-        withPlaceFragment { scenario, activity, fragment ->
+        withPlaceFragment { _, _, _ ->
             composeTestRule.waitUntil(5_000) {
                 composeTestRule.onAllNodesWithText("First").fetchSemanticsNodes().isNotEmpty()
             }
             composeTestRule.onNodeWithText("First").assertExists()
             composeTestRule.onNodeWithText("Second").assertExists()
-
-            composeTestRule.onNodeWithTag(PLACE_COMMENTS_TAG).performClick()
-
-            waitUntilOnMain {
-                activity.supportFragmentManager
-                    .findFragmentById(R.id.fragmentContainerView) is CommentsFragment
-            }
         }
     }
 
     @Test
-    fun commentsButton_opensTheAddScreenWhenThereAreNoComments() {
+    fun addCommentButton_opensTheAddScreen() {
         // A valid quote keeps the add screen open; otherwise it pops itself as
         // soon as the quote fails to load.
         apiRule.server.dispatcher = object : Dispatcher() {
@@ -75,18 +67,18 @@ class PlaceCommentsTest : AppTestCase() {
                 }
         }
 
-        withPlaceFragment { scenario, activity, fragment ->
+        withPlaceFragment { _, activity, fragment ->
             waitUntilOnMain {
                 fragment.requireView()
                     .findViewById<PlaceComposeView>(R.id.placeContent)
                     .place != null
             }
             composeTestRule.waitUntil(5_000) {
-                composeTestRule.onAllNodesWithTag(PLACE_COMMENTS_TAG)
+                composeTestRule.onAllNodesWithTag(PLACE_ADD_COMMENT_TAG)
                     .fetchSemanticsNodes().isNotEmpty()
             }
 
-            composeTestRule.onNodeWithTag(PLACE_COMMENTS_TAG).performClick()
+            composeTestRule.onNodeWithTag(PLACE_ADD_COMMENT_TAG).performClick()
 
             waitUntilOnMain {
                 activity.supportFragmentManager
@@ -148,7 +140,6 @@ class PlaceCommentsTest : AppTestCase() {
             line = null,
             requiredAppUrl = null,
             boostedUntil = null,
-            // The stored comments are the count the body labels its action with.
             comments = 2L,
             telegram = null,
             osmId = null,

@@ -27,14 +27,12 @@ class AddCommentFragment : Fragment() {
     private data class Args(
         val placeId: Long,
         val placeName: String?,
-        val notifyOnPosted: Boolean,
     )
 
     private val args by lazy {
         Args(
             placeId = requireArguments().getLong("place_id"),
             placeName = requireArguments().getString("place_name"),
-            notifyOnPosted = requireArguments().getBoolean(ARG_NOTIFY_ON_POSTED, false),
         )
     }
 
@@ -71,12 +69,6 @@ class AddCommentFragment : Fragment() {
         content.onBack = { parentFragmentManager.popBackStack() }
         content.onPosted = {
             (activity as? Activity)?.showMessage(getString(R.string.your_comment_has_been_posted))
-            // Only the comments list opened from CommentsFragment waits for
-            // this; a comment posted straight from the place screen must not
-            // leave a result behind that a later list visit would consume.
-            if (args.notifyOnPosted) {
-                parentFragmentManager.setFragmentResult(REQUEST_KEY, Bundle())
-            }
             parentFragmentManager.popBackStack()
         }
     }
@@ -113,19 +105,4 @@ class AddCommentFragment : Fragment() {
         discard = getString(R.string.start_over),
         cancel = getString(android.R.string.cancel),
     )
-
-    companion object {
-        /**
-         * Fragment result set right before this screen closes once the comment
-         * was paid for; `CommentsFragment` listens for it to re-run its sync.
-         */
-        const val REQUEST_KEY = "org.btcmap.comment.posted"
-
-        /**
-         * Argument telling this screen to set [REQUEST_KEY] once the comment is
-         * paid for. Only `CommentsFragment` needs it; the place screen opens
-         * this screen directly and does not listen for the result.
-         */
-        const val ARG_NOTIFY_ON_POSTED = "notify_on_posted"
-    }
 }

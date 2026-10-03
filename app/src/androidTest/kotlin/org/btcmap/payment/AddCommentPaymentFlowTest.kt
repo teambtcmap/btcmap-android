@@ -10,7 +10,6 @@ import androidx.compose.ui.test.performTextInput
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.btcmap.R
-import org.btcmap.comment.AddCommentFragment
 import org.btcmap.ui.COMMENT_CONTINUE_TAG
 import org.btcmap.ui.COMMENT_FIELD_TAG
 import org.btcmap.util.waitUntil
@@ -18,7 +17,6 @@ import org.junit.Assert
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import java.util.concurrent.atomic.AtomicBoolean
 
 /**
  * The add-comment screen now renders the shared
@@ -102,42 +100,6 @@ class AddCommentPaymentFlowTest : PaymentScreenTest() {
                 }
                 gone
             }
-        }
-    }
-
-    /**
-     * The place screen opens this screen directly and does not listen for the
-     * posted result. Setting one anyway would leave a stale result behind for a
-     * later comments visit to consume as a fresh payment.
-     */
-    @Test
-    fun postedComment_setsNoResultWhenNotRequested() {
-        apiRule.server.dispatcher = commentDispatcher(invoiceStatuses = listOf("unpaid", "paid"))
-
-        withComment(addToBackStack = true) { scenario, _ ->
-            val resultReceived = AtomicBoolean(false)
-            scenario.onActivity {
-                it.supportFragmentManager.setFragmentResultListener(
-                    AddCommentFragment.REQUEST_KEY,
-                    it,
-                ) { _, _ -> resultReceived.set(true) }
-            }
-
-            composeTestRule.waitUntil(5_000) { continueShown() }
-            composeTestRule.onNodeWithTag(COMMENT_FIELD_TAG).performTextInput("gm")
-            composeTestRule.onNodeWithTag(COMMENT_CONTINUE_TAG).performClick()
-
-            waitUntil {
-                var gone = false
-                scenario.onActivity {
-                    gone = it.supportFragmentManager.findFragmentByTag(COMMENT_TAG) == null
-                }
-                gone
-            }
-            Assert.assertFalse(
-                "an add screen opened directly must not set the posted result",
-                resultReceived.get(),
-            )
         }
     }
 

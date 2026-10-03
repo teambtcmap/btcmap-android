@@ -108,6 +108,8 @@
     <string name="opening_hours_closed">Closed</string>
     <string name="opening_hours_open_24_7">Open 24/7</string>
     <string name="save">Save</string>
+    <string name="watch">Watch</string>
+    <string name="unwatch">Unwatch</string>
     <string name="account">BTC Map Account</string>
     <string name="not_logged_in">Account</string>
     <string name="logged_in_as">Logged in as %1$s</string>

@@ -19,9 +19,9 @@ data class PlaceSheetStrings(
     val verify: String,
     val report: String,
     val boost: String,
-    val comments: (Long) -> String,
     val commentsTitle: (Long) -> String,
     val addComment: String,
-    val save: String,
+    val watch: String,
+    val unwatch: String,
     val addPhoto: String,
 )

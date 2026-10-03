@@ -33,7 +33,6 @@ import org.btcmap.auth.registerAuthResultListener
 import org.btcmap.auth.showAuthDialog
 import org.btcmap.boost.BoostFragment
 import org.btcmap.comment.AddCommentFragment
-import org.btcmap.comment.CommentsFragment
 import org.btcmap.comment.commentDateFormatter
 import org.btcmap.comment.toAdapterItem
 import org.btcmap.db
@@ -56,6 +55,8 @@ import org.btcmap.sync.SyncEvent
 import org.btcmap.syncController
 import org.btcmap.ui.PlaceAction
 import org.btcmap.util.iconTypeface
+import org.btcmap.util.openDialer
+import org.btcmap.util.openEmail
 import org.btcmap.util.openInBrowser
 import org.btcmap.util.rethrowIfCancellation
 import org.btcmap.util.showError
@@ -102,6 +103,9 @@ class PlaceFragment : Fragment() {
 
     /** The place's OpenStreetMap page, or null when it has no OSM id. */
     private var osmUrl: String? = null
+
+    /** The rendered place, kept so its contact rows can open their links. */
+    private var place: Place? = null
 
     /** The place's OpenStreetMap editor page, or null when it has no OSM id. */
     private var osmEditUrl: String? = null
@@ -252,6 +256,7 @@ class PlaceFragment : Fragment() {
         binding.toolbar.menu.findItem(R.id.view_on_osm)?.isVisible = osmUrl != null
         osmEditUrl = place.osmEditUrl()
         binding.toolbar.menu.findItem(R.id.edit_on_osm)?.isVisible = osmEditUrl != null
+        this.place = place
 
         binding.placeContent.place = place
 
@@ -304,12 +309,20 @@ class PlaceFragment : Fragment() {
 
     private fun onPlaceAction(action: PlaceAction) {
         when (action) {
+            PlaceAction.Directions -> openDirections()
             PlaceAction.Verify -> openReport(defaultType = "verified")
             PlaceAction.Report -> openReport(defaultType = null)
             PlaceAction.Boost -> openBoost()
-            PlaceAction.Comments -> openCommentsOrAdd()
             PlaceAction.AddComment -> openAddComment()
             PlaceAction.AddPhoto -> requestAddPhoto()
+            PlaceAction.Phone -> openDialer(place?.phone)
+            PlaceAction.Website -> place?.website?.let { openInBrowser(it.toString().toUri()) }
+            PlaceAction.Email -> openEmail(place?.email)
+            PlaceAction.Telegram -> place?.telegram?.let { openInBrowser(it.toString().toUri()) }
+            PlaceAction.Line -> place?.line?.let { openInBrowser(it.toString().toUri()) }
+            PlaceAction.Twitter -> place?.twitter?.let { openInBrowser(it.toString().toUri()) }
+            PlaceAction.Facebook -> place?.facebook?.let { openInBrowser(it.toString().toUri()) }
+            PlaceAction.Instagram -> place?.instagram?.let { openInBrowser(it.toString().toUri()) }
             // The rest are raised by the top bar, not the body.
             else -> {}
         }
@@ -369,26 +382,6 @@ class PlaceFragment : Fragment() {
     private fun openBoost() {
         navigate(
             BoostFragment(),
-            Bundle().apply {
-                putLong("place_id", placeId)
-                putString("place_name", placeName)
-            },
-        )
-    }
-
-    private fun openCommentsOrAdd() {
-        viewLifecycleOwner.lifecycleScope.launch {
-            val hasComments = withContext(Dispatchers.IO) {
-                db().comment.selectCountByPlaceId(placeId) > 0
-            }
-
-            if (hasComments) openComments() else openAddComment()
-        }
-    }
-
-    private fun openComments() {
-        navigate(
-            CommentsFragment(),
             Bundle().apply {
                 putLong("place_id", placeId)
                 putString("place_name", placeName)

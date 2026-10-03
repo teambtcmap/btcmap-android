@@ -1045,9 +1045,9 @@ private val PLACE_SHEET_STRINGS = org.btcmap.ui.PlaceSheetStrings(
     verify = "Verify",
     report = "Report",
     boost = "Boost",
-    comments = { "Comments ($it)" },
     commentsTitle = { "Comments ($it)" },
     addComment = "Add comment",
-    save = "Save",
+    watch = "Watch",
+    unwatch = "Unwatch",
     addPhoto = "Add photo",
 )

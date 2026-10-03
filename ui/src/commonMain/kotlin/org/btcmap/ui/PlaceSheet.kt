@@ -1,6 +1,8 @@
 package org.btcmap.ui
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyRow
@@ -54,7 +56,7 @@ import java.time.format.FormatStyle
 const val PLACE_VERIFY_TAG = "place-verify"
 const val PLACE_REPORT_TAG = "place-report"
 const val PLACE_BOOST_TAG = "place-boost"
-const val PLACE_COMMENTS_TAG = "place-comments"
+const val PLACE_WATCH_TAG = "place-watch"
 const val PLACE_ADD_COMMENT_TAG = "place-add-comment"
 const val PLACE_ADD_PHOTO_TAG = "place-add-photo"
 
@@ -128,7 +130,6 @@ fun PlaceDetails(
                 )
                 PlaceOverflowMenu(
                     place = place,
-                    bookmarked = bookmarked,
                     strings = strings,
                     onAction = onAction,
                 )
@@ -136,6 +137,65 @@ fun PlaceDetails(
         }
 
         previewMap?.invoke()
+
+        // The photos sit above the verification state and the contact details.
+        var viewerIndex by remember { mutableStateOf<Int?>(null) }
+
+        if (photos.isNotEmpty()) {
+            LazyRow(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                contentPadding = PaddingValues(horizontal = 16.dp),
+                modifier = Modifier.padding(top = 8.dp),
+            ) {
+                itemsIndexed(photos) { index, url ->
+                    AsyncImage(
+                        model = url,
+                        contentDescription = null,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier
+                            .size(72.dp)
+                            .clip(RoundedCornerShape(8.dp))
+                            .clickable { viewerIndex = index },
+                    )
+                }
+                // With photos, the add affordance is a trailing tile in the
+                // strip rather than a separate full-width button.
+                item {
+                    Box(
+                        contentAlignment = Alignment.Center,
+                        modifier = Modifier
+                            .size(72.dp)
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(MaterialTheme.colorScheme.surfaceVariant)
+                            .clickable { onAction(PlaceAction.AddPhoto) }
+                            .testTag(PLACE_ADD_PHOTO_TAG),
+                    ) {
+                        MaterialSymbol(
+                            glyph = "add",
+                            contentDescription = strings.addPhoto,
+                        )
+                    }
+                }
+            }
+        } else {
+            OutlinedButton(
+                onClick = { onAction(PlaceAction.AddPhoto) },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 4.dp)
+                    .testTag(PLACE_ADD_PHOTO_TAG),
+            ) {
+                Text(text = strings.addPhoto)
+            }
+        }
+
+        viewerIndex?.let { index ->
+            PlacePhotoViewer(
+                photos = photos,
+                initialIndex = index,
+                onDismiss = { viewerIndex = null },
+            )
+        }
 
         place.requiredAppUrl?.let { requiredAppUrl ->
             InfoRow(
@@ -182,60 +242,50 @@ fun PlaceDetails(
             )
         }
 
-        place.address?.takeIf { it.isNotBlank() }?.let { InfoRow(glyph = "place", text = it) }
-        place.phone?.takeIf { it.isNotBlank() }?.let { InfoRow(glyph = "call", text = it) }
+        place.address?.takeIf { it.isNotBlank() }?.let {
+            InfoRow(glyph = "place", text = it, onClick = { onAction(PlaceAction.Directions) })
+        }
+        place.phone?.takeIf { it.isNotBlank() }?.let {
+            InfoRow(glyph = "call", text = it, onClick = { onAction(PlaceAction.Phone) })
+        }
         place.website?.let {
-            InfoRow(glyph = "public", text = it.toString().replace("https://", "").trimEnd('/'))
-        }
-        place.email?.let { InfoRow(glyph = "mail", text = it) }
-        place.telegram?.let {
-            InfoRow(glyph = "send", text = it.toString().replace("https://t.me/", ""))
-        }
-        place.line?.let { InfoRow(glyph = "chat", text = it.toString()) }
-        place.twitter?.let { InfoRow(glyph = "link", text = it.toString()) }
-        place.facebook?.let { InfoRow(glyph = "link", text = it.toString()) }
-        place.instagram?.let { InfoRow(glyph = "link", text = it.toString()) }
-        place.openingHours?.takeIf { it.isNotBlank() }?.let { InfoRow(glyph = "schedule", text = it) }
-
-        var viewerIndex by remember { mutableStateOf<Int?>(null) }
-
-        if (photos.isNotEmpty()) {
-            LazyRow(
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                contentPadding = PaddingValues(horizontal = 16.dp),
-                modifier = Modifier.padding(top = 8.dp),
-            ) {
-                itemsIndexed(photos) { index, url ->
-                    AsyncImage(
-                        model = url,
-                        contentDescription = null,
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier
-                            .size(72.dp)
-                            .clip(RoundedCornerShape(8.dp))
-                            .clickable { viewerIndex = index },
-                    )
-                }
-            }
-        }
-
-        viewerIndex?.let { index ->
-            PlacePhotoViewer(
-                photos = photos,
-                initialIndex = index,
-                onDismiss = { viewerIndex = null },
+            InfoRow(
+                glyph = "public",
+                text = it.toString().replace("https://", "").trimEnd('/'),
+                onClick = { onAction(PlaceAction.Website) },
             )
         }
-
-        OutlinedButton(
-            onClick = { onAction(PlaceAction.AddPhoto) },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 4.dp)
-                .testTag(PLACE_ADD_PHOTO_TAG),
-        ) {
-            Text(text = strings.addPhoto)
+        place.email?.let {
+            InfoRow(glyph = "mail", text = it, onClick = { onAction(PlaceAction.Email) })
         }
+        place.telegram?.let {
+            InfoRow(
+                glyph = "send",
+                text = it.toString().replace("https://t.me/", ""),
+                onClick = { onAction(PlaceAction.Telegram) },
+            )
+        }
+        place.line?.let {
+            InfoRow(glyph = "chat", text = it.toString(), onClick = { onAction(PlaceAction.Line) })
+        }
+        place.twitter?.let {
+            InfoRow(glyph = "link", text = it.toString(), onClick = { onAction(PlaceAction.Twitter) })
+        }
+        place.facebook?.let {
+            InfoRow(
+                glyph = "link",
+                text = it.toString(),
+                onClick = { onAction(PlaceAction.Facebook) },
+            )
+        }
+        place.instagram?.let {
+            InfoRow(
+                glyph = "link",
+                text = it.toString(),
+                onClick = { onAction(PlaceAction.Instagram) },
+            )
+        }
+        place.openingHours?.takeIf { it.isNotBlank() }?.let { InfoRow(glyph = "schedule", text = it) }
 
         ActionRow(
             startLabel = strings.verify,
@@ -249,9 +299,9 @@ fun PlaceDetails(
             startLabel = strings.boost,
             onStart = { onAction(PlaceAction.Boost) },
             startTag = PLACE_BOOST_TAG,
-            endLabel = strings.comments(place.comments ?: 0),
-            onEnd = { onAction(PlaceAction.Comments) },
-            endTag = PLACE_COMMENTS_TAG,
+            endLabel = if (bookmarked) strings.unwatch else strings.watch,
+            onEnd = { onAction(PlaceAction.ToggleBookmark) },
+            endTag = PLACE_WATCH_TAG,
         )
 
         if (comments.isNotEmpty()) {
@@ -274,7 +324,6 @@ fun PlaceDetails(
 @Composable
 private fun PlaceOverflowMenu(
     place: Place,
-    bookmarked: Boolean,
     strings: PlaceSheetStrings,
     onAction: (PlaceAction) -> Unit,
 ) {
@@ -287,10 +336,6 @@ private fun PlaceOverflowMenu(
     }
 
     DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-        MenuItem(
-            label = strings.save,
-            glyph = if (bookmarked) "bookmark_added" else "bookmark",
-        ) { expanded = false; onAction(PlaceAction.ToggleBookmark) }
         MenuItem(strings.directions) { expanded = false; onAction(PlaceAction.Directions) }
         MenuItem(strings.share) { expanded = false; onAction(PlaceAction.Share) }
         MenuItem(strings.viewOnBtcmap) { expanded = false; onAction(PlaceAction.ViewOnBtcmap) }

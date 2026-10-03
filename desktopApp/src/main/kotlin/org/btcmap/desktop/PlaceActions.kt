@@ -26,6 +26,13 @@ fun handlePlaceAction(place: Place, action: PlaceAction) {
         PlaceAction.ViewOnBtcmap -> openUrl(place.btcmapUrl())
         PlaceAction.ViewOnOsm -> place.osmUrl()?.let(::openUrl)
         PlaceAction.EditOnOsm -> place.osmEditUrl()?.let(::openUrl)
+        PlaceAction.Website -> place.website?.let { openUrl(it.toString()) }
+        PlaceAction.Email -> place.email?.let { openUrl("mailto:$it") }
+        PlaceAction.Telegram -> place.telegram?.let { openUrl(it.toString()) }
+        PlaceAction.Line -> place.line?.let { openUrl(it.toString()) }
+        PlaceAction.Twitter -> place.twitter?.let { openUrl(it.toString()) }
+        PlaceAction.Facebook -> place.facebook?.let { openUrl(it.toString()) }
+        PlaceAction.Instagram -> place.instagram?.let { openUrl(it.toString()) }
         else -> println("desktop: place action $action is not wired yet")
     }
 }

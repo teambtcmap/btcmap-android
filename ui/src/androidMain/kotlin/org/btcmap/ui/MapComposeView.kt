@@ -86,10 +86,10 @@ class MapComposeView @JvmOverloads constructor(
             verify = "",
             report = "",
             boost = "",
-            comments = { it.toString() },
             commentsTitle = { it.toString() },
             addComment = "",
-            save = "",
+            watch = "",
+            unwatch = "",
             addPhoto = "",
         )
     )

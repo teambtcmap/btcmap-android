@@ -23,15 +23,9 @@ fun Context.placeSheetStrings(): PlaceSheetStrings = PlaceSheetStrings(
     verify = getString(R.string.btn_verify),
     report = getString(R.string.btn_report),
     boost = getString(R.string.boost),
-    comments = { count ->
-        if (count == 0L) {
-            getString(R.string.comments)
-        } else {
-            getString(R.string.comments_d, count.toInt())
-        }
-    },
     commentsTitle = { count -> getString(R.string.comments_d, count.toInt()) },
     addComment = getString(R.string.add_comment),
-    save = getString(R.string.save),
+    watch = getString(R.string.watch),
+    unwatch = getString(R.string.unwatch),
     addPhoto = getString(R.string.add_photo),
 )

@@ -4,6 +4,7 @@ import android.content.Intent
 import android.net.Uri
 import android.widget.Toast
 import androidx.core.content.FileProvider
+import androidx.core.net.toUri
 import androidx.fragment.app.Fragment
 import org.btcmap.R
 import java.io.File
@@ -31,6 +32,20 @@ fun Fragment.openInBrowser(uri: Uri) {
             uri,
         )
     )
+}
+
+/** Opens the dialer with [phone] pre-filled. Does nothing when it is blank. */
+fun Fragment.openDialer(phone: String?) {
+    val number = phone?.trim()
+    if (number.isNullOrEmpty()) return
+    startActivity(Intent(Intent.ACTION_DIAL, "tel:$number".toUri()))
+}
+
+/** Opens the mail app with [email] as the recipient. Does nothing when blank. */
+fun Fragment.openEmail(email: String?) {
+    val address = email?.trim()
+    if (address.isNullOrEmpty()) return
+    startActivity(Intent(Intent.ACTION_SENDTO, "mailto:$address".toUri()))
 }
 
 fun Fragment.showError(throwable: Throwable) {

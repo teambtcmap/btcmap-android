@@ -36,7 +36,6 @@ import org.btcmap.auth.registerAuthResultListener
 import org.btcmap.auth.showAuthDialog
 import org.btcmap.boost.BoostFragment
 import org.btcmap.comment.AddCommentFragment
-import org.btcmap.comment.CommentsFragment
 import org.btcmap.db
 import org.btcmap.db.table.place.Place
 import org.btcmap.databinding.MapFragmentBinding
@@ -82,6 +81,8 @@ import org.btcmap.ui.map.SearchActions
 import org.btcmap.ui.map.bundledStyleJsonFor
 import org.btcmap.util.DeepLink
 import org.btcmap.util.iconTypeface
+import org.btcmap.util.openDialer
+import org.btcmap.util.openEmail
 import org.btcmap.util.openInBrowser
 import org.btcmap.util.rethrowIfCancellation
 import java.text.NumberFormat
@@ -305,6 +306,22 @@ class MapFragment : Fragment() {
 
             PlaceAction.EditOnOsm -> place.osmEditUrl()?.let { openInBrowser(it.toUri()) }
 
+            PlaceAction.Phone -> openDialer(place.phone)
+
+            PlaceAction.Website -> place.website?.let { openInBrowser(it.toString().toUri()) }
+
+            PlaceAction.Email -> openEmail(place.email)
+
+            PlaceAction.Telegram -> place.telegram?.let { openInBrowser(it.toString().toUri()) }
+
+            PlaceAction.Line -> place.line?.let { openInBrowser(it.toString().toUri()) }
+
+            PlaceAction.Twitter -> place.twitter?.let { openInBrowser(it.toString().toUri()) }
+
+            PlaceAction.Facebook -> place.facebook?.let { openInBrowser(it.toString().toUri()) }
+
+            PlaceAction.Instagram -> place.instagram?.let { openInBrowser(it.toString().toUri()) }
+
             PlaceAction.ToggleBookmark -> {
                 if (prefs.authorized) {
                     viewLifecycleOwner.lifecycleScope.launch {
@@ -338,13 +355,6 @@ class MapFragment : Fragment() {
                     putString("place_name", place.name.orEmpty())
                 },
             )
-
-            PlaceAction.Comments -> viewLifecycleOwner.lifecycleScope.launch {
-                val hasComments = withContext(Dispatchers.IO) {
-                    db().comment.selectCountByPlaceId(place.id) > 0
-                }
-                if (hasComments) openComments(place) else openAddComment(place)
-            }
 
             PlaceAction.AddComment -> openAddComment(place)
 
@@ -421,10 +431,6 @@ class MapFragment : Fragment() {
                 if (defaultType != null) putString("default_type", defaultType)
             },
         )
-    }
-
-    private fun openComments(place: Place) {
-        navigate(CommentsFragment(), placeArgs(place))
     }
 
     private fun openAddComment(place: Place) {
