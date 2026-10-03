@@ -32,6 +32,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Move the Android offline map packs, image-load stats and update check onto shared code, and drop the MapLibre Android SDK in favour of the shared Compose map runtime
 - Show a place's photos at the top of its sheet, with an add-photo tile in the photo carousel, and make its phone, address, website, email and social links tappable
 - Replace a place's Comments button with a Watch/Unwatch action, drop Save from its overflow menu and remove the separate comments screen
+- Show a place's opening hours as a week, one line per weekday with today underlined, instead of the raw OpenStreetMap value
+- Move the place action buttons directly below the photo carousel and give them icons
 
 ## [1.2.0] - 2026-09-30
 

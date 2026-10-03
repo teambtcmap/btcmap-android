@@ -28,4 +28,6 @@ fun Context.placeSheetStrings(): PlaceSheetStrings = PlaceSheetStrings(
     watch = getString(R.string.watch),
     unwatch = getString(R.string.unwatch),
     addPhoto = getString(R.string.add_photo),
+    openingHoursClosed = getString(R.string.opening_hours_closed),
+    openingHoursOpen24_7 = getString(R.string.opening_hours_open_24_7),
 )

@@ -91,6 +91,8 @@ class MapComposeView @JvmOverloads constructor(
             watch = "",
             unwatch = "",
             addPhoto = "",
+            openingHoursClosed = "",
+            openingHoursOpen24_7 = "",
         )
     )
 

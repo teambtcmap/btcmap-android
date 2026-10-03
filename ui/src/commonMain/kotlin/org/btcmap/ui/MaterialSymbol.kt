@@ -8,6 +8,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.sp
 
 /**
@@ -22,6 +23,7 @@ fun MaterialSymbol(
     contentDescription: String?,
     modifier: Modifier = Modifier,
     tint: Color = LocalContentColor.current,
+    size: TextUnit = 24.sp,
 ) {
     val semantics = if (contentDescription != null) {
         Modifier.semantics { this.contentDescription = contentDescription }
@@ -32,7 +34,7 @@ fun MaterialSymbol(
     Text(
         text = glyph,
         fontFamily = LocalIconFont.current,
-        fontSize = 24.sp,
+        fontSize = size,
         color = tint,
         modifier = modifier.then(semantics),
     )

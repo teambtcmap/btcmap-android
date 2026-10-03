@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.width
@@ -41,16 +42,26 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import org.btcmap.comment.CommentsAdapterItem
 import org.btcmap.db.table.place.Place
 import org.btcmap.i18n.getLocalizedName
+import org.btcmap.openinghours.toOpeningHours
 import org.btcmap.place.osmEditUrl
 import org.btcmap.place.osmUrl
+import java.time.DayOfWeek
+import java.time.LocalDate
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
+import java.util.Locale
 
 /** Test tags for the place body's action buttons. */
 const val PLACE_VERIFY_TAG = "place-verify"
@@ -197,6 +208,35 @@ fun PlaceDetails(
             )
         }
 
+        // A little breathing room between the photo carousel and the actions.
+        // The standalone add-photo button already carries its own padding.
+        if (photos.isNotEmpty()) {
+            Spacer(modifier = Modifier.height(8.dp))
+        }
+
+        // The actions sit directly below the photo carousel.
+        ActionRow(
+            startLabel = strings.verify,
+            onStart = { onAction(PlaceAction.Verify) },
+            startGlyph = "verified",
+            startTag = PLACE_VERIFY_TAG,
+            endLabel = strings.report,
+            onEnd = { onAction(PlaceAction.Report) },
+            endGlyph = "warning",
+            endTag = PLACE_REPORT_TAG,
+        )
+        ActionRow(
+            startLabel = strings.boost,
+            onStart = { onAction(PlaceAction.Boost) },
+            startGlyph = "rocket_launch",
+            startTag = PLACE_BOOST_TAG,
+            endLabel = if (bookmarked) strings.unwatch else strings.watch,
+            onEnd = { onAction(PlaceAction.ToggleBookmark) },
+            endGlyph = if (bookmarked) "bookmark_remove" else "bookmark_add",
+            endTag = PLACE_WATCH_TAG,
+            bottomPadding = 0.dp,
+        )
+
         place.requiredAppUrl?.let { requiredAppUrl ->
             InfoRow(
                 glyph = "warning",
@@ -285,24 +325,9 @@ fun PlaceDetails(
                 onClick = { onAction(PlaceAction.Instagram) },
             )
         }
-        place.openingHours?.takeIf { it.isNotBlank() }?.let { InfoRow(glyph = "schedule", text = it) }
-
-        ActionRow(
-            startLabel = strings.verify,
-            onStart = { onAction(PlaceAction.Verify) },
-            startTag = PLACE_VERIFY_TAG,
-            endLabel = strings.report,
-            onEnd = { onAction(PlaceAction.Report) },
-            endTag = PLACE_REPORT_TAG,
-        )
-        ActionRow(
-            startLabel = strings.boost,
-            onStart = { onAction(PlaceAction.Boost) },
-            startTag = PLACE_BOOST_TAG,
-            endLabel = if (bookmarked) strings.unwatch else strings.watch,
-            onEnd = { onAction(PlaceAction.ToggleBookmark) },
-            endTag = PLACE_WATCH_TAG,
-        )
+        place.openingHours?.takeIf { it.isNotBlank() }?.let {
+            OpeningHoursRow(hours = it, strings = strings)
+        }
 
         if (comments.isNotEmpty()) {
             InfoRow(glyph = "comment", text = strings.commentsTitle(comments.size.toLong()))
@@ -362,11 +387,64 @@ private fun MenuItem(
 }
 
 @Composable
+private fun OpeningHoursRow(hours: String, strings: PlaceSheetStrings) {
+    val text = remember(hours, strings) {
+        openingHoursText(
+            raw = hours,
+            closedLabel = strings.openingHoursClosed,
+            aroundTheClockLabel = strings.openingHoursOpen24_7,
+        )
+    }
+    InfoRow(glyph = "schedule", text = text, maxLines = Int.MAX_VALUE)
+}
+
+/**
+ * The display text for a place's `opening_hours`: the parsed week, one line per
+ * weekday with today's line underlined, or the raw OpenStreetMap value when the
+ * week cannot be parsed faithfully. A week that never closes or opens collapses
+ * to a single label and has no day to underline.
+ */
+internal fun openingHoursText(
+    raw: String,
+    closedLabel: String,
+    aroundTheClockLabel: String,
+    today: DayOfWeek = LocalDate.now().dayOfWeek,
+    locale: Locale = Locale.getDefault(),
+): AnnotatedString {
+    val hours = raw.toOpeningHours() ?: return AnnotatedString(raw)
+
+    val display = hours.toDisplayString(
+        closedLabel = closedLabel,
+        aroundTheClockLabel = aroundTheClockLabel,
+        locale = locale,
+    )
+    val lineIndex = hours.todayLineIndex(today) ?: return AnnotatedString(display)
+
+    val lines = display.split('\n')
+    val start = lines.take(lineIndex).sumOf { it.length + 1 }
+    val end = start + lines[lineIndex].length
+
+    return buildAnnotatedString {
+        append(display)
+        addStyle(SpanStyle(textDecoration = TextDecoration.Underline), start, end)
+    }
+}
+
+@Composable
 private fun InfoRow(
     glyph: String,
     text: String,
     tint: Color = MaterialTheme.colorScheme.onSurfaceVariant,
     onClick: (() -> Unit)? = null,
+) = InfoRow(glyph = glyph, text = AnnotatedString(text), tint = tint, onClick = onClick)
+
+@Composable
+private fun InfoRow(
+    glyph: String,
+    text: AnnotatedString,
+    tint: Color = MaterialTheme.colorScheme.onSurfaceVariant,
+    onClick: (() -> Unit)? = null,
+    maxLines: Int = 2,
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
@@ -379,7 +457,7 @@ private fun InfoRow(
         Text(
             text = text,
             style = MaterialTheme.typography.bodyLarge,
-            maxLines = 2,
+            maxLines = maxLines,
             overflow = TextOverflow.Ellipsis,
         )
     }
@@ -389,14 +467,17 @@ private fun InfoRow(
 private fun ActionRow(
     startLabel: String,
     onStart: () -> Unit,
+    startGlyph: String? = null,
     startTag: String? = null,
     endLabel: String,
     onEnd: () -> Unit,
+    endGlyph: String? = null,
     endTag: String? = null,
+    bottomPadding: Dp = 4.dp,
 ) {
     Row(
         horizontalArrangement = Arrangement.spacedBy(8.dp),
-        modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
+        modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 4.dp, bottom = bottomPadding),
     ) {
         OutlinedButton(
             onClick = onStart,
@@ -404,7 +485,7 @@ private fun ActionRow(
                 .weight(1f)
                 .then(if (startTag != null) Modifier.testTag(startTag) else Modifier),
         ) {
-            Text(text = startLabel, maxLines = 1)
+            ButtonLabel(label = startLabel, glyph = startGlyph)
         }
         OutlinedButton(
             onClick = onEnd,
@@ -412,9 +493,19 @@ private fun ActionRow(
                 .weight(1f)
                 .then(if (endTag != null) Modifier.testTag(endTag) else Modifier),
         ) {
-            Text(text = endLabel, maxLines = 1)
+            ButtonLabel(label = endLabel, glyph = endGlyph)
         }
     }
+}
+
+/** A button's optional leading icon followed by its label. */
+@Composable
+private fun ButtonLabel(label: String, glyph: String?) {
+    if (glyph != null) {
+        MaterialSymbol(glyph = glyph, contentDescription = null, size = 18.sp)
+        Spacer(modifier = Modifier.width(8.dp))
+    }
+    Text(text = label, maxLines = 1)
 }
 
 private fun formatVerifiedAt(verifiedAt: ZonedDateTime): String {

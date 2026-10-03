@@ -24,4 +24,6 @@ data class PlaceSheetStrings(
     val watch: String,
     val unwatch: String,
     val addPhoto: String,
+    val openingHoursClosed: String,
+    val openingHoursOpen24_7: String,
 )

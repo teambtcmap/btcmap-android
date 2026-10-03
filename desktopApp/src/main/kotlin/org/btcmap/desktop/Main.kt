@@ -1050,4 +1050,6 @@ private val PLACE_SHEET_STRINGS = org.btcmap.ui.PlaceSheetStrings(
     watch = "Watch",
     unwatch = "Unwatch",
     addPhoto = "Add photo",
+    openingHoursClosed = "Closed",
+    openingHoursOpen24_7 = "Open 24/7",
 )
