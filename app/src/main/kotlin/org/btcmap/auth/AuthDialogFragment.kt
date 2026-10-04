@@ -1,6 +1,7 @@
 package org.btcmap.auth
 
 import android.os.Bundle
+import androidx.compose.ui.autofill.ContentType
 import androidx.lifecycle.ViewModelProvider
 import org.btcmap.R
 import org.btcmap.ui.AuthField
@@ -55,6 +56,7 @@ internal class AuthDialogFragment : AuthFormDialogFragment() {
                 value = formState.username,
                 isPassword = false,
                 imeAction = AuthImeAction.Next,
+                contentType = if (signUp()) ContentType.NewUsername else ContentType.Username,
             ),
             AuthField(
                 key = PASSWORD,
@@ -67,6 +69,7 @@ internal class AuthDialogFragment : AuthFormDialogFragment() {
                     null
                 },
                 imeAction = if (signUp()) AuthImeAction.Next else AuthImeAction.Done,
+                contentType = if (signUp()) ContentType.NewPassword else ContentType.Password,
             ),
         )
 
@@ -78,6 +81,7 @@ internal class AuthDialogFragment : AuthFormDialogFragment() {
                     value = formState.confirmation,
                     isPassword = true,
                     imeAction = AuthImeAction.Done,
+                    contentType = ContentType.NewPassword,
                 )
             )
         }

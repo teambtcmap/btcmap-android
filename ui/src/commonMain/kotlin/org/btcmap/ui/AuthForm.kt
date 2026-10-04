@@ -1,6 +1,7 @@
 package org.btcmap.ui
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardActions
@@ -14,10 +15,15 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.autofill.ContentType
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.semantics.contentType
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
 enum class AuthImeAction { Next, Done }
@@ -34,6 +40,15 @@ data class AuthField(
     val error: String? = null,
     val helper: String? = null,
     val imeAction: AuthImeAction = AuthImeAction.Next,
+    /**
+     * Overrides the keyboard type. Defaults to [KeyboardType.Password] for a
+     * password field and [KeyboardType.Text] otherwise.
+     */
+    val keyboardType: KeyboardType? = null,
+    /** Autofill hint, so password managers can offer the right credential. */
+    val contentType: ContentType? = null,
+    /** Explicit test tag; defaults to [AUTH_FIELD_TAG_PREFIX] plus [key]. */
+    val testTag: String? = null,
 )
 
 /**
@@ -46,8 +61,15 @@ fun AuthFormContent(
     onValueChange: (key: String, value: String) -> Unit,
     onDone: () -> Unit,
     modifier: Modifier = Modifier,
+    contentPadding: PaddingValues = PaddingValues(
+        start = 24.dp,
+        end = 24.dp,
+        top = 16.dp,
+        bottom = 16.dp,
+    ),
+    fieldSpacing: Dp = 16.dp,
 ) {
-    Column(modifier = modifier.padding(start = 24.dp, end = 24.dp, top = 16.dp, bottom = 16.dp)) {
+    Column(modifier = modifier.padding(contentPadding)) {
         fields.forEachIndexed { index, field ->
             var visible by remember(field.key) { mutableStateOf(false) }
 
@@ -56,6 +78,10 @@ fun AuthFormContent(
                 field.helper != null -> ({ Text(field.helper) })
                 else -> null
             }
+
+            val fieldContentType = field.contentType
+            val keyboardType = field.keyboardType
+                ?: if (field.isPassword) KeyboardType.Password else KeyboardType.Text
 
             OutlinedTextField(
                 value = field.value,
@@ -70,6 +96,7 @@ fun AuthFormContent(
                     VisualTransformation.None
                 },
                 keyboardOptions = KeyboardOptions(
+                    keyboardType = keyboardType,
                     imeAction = if (field.imeAction == AuthImeAction.Done) {
                         ImeAction.Done
                     } else {
@@ -91,8 +118,15 @@ fun AuthFormContent(
                 },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = if (index == 0) 0.dp else 16.dp)
-                    .testTag(AUTH_FIELD_TAG_PREFIX + field.key),
+                    .padding(top = if (index == 0) 0.dp else fieldSpacing)
+                    .then(
+                        if (fieldContentType != null) {
+                            Modifier.semantics { contentType = fieldContentType }
+                        } else {
+                            Modifier
+                        }
+                    )
+                    .testTag(field.testTag ?: (AUTH_FIELD_TAG_PREFIX + field.key)),
             )
         }
     }

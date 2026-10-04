@@ -1,12 +1,18 @@
 package org.btcmap.ui
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -15,9 +21,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.autofill.ContentType
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import org.btcmap.api.Api
@@ -36,6 +43,11 @@ const val ACCOUNT_CONFIRM_TAG = "account-confirm"
 const val ACCOUNT_SUBMIT_TAG = "account-submit"
 const val ACCOUNT_TOGGLE_TAG = "account-toggle"
 
+/** Field keys for the shared [AuthFormContent]. */
+private const val ACCOUNT_USERNAME_KEY = "username"
+private const val ACCOUNT_PASSWORD_KEY = "password"
+private const val ACCOUNT_CONFIRM_KEY = "confirmation"
+
 /** The account form's strings, so the screen stays resource-free. */
 data class AccountLabels(
     val username: String,
@@ -48,7 +60,6 @@ data class AccountLabels(
     val createAccount: String,
     val alreadyHaveAccount: String,
     val createAnAccount: String,
-    val signInHint: String,
     val accountCreated: String,
 )
 
@@ -197,95 +208,111 @@ private fun AccountAuthForm(
         password.isNotBlank() &&
         (!signUp || confirmation.isNotBlank())
 
-    Column(
-        verticalArrangement = Arrangement.spacedBy(12.dp),
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp),
-    ) {
-        OutlinedTextField(
+    val fields = listOfNotNull(
+        AuthField(
+            key = ACCOUNT_USERNAME_KEY,
+            label = labels.username,
             value = username,
-            onValueChange = onUsernameChange,
-            label = { Text(text = labels.username) },
-            singleLine = true,
-            isError = usernameError,
-            supportingText = if (usernameError) {
-                { Text(labels.required) }
+            isPassword = false,
+            error = if (usernameError) labels.required else null,
+            imeAction = AuthImeAction.Next,
+            contentType = if (signUp) ContentType.NewUsername else ContentType.Username,
+            testTag = ACCOUNT_USERNAME_TAG,
+        ),
+        AuthField(
+            key = ACCOUNT_PASSWORD_KEY,
+            label = labels.password,
+            value = password,
+            isPassword = true,
+            error = when {
+                passwordTooShort -> labels.passwordTooShort(AuthValidation.MIN_PASSWORD_LENGTH)
+                passwordError -> labels.required
+                else -> null
+            },
+            helper = if (signUp) {
+                labels.passwordTooShort(AuthValidation.MIN_PASSWORD_LENGTH)
             } else {
                 null
             },
-            enabled = !busy,
-            modifier = Modifier
-                .fillMaxWidth()
-                .testTag(ACCOUNT_USERNAME_TAG),
-        )
-        OutlinedTextField(
-            value = password,
-            onValueChange = onPasswordChange,
-            label = { Text(text = labels.password) },
-            singleLine = true,
-            visualTransformation = PasswordVisualTransformation(),
-            isError = passwordError,
-            supportingText = when {
-                passwordTooShort ->
-                    { { Text(labels.passwordTooShort(AuthValidation.MIN_PASSWORD_LENGTH)) } }
-
-                passwordError -> {
-                    { Text(labels.required) }
-                }
-
-                signUp -> {
-                    { Text(labels.passwordTooShort(AuthValidation.MIN_PASSWORD_LENGTH)) }
-                }
-
-                else -> null
-            },
-            enabled = !busy,
-            modifier = Modifier
-                .fillMaxWidth()
-                .testTag(ACCOUNT_PASSWORD_TAG),
-        )
+            imeAction = if (signUp) AuthImeAction.Next else AuthImeAction.Done,
+            contentType = if (signUp) ContentType.NewPassword else ContentType.Password,
+            testTag = ACCOUNT_PASSWORD_TAG,
+        ),
         if (signUp) {
-            OutlinedTextField(
+            AuthField(
+                key = ACCOUNT_CONFIRM_KEY,
+                label = labels.confirmPassword,
                 value = confirmation,
-                onValueChange = onConfirmationChange,
-                label = { Text(text = labels.confirmPassword) },
-                singleLine = true,
-                visualTransformation = PasswordVisualTransformation(),
-                isError = confirmationError,
-                supportingText = if (confirmationError) {
-                    { Text(labels.passwordsDoNotMatch) }
-                } else {
-                    null
+                isPassword = true,
+                error = if (confirmationError) labels.passwordsDoNotMatch else null,
+                imeAction = AuthImeAction.Done,
+                contentType = ContentType.NewPassword,
+                testTag = ACCOUNT_CONFIRM_TAG,
+            )
+        } else {
+            null
+        },
+    )
+
+    Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.TopCenter) {
+        Column(
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+            modifier = Modifier
+                .widthIn(max = 420.dp)
+                .fillMaxWidth()
+                .padding(16.dp),
+        ) {
+            AuthFormContent(
+                fields = fields,
+                onValueChange = { key, value ->
+                    when (key) {
+                        ACCOUNT_USERNAME_KEY -> onUsernameChange(value)
+                        ACCOUNT_PASSWORD_KEY -> onPasswordChange(value)
+                        ACCOUNT_CONFIRM_KEY -> onConfirmationChange(value)
+                    }
                 },
-                enabled = !busy,
+                onDone = onSubmit,
+                contentPadding = PaddingValues(0.dp),
+            )
+            error?.let {
+                Surface(
+                    color = MaterialTheme.colorScheme.errorContainer,
+                    contentColor = MaterialTheme.colorScheme.onErrorContainer,
+                    shape = MaterialTheme.shapes.small,
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    Text(
+                        text = it,
+                        style = MaterialTheme.typography.bodyMedium,
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+                    )
+                }
+            }
+            Button(
+                enabled = !busy && ready,
+                onClick = onSubmit,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .testTag(ACCOUNT_CONFIRM_TAG),
-            )
-        }
-        error?.let { Text(text = it, color = MaterialTheme.colorScheme.error) }
-        Button(
-            enabled = !busy && ready,
-            onClick = onSubmit,
-            modifier = Modifier
-                .fillMaxWidth()
-                .testTag(ACCOUNT_SUBMIT_TAG),
-        ) {
-            Text(text = if (signUp) labels.createAccount else labels.signIn)
-        }
-        TextButton(
-            enabled = !busy,
-            onClick = onToggleMode,
-            modifier = Modifier.testTag(ACCOUNT_TOGGLE_TAG),
-        ) {
-            Text(text = if (signUp) labels.alreadyHaveAccount else labels.createAnAccount)
-        }
-        if (!signUp) {
-            Text(
-                text = labels.signInHint,
-                style = MaterialTheme.typography.bodySmall,
-            )
+                    .testTag(ACCOUNT_SUBMIT_TAG),
+            ) {
+                if (busy) {
+                    CircularProgressIndicator(
+                        color = LocalContentColor.current,
+                        strokeWidth = 2.dp,
+                        modifier = Modifier.size(20.dp),
+                    )
+                } else {
+                    Text(text = if (signUp) labels.createAccount else labels.signIn)
+                }
+            }
+            TextButton(
+                enabled = !busy,
+                onClick = onToggleMode,
+                contentPadding = PaddingValues(horizontal = 0.dp),
+                modifier = Modifier.testTag(ACCOUNT_TOGGLE_TAG),
+            ) {
+                Text(text = if (signUp) labels.alreadyHaveAccount else labels.createAnAccount)
+            }
         }
     }
 }

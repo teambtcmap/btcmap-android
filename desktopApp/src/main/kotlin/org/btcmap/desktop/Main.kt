@@ -1249,7 +1249,6 @@ private val ACCOUNT_LABELS = AccountLabels(
     createAccount = "Create account",
     alreadyHaveAccount = "I already have an account",
     createAnAccount = "Create an account",
-    signInHint = "Accounts can also be created in the mobile app or on btcmap.org.",
     accountCreated = "Account created. Please sign in.",
 )
 

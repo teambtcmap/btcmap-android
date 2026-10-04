@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+- Let the account sign-in and sign-up forms be filled by password managers, and add a password visibility toggle
+- Cap and centre the desktop account form's width, show a busy indicator while signing in, restyle its error message and drop the redundant sign-in hint
 - Show a place's photos at full resolution in the viewer, captioned with the uploader's username
 - Let users delete their own place photos from the gallery; admins and root may delete any
 - Add an Uploaded images screen to the profile, listing the account's photos with a delete action
