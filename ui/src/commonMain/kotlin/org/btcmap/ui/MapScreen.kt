@@ -134,6 +134,11 @@ fun MapScreen(
     onAddPlace: ((Double, Double) -> Unit)? = null,
     onOpenFeed: ((List<MapArea>) -> Unit)? = null,
     /**
+     * Opens the infrastructure dashboard. Null unless the signed-in user holds
+     * an admin or root role, so the button is only drawn for them.
+     */
+    onOpenInfra: (() -> Unit)? = null,
+    /**
      * Bumped by the host when the synced data changed, so the markers and the
      * area chips are queried again rather than left stale until the next camera
      * move.
@@ -597,6 +602,17 @@ fun MapScreen(
                         modifier = Modifier.size(AREA_CHIP_SIZE),
                     ) {
                         MaterialSymbol(glyph = "vital_signs", contentDescription = null)
+                    }
+                }
+                onOpenInfra?.let { openInfra ->
+                    // Shown only to admins and roots; the host decides whether to
+                    // supply the callback.
+                    FilledTonalIconButton(
+                        onClick = openInfra,
+                        colors = controlColors,
+                        modifier = Modifier.size(AREA_CHIP_SIZE),
+                    ) {
+                        MaterialSymbol(glyph = "host", contentDescription = "Infra dashboard")
                     }
                 }
                 FilledTonalIconButton(

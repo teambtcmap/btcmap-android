@@ -25,6 +25,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
@@ -33,8 +34,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import kotlinx.coroutines.launch
 import androidx.compose.runtime.rememberCoroutineScope
+import org.btcmap.account.isAdmin
 import org.btcmap.api.ActivityFeedItem
 import org.btcmap.api.getActivity
+import org.btcmap.api.getDashboard
 import org.btcmap.api.deletePlaceImage
 import org.btcmap.api.getPlaceImages
 import org.btcmap.feed.feedKey
@@ -110,6 +113,7 @@ import org.btcmap.ui.CommentScreen
 import org.btcmap.ui.CommentScreenLabels
 import org.btcmap.ui.DbStatsPage
 import org.btcmap.ui.DbStatsPageLabels
+import org.btcmap.ui.InfraDashboardScreen
 import org.btcmap.ui.InvoicePaymentLabels
 import org.btcmap.ui.InvoicePaymentSection
 import org.btcmap.ui.InvoicePaymentSectionLabels
@@ -269,6 +273,20 @@ private fun runApp() = application {
                     // or the map when it came from a search result.
                     var eventBackRoute by remember { mutableStateOf(Route.Map) }
 
+                    // Whether the signed-in account may open the infrastructure
+                    // dashboard. Re-derived whenever the map is (re)entered, so a
+                    // sign-in or sign-out is reflected.
+                    var isAdmin by remember { mutableStateOf(false) }
+                    LaunchedEffect(route) {
+                        if (route == Route.Map) {
+                            isAdmin = db.user.select()?.isAdmin() == true
+                        }
+                    }
+
+                    // Bumped by the infrastructure dashboard's toolbar refresh.
+                    var infraRefreshKey by remember { mutableStateOf(0) }
+                    var infraRefreshing by remember { mutableStateOf(false) }
+
                     // The bundled style, shared by the map and the add-place map.
                     // Its sprite and glyph URLs are served from the app's
                     // resources (the style itself references them with Android's
@@ -310,6 +328,11 @@ private fun runApp() = application {
                                 route = if (settings.authorized) Route.AddPlace else Route.Account
                             },
                             onOpenFeed = { route = Route.Feed },
+                            onOpenInfra = if (isAdmin) {
+                                { route = Route.Infra }
+                            } else {
+                                null
+                            },
                             bookmarked = bookmarked,
                             photos = selectedPhotos,
                             onDeletePhoto = { photo ->
@@ -457,6 +480,32 @@ private fun runApp() = application {
                                 onPay = { openUrl("lightning:$it") },
                                 onCopy = { copyToClipboard(it) },
                                 onBack = { route = Route.Map },
+                            )
+                        }
+
+                        Route.Infra -> ScreenPage(
+                            title = "Infra dashboard",
+                            onBack = { route = Route.Map },
+                            actions = {
+                                if (infraRefreshing) {
+                                    CircularProgressIndicator(
+                                        strokeWidth = 2.dp,
+                                        modifier = Modifier.size(24.dp),
+                                    )
+                                } else {
+                                    IconButton(onClick = { infraRefreshKey++ }) {
+                                        MaterialSymbol(
+                                            glyph = "refresh",
+                                            contentDescription = "Refresh",
+                                        )
+                                    }
+                                }
+                            },
+                        ) {
+                            InfraDashboardScreen(
+                                load = { api.getDashboard() },
+                                refreshKey = infraRefreshKey,
+                                onLoadingChange = { infraRefreshing = it },
                             )
                         }
 
@@ -618,6 +667,7 @@ private fun runApp() = application {
 internal fun ScreenPage(
     title: String,
     onBack: () -> Unit,
+    actions: @androidx.compose.runtime.Composable androidx.compose.foundation.layout.RowScope.() -> Unit = {},
     content: @androidx.compose.runtime.Composable () -> Unit,
 ) {
     Column(modifier = Modifier.fillMaxSize()) {
@@ -630,7 +680,12 @@ internal fun ScreenPage(
             IconButton(onClick = onBack) {
                 MaterialSymbol(glyph = "arrow_back", contentDescription = null)
             }
-            Text(text = title, style = MaterialTheme.typography.titleLarge)
+            Text(
+                text = title,
+                style = MaterialTheme.typography.titleLarge,
+                modifier = Modifier.weight(1f),
+            )
+            actions()
         }
         content()
     }
@@ -745,7 +800,7 @@ private fun AreaPlaceIssue.osmEditUrl(): String =
 private const val JOIN_US_URL = "https://btcmap.org/join-us"
 
 /** The desktop app's full-window pages. */
-private enum class Route { Map, Area, Event, Feed, Settings, Colors, DbStats, Account, Report, AddPlace, AddComment, Boost }
+private enum class Route { Map, Area, Event, Feed, Settings, Colors, DbStats, Account, Report, AddPlace, AddComment, Boost, Infra }
 
 private const val SCREENSHOT_ARG = "--screenshot="
 
@@ -853,6 +908,16 @@ private fun renderScreen(spec: String) {
                         onBack = {},
                     )
 
+                    "infra" -> {
+                        val api = Api(
+                            httpClient = apiHttpClient(USER_AGENT),
+                            baseUrl = { API_URL.toUrl() },
+                            token = { settings.getString(KEY_AUTH_TOKEN, null) },
+                            userAgent = USER_AGENT,
+                        )
+                        InfraDashboardScreen(load = { api.getDashboard() })
+                    }
+
                     else -> Text(text = "Unknown screen: $name")
                 }
             }
@@ -861,9 +926,10 @@ private fun renderScreen(spec: String) {
 
     // Render once so effects start, then again after a moment: a screen that
     // loads its data off the main thread (the profile) is blank on the first
-    // frame and settled by the second.
+    // frame and settled by the second. The infra dashboard fetches over the
+    // network, which takes a few seconds.
     scene.render()
-    Thread.sleep(500)
+    Thread.sleep(if (name == "infra") 8000 else 500)
     val bytes = scene.render().encodeToData(org.jetbrains.skia.EncodedImageFormat.PNG)?.bytes
     scene.close()
     requireNotNull(bytes) { "could not encode the screenshot" }

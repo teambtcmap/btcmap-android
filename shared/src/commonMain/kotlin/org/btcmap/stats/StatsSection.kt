@@ -9,10 +9,14 @@ package org.btcmap.stats
  *
  * [icon] is a Material Symbols ligature name rendered with the bundled icon
  * typeface, or null for a card without a leading icon.
+ *
+ * [onClick] makes the card tappable and draws a trailing chevron; null renders
+ * it as a plain, non-interactive card.
  */
 data class StatsSection(
     val key: String,
     val title: String,
     val entries: List<StatsEntry>,
     val icon: String? = null,
+    val onClick: (() -> Unit)? = null,
 )

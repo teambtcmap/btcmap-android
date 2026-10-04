@@ -6,6 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+- Add an admin-only infrastructure dashboard, opened from a button on the map, showing live analytics (unique clients, places, imports, request logs, API calls, Lightning node, OSM syncs and wallets) with tap-to-open detail dialogs and a refresh action
 - Let the account sign-in and sign-up forms be filled by password managers, and add a password visibility toggle
 - Cap and centre the desktop account form's width, show a busy indicator while signing in, restyle its error message and drop the redundant sign-in hint
 - Show a place's photos at full resolution in the viewer, captioned with the uploader's username

@@ -123,6 +123,9 @@ class MapComposeView @JvmOverloads constructor(
 
     var onOpenFeed: ((List<MapArea>) -> Unit)? by mutableStateOf(null)
 
+    /** Opens the admin-only infrastructure dashboard; null hides the button. */
+    var onOpenInfra: (() -> Unit)? by mutableStateOf(null)
+
     var openPlaceId: Long? by mutableStateOf(null)
 
     var reloadKey: Int by mutableStateOf(0)
@@ -182,6 +185,7 @@ class MapComposeView @JvmOverloads constructor(
             searchActions = searchActions,
             onAddPlace = onAddPlace,
             onOpenFeed = onOpenFeed,
+            onOpenInfra = onOpenInfra,
             openPlaceId = openPlaceId,
             reloadKey = reloadKey,
             onCameraIdle = onCameraIdle,

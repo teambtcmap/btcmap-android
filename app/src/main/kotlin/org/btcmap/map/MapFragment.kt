@@ -25,6 +25,7 @@ import kotlinx.coroutines.withContext
 import org.btcmap.Activity
 import org.btcmap.App
 import org.btcmap.R
+import org.btcmap.account.isAdmin
 import org.btcmap.api
 import org.btcmap.api.getEvent
 import org.btcmap.api.getPlaceCoordinates
@@ -43,6 +44,7 @@ import org.btcmap.event.EventFragment
 import org.btcmap.event.toBundle
 import org.btcmap.feed.ActivityFeedFragment
 import org.btcmap.i18n.getLocalizedName
+import org.btcmap.infra.InfraDashboardFragment
 import org.btcmap.place.AddPlaceFragment
 import org.btcmap.place.ReportPlaceFragment
 import org.btcmap.place.btcmapUrl
@@ -153,6 +155,10 @@ class MapFragment : Fragment() {
                         binding.map.syncVisible = state != SyncState.Idle
                     }
                 }
+
+                // The dashboard button is admin-only and the role can change with
+                // a sign-in or sign-out, so it is re-evaluated on every resume.
+                launch { refreshInfraButton() }
 
                 syncController().events.collect {
                     // The shared map reads its features when the camera settles,
@@ -592,6 +598,19 @@ class MapFragment : Fragment() {
                 }
             )
             addToBackStack(null)
+        }
+    }
+
+    /**
+     * Shows the infrastructure dashboard button only to a signed-in admin or
+     * root, binding its action to open [InfraDashboardFragment].
+     */
+    private suspend fun refreshInfraButton() {
+        val user = withContext(Dispatchers.IO) { db().user.select() }
+        _binding?.map?.onOpenInfra = if (user?.isAdmin() == true) {
+            { navigate(InfraDashboardFragment(), null) }
+        } else {
+            null
         }
     }
 

@@ -12,6 +12,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
+import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
+import androidx.compose.foundation.lazy.staggeredgrid.items
 import androidx.compose.material3.Card
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
@@ -22,7 +25,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import org.btcmap.stats.StatsSection
 
@@ -55,66 +59,131 @@ fun StatsScreen(
     }
 }
 
+/**
+ * Renders the cards in an adaptive staggered grid: a phone shows one column,
+ * while a wide window shows as many [minColumnWidth]-wide columns as fit. Each
+ * column packs its cards independently, so a card taller than its neighbours
+ * does not leave a hole beneath the shorter ones and the vertical space is
+ * filled. Cards keep the same shape [StatsScreen] draws.
+ */
+@Composable
+fun StatsGrid(
+    sections: List<StatsSection>,
+    modifier: Modifier = Modifier,
+    minColumnWidth: Dp = 340.dp,
+) {
+    LazyVerticalStaggeredGrid(
+        columns = StaggeredGridCells.Adaptive(minSize = minColumnWidth),
+        modifier = modifier.fillMaxSize().testTag(STATS_LIST_TAG),
+        contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 16.dp),
+        verticalItemSpacing = 12.dp,
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        items(sections, key = { it.key }) { section ->
+            StatsCard(section)
+        }
+    }
+}
+
 @Composable
 private fun StatsCard(section: StatsSection) {
+    val onClick = section.onClick
+    if (onClick != null) {
+        // The onClick overload keeps the indication inside the card's rounded
+        // clip, so the hover/ripple highlight does not show square corners.
+        Card(onClick = onClick, modifier = Modifier.fillMaxWidth()) {
+            StatsCardContent(section)
+        }
+    } else {
+        Card(modifier = Modifier.fillMaxWidth()) {
+            StatsCardContent(section)
+        }
+    }
+}
+
+@Composable
+private fun StatsCardContent(section: StatsSection) {
     val iconFont = LocalIconFont.current
 
-    Card(modifier = Modifier.fillMaxWidth()) {
-        Column(modifier = Modifier.padding(vertical = 4.dp)) {
+    Column(modifier = Modifier.padding(vertical = 4.dp)) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            val icon = section.icon
+            if (icon != null && iconFont != null) {
+                Text(
+                    text = icon,
+                    fontFamily = iconFont,
+                    style = MaterialTheme.typography.titleLarge,
+                    color = MaterialTheme.colorScheme.primary,
+                    // The ligature name is not a word; the icon is decorative.
+                    modifier = Modifier
+                        .size(24.dp)
+                        .clearAndSetSemantics {},
+                )
+                Spacer(Modifier.width(12.dp))
+            }
+            Text(
+                text = section.title,
+                style = MaterialTheme.typography.titleMedium,
+                modifier = Modifier.weight(1f),
+            )
+            if (section.onClick != null && iconFont != null) {
+                MaterialSymbol(
+                    glyph = "chevron_right",
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+        }
+
+        section.entries.forEachIndexed { index, entry ->
+            if (index > 0) {
+                HorizontalDivider(modifier = Modifier.padding(start = 16.dp))
+            }
             Row(
+                // Label and value are one node, so a screen reader announces
+                // them together instead of as two stops.
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 8.dp),
+                    .testTag(statsEntryTag(section.key, entry.label))
+                    .semantics(mergeDescendants = true) {}
+                    .padding(horizontal = 16.dp, vertical = 12.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                val icon = section.icon
-                if (icon != null && iconFont != null) {
+                val entryIcon = entry.icon
+                if (entryIcon != null && iconFont != null) {
                     Text(
-                        text = icon,
+                        text = entryIcon,
                         fontFamily = iconFont,
-                        style = MaterialTheme.typography.titleLarge,
-                        color = MaterialTheme.colorScheme.primary,
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                         // The ligature name is not a word; the icon is decorative.
                         modifier = Modifier
-                            .size(24.dp)
+                            .size(20.dp)
                             .clearAndSetSemantics {},
                     )
                     Spacer(Modifier.width(12.dp))
                 }
                 Text(
-                    text = section.title,
-                    style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier.weight(1f),
-                )
-            }
-
-            section.entries.forEachIndexed { index, entry ->
-                if (index > 0) {
-                    HorizontalDivider(modifier = Modifier.padding(start = 16.dp))
-                }
-                Row(
-                    // Label and value are one node, so a screen reader announces
-                    // them together instead of as two stops.
+                    text = entry.label,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .testTag(statsEntryTag(section.key, entry.label))
-                        .semantics(mergeDescendants = true) {}
-                        .padding(horizontal = 16.dp, vertical = 12.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Text(
-                        text = entry.label,
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.padding(end = 16.dp),
-                    )
-                    Text(
-                        text = entry.value,
-                        style = MaterialTheme.typography.bodyMedium,
-                        modifier = Modifier.weight(1f),
-                        textAlign = TextAlign.End,
-                    )
-                }
+                        .weight(1f)
+                        .padding(end = 16.dp),
+                )
+                Text(
+                    text = entry.value,
+                    style = MaterialTheme.typography.bodyMedium,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
             }
         }
     }

@@ -157,6 +157,8 @@
     <string name="sync">Sync</string>
     <string name="database_stats">Database</string>
     <string name="database_stats_secondary">Database metadata and table management</string>
+    <string name="infra_dashboard">Infra dashboard</string>
+    <string name="refresh">Refresh</string>
     <string name="stats_row_description" translatable="false">%1$s: %2$s</string>
     <string name="db_stats_database">Database</string>
     <string name="db_stats_version">Version</string>
