@@ -202,6 +202,107 @@ class EventApiTest : ApiTestBase() {
         Assert.assertEquals("live", response.status)
     }
 
+    @Test
+    fun getMyEvents_parsesStatusesAndDates() = runTest {
+        enqueueJson(
+            """
+            [
+                {
+                    "id": 174,
+                    "lat": 1.0,
+                    "lon": 2.0,
+                    "name": "My Pending Meetup",
+                    "website": "https://example.com",
+                    "status": "pending",
+                    "starts_at": "2026-11-01T18:00:00Z"
+                },
+                {
+                    "id": 168,
+                    "lat": 48.8566,
+                    "lon": 2.3522,
+                    "name": "My Rejected Meetup",
+                    "website": "",
+                    "status": "rejected",
+                    "starts_at": "2026-09-01T18:00:00+07:00",
+                    "ends_at": "2026-09-01T20:00:00+07:00"
+                }
+            ]
+            """.trimIndent()
+        )
+
+        val events = api().getMyEvents()
+
+        val request = takeRequest()
+        Assert.assertEquals("GET", request.method)
+        Assert.assertEquals("/v4/users/me/events", request.url.encodedPath)
+        Assert.assertEquals(2, events.size)
+        Assert.assertEquals(174L, events[0].id)
+        Assert.assertEquals("My Pending Meetup", events[0].name)
+        Assert.assertEquals("https://example.com", events[0].website.toString())
+        Assert.assertEquals("pending", events[0].status)
+        Assert.assertNull(events[0].endsAt)
+        Assert.assertEquals("2026-11-01T18:00:00", events[0].startsAtLocal)
+        Assert.assertNull(events[0].endsAtLocal)
+        Assert.assertEquals(168L, events[1].id)
+        Assert.assertNull(events[1].website)
+        Assert.assertEquals("rejected", events[1].status)
+        Assert.assertNotNull(events[1].endsAt)
+        Assert.assertEquals("2026-09-01T18:00:00", events[1].startsAtLocal)
+        Assert.assertEquals("2026-09-01T20:00:00", events[1].endsAtLocal)
+    }
+
+    @Test
+    fun revokeEvent_deletesTheEvent() = runTest {
+        enqueueJson(
+            """
+            {"id":174,"lat":1.0,"lon":2.0,"name":"Meetup","website":"https://example.com","status":"pending","starts_at":"2026-11-01T18:00:00Z"}
+            """.trimIndent()
+        )
+
+        api().revokeEvent(174L)
+
+        val request = takeRequest()
+        Assert.assertEquals("DELETE", request.method)
+        Assert.assertEquals("/v4/events/174", request.url.encodedPath)
+        Assert.assertEquals("", request.jsonBody())
+    }
+
+    @Test
+    fun getPendingEvents_requestsThePendingStatus() = runTest {
+        enqueueJson(
+            """
+            [
+                {"id":9,"lat":1.0,"lon":2.0,"name":"Pending","website":"","status":"pending","starts_at":"2026-11-01T18:00:00Z"}
+            ]
+            """.trimIndent()
+        )
+
+        val events = api().getPendingEvents()
+
+        val request = takeRequest()
+        Assert.assertEquals("GET", request.method)
+        Assert.assertEquals("/v4/events", request.url.encodedPath)
+        Assert.assertEquals("pending", request.url.queryParameter("status"))
+        Assert.assertEquals(1, events.size)
+        Assert.assertEquals("pending", events[0].status)
+    }
+
+    @Test
+    fun setEventStatus_putsStatus() = runTest {
+        enqueueJson(
+            """
+            {"id":9,"lat":1.0,"lon":2.0,"name":"Pending","website":"","status":"live","starts_at":"2026-11-01T18:00:00Z"}
+            """.trimIndent()
+        )
+
+        api().setEventStatus(9L, "live")
+
+        val request = takeRequest()
+        Assert.assertEquals("PUT", request.method)
+        Assert.assertEquals("/v4/events/9/status", request.url.encodedPath)
+        Assert.assertEquals("""{"status":"live"}""", request.jsonBody())
+    }
+
     private companion object {
         val SINCE: Instant = Instant.parse("1970-01-01T00:00:00Z")
 

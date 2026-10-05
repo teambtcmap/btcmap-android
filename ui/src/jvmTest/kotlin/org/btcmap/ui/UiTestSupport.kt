@@ -106,6 +106,7 @@ internal val TEST_PROFILE_LABELS = UserProfileLabels(
     editPassword = "Change password",
     delete = "Delete",
     uploadedImages = "Uploaded images",
+    myEvents = "My events",
 )
 
 internal val TEST_UPLOADED_IMAGES_LABELS = UploadedImagesLabels(
@@ -114,4 +115,28 @@ internal val TEST_UPLOADED_IMAGES_LABELS = UploadedImagesLabels(
     failed = "Couldn't delete the image.",
     retry = "Retry",
     unknownPlace = { "Place #$it" },
+)
+
+internal val TEST_MY_EVENTS_LABELS = MyEventsLabels(
+    empty = "You haven't submitted any events yet.",
+    failed = "Couldn't load your events",
+    retry = "Retry",
+    duplicate = "Duplicate",
+    revoke = "Revoke",
+    revokeFailed = "Couldn't revoke the event",
+    statusPending = "Pending review",
+    statusLive = "Live",
+    statusRejected = "Rejected",
+    dateRange = { date, start, end -> "$date, $start - $end" },
+)
+
+internal val TEST_EVENT_REVIEW_LABELS = EventReviewLabels(
+    back = "Navigate up",
+    empty = "No events are waiting for review",
+    failed = "Couldn't load the events",
+    retry = "Retry",
+    approve = "Approve",
+    reject = "Reject",
+    actionFailed = "Couldn't update the event",
+    dateRange = { date, start, end -> "$date, $start - $end" },
 )

@@ -5,17 +5,17 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Badge
+import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
@@ -57,9 +57,24 @@ private fun AreaChip(
     onClick: (MapArea) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Box(
-        modifier = modifier.size(AREA_CHIP_SIZE).clickable { onClick(area) },
-        contentAlignment = Alignment.Center,
+    BadgedBox(
+        badge = {
+            if (area.upcomingEventsCount > 0) {
+                // The same Material 3 Badge the map's review button uses, in the
+                // chip's own badge colours: round for a short count, a pill for
+                // a longer one.
+                Badge(
+                    containerColor = palette.badgeBackground,
+                    contentColor = palette.badgeText,
+                    modifier = Modifier.offset(MAP_BADGE_OFFSET.x, MAP_BADGE_OFFSET.y),
+                ) {
+                    Text(area.upcomingEventsCount.toString())
+                }
+            }
+        },
+        modifier = modifier
+            .size(AREA_CHIP_SIZE)
+            .clickable { onClick(area) },
     ) {
         Box(
             modifier = Modifier
@@ -78,20 +93,6 @@ private fun AreaChip(
                 contentDescription = null,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.size(AREA_CHIP_SIZE).clip(CircleShape),
-            )
-        }
-
-        if (area.upcomingEventsCount > 0) {
-            Text(
-                text = area.upcomingEventsCount.toString(),
-                color = palette.badgeText,
-                fontSize = 11.sp,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier
-                    .align(Alignment.TopEnd)
-                    .clip(RoundedCornerShape(percent = 50))
-                    .background(palette.badgeBackground)
-                    .padding(horizontal = 5.dp, vertical = 1.dp),
             )
         }
     }

@@ -25,9 +25,11 @@ import kotlinx.coroutines.withContext
 import org.btcmap.Activity
 import org.btcmap.App
 import org.btcmap.R
+import org.btcmap.account.canManageEvents
 import org.btcmap.account.isAdmin
 import org.btcmap.api
 import org.btcmap.api.getEvent
+import org.btcmap.api.getPendingEvents
 import org.btcmap.api.getPlaceCoordinates
 import org.btcmap.api.deletePlaceImage
 import org.btcmap.api.getPlaceImages
@@ -42,6 +44,7 @@ import org.btcmap.db.table.place.Place
 import org.btcmap.databinding.MapFragmentBinding
 import org.btcmap.event.AddEventFragment
 import org.btcmap.event.EventFragment
+import org.btcmap.event.EventReviewFragment
 import org.btcmap.event.toBundle
 import org.btcmap.feed.ActivityFeedFragment
 import org.btcmap.i18n.getLocalizedName
@@ -161,6 +164,9 @@ class MapFragment : Fragment() {
                 // The dashboard button is admin-only and the role can change with
                 // a sign-in or sign-out, so it is re-evaluated on every resume.
                 launch { refreshInfraButton() }
+
+                // Likewise the event review button and its pending-count badge.
+                launch { refreshEventReviewButton() }
 
                 syncController().events.collect {
                     // The shared map reads its features when the camera settles,
@@ -626,6 +632,23 @@ class MapFragment : Fragment() {
             { navigate(InfraDashboardFragment(), null) }
         } else {
             null
+        }
+    }
+
+    /**
+     * Shows the event review button only to a signed-in event manager, admin or
+     * root, with a badge counting the submissions awaiting review. The count is
+     * fetched best-effort: a failure just leaves the badge unset.
+     */
+    private suspend fun refreshEventReviewButton() {
+        val user = withContext(Dispatchers.IO) { db().user.select() }
+        if (user?.canManageEvents() == true) {
+            _binding?.map?.onOpenEventReview = { navigate(EventReviewFragment(), null) }
+            val pending = runCatching { api().getPendingEvents().size }.getOrDefault(0)
+            _binding?.map?.pendingEventCount = pending
+        } else {
+            _binding?.map?.onOpenEventReview = null
+            _binding?.map?.pendingEventCount = 0
         }
     }
 

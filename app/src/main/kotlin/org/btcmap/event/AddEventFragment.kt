@@ -14,6 +14,7 @@ import org.btcmap.settings.prefs
 import org.btcmap.settings.uri
 import org.btcmap.ui.AddEventLabels
 import org.btcmap.ui.markerPalette
+import java.time.LocalDateTime
 
 /**
  * The add-event screen: the shared [org.btcmap.ui.AddEventScreen] and nothing
@@ -26,12 +27,20 @@ class AddEventFragment : Fragment() {
     private data class Args(
         val lat: Double,
         val lon: Double,
+        val name: String,
+        val website: String,
+        val startsAt: LocalDateTime?,
+        val endsAt: LocalDateTime?,
     )
 
     private val args by lazy {
         Args(
             lat = requireArguments().getDouble("lat"),
             lon = requireArguments().getDouble("lon"),
+            name = requireArguments().getString("name").orEmpty(),
+            website = requireArguments().getString("website").orEmpty(),
+            startsAt = requireArguments().getString("starts_at")?.toLocalDateTimeOrNull(),
+            endsAt = requireArguments().getString("ends_at")?.toLocalDateTimeOrNull(),
         )
     }
 
@@ -53,6 +62,10 @@ class AddEventFragment : Fragment() {
         binding.addEventContent.apply {
             lat = args.lat
             lon = args.lon
+            initialName = args.name
+            initialWebsite = args.website
+            initialStartsAt = args.startsAt
+            initialEndsAt = args.endsAt
             styleUrl = prefs.mapStyle.uri(requireContext())
             iconTypeface = org.btcmap.util.iconTypeface
             palette = markerPalette(prefs)
@@ -94,3 +107,7 @@ class AddEventFragment : Fragment() {
         _binding = null
     }
 }
+
+/** Parses the floating local date-time a duplicate pre-fill carries, or null. */
+private fun String.toLocalDateTimeOrNull(): LocalDateTime? =
+    runCatching { LocalDateTime.parse(this) }.getOrNull()

@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
@@ -66,6 +67,7 @@ import org.btcmap.ui.map.AreaChips
 import org.btcmap.ui.map.EventLayers
 import org.btcmap.ui.map.ExchangeLayers
 import org.btcmap.ui.map.FILTER_BUTTON_INSET
+import org.btcmap.ui.map.MAP_BADGE_OFFSET
 import org.btcmap.ui.map.MAP_CONTROLS_GAP
 import org.btcmap.ui.map.MARKER_PIN_IMAGE_ID
 import org.btcmap.ui.map.MarkerBitmapFactory
@@ -81,6 +83,8 @@ import org.btcmap.ui.map.rememberMapAreas
 import org.btcmap.ui.map.rememberReloadedPlace
 import org.btcmap.ui.map.rememberViewportFeatures
 import org.btcmap.ui.map.setBitmap
+import androidx.compose.material3.Badge
+import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
@@ -149,6 +153,13 @@ fun MapScreen(
      * an admin or root role, so the button is only drawn for them.
      */
     onOpenInfra: (() -> Unit)? = null,
+    /**
+     * Opens the event review queue. Null unless the signed-in user holds an
+     * event manager, admin or root role, so the button is only drawn for them.
+     */
+    onOpenEventReview: (() -> Unit)? = null,
+    /** The number of events awaiting review, shown as the button's badge. */
+    pendingEventCount: Int = 0,
     /**
      * Bumped by the host when the synced data changed, so the markers and the
      * area chips are queried again rather than left stale until the next camera
@@ -631,6 +642,40 @@ fun MapScreen(
                         modifier = Modifier.size(AREA_CHIP_SIZE),
                     ) {
                         MaterialSymbol(glyph = "host", contentDescription = "Infra dashboard")
+                    }
+                }
+                onOpenEventReview?.let { openReview ->
+                    // Shown only to event managers/admins/roots; the badge counts
+                    // the submissions waiting for review.
+                    BadgedBox(
+                        badge = {
+                            if (pendingEventCount > 0) {
+                                Badge(
+                                    // The same colours and corner-inset the area
+                                    // chip badges use, so every count on the map
+                                    // reads alike.
+                                    containerColor = areaChipPalette.badgeBackground,
+                                    contentColor = areaChipPalette.badgeText,
+                                    modifier = Modifier.offset(MAP_BADGE_OFFSET.x, MAP_BADGE_OFFSET.y),
+                                ) {
+                                    Text(
+                                        text = if (pendingEventCount > 99) {
+                                            "99+"
+                                        } else {
+                                            pendingEventCount.toString()
+                                        },
+                                    )
+                                }
+                            }
+                        },
+                    ) {
+                        FilledTonalIconButton(
+                            onClick = openReview,
+                            colors = controlColors,
+                            modifier = Modifier.size(AREA_CHIP_SIZE),
+                        ) {
+                            MaterialSymbol(glyph = "event_upcoming", contentDescription = "Review events")
+                        }
                     }
                 }
                 FilledTonalIconButton(

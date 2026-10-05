@@ -32,8 +32,10 @@ import kotlinx.coroutines.withContext
 import org.btcmap.account.AccountSession
 import org.btcmap.api.Api
 import org.btcmap.api.deletePlaceImage
+import org.btcmap.api.getMyEvents
 import org.btcmap.api.getMyPlaceImages
 import org.btcmap.api.placeImageUrl
+import org.btcmap.api.revokeEvent
 import org.btcmap.api.signOut
 import org.btcmap.api.updatePassword
 import org.btcmap.auth.AuthError
@@ -45,6 +47,7 @@ import org.btcmap.saved.SavedItems
 import org.btcmap.saved.withLocalizedAreaNames
 import org.btcmap.saved.withLocalizedPlaceNames
 import org.btcmap.settings.Settings
+import org.btcmap.ui.map.EventMiniMap
 
 /** Test tags so a test can drive the profile forms. */
 const val PROFILE_USERNAME_FIELD_TAG = "profile-username-field"
@@ -92,8 +95,16 @@ fun ProfileScreen(
     profileLabels: UserProfileLabels,
     formLabels: ProfileFormLabels,
     imagesLabels: UploadedImagesLabels,
+    eventsLabels: MyEventsLabels,
+    /** The map style the my-events previews render with. */
+    mapStyleUrl: String,
+    mapStyleJson: String?,
     showUploadedImages: Boolean,
     onShowUploadedImagesChange: (Boolean) -> Unit,
+    showMyEvents: Boolean,
+    onShowMyEventsChange: (Boolean) -> Unit,
+    /** Opens the add-event screen pre-filled from one of the user's events. */
+    onDuplicateEvent: (MyEventUi) -> Unit = {},
     onLoggedOut: () -> Unit,
 ) {
     var account by remember { mutableStateOf<User?>(null) }
@@ -155,6 +166,38 @@ fun ProfileScreen(
             },
         )
 
+        showMyEvents -> MyEventsScreen(
+            labels = eventsLabels,
+            load = {
+                api.getMyEvents().map { event ->
+                    MyEventUi(
+                        id = event.id,
+                        lat = event.lat,
+                        lon = event.lon,
+                        name = event.name,
+                        website = event.website?.toString().orEmpty(),
+                        startsAt = event.startsAt,
+                        endsAt = event.endsAt,
+                        status = MyEventStatus.fromValue(event.status),
+                        startsAtLocal = event.startsAtLocal,
+                        endsAtLocal = event.endsAtLocal,
+                    )
+                }
+            },
+            revoke = { event -> api.revokeEvent(event.id) },
+            onDuplicate = onDuplicateEvent,
+            map = { event, mapModifier ->
+                EventMiniMap(
+                    lat = event.lat,
+                    lon = event.lon,
+                    styleUrl = mapStyleUrl,
+                    styleJson = mapStyleJson,
+                    palette = markerPalette(settings),
+                    modifier = mapModifier,
+                )
+            },
+        )
+
         editing == ProfileEdit.Username -> ChangeUsernameForm(
             currentName = current.name,
             labels = formLabels,
@@ -202,6 +245,10 @@ fun ProfileScreen(
                 onOpenUploadedImages = {
                     message = null
                     onShowUploadedImagesChange(true)
+                },
+                onOpenMyEvents = {
+                    message = null
+                    onShowMyEventsChange(true)
                 },
                 onDeletePlace = { id ->
                     scope.launch {

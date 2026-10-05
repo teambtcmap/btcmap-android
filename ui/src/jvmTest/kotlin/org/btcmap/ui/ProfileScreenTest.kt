@@ -46,6 +46,7 @@ class ProfileScreenTest {
             setContent {
                 AppTheme {
                     var showUploadedImages by remember { mutableStateOf(false) }
+                    var showMyEvents by remember { mutableStateOf(false) }
                     ProfileScreen(
                         api = testApi(),
                         db = db,
@@ -53,8 +54,13 @@ class ProfileScreenTest {
                         profileLabels = TEST_PROFILE_LABELS,
                         formLabels = TEST_PROFILE_FORM_LABELS,
                         imagesLabels = TEST_UPLOADED_IMAGES_LABELS,
+                        eventsLabels = TEST_MY_EVENTS_LABELS,
+                        mapStyleUrl = "",
+                        mapStyleJson = null,
                         showUploadedImages = showUploadedImages,
                         onShowUploadedImagesChange = { showUploadedImages = it },
+                        showMyEvents = showMyEvents,
+                        onShowMyEventsChange = { showMyEvents = it },
                         onLoggedOut = { loggedOut = true },
                     )
                 }

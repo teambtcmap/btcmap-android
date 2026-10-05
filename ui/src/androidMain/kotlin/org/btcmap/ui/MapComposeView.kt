@@ -133,6 +133,12 @@ class MapComposeView @JvmOverloads constructor(
     /** Opens the admin-only infrastructure dashboard; null hides the button. */
     var onOpenInfra: (() -> Unit)? by mutableStateOf(null)
 
+    /** Opens the event review queue; null hides the button. */
+    var onOpenEventReview: (() -> Unit)? by mutableStateOf(null)
+
+    /** The number of events awaiting review, shown as the review button's badge. */
+    var pendingEventCount: Int by mutableStateOf(0)
+
     var openPlaceId: Long? by mutableStateOf(null)
 
     var reloadKey: Int by mutableStateOf(0)
@@ -195,6 +201,8 @@ class MapComposeView @JvmOverloads constructor(
             addLocationLabels = addLocationLabels,
             onOpenFeed = onOpenFeed,
             onOpenInfra = onOpenInfra,
+            onOpenEventReview = onOpenEventReview,
+            pendingEventCount = pendingEventCount,
             openPlaceId = openPlaceId,
             reloadKey = reloadKey,
             onCameraIdle = onCameraIdle,

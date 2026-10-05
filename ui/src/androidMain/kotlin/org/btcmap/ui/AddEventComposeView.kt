@@ -12,6 +12,7 @@ import androidx.compose.ui.platform.AbstractComposeView
 import androidx.compose.ui.text.font.FontFamily
 import org.btcmap.ui.map.MarkerPalette
 import org.btcmap.ui.map.bundledStyleJsonFor
+import java.time.LocalDateTime
 
 /**
  * Hosts [AddEventScreen] inside the Android Views hierarchy. The app sets the
@@ -37,6 +38,15 @@ class AddEventComposeView @JvmOverloads constructor(
     /** The user's marker colours, so the pin matches the map's merchant markers. */
     var palette: MarkerPalette? by mutableStateOf(null)
 
+    /** Optional pre-fill for a duplicate; blank/null for a brand new event. */
+    var initialName: String by mutableStateOf("")
+
+    var initialWebsite: String by mutableStateOf("")
+
+    var initialStartsAt: LocalDateTime? by mutableStateOf(null)
+
+    var initialEndsAt: LocalDateTime? by mutableStateOf(null)
+
     var submit: suspend (AddEventDraft) -> Unit = {}
 
     var onBack: () -> Unit = {}
@@ -60,6 +70,10 @@ class AddEventComposeView @JvmOverloads constructor(
             palette = palette,
             submit = submit,
             onBack = onBack,
+            initialName = initialName,
+            initialWebsite = initialWebsite,
+            initialStartsAt = initialStartsAt,
+            initialEndsAt = initialEndsAt,
         )
     }
 }

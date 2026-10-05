@@ -161,6 +161,10 @@ private val LOCAL_DATE_TIME_SAVER: Saver<LocalDateTime?, String> = Saver(
  * cannot drift apart, [submit] is injected so it can be driven without a server,
  * [map] so a test can render the form without a GPU and [dateTimePicker] so a
  * test can set the timestamps without the Material dialogs.
+ *
+ * The optional initial values pre-fill the form for a duplicate: [initialName],
+ * [initialWebsite], [initialStartsAt] and [initialEndsAt] seed the fields, so the
+ * user only has to adjust the date to repeat a regular event.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -174,6 +178,10 @@ fun AddEventScreen(
     palette: MarkerPalette,
     submit: suspend (AddEventDraft) -> Unit,
     onBack: () -> Unit,
+    initialName: String = "",
+    initialWebsite: String = "",
+    initialStartsAt: LocalDateTime? = null,
+    initialEndsAt: LocalDateTime? = null,
     map: @Composable ((Double, Double) -> Unit) -> Unit = { onCenterChanged ->
         LocationPickerMap(
             lat = lat,
@@ -258,6 +266,10 @@ fun AddEventScreen(
                     busy = busy,
                     submitted = submitted,
                     labels = labels,
+                    initialName = initialName,
+                    initialWebsite = initialWebsite,
+                    initialStartsAt = initialStartsAt,
+                    initialEndsAt = initialEndsAt,
                     onSubmit = { name, website, startsAt, endsAt ->
                         busy = true
                         val draft = AddEventDraft(
@@ -304,6 +316,10 @@ fun AddEventForm(
     onSubmit: (name: String, website: String, startsAt: LocalDateTime, endsAt: LocalDateTime?) -> Unit,
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
+    initialName: String = "",
+    initialWebsite: String = "",
+    initialStartsAt: LocalDateTime? = null,
+    initialEndsAt: LocalDateTime? = null,
     dateTimePicker: EventDateTimePicker = { title, initial, onConfirm, onDismiss ->
         EventDateTimePickerDialog(
             title = title,
@@ -315,15 +331,15 @@ fun AddEventForm(
         )
     },
 ) {
-    var name by rememberSaveable { mutableStateOf("") }
-    var website by rememberSaveable { mutableStateOf("") }
+    var name by rememberSaveable { mutableStateOf(initialName) }
+    var website by rememberSaveable { mutableStateOf(initialWebsite) }
     // The wall-clock times the user picked, saved across a configuration change.
     // They are not bound to a zone: the API places them in the event's zone.
     var startsAt by rememberSaveable(stateSaver = LOCAL_DATE_TIME_SAVER) {
-        mutableStateOf<LocalDateTime?>(null)
+        mutableStateOf(initialStartsAt)
     }
     var endsAt by rememberSaveable(stateSaver = LOCAL_DATE_TIME_SAVER) {
-        mutableStateOf<LocalDateTime?>(null)
+        mutableStateOf(initialEndsAt)
     }
     var attempted by rememberSaveable { mutableStateOf(false) }
     var picking by remember { mutableStateOf<EventField?>(null) }

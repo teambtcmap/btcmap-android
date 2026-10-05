@@ -40,6 +40,7 @@ data class UserProfileLabels(
     val editPassword: String,
     val delete: String,
     val uploadedImages: String,
+    val myEvents: String,
 )
 
 data class UserProfileUiState(
@@ -56,6 +57,7 @@ fun UserProfileScreen(
     onEditUsername: () -> Unit,
     onEditPassword: () -> Unit,
     onOpenUploadedImages: () -> Unit,
+    onOpenMyEvents: () -> Unit,
     onDeletePlace: (id: Long) -> Unit,
     onDeleteArea: (id: Long) -> Unit,
     onLogOut: () -> Unit,
@@ -91,9 +93,18 @@ fun UserProfileScreen(
         }
 
         OutlinedButton(
-            onClick = onOpenUploadedImages,
+            onClick = onOpenMyEvents,
             modifier = Modifier
                 .padding(start = 16.dp, end = 16.dp, top = 24.dp)
+                .fillMaxWidth(),
+        ) {
+            Text(state.labels.myEvents)
+        }
+
+        OutlinedButton(
+            onClick = onOpenUploadedImages,
+            modifier = Modifier
+                .padding(start = 16.dp, end = 16.dp, top = 8.dp)
                 .fillMaxWidth(),
         ) {
             Text(state.labels.uploadedImages)

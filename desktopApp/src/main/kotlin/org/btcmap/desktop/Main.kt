@@ -34,10 +34,13 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import kotlinx.coroutines.launch
 import androidx.compose.runtime.rememberCoroutineScope
+import org.btcmap.account.canManageEvents
 import org.btcmap.account.isAdmin
 import org.btcmap.api.ActivityFeedItem
 import org.btcmap.api.getActivity
 import org.btcmap.api.getDashboard
+import org.btcmap.api.getPendingEvents
+import org.btcmap.api.setEventStatus
 import org.btcmap.api.deletePlaceImage
 import org.btcmap.api.getPlaceImages
 import org.btcmap.feed.feedKey
@@ -52,6 +55,7 @@ import org.btcmap.ui.ActivityFeedScreen
 import org.btcmap.ui.ActivityFeedState
 import org.btcmap.ui.MaterialSymbol
 import org.btcmap.ui.map.AddLocationLabels
+import org.btcmap.ui.map.EventMiniMap
 import org.btcmap.ui.map.SearchActions
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withTimeoutOrNull
@@ -70,6 +74,7 @@ import org.btcmap.api.signIn
 import org.btcmap.api.submitEvent
 import org.btcmap.api.submitPlace
 import org.btcmap.ui.PlaceAction
+import org.btcmap.ui.PendingEventUi
 import org.btcmap.ui.PlacePhoto
 import org.btcmap.ui.toPlacePhoto
 import org.btcmap.api.apiHttpClient
@@ -118,12 +123,15 @@ import org.btcmap.ui.CommentScreen
 import org.btcmap.ui.CommentScreenLabels
 import org.btcmap.ui.DbStatsPage
 import org.btcmap.ui.DbStatsPageLabels
+import org.btcmap.ui.EventReviewLabels
+import org.btcmap.ui.EventReviewScreen
 import org.btcmap.ui.InfraDashboardScreen
 import org.btcmap.ui.InvoicePaymentLabels
 import org.btcmap.ui.InvoicePaymentSection
 import org.btcmap.ui.InvoicePaymentSectionLabels
 import org.btcmap.ui.MapScreen
 import org.btcmap.ui.ProfileFormLabels
+import org.btcmap.ui.MyEventsLabels
 import org.btcmap.ui.ProfileScreen
 import org.btcmap.ui.UploadedImagesLabels
 import org.btcmap.ui.ReportPlaceLabels
@@ -268,8 +276,11 @@ private fun runApp() = application {
                     var mapCenterLon by remember { mutableStateOf(DEFAULT_MAP_CENTER_LON) }
                     // Where the add-place screen was opened from the map.
                     var addPlace by remember { mutableStateOf<Pair<Double, Double>?>(null) }
-                    // Where the add-event screen was opened from the map.
-                    var addEvent by remember { mutableStateOf<Pair<Double, Double>?>(null) }
+                    // Where the add-event screen was opened from, and what it is
+                    // pre-filled with: blank from the map, an event to duplicate
+                    // from the profile.
+                    var addEvent by remember { mutableStateOf<AddEventPrefill?>(null) }
+                    var addEventBackRoute by remember { mutableStateOf(Route.Map) }
                     // The place a boost or comment payment screen is for.
                     var paymentPlace by remember { mutableStateOf<Pair<Long, String>?>(null) }
                     // The area a chip (or an area search result) opened, and the
@@ -284,9 +295,18 @@ private fun runApp() = application {
                     // dashboard. Re-derived whenever the map is (re)entered, so a
                     // sign-in or sign-out is reflected.
                     var isAdmin by remember { mutableStateOf(false) }
+                    var canManageEvents by remember { mutableStateOf(false) }
+                    var pendingEventCount by remember { mutableStateOf(0) }
                     LaunchedEffect(route) {
                         if (route == Route.Map) {
-                            isAdmin = db.user.select()?.isAdmin() == true
+                            val user = db.user.select()
+                            isAdmin = user?.isAdmin() == true
+                            canManageEvents = user?.canManageEvents() == true
+                            pendingEventCount = if (canManageEvents) {
+                                runCatching { api.getPendingEvents().size }.getOrDefault(0)
+                            } else {
+                                0
+                            }
                         }
                     }
 
@@ -338,7 +358,8 @@ private fun runApp() = application {
                                 route = if (settings.authorized) Route.AddPlace else Route.Account
                             },
                             onAddEvent = { lat, lon ->
-                                addEvent = lat to lon
+                                addEvent = AddEventPrefill(lat = lat, lon = lon)
+                                addEventBackRoute = Route.Map
                                 route = if (settings.authorized) Route.AddEvent else Route.Account
                             },
                             addLocationLabels = ADD_LOCATION_LABELS,
@@ -348,6 +369,12 @@ private fun runApp() = application {
                             } else {
                                 null
                             },
+                            onOpenEventReview = if (canManageEvents) {
+                                { route = Route.EventReview }
+                            } else {
+                                null
+                            },
+                            pendingEventCount = pendingEventCount,
                             bookmarked = bookmarked,
                             photos = selectedPhotos,
                             onDeletePhoto = { photo ->
@@ -471,13 +498,17 @@ private fun runApp() = application {
                         )
 
                         Route.AddEvent -> AddEventScreen(
-                            lat = addEvent?.first ?: 0.0,
-                            lon = addEvent?.second ?: 0.0,
+                            lat = addEvent?.lat ?: 0.0,
+                            lon = addEvent?.lon ?: 0.0,
                             styleUrl = HOSTED_STYLE_URL,
                             styleJson = styleJson,
                             labels = ADD_EVENT_LABELS,
                             iconFont = iconFont,
                             palette = markerPalette(settings),
+                            initialName = addEvent?.name.orEmpty(),
+                            initialWebsite = addEvent?.website.orEmpty(),
+                            initialStartsAt = addEvent?.startsAt?.toLocalDateTimeOrNull(),
+                            initialEndsAt = addEvent?.endsAt?.toLocalDateTimeOrNull(),
                             submit = { draft ->
                                 api.submitEvent(
                                     lat = draft.lat,
@@ -488,7 +519,7 @@ private fun runApp() = application {
                                     endsAt = draft.endsAt,
                                 )
                             },
-                            onBack = { route = Route.Map },
+                            onBack = { route = addEventBackRoute },
                         )
 
                         Route.AddComment -> ScreenPage(
@@ -545,6 +576,39 @@ private fun runApp() = application {
                             )
                         }
 
+                        Route.EventReview -> EventReviewScreen(
+                            labels = EVENT_REVIEW_LABELS,
+                            load = {
+                                api.getPendingEvents().map { event ->
+                                    PendingEventUi(
+                                        id = event.id,
+                                        lat = event.lat,
+                                        lon = event.lon,
+                                        name = event.name,
+                                        website = event.website?.toString().orEmpty(),
+                                        startsAt = event.startsAt,
+                                        endsAt = event.endsAt,
+                                    )
+                                }
+                            },
+                            approve = { api.setEventStatus(it.id, "live") },
+                            reject = { api.setEventStatus(it.id, "rejected") },
+                            onOpenUrl = { openUrl(it) },
+                            onBack = { route = Route.Map },
+                            title = "Review events",
+                            iconFont = iconFont,
+                            map = { event, mapModifier ->
+                                EventMiniMap(
+                                    lat = event.lat,
+                                    lon = event.lon,
+                                    styleUrl = HOSTED_STYLE_URL,
+                                    styleJson = styleJson,
+                                    palette = markerPalette(settings),
+                                    modifier = mapModifier,
+                                )
+                            },
+                        )
+
                         Route.Settings -> ScreenPage(
                             title = "Settings",
                             onBack = { route = Route.Map },
@@ -581,21 +645,22 @@ private fun runApp() = application {
                         }
 
                         Route.Account -> {
-                            // Uploaded images is inside the profile, so the
-                            // screen's back arrow returns to the profile page
-                            // before leaving the account screen.
+                            // Uploaded images and my events are inside the
+                            // profile, so the screen's back arrow returns to the
+                            // profile page before leaving the account screen.
                             var showUploadedImages by remember { mutableStateOf(false) }
+                            var showMyEvents by remember { mutableStateOf(false) }
                             ScreenPage(
-                                title = if (showUploadedImages) {
-                                    PROFILE_LABELS.uploadedImages
-                                } else {
-                                    "Account"
+                                title = when {
+                                    showUploadedImages -> PROFILE_LABELS.uploadedImages
+                                    showMyEvents -> PROFILE_LABELS.myEvents
+                                    else -> "Account"
                                 },
                                 onBack = {
-                                    if (showUploadedImages) {
-                                        showUploadedImages = false
-                                    } else {
-                                        route = Route.Settings
+                                    when {
+                                        showUploadedImages -> showUploadedImages = false
+                                        showMyEvents -> showMyEvents = false
+                                        else -> route = Route.Settings
                                     }
                                 },
                             ) {
@@ -613,12 +678,30 @@ private fun runApp() = application {
                                             profileLabels = PROFILE_LABELS,
                                             formLabels = PROFILE_FORM_LABELS,
                                             imagesLabels = UPLOADED_IMAGES_LABELS,
+                                            eventsLabels = MY_EVENTS_LABELS,
+                                            mapStyleUrl = HOSTED_STYLE_URL,
+                                            mapStyleJson = styleJson,
                                             showUploadedImages = showUploadedImages,
                                             onShowUploadedImagesChange = {
                                                 showUploadedImages = it
                                             },
+                                            showMyEvents = showMyEvents,
+                                            onShowMyEventsChange = { showMyEvents = it },
+                                            onDuplicateEvent = { event ->
+                                                addEvent = AddEventPrefill(
+                                                    lat = event.lat,
+                                                    lon = event.lon,
+                                                    name = event.name,
+                                                    website = event.website,
+                                                    startsAt = event.startsAtLocal,
+                                                    endsAt = event.endsAtLocal,
+                                                )
+                                                addEventBackRoute = Route.Account
+                                                route = Route.AddEvent
+                                            },
                                             onLoggedOut = {
                                                 showUploadedImages = false
+                                                showMyEvents = false
                                                 onLoggedOut()
                                             },
                                         )
@@ -836,7 +919,25 @@ private fun AreaPlaceIssue.osmEditUrl(): String =
 private const val JOIN_US_URL = "https://btcmap.org/join-us"
 
 /** The desktop app's full-window pages. */
-private enum class Route { Map, Area, Event, Feed, Settings, Colors, DbStats, Account, Report, AddPlace, AddEvent, AddComment, Boost, Infra }
+private enum class Route { Map, Area, Event, Feed, Settings, Colors, DbStats, Account, Report, AddPlace, AddEvent, AddComment, Boost, Infra, EventReview }
+
+/**
+ * What the add-event screen opens with. From the map it is just the centre; from
+ * the profile it is a submitted event to repeat, with its wall-clock times so the
+ * user only has to adjust the date.
+ */
+private data class AddEventPrefill(
+    val lat: Double,
+    val lon: Double,
+    val name: String = "",
+    val website: String = "",
+    val startsAt: String? = null,
+    val endsAt: String? = null,
+)
+
+/** Parses a floating local date-time pre-fill, or null when absent/malformed. */
+private fun String.toLocalDateTimeOrNull(): java.time.LocalDateTime? =
+    runCatching { java.time.LocalDateTime.parse(this) }.getOrNull()
 
 private const val SCREENSHOT_ARG = "--screenshot="
 
@@ -903,6 +1004,7 @@ private fun renderScreen(spec: String) {
                             userAgent = USER_AGENT,
                         )
                         var showUploadedImages by remember { mutableStateOf(false) }
+                        var showMyEvents by remember { mutableStateOf(false) }
                         AccountScreen(
                             api = api,
                             db = db,
@@ -917,10 +1019,15 @@ private fun renderScreen(spec: String) {
                                     profileLabels = PROFILE_LABELS,
                                     formLabels = PROFILE_FORM_LABELS,
                                     imagesLabels = UPLOADED_IMAGES_LABELS,
+                                    eventsLabels = MY_EVENTS_LABELS,
+                                    mapStyleUrl = HOSTED_STYLE_URL,
+                                    mapStyleJson = null,
                                     showUploadedImages = showUploadedImages,
                                     onShowUploadedImagesChange = {
                                         showUploadedImages = it
                                     },
+                                    showMyEvents = showMyEvents,
+                                    onShowMyEventsChange = { showMyEvents = it },
                                     onLoggedOut = onLoggedOut,
                                 )
                             },
@@ -1320,6 +1427,7 @@ private val PROFILE_LABELS = UserProfileLabels(
     editPassword = "Change password",
     delete = "Delete",
     uploadedImages = "Uploaded images",
+    myEvents = "My events",
 )
 
 private val UPLOADED_IMAGES_LABELS = UploadedImagesLabels(
@@ -1328,6 +1436,30 @@ private val UPLOADED_IMAGES_LABELS = UploadedImagesLabels(
     failed = "Couldn't delete the image.",
     retry = "Retry",
     unknownPlace = { "Place #$it" },
+)
+
+private val MY_EVENTS_LABELS = MyEventsLabels(
+    empty = "You haven't submitted any events yet.",
+    failed = "Couldn't load your events",
+    retry = "Retry",
+    duplicate = "Duplicate",
+    revoke = "Revoke",
+    revokeFailed = "Couldn't revoke the event",
+    statusPending = "Pending review",
+    statusLive = "Live",
+    statusRejected = "Rejected",
+    dateRange = { date, start, end -> "$date, $start - $end" },
+)
+
+private val EVENT_REVIEW_LABELS = EventReviewLabels(
+    back = "Navigate up",
+    empty = "No events are waiting for review",
+    failed = "Couldn't load the events",
+    retry = "Retry",
+    approve = "Approve",
+    reject = "Reject",
+    actionFailed = "Couldn't update the event",
+    dateRange = { date, start, end -> "$date, $start - $end" },
 )
 
 private val PROFILE_FORM_LABELS = ProfileFormLabels(

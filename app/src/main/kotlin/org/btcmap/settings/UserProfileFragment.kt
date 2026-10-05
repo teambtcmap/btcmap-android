@@ -7,12 +7,19 @@ import android.view.ViewGroup
 import androidx.activity.addCallback
 import androidx.compose.runtime.snapshotFlow
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.commit
+import androidx.fragment.app.replace
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.launch
 import org.btcmap.R
 import org.btcmap.api
 import org.btcmap.databinding.UserProfileFragmentBinding
 import org.btcmap.db
+import org.btcmap.event.AddEventFragment
+import org.btcmap.settings.mapStyle
+import org.btcmap.settings.uri
+import org.btcmap.ui.MyEventUi
+import org.btcmap.ui.MyEventsLabels
 import org.btcmap.ui.ProfileFormLabels
 import org.btcmap.ui.UploadedImagesLabels
 import org.btcmap.ui.UserProfileLabels
@@ -44,21 +51,28 @@ class UserProfileFragment : Fragment() {
             requireActivity().onBackPressedDispatcher.onBackPressed()
         }
 
-        // Uploaded images is Compose state inside the profile rather than a
-        // back-stack entry, so back returns to the profile page first.
+        // Uploaded images and my events are Compose state inside the profile
+        // rather than back-stack entries, so back returns to the profile page
+        // first.
         requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner) {
-            if (content.uploadedImagesOpen) {
-                content.uploadedImagesOpen = false
-            } else {
-                parentFragmentManager.popBackStack()
+            when {
+                content.uploadedImagesOpen -> content.uploadedImagesOpen = false
+                content.myEventsOpen -> content.myEventsOpen = false
+                else -> parentFragmentManager.popBackStack()
             }
         }
 
-        // The uploaded-images body carries no title, so the toolbar title names
-        // the profile's current sub-screen.
+        // The sub-screen bodies carry no title, so the toolbar title names the
+        // profile's current sub-screen.
         viewLifecycleOwner.lifecycleScope.launch {
-            snapshotFlow { content.uploadedImagesOpen }.collect { open ->
-                binding.topAppBar.setTitle(if (open) R.string.uploaded_images else R.string.profile)
+            snapshotFlow { content.uploadedImagesOpen to content.myEventsOpen }.collect { (images, events) ->
+                binding.topAppBar.setTitle(
+                    when {
+                        images -> R.string.uploaded_images
+                        events -> R.string.my_events
+                        else -> R.string.profile
+                    },
+                )
             }
         }
 
@@ -68,13 +82,39 @@ class UserProfileFragment : Fragment() {
         content.profileLabels = profileLabels()
         content.formLabels = formLabels()
         content.imagesLabels = imagesLabels()
+        content.eventsLabels = eventsLabels()
+        content.mapStyleUrl = prefs.mapStyle.uri(requireContext())
         content.iconTypeface = org.btcmap.util.iconTypeface
+        content.onDuplicateEvent = { event -> openDuplicate(event) }
         content.onLoggedOut = { parentFragmentManager.popBackStack() }
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+
+    /**
+     * Opens the add-event screen pre-filled from a submitted event, so a regular
+     * event can be repeated with a new date.
+     */
+    private fun openDuplicate(event: MyEventUi) {
+        parentFragmentManager.commit {
+            setReorderingAllowed(true)
+            replace<AddEventFragment>(
+                R.id.fragmentContainerView,
+                null,
+                Bundle().apply {
+                    putDouble("lat", event.lat)
+                    putDouble("lon", event.lon)
+                    putString("name", event.name)
+                    putString("website", event.website)
+                    putString("starts_at", event.startsAtLocal)
+                    event.endsAtLocal?.let { putString("ends_at", it) }
+                },
+            )
+            addToBackStack(null)
+        }
     }
 
     private fun profileLabels(): UserProfileLabels = UserProfileLabels(
@@ -89,6 +129,7 @@ class UserProfileFragment : Fragment() {
         editPassword = getString(R.string.change_password),
         delete = getString(R.string.delete),
         uploadedImages = getString(R.string.uploaded_images),
+        myEvents = getString(R.string.my_events),
     )
 
     private fun imagesLabels(): UploadedImagesLabels = UploadedImagesLabels(
@@ -97,6 +138,21 @@ class UserProfileFragment : Fragment() {
         failed = getString(R.string.uploaded_images_failed),
         retry = getString(R.string.retry),
         unknownPlace = { getString(R.string.uploaded_images_place, it) },
+    )
+
+    private fun eventsLabels(): MyEventsLabels = MyEventsLabels(
+        empty = getString(R.string.my_events_empty),
+        failed = getString(R.string.my_events_failed),
+        retry = getString(R.string.retry),
+        statusPending = getString(R.string.event_status_pending),
+        statusLive = getString(R.string.event_status_live),
+        statusRejected = getString(R.string.event_status_rejected),
+        revoke = getString(R.string.event_revoke),
+        revokeFailed = getString(R.string.event_revoke_failed),
+        duplicate = getString(R.string.event_duplicate),
+        dateRange = { date, start, end ->
+            getString(R.string.event_date_time_range, date, start, end)
+        },
     )
 
     private fun formLabels(): ProfileFormLabels = ProfileFormLabels(
