@@ -40,6 +40,7 @@ import org.btcmap.comment.AddCommentFragment
 import org.btcmap.db
 import org.btcmap.db.table.place.Place
 import org.btcmap.databinding.MapFragmentBinding
+import org.btcmap.event.AddEventFragment
 import org.btcmap.event.EventFragment
 import org.btcmap.event.toBundle
 import org.btcmap.feed.ActivityFeedFragment
@@ -82,6 +83,7 @@ import org.btcmap.syncController
 import org.btcmap.ui.PlaceAction
 import org.btcmap.ui.PlacePhoto
 import org.btcmap.ui.toPlacePhoto
+import org.btcmap.ui.map.AddLocationLabels
 import org.btcmap.ui.map.SearchActions
 import org.btcmap.ui.map.bundledStyleJsonFor
 import org.btcmap.util.DeepLink
@@ -234,9 +236,19 @@ class MapFragment : Fragment() {
             onAreaSelected = ::openArea
             onOpenFeed = ::openFeed
             onAddPlace = { lat, lon ->
+                pendingAddEvent = null
                 pendingAddPlace = lat to lon
                 if (prefs.authorized) navigateToAddPlace(lat, lon) else showAuthDialog()
             }
+            onAddEvent = { lat, lon ->
+                pendingAddPlace = null
+                pendingAddEvent = lat to lon
+                if (prefs.authorized) navigateToAddEvent(lat, lon) else showAuthDialog()
+            }
+            addLocationLabels = AddLocationLabels(
+                addPlace = getString(R.string.add_place_title),
+                addEvent = getString(R.string.add_event),
+            )
             searchActions = SearchActions(onSettings = { navigateToSettings() })
             formatDistance = ::formatDistance
             onFeaturesDrawn = { (activity as? Activity)?.reportFullyDrawn() }
@@ -422,8 +434,11 @@ class MapFragment : Fragment() {
             }
 
             // No action means the map only asked the user to sign in: the action
-            // that needed it was adding a place.
-            else -> addPlaceAfterAuth()
+            // that needed it was adding a location, either a place or an event.
+            else -> {
+                addPlaceAfterAuth()
+                addEventAfterAuth()
+            }
         }
     }
 
@@ -638,9 +653,20 @@ class MapFragment : Fragment() {
      */
     private var pendingAddPlace: Pair<Double, Double>? = null
 
+    /**
+     * The map centre an add-event that still has to authenticate should use once
+     * the form comes back signed in.
+     */
+    private var pendingAddEvent: Pair<Double, Double>? = null
+
     private fun addPlaceAfterAuth() {
         val pending = pendingAddPlace ?: return
         navigateToAddPlace(pending.first, pending.second)
+    }
+
+    private fun addEventAfterAuth() {
+        val pending = pendingAddEvent ?: return
+        navigateToAddEvent(pending.first, pending.second)
     }
 
     /** Mirrors the distance labels the Views search showed. */
@@ -666,6 +692,20 @@ class MapFragment : Fragment() {
         parentFragmentManager.commit {
             setReorderingAllowed(true)
             replace<AddPlaceFragment>(
+                R.id.fragmentContainerView, null, Bundle().apply {
+                    putDouble("lat", lat)
+                    putDouble("lon", lon)
+                }
+            )
+            addToBackStack(null)
+        }
+    }
+
+    private fun navigateToAddEvent(lat: Double, lon: Double) {
+        pendingAddEvent = null
+        parentFragmentManager.commit {
+            setReorderingAllowed(true)
+            replace<AddEventFragment>(
                 R.id.fragmentContainerView, null, Bundle().apply {
                     putDouble("lat", lat)
                     putDouble("lon", lon)

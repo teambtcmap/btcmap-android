@@ -60,6 +60,7 @@ import org.btcmap.map.toEventGeoJson
 import org.btcmap.map.toMarkerGeoJson
 import org.btcmap.place.isMerchant
 import org.btcmap.ui.map.AREA_CHIP_SIZE
+import org.btcmap.ui.map.AddLocationLabels
 import org.btcmap.ui.map.AreaChipPalette
 import org.btcmap.ui.map.AreaChips
 import org.btcmap.ui.map.EventLayers
@@ -132,6 +133,16 @@ fun MapScreen(
      * coordinates because only it knows where the user is looking.
      */
     onAddPlace: ((Double, Double) -> Unit)? = null,
+    /**
+     * Creates an event at the map centre, if the host can. Offered alongside
+     * [onAddPlace] in the add-location chooser.
+     */
+    onAddEvent: ((Double, Double) -> Unit)? = null,
+    /** The labels of the add-location chooser. */
+    addLocationLabels: AddLocationLabels = AddLocationLabels(
+        addPlace = "Add a place",
+        addEvent = "Add an event",
+    ),
     onOpenFeed: ((List<MapArea>) -> Unit)? = null,
     /**
      * Opens the infrastructure dashboard. Null unless the signed-in user holds
@@ -396,8 +407,8 @@ fun MapScreen(
     }
 
     // The host supplies what it can do, but only the map knows where it is
-    // looking, so the add-place action is handed the map centre.
-    val mapSearchActions = if (searchActions == null && onAddPlace == null) {
+    // looking, so the add-location actions are handed the map centre.
+    val mapSearchActions = if (searchActions == null && onAddPlace == null && onAddEvent == null) {
         null
     } else {
         SearchActions(
@@ -405,6 +416,13 @@ fun MapScreen(
                 {
                     state.cameraPosition?.target?.let { centre ->
                         createPlace(centre.latitude, centre.longitude)
+                    }
+                }
+            },
+            onAddEvent = onAddEvent?.let { createEvent ->
+                {
+                    state.cameraPosition?.target?.let { centre ->
+                        createEvent(centre.latitude, centre.longitude)
                     }
                 }
             },
@@ -723,6 +741,7 @@ fun MapScreen(
                 results = searchResults,
                 onResultClick = onSearchResultClick,
                 actions = mapSearchActions,
+                addLocationLabels = addLocationLabels,
                 modifier = Modifier
                     .align(Alignment.TopCenter)
                     // The Views SearchBar sat below the status bar with its own

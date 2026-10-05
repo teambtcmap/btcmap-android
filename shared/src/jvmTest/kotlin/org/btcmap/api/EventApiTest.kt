@@ -149,6 +149,59 @@ class EventApiTest : ApiTestBase() {
         Assert.assertEquals(Instant.parse("1970-01-01T00:00:00Z"), events[0].startsAt)
     }
 
+    @Test
+    fun submitEvent_postsFieldsAndParsesStatus() = runTest {
+        enqueueJson(
+            """
+            {"id":174,"lat":1.0,"lon":2.0,"name":"Meetup","website":"https://example.com","status":"pending","starts_at":"2026-09-25T19:00:00Z"}
+            """.trimIndent()
+        )
+
+        val response = api().submitEvent(
+            lat = 1.0,
+            lon = 2.0,
+            name = "Meetup",
+            website = "https://example.com",
+            startsAt = "2026-09-25T19:00:00",
+            endsAt = "2026-09-25T22:00:00",
+        )
+
+        val request = takeRequest()
+        Assert.assertEquals("POST", request.method)
+        Assert.assertEquals("/v4/events", request.url.encodedPath)
+        Assert.assertEquals(
+            """{"lat":1.0,"lon":2.0,"name":"Meetup","website":"https://example.com","starts_at":"2026-09-25T19:00:00","ends_at":"2026-09-25T22:00:00","timezone":"auto"}""",
+            request.jsonBody(),
+        )
+        Assert.assertEquals(174L, response.id)
+        Assert.assertEquals("pending", response.status)
+    }
+
+    @Test
+    fun submitEvent_omitsEndsAtAndSendsEmptyWebsite() = runTest {
+        enqueueJson(
+            """
+            {"id":175,"lat":1.0,"lon":2.0,"name":"Meetup","website":"","status":"live","starts_at":"2026-09-25T19:00:00Z"}
+            """.trimIndent()
+        )
+
+        val response = api().submitEvent(
+            lat = 1.0,
+            lon = 2.0,
+            name = "Meetup",
+            website = "",
+            startsAt = "2026-09-25T19:00:00",
+            endsAt = null,
+        )
+
+        val request = takeRequest()
+        Assert.assertEquals(
+            """{"lat":1.0,"lon":2.0,"name":"Meetup","website":"","starts_at":"2026-09-25T19:00:00","timezone":"auto"}""",
+            request.jsonBody(),
+        )
+        Assert.assertEquals("live", response.status)
+    }
+
     private companion object {
         val SINCE: Instant = Instant.parse("1970-01-01T00:00:00Z")
 

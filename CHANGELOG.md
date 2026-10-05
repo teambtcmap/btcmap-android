@@ -10,6 +10,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Fix the add-place screen showing the literal `location_on` text instead of the pin, the MapLibre logo and attribution pill, and a blank top bar
 - Restore the add-place form's example hints, mark the required fields, chain the keyboard's Next key, show a spinner while submitting, scroll to the first invalid field and surface submit errors in a snackbar
 - Float a hint over the add-place map so it is clear the map can be dragged to set the exact location
+- Add an add-event screen on the shared Compose UI, mirroring add-place: a positioning map, name and website fields, Material 3 date and time pickers for the start and optional end, and a confirmation state. Submitted times are the event's local wall-clock time, with the zone resolved from its location
+- Offer a choice of adding a place or an event when the map's add-location action is tapped, and submit events to the new `POST /v4/events` endpoint
 - Add an admin-only infrastructure dashboard, opened from a button on the map, showing live analytics (unique clients, places, imports, request logs, API calls, Lightning node, OSM syncs and wallets) with tap-to-open detail dialogs and a refresh action
 - Let the account sign-in and sign-up forms be filled by password managers, and add a password visibility toggle
 - Cap and centre the desktop account form's width, show a busy indicator while signing in, restyle its error message and drop the redundant sign-in hint

@@ -15,6 +15,7 @@ import org.btcmap.db.Database
 import org.btcmap.db.table.event.Event
 import org.btcmap.db.table.place.Place
 import org.btcmap.map.MapArea
+import org.btcmap.ui.map.AddLocationLabels
 import org.btcmap.ui.map.AreaChipPalette
 import org.btcmap.ui.map.MarkerPalette
 import org.btcmap.ui.map.SearchActions
@@ -121,6 +122,12 @@ class MapComposeView @JvmOverloads constructor(
 
     var onAddPlace: ((Double, Double) -> Unit)? by mutableStateOf(null)
 
+    var onAddEvent: ((Double, Double) -> Unit)? by mutableStateOf(null)
+
+    var addLocationLabels: AddLocationLabels by mutableStateOf(
+        AddLocationLabels(addPlace = "Add a place", addEvent = "Add an event"),
+    )
+
     var onOpenFeed: ((List<MapArea>) -> Unit)? by mutableStateOf(null)
 
     /** Opens the admin-only infrastructure dashboard; null hides the button. */
@@ -184,6 +191,8 @@ class MapComposeView @JvmOverloads constructor(
             placeSheetStrings = placeSheetStrings,
             searchActions = searchActions,
             onAddPlace = onAddPlace,
+            onAddEvent = onAddEvent,
+            addLocationLabels = addLocationLabels,
             onOpenFeed = onOpenFeed,
             onOpenInfra = onOpenInfra,
             openPlaceId = openPlaceId,

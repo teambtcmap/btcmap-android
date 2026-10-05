@@ -51,6 +51,7 @@ import org.btcmap.ui.ActivityFeedRow
 import org.btcmap.ui.ActivityFeedScreen
 import org.btcmap.ui.ActivityFeedState
 import org.btcmap.ui.MaterialSymbol
+import org.btcmap.ui.map.AddLocationLabels
 import org.btcmap.ui.map.SearchActions
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withTimeoutOrNull
@@ -66,6 +67,7 @@ import androidx.compose.ui.Modifier
 import org.btcmap.util.toUrl
 import org.btcmap.api.Api
 import org.btcmap.api.signIn
+import org.btcmap.api.submitEvent
 import org.btcmap.api.submitPlace
 import org.btcmap.ui.PlaceAction
 import org.btcmap.ui.PlacePhoto
@@ -100,6 +102,9 @@ import org.btcmap.settings.verifiedFilterMinVerifiedAt
 import org.btcmap.sync.SyncState
 import org.btcmap.ui.AccountLabels
 import org.btcmap.ui.AccountScreen
+import org.btcmap.ui.AddEventForm
+import org.btcmap.ui.AddEventLabels
+import org.btcmap.ui.AddEventScreen
 import org.btcmap.ui.AddPlaceForm
 import org.btcmap.ui.AddPlaceLabels
 import org.btcmap.ui.AddPlaceScreen
@@ -263,6 +268,8 @@ private fun runApp() = application {
                     var mapCenterLon by remember { mutableStateOf(DEFAULT_MAP_CENTER_LON) }
                     // Where the add-place screen was opened from the map.
                     var addPlace by remember { mutableStateOf<Pair<Double, Double>?>(null) }
+                    // Where the add-event screen was opened from the map.
+                    var addEvent by remember { mutableStateOf<Pair<Double, Double>?>(null) }
                     // The place a boost or comment payment screen is for.
                     var paymentPlace by remember { mutableStateOf<Pair<Long, String>?>(null) }
                     // The area a chip (or an area search result) opened, and the
@@ -330,6 +337,11 @@ private fun runApp() = application {
                                 addPlace = lat to lon
                                 route = if (settings.authorized) Route.AddPlace else Route.Account
                             },
+                            onAddEvent = { lat, lon ->
+                                addEvent = lat to lon
+                                route = if (settings.authorized) Route.AddEvent else Route.Account
+                            },
+                            addLocationLabels = ADD_LOCATION_LABELS,
                             onOpenFeed = { route = Route.Feed },
                             onOpenInfra = if (isAdmin) {
                                 { route = Route.Infra }
@@ -453,6 +465,27 @@ private fun runApp() = application {
                                     address = draft.address.takeIf { it.isNotEmpty() },
                                     website = draft.website.takeIf { it.isNotEmpty() },
                                     description = draft.description.takeIf { it.isNotEmpty() },
+                                )
+                            },
+                            onBack = { route = Route.Map },
+                        )
+
+                        Route.AddEvent -> AddEventScreen(
+                            lat = addEvent?.first ?: 0.0,
+                            lon = addEvent?.second ?: 0.0,
+                            styleUrl = HOSTED_STYLE_URL,
+                            styleJson = styleJson,
+                            labels = ADD_EVENT_LABELS,
+                            iconFont = iconFont,
+                            palette = markerPalette(settings),
+                            submit = { draft ->
+                                api.submitEvent(
+                                    lat = draft.lat,
+                                    lon = draft.lon,
+                                    name = draft.name,
+                                    website = draft.website,
+                                    startsAt = draft.startsAt,
+                                    endsAt = draft.endsAt,
                                 )
                             },
                             onBack = { route = Route.Map },
@@ -803,7 +836,7 @@ private fun AreaPlaceIssue.osmEditUrl(): String =
 private const val JOIN_US_URL = "https://btcmap.org/join-us"
 
 /** The desktop app's full-window pages. */
-private enum class Route { Map, Area, Event, Feed, Settings, Colors, DbStats, Account, Report, AddPlace, AddComment, Boost, Infra }
+private enum class Route { Map, Area, Event, Feed, Settings, Colors, DbStats, Account, Report, AddPlace, AddEvent, AddComment, Boost, Infra }
 
 private const val SCREENSHOT_ARG = "--screenshot="
 
@@ -907,6 +940,14 @@ private fun renderScreen(spec: String) {
                         submitted = false,
                         labels = ADD_PLACE_LABELS,
                         onSubmit = { _, _, _, _, _ -> },
+                        onBack = {},
+                    )
+
+                    "addevent" -> AddEventForm(
+                        busy = false,
+                        submitted = false,
+                        labels = ADD_EVENT_LABELS,
+                        onSubmit = { _, _, _, _ -> },
                         onBack = {},
                     )
 
@@ -1368,6 +1409,31 @@ private val ADD_PLACE_LABELS = AddPlaceLabels(
     submit = "Submit place",
     submitted = "Place submitted for review.",
     backToMap = "Back to the map",
+)
+
+private val ADD_EVENT_LABELS = AddEventLabels(
+    title = "Add an event",
+    back = "Navigate up",
+    name = "Name",
+    namePlaceholder = "Phuket Bitcoin Meetup",
+    website = "Website",
+    websitePlaceholder = "example.com",
+    startsAt = "Starts at",
+    endsAt = "Ends (optional)",
+    selectDateTime = "Select date and time",
+    clearEnd = "Remove end time",
+    dragMap = "Drag the map to set the exact location",
+    required = "Required",
+    submit = "Submit event",
+    submitted = "Event submitted.",
+    backToMap = "Back to the map",
+    ok = "OK",
+    cancel = "Cancel",
+)
+
+private val ADD_LOCATION_LABELS = AddLocationLabels(
+    addPlace = "Add a place",
+    addEvent = "Add an event",
 )
 
 private val PLACE_SHEET_STRINGS = org.btcmap.ui.PlaceSheetStrings(

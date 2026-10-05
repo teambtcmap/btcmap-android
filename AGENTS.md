@@ -203,9 +203,9 @@ Shares `:shared` and `:ui`; it opens the shared database under `$BTCMAP_HOME` or
 ```
 
 - `screenshot` renders one screen headlessly to a PNG; today's screens are
-  `settings`, `account`, `report`, `addplace` and `payment` (the map needs a real
-  window and GPU, so it is not one of them). The third spec field is optional
-  (`dark`/`light`).
+  `settings`, `account`, `report`, `addplace`, `addevent` and `payment` (the map
+  needs a real window and GPU, so it is not one of them). The third spec field is
+  optional (`dark`/`light`).
 - When asked to run or restart the window, **never run `:desktopApp:run` in the
   foreground and never `sleep`/poll waiting for it to start**. `run` blocks for
   the life of the window, so launch it detached with its output in a named log,

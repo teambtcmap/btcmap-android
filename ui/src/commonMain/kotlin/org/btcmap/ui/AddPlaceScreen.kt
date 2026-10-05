@@ -1,13 +1,11 @@
 package org.btcmap.ui
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.relocation.BringIntoViewRequester
@@ -40,27 +38,18 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.launch
-import org.btcmap.ui.map.MarkerBitmapFactory
+import org.btcmap.ui.map.LocationPickerMap
 import org.btcmap.ui.map.MarkerPalette
-import org.maplibre.compose.camera.CameraPosition
-import org.maplibre.compose.map.MapEvent
-import org.maplibre.compose.map.MaplibreMap
-import org.maplibre.compose.map.rememberMapState
-import org.maplibre.compose.style.BaseStyle
-import org.maplibre.spatialk.geojson.Position
 
 /** Test tags so a test can drive the add-place form. */
 const val ADD_PLACE_NAME_TAG = "add-place-name"
@@ -102,8 +91,6 @@ data class AddPlaceLabels(
     val backToMap: String,
 )
 
-private const val ADD_PLACE_ZOOM = 16.0
-
 /**
  * The whole add-place screen: a Material 3 top app bar, a positioning map with
  * its drag hint, and the fields a new place is submitted with. The location
@@ -130,7 +117,7 @@ fun AddPlaceScreen(
     submit: suspend (AddPlaceDraft) -> Unit,
     onBack: () -> Unit,
     map: @Composable ((Double, Double) -> Unit) -> Unit = { onCenterChanged ->
-        AddPlaceMap(
+        LocationPickerMap(
             lat = lat,
             lon = lon,
             styleUrl = styleUrl,
@@ -440,61 +427,3 @@ private fun AddPlaceSubmitted(
  */
 private fun requiredLabel(label: String): String = "$label *"
 
-/** The add-place map: pan and zoom to move the centre the pin marks. */
-@Composable
-private fun AddPlaceMap(
-    lat: Double,
-    lon: Double,
-    styleUrl: String,
-    styleJson: String?,
-    palette: MarkerPalette,
-    onCenterChanged: (Double, Double) -> Unit,
-) {
-    val state = rememberMapState(
-        baseStyle = if (styleJson != null) BaseStyle.Json(styleJson) else BaseStyle.Uri(styleUrl),
-        initialCameraPosition = CameraPosition(target = Position(lon, lat), zoom = ADD_PLACE_ZOOM),
-    ) { }
-
-    LaunchedEffect(state, onCenterChanged) {
-        state.events.filterIsInstance<MapEvent.CameraMoveEnded>().collect {
-            state.cameraPosition?.target?.let { onCenterChanged(it.latitude, it.longitude) }
-        }
-    }
-
-    // The positioning pin is the standard merchant pin the map draws, built with
-    // the icon font AppTheme provides and the user's marker colours.
-    val textMeasurer = rememberTextMeasurer()
-    val density = LocalDensity.current
-    val iconFont = LocalIconFont.current
-    val factory = remember(textMeasurer, iconFont, density, palette) {
-        MarkerBitmapFactory(
-            textMeasurer = textMeasurer,
-            iconFont = iconFont,
-            density = density,
-            palette = palette,
-        )
-    }
-    val pin = remember(factory) { factory.merchantPin() }
-    // The pin's tip, not its centre, marks the position, so the bitmap is lifted
-    // by half its height to sit on the map centre.
-    val pinHeight = with(density) { pin.height.toDp() }
-
-    Box(modifier = Modifier.fillMaxSize()) {
-        // The positioning map is a temporary overlay, not a place map, so the
-        // MapLibre logo and the expanding attribution pill are dropped. Its
-        // `overlay = {}` is what removes them; `MapUiOptions` does not control
-        // the overlay.
-        MaplibreMap(
-            modifier = Modifier.fillMaxSize(),
-            state = state,
-            overlay = {},
-        )
-        Image(
-            bitmap = pin,
-            contentDescription = null,
-            modifier = Modifier
-                .align(Alignment.Center)
-                .offset(y = -(pinHeight / 2)),
-        )
-    }
-}

@@ -22,6 +22,7 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.btcmap.db.table.place.Marker
+import org.btcmap.map.EVENT_ICON
 import org.btcmap.map.MAX_COMMENT_BADGE
 import org.btcmap.map.isBoosted
 import org.btcmap.map.isOutdated
@@ -81,6 +82,18 @@ class MarkerBitmapFactory(
      */
     fun merchantPin(): ImageBitmap = render(
         character = FALLBACK_ICON,
+        outdated = false,
+        boosted = false,
+        comments = null,
+    )
+
+    /**
+     * The stock event pin: the marker-coloured teardrop with the event glyph,
+     * i.e. the marker the map draws for an event. The add-event screen previews
+     * it as its positioning pin.
+     */
+    fun eventPin(): ImageBitmap = render(
+        character = EVENT_ICON,
         outdated = false,
         boosted = false,
         comments = null,
