@@ -13,12 +13,13 @@ import org.btcmap.settings.mapStyle
 import org.btcmap.settings.prefs
 import org.btcmap.settings.uri
 import org.btcmap.ui.AddPlaceLabels
+import org.btcmap.ui.markerPalette
 
 /**
- * The add-place screen: a toolbar over the shared
- * [org.btcmap.ui.AddPlaceScreen], which owns the positioning map, the form, the
- * validation and the submit. This fragment only supplies the labels, the target
- * position and the submit call.
+ * The add-place screen: the shared [org.btcmap.ui.AddPlaceScreen] and nothing
+ * else. The screen owns its top bar, the positioning map, the form, the
+ * validation and the submit; this fragment only supplies the labels, the target
+ * position, the icon typeface, the marker colours and the submit call.
  */
 class AddPlaceFragment : Fragment() {
 
@@ -49,20 +50,26 @@ class AddPlaceFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        binding.topAppBar.setNavigationOnClickListener {
-            parentFragmentManager.popBackStack()
-        }
-
         binding.addPlaceContent.apply {
             lat = args.lat
             lon = args.lon
             styleUrl = prefs.mapStyle.uri(requireContext())
+            iconTypeface = org.btcmap.util.iconTypeface
+            palette = markerPalette(prefs)
             labels = AddPlaceLabels(
+                title = getString(R.string.add_place_title),
+                back = getString(R.string.navigate_up),
                 name = getString(R.string.name),
+                namePlaceholder = getString(R.string.name_placeholder),
                 category = getString(R.string.category),
+                categoryPlaceholder = getString(R.string.category_placeholder),
                 address = getString(R.string.address),
+                addressPlaceholder = getString(R.string.address_placeholder),
                 website = getString(R.string.website_optional),
+                websitePlaceholder = getString(R.string.website_placeholder),
                 description = getString(R.string.description_optional),
+                descriptionPlaceholder = getString(R.string.description_placeholder),
+                dragMap = getString(R.string.add_location_drag_to_adjust),
                 required = getString(R.string.field_required),
                 submit = getString(R.string.submit_place),
                 submitted = getString(R.string.place_submitted),

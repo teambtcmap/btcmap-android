@@ -33,6 +33,7 @@
     <!-- Joins the two strings above in the centered empty/error placeholder. -->
     <string name="failed_to_load_tap_to_retry">%1$s\n\n%2$s</string>
     <string name="close">Close</string>
+    <string name="navigate_up">Navigate up</string>
     <string name="comments">Comments</string>
     <string name="no_comments_yet">No comments yet</string>
     <string name="add">Add</string>
@@ -276,6 +277,7 @@
     <string name="description_optional">Extra notes (optional)</string>
     <string name="description_placeholder">Accepts Lightning payments via Blink wallet, ATM in the back room</string>
     <string name="submit_place">Submit place</string>
+    <string name="add_place_title">Add a place</string>
     <string name="place_submitted">Place submitted for review</string>
     <string name="back_to_map">Back to the map</string>
     <string name="verify_or_report_description">Let editors know the current state of this place. Your report will be reviewed by the BTC Map community.</string>

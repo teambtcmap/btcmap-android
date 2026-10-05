@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+- Rebuild the add-place screen on the shared Compose UI so Android and the desktop app render the same screen: a Material 3 top app bar, the map's merchant pin as the positioning pin and a confirmation state
+- Fix the add-place screen showing the literal `location_on` text instead of the pin, the MapLibre logo and attribution pill, and a blank top bar
+- Restore the add-place form's example hints, mark the required fields, chain the keyboard's Next key, show a spinner while submitting, scroll to the first invalid field and surface submit errors in a snackbar
+- Float a hint over the add-place map so it is clear the map can be dragged to set the exact location
 - Add an admin-only infrastructure dashboard, opened from a button on the map, showing live analytics (unique clients, places, imports, request logs, API calls, Lightning node, OSM syncs and wallets) with tap-to-open detail dialogs and a refresh action
 - Let the account sign-in and sign-up forms be filled by password managers, and add a password visibility toggle
 - Cap and centre the desktop account form's width, show a busy indicator while signing in, restyle its error message and drop the redundant sign-in hint

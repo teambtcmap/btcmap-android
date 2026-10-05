@@ -1,5 +1,6 @@
 package org.btcmap.ui
 
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
@@ -10,6 +11,7 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.runComposeUiTest
+import org.btcmap.ui.map.MarkerPalette
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -22,15 +24,32 @@ import kotlin.test.assertTrue
 class AddPlaceScreenTest {
 
     private val labels = AddPlaceLabels(
+        title = "Add a place",
+        back = "Navigate up",
         name = "Name",
+        namePlaceholder = "Satoshi Cafe",
         category = "Category",
+        categoryPlaceholder = "cafe",
         address = "Address",
+        addressPlaceholder = "1 HODL Lane, Block 21",
         website = "Website (optional)",
+        websitePlaceholder = "example.com",
         description = "Description (optional)",
+        descriptionPlaceholder = "Accepts Lightning payments via Blink wallet, ATM in the back room",
+        dragMap = "Drag the map to set the exact location",
         required = "Required",
         submit = "Submit place",
         submitted = "Place submitted for review.",
         backToMap = "Back to the map",
+    )
+
+    private val palette = MarkerPalette(
+        markerBackground = Color(0xFF00BCD4),
+        markerIcon = Color.White,
+        boostedMarkerBackground = Color(0xFF00BCD4),
+        boostedMarkerIcon = Color.White,
+        badgeBackground = Color(0xFFE53935),
+        badgeText = Color.White,
     )
 
     @OptIn(ExperimentalTestApi::class)
@@ -39,18 +58,18 @@ class AddPlaceScreenTest {
         val drafts = mutableListOf<AddPlaceDraft>()
         runComposeUiTest {
             setContent {
-                AppTheme {
-                    AddPlaceScreen(
-                        lat = 1.0,
-                        lon = 2.0,
-                        styleUrl = "",
-                        styleJson = null,
-                        labels = labels,
-                        submit = { drafts += it },
-                        onBack = {},
-                        map = {},
-                    )
-                }
+                AddPlaceScreen(
+                    lat = 1.0,
+                    lon = 2.0,
+                    styleUrl = "",
+                    styleJson = null,
+                    labels = labels,
+                    iconFont = null,
+                    palette = palette,
+                    submit = { drafts += it },
+                    onBack = {},
+                    map = {},
+                )
             }
             onNodeWithTag(ADD_PLACE_SUBMIT_TAG).performScrollTo().performClick()
             onAllNodesWithText("Required").assertCountEquals(3)
@@ -64,18 +83,18 @@ class AddPlaceScreenTest {
         val drafts = mutableListOf<AddPlaceDraft>()
         runComposeUiTest {
             setContent {
-                AppTheme {
-                    AddPlaceScreen(
-                        lat = 1.5,
-                        lon = 2.5,
-                        styleUrl = "",
-                        styleJson = null,
-                        labels = labels,
-                        submit = { drafts += it },
-                        onBack = {},
-                        map = {},
-                    )
-                }
+                AddPlaceScreen(
+                    lat = 1.5,
+                    lon = 2.5,
+                    styleUrl = "",
+                    styleJson = null,
+                    labels = labels,
+                    iconFont = null,
+                    palette = palette,
+                    submit = { drafts += it },
+                    onBack = {},
+                    map = {},
+                )
             }
             onNodeWithTag(ADD_PLACE_NAME_TAG).performTextInput("Cafe")
             onNodeWithTag(ADD_PLACE_CATEGORY_TAG).performTextInput("coffee")

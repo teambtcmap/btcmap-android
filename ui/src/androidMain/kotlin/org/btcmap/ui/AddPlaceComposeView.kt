@@ -1,6 +1,7 @@
 package org.btcmap.ui
 
 import android.content.Context
+import android.graphics.Typeface
 import android.util.AttributeSet
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -8,12 +9,14 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.AbstractComposeView
+import androidx.compose.ui.text.font.FontFamily
+import org.btcmap.ui.map.MarkerPalette
 import org.btcmap.ui.map.bundledStyleJsonFor
 
 /**
  * Hosts [AddPlaceScreen] inside the Android Views hierarchy. The app sets the
- * position, the style, the labels and the submit callback; this view holds no
- * state of its own.
+ * position, the style, the labels, the icon typeface, the marker colours and the
+ * submit callback; this view holds no state of its own.
  */
 class AddPlaceComposeView @JvmOverloads constructor(
     context: Context,
@@ -28,6 +31,12 @@ class AddPlaceComposeView @JvmOverloads constructor(
 
     var labels: AddPlaceLabels? by mutableStateOf(null)
 
+    /** The Material Symbols typeface the screen's pin and back arrow draw with. */
+    var iconTypeface: Typeface? by mutableStateOf(null)
+
+    /** The user's marker colours, so the pin matches the map's merchant markers. */
+    var palette: MarkerPalette? by mutableStateOf(null)
+
     var submit: suspend (AddPlaceDraft) -> Unit = {}
 
     var onBack: () -> Unit = {}
@@ -35,20 +44,22 @@ class AddPlaceComposeView @JvmOverloads constructor(
     @Composable
     override fun Content() {
         val labels = labels ?: return
+        val palette = palette ?: return
         // The screen needs a style before it can create the map.
         if (styleUrl.isEmpty()) return
         val styleJson = remember(styleUrl) { bundledStyleJsonFor(context, styleUrl) }
+        val iconFont = remember(iconTypeface) { iconTypeface?.let { FontFamily(it) } }
 
-        AppTheme {
-            AddPlaceScreen(
-                lat = lat,
-                lon = lon,
-                styleUrl = styleUrl,
-                styleJson = styleJson,
-                labels = labels,
-                submit = submit,
-                onBack = onBack,
-            )
-        }
+        AddPlaceScreen(
+            lat = lat,
+            lon = lon,
+            styleUrl = styleUrl,
+            styleJson = styleJson,
+            labels = labels,
+            iconFont = iconFont,
+            palette = palette,
+            submit = submit,
+            onBack = onBack,
+        )
     }
 }

@@ -74,6 +74,19 @@ class MarkerBitmapFactory(
     }
 
     /**
+     * The stock merchant pin: the marker-coloured teardrop with the storefront
+     * glyph, i.e. the marker the map draws for a place with no icon of its own.
+     * The add-place screen previews it as its positioning pin, so the pin looks
+     * like the marker the submitted place will get.
+     */
+    fun merchantPin(): ImageBitmap = render(
+        character = FALLBACK_ICON,
+        outdated = false,
+        boosted = false,
+        comments = null,
+    )
+
+    /**
      * The place glyph on its own, for the exchange and event markers, which
      * draw the glyph over the shared pin instead of baking it in.
      */

@@ -294,6 +294,13 @@ private fun runApp() = application {
                     val darkTheme = androidx.compose.foundation.isSystemInDarkTheme()
                     val styleAsset = settings.mapStyle.bundledStyleAsset(darkSystemTheme = darkTheme)
                     val styleJson = remember(styleAsset) { bundledStyleJson(styleAsset) }
+                    // The attribution colour follows the map style's light/dark
+                    // tone, shared by the main map and the add-place map.
+                    val attributionColor = if (darkTheme) {
+                        Color.White
+                    } else {
+                        Color.Black.copy(alpha = 0.8f)
+                    }
 
                     when (route) {
                         Route.Map -> MapScreen(
@@ -317,11 +324,7 @@ private fun runApp() = application {
                             iconFont = iconFont,
                             placeSheetStrings = PLACE_SHEET_STRINGS,
                             attributionText = "© OpenStreetMap contributors",
-                            attributionTextColor = if (darkTheme) {
-                                Color.White
-                            } else {
-                                Color.Black.copy(alpha = 0.8f)
-                            },
+                            attributionTextColor = attributionColor,
                             searchActions = SearchActions(onSettings = { route = Route.Settings }),
                             onAddPlace = { lat, lon ->
                                 addPlace = lat to lon
@@ -430,30 +433,30 @@ private fun runApp() = application {
                             )
                         }
 
-                        Route.AddPlace -> ScreenPage(
-                            title = "Add a place",
+                        // The shared screen draws its own top bar and back
+                        // affordance, so the route is the screen itself, not a
+                        // ScreenPage wrapping it.
+                        Route.AddPlace -> AddPlaceScreen(
+                            lat = addPlace?.first ?: 0.0,
+                            lon = addPlace?.second ?: 0.0,
+                            styleUrl = HOSTED_STYLE_URL,
+                            styleJson = styleJson,
+                            labels = ADD_PLACE_LABELS,
+                            iconFont = iconFont,
+                            palette = markerPalette(settings),
+                            submit = { draft ->
+                                api.submitPlace(
+                                    lat = draft.lat,
+                                    lon = draft.lon,
+                                    category = draft.category,
+                                    name = draft.name,
+                                    address = draft.address.takeIf { it.isNotEmpty() },
+                                    website = draft.website.takeIf { it.isNotEmpty() },
+                                    description = draft.description.takeIf { it.isNotEmpty() },
+                                )
+                            },
                             onBack = { route = Route.Map },
-                        ) {
-                            AddPlaceScreen(
-                                lat = addPlace?.first ?: 0.0,
-                                lon = addPlace?.second ?: 0.0,
-                                styleUrl = HOSTED_STYLE_URL,
-                                styleJson = styleJson,
-                                labels = ADD_PLACE_LABELS,
-                                submit = { draft ->
-                                    api.submitPlace(
-                                        lat = draft.lat,
-                                        lon = draft.lon,
-                                        category = draft.category,
-                                        name = draft.name,
-                                        address = draft.address.takeIf { it.isNotEmpty() },
-                                        website = draft.website.takeIf { it.isNotEmpty() },
-                                        description = draft.description.takeIf { it.isNotEmpty() },
-                                    )
-                                },
-                                onBack = { route = Route.Map },
-                            )
-                        }
+                        )
 
                         Route.AddComment -> ScreenPage(
                             title = paymentPlace?.second?.ifBlank { "Add comment" } ?: "Add comment",
@@ -678,7 +681,7 @@ internal fun ScreenPage(
                 .padding(8.dp),
         ) {
             IconButton(onClick = onBack) {
-                MaterialSymbol(glyph = "arrow_back", contentDescription = null)
+                MaterialSymbol(glyph = "arrow_back", contentDescription = "Back")
             }
             Text(
                 text = title,
@@ -732,7 +735,7 @@ private fun DesktopAreaScreen(
                 .padding(8.dp),
         ) {
             IconButton(onClick = onBack) {
-                MaterialSymbol(glyph = "arrow_back", contentDescription = null)
+                MaterialSymbol(glyph = "arrow_back", contentDescription = "Back")
             }
             Text(
                 text = area?.getLocalizedName() ?: "Area",
@@ -901,7 +904,6 @@ private fun renderScreen(spec: String) {
 
                     "addplace" -> AddPlaceForm(
                         busy = false,
-                        error = null,
                         submitted = false,
                         labels = ADD_PLACE_LABELS,
                         onSubmit = { _, _, _, _, _ -> },
@@ -1349,11 +1351,19 @@ private val REPORT_LABELS = ReportPlaceLabels(
 )
 
 private val ADD_PLACE_LABELS = AddPlaceLabels(
+    title = "Add a place",
+    back = "Navigate up",
     name = "Name",
+    namePlaceholder = "Satoshi Cafe",
     category = "Category",
+    categoryPlaceholder = "cafe",
     address = "Address",
+    addressPlaceholder = "1 HODL Lane, Block 21",
     website = "Website (optional)",
+    websitePlaceholder = "example.com",
     description = "Description (optional)",
+    descriptionPlaceholder = "Accepts Lightning payments via Blink wallet, ATM in the back room",
+    dragMap = "Drag the map to set the exact location",
     required = "Required",
     submit = "Submit place",
     submitted = "Place submitted for review.",
