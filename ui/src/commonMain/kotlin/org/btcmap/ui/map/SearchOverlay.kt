@@ -11,13 +11,16 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
@@ -49,6 +52,7 @@ import org.btcmap.ui.MaterialSymbol
  * `map_fragment.xml`. The results are the local matches from
  * [rememberSearchResults].
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SearchOverlay(
     query: String,
@@ -72,7 +76,10 @@ fun SearchOverlay(
     val isFocused by interactionSource.collectIsFocusedAsState()
     val focusManager = LocalFocusManager.current
 
-    Column(modifier = modifier) {
+    // On a large screen the place sheet's ModalBottomSheet keeps to this width
+    // and centres itself, so the search field and its results do the same; the
+    // host aligns this column to the top centre.
+    Column(modifier = modifier.widthIn(max = BottomSheetDefaults.SheetMaxWidth)) {
         TextField(
             value = query,
             onValueChange = onQueryChange,

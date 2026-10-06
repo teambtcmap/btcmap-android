@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+- Cap the map search field and its results at the place sheet's width and centre them, so they no longer stretch across a large screen
+- Follow OS dark-mode changes in the running desktop app on Linux instead of keeping the launch-time theme until a restart
 - Apply a map style change immediately instead of only after a restart: the map, its offline packs, the attribution line and the system-bar icons now all follow the newly picked style
 - Fix the basemap rendering blank over regions whose labels need CJK or Hangul glyphs (for example Beijing or Seoul): the unbundled glyph ranges are fetched online, falling back to an empty range offline so the tiles still draw
 - Show cities in the map's area chips, below countries and communities, and give cities a city-buildings icon in both the chips and the search results

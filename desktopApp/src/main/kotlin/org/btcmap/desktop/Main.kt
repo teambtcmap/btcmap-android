@@ -1,6 +1,9 @@
 package org.btcmap.desktop
 
 import kotlinx.coroutines.runBlocking
+import androidx.compose.ui.ComposeUiFlags
+import androidx.compose.ui.ExperimentalComposeUiApi
+import androidx.compose.ui.pollSystemTheme
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.platform.Font
@@ -180,7 +183,16 @@ fun main(args: Array<String>) {
     runApp()
 }
 
+@OptIn(ExperimentalComposeUiApi::class)
 private fun runApp() = application {
+    // Compose Desktop only polls the OS theme for changes on Windows and macOS;
+    // on Linux the poll is off by default, so the window would keep its
+    // launch-time theme until restarted. Turn it on here so all three desktop
+    // platforms follow a runtime switch; the shared screens read
+    // isSystemInDarkTheme(), which the poll updates. It is a no-op where the
+    // poll is already on (Windows and macOS).
+    ComposeUiFlags.pollSystemTheme = true
+
     val home = DesktopHome()
     val db = home.database()
     val settings = runBlocking { home.settings(db).apply { preload() } }
