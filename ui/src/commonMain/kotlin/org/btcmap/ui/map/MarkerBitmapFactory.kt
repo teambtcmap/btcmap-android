@@ -41,8 +41,8 @@ internal fun StyleImages.setBitmap(name: String, image: ImageBitmap) {
 /**
  * Builds the marker bitmaps in common Compose graphics, ported from the Views
  * builder that did the same with the Android Canvas. The pin outline is the
- * same vector as `R.drawable.map_marker`; the glyph and the comment badge are
- * laid out at the same dp sizes.
+ * `PIN_PATH_DATA` path below; the glyph and the comment badge are laid out at
+ * the same dp sizes.
  */
 class MarkerBitmapFactory(
     private val textMeasurer: TextMeasurer,
@@ -63,8 +63,9 @@ class MarkerBitmapFactory(
     }
 
     /**
-     * The plain [R.drawable.map_marker] pin in [backgroundColor]. Exchange and
-     * event markers draw it on its own, with their glyph on a separate layer.
+     * The plain pin (the `PIN_PATH_DATA` outline) in [backgroundColor].
+     * Exchange and event markers draw it on its own, with their glyph on a
+     * separate layer.
      */
     fun pin(backgroundColor: Color): ImageBitmap {
         val pinPx = with(density) { PIN_SIZE_DP.dp.toPx() }
@@ -251,7 +252,7 @@ class MarkerBitmapFactory(
         /** The glyph each place icon name resolved to, so the measurement runs once. */
         val resolvedGlyphs = mutableMapOf<String, String>()
 
-        /** The same outline as `R.drawable.map_marker` (viewport 24x24). */
+        /** The pin outline (viewport 24x24). */
         const val PIN_PATH_DATA =
             "m12,0.2589c4.9142,0 9.3603,3.7675 9.3603,9.5943C21.3603,13.7377 18.2363,18.336 12,23.6596 " +
                 "5.7637,18.336 2.6397,13.7377 2.6397,9.8532 2.6397,4.0264 7.0858,0.2589 12,0.2589Z"
