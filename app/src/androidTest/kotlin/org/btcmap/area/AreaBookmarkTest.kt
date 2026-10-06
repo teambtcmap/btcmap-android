@@ -1,9 +1,10 @@
 package org.btcmap.area
 
 import kotlinx.coroutines.runBlocking
-import android.view.View
-import androidx.appcompat.widget.Toolbar
-import androidx.core.view.isVisible
+import androidx.compose.ui.test.junit4.createEmptyComposeRule
+import androidx.compose.ui.test.onAllNodesWithTag
+import androidx.compose.ui.test.onNodeWithContentDescription
+import androidx.compose.ui.test.performClick
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.matcher.RootMatchers.isDialog
@@ -17,16 +18,20 @@ import org.btcmap.R
 import org.btcmap.db.table.user.SavedItem
 import org.btcmap.db.table.user.User
 import org.btcmap.settings.authToken
+import org.btcmap.ui.AREA_DESCRIPTION_TAG
 import org.btcmap.util.assertNoUncaughtException
 import org.btcmap.util.waitUntil
-import org.btcmap.util.waitUntilOnMain
 import org.junit.Assert
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import java.util.concurrent.atomic.AtomicBoolean
 
 @RunWith(AndroidJUnit4::class)
 class AreaBookmarkTest : AreaScreenTest() {
+
+    @get:Rule
+    val composeTestRule = createEmptyComposeRule()
 
     @Test
     fun save_whenAuthorized_postsToApiAndPersistsArea() = runBlocking<Unit> {
@@ -49,10 +54,9 @@ class AreaBookmarkTest : AreaScreenTest() {
             }
         }
 
-        withArea { scenario, area ->
-            waitUntilOnMain { !area.requireView().findViewById<View>(R.id.loading).isVisible }
-
-            scenario.onActivity { save(area) }
+        withArea { _, _ ->
+            awaitArea()
+            save()
 
             waitUntil { posted.get() }
             waitUntil { savedAreaIds().contains(1L) }
@@ -80,10 +84,9 @@ class AreaBookmarkTest : AreaScreenTest() {
             }
         }
 
-        withArea { scenario, area ->
-            waitUntilOnMain { !area.requireView().findViewById<View>(R.id.loading).isVisible }
-
-            scenario.onActivity { save(area) }
+        withArea { _, _ ->
+            awaitArea()
+            save()
 
             waitUntil { deleted.get() }
             waitUntil { savedAreaIds().isEmpty() }
@@ -103,17 +106,16 @@ class AreaBookmarkTest : AreaScreenTest() {
             }
         }
 
-        withArea { scenario, area ->
-            waitUntilOnMain { !area.requireView().findViewById<View>(R.id.loading).isVisible }
-
-            scenario.onActivity { save(area) }
+        withArea { _, _ ->
+            awaitArea()
+            save()
 
             waitUntil {
                 try {
                     onView(withText(R.string.account)).inRoot(isDialog())
                         .check(matches(isDisplayed()))
                     true
-                } catch (t: Throwable) {
+                } catch (_: Throwable) {
                     false
                 }
             }
@@ -130,11 +132,8 @@ class AreaBookmarkTest : AreaScreenTest() {
         assertNoUncaughtException(
             "Exception escaped the area screen's coroutine to the uncaught handler",
         ) {
-            withArea { _, area ->
-                waitUntilOnMain {
-                    !area.requireView().findViewById<View>(R.id.loading).isVisible
-                }
-                waitUntilOnMain { area.requireView().findViewById<View>(R.id.content).isVisible }
+            withArea { _, _ ->
+                awaitArea()
             }
         }
     }
@@ -148,12 +147,9 @@ class AreaBookmarkTest : AreaScreenTest() {
         assertNoUncaughtException(
             "Exception escaped the area screen's coroutine to the uncaught handler",
         ) {
-            withArea { scenario, area ->
-                waitUntilOnMain {
-                    !area.requireView().findViewById<View>(R.id.loading).isVisible
-                }
-
-                scenario.onActivity { save(area) }
+            withArea { _, _ ->
+                awaitArea()
+                save()
             }
         }
     }
@@ -182,21 +178,27 @@ class AreaBookmarkTest : AreaScreenTest() {
         assertNoUncaughtException(
             "Exception escaped the area screen's coroutine to the uncaught handler",
         ) {
-            withArea { scenario, area ->
-                waitUntilOnMain {
-                    !area.requireView().findViewById<View>(R.id.loading).isVisible
-                }
-
-                scenario.onActivity { save(area) }
+            withArea { _, _ ->
+                awaitArea()
+                save()
 
                 waitUntil { attempted.get() }
             }
         }
     }
 
-    private fun save(area: AreaFragment) {
-        area.requireView().findViewById<Toolbar>(R.id.toolbar)
-            .menu.performIdentifierAction(R.id.save, 0)
+    /** Waits for the area body to render. */
+    private fun awaitArea() {
+        composeTestRule.waitUntil(5_000) {
+            composeTestRule.onAllNodesWithTag(AREA_DESCRIPTION_TAG)
+                .fetchSemanticsNodes().isNotEmpty()
+        }
+    }
+
+    private fun save() {
+        composeTestRule.onNodeWithContentDescription(
+            app.getString(R.string.save),
+        ).performClick()
     }
 
     private fun savedAreaIds(): List<Long> {

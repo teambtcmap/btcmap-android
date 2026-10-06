@@ -1,9 +1,8 @@
 package org.btcmap.feed
 
 import kotlinx.coroutines.runBlocking
-import android.os.Bundle
-import androidx.appcompat.widget.Toolbar
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
+import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -19,12 +18,11 @@ import org.btcmap.Activity
 import org.btcmap.App
 import org.btcmap.R
 import org.btcmap.db.table.place.Place
-import org.btcmap.place.PlaceFragment
-import org.btcmap.ui.PlaceComposeView
+import org.btcmap.nav.AppRootFragment
+import org.btcmap.ui.AppRoute
+import org.btcmap.ui.PLACE_MENU_TAG
 import org.btcmap.util.AppTestCase
 import org.btcmap.util.waitUntil
-import org.btcmap.util.waitUntilOnMain
-import org.junit.Assert
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -39,7 +37,7 @@ class ActivityFeedPlaceNavigationTest : AppTestCase() {
     val composeTestRule = createEmptyComposeRule()
 
     @Test
-    fun tappingRow_opensThePlaceWithItsPreviewMap() = runBlocking<Unit> {
+    fun tappingRow_opensThePlaceScreen() = runBlocking<Unit> {
         apiRule.server.dispatcher = object : Dispatcher() {
             override fun dispatch(request: RecordedRequest): MockResponse {
                 return if (request.url.encodedPath == "/v4/activity") {
@@ -57,30 +55,14 @@ class ActivityFeedPlaceNavigationTest : AppTestCase() {
         app.mapStyleUriForTesting = OFFLINE_STYLE_URI
         try {
             ActivityScenario.launch(Activity::class.java).use { scenario ->
-                lateinit var activity: Activity
-                lateinit var feed: TestActivityFeedTab
-                scenario.onActivity {
-                    activity = it
-                    feed = TestActivityFeedTab().apply {
-                        arguments = Bundle().apply {
-                            putBoolean(BaseActivityFeedTab.ARG_SHOW_AREA_CHIPS, true)
-                            putStringArrayList(
-                                BaseActivityFeedTab.ARG_INITIAL_AREA_IDS,
-                                arrayListOf("1"),
-                            )
-                            putStringArrayList(
-                                BaseActivityFeedTab.ARG_INITIAL_AREA_NAMES,
-                                arrayListOf("Area"),
-                            )
-                            putStringArrayList(
-                                BaseActivityFeedTab.ARG_INITIAL_AREA_TYPES,
-                                arrayListOf("community"),
-                            )
-                        }
-                    }
+                scenario.onActivity { activity ->
                     activity.supportFragmentManager.commitNow {
                         setReorderingAllowed(true)
-                        replace(R.id.fragmentContainerView, feed, FEED_TAG)
+                        replace(
+                            R.id.fragmentContainerView,
+                            AppRootFragment.create(FEED_ROUTE),
+                            FEED_TAG,
+                        )
                     }
                 }
 
@@ -92,32 +74,12 @@ class ActivityFeedPlaceNavigationTest : AppTestCase() {
 
                 composeTestRule.onNodeWithText("Test Merchant").performClick()
 
-                waitUntilOnMain {
-                    val current = activity.supportFragmentManager
-                        .findFragmentById(R.id.fragmentContainerView)
-                    current is PlaceFragment &&
-                        current.requireView().findViewById<Toolbar>(R.id.toolbar)
-                            .title == "Test Merchant"
+                // The row opens the place screen, which pushes onto the same root.
+                composeTestRule.waitUntil(5_000) {
+                    composeTestRule.onAllNodesWithTag(PLACE_MENU_TAG)
+                        .fetchSemanticsNodes().isNotEmpty()
                 }
-
-                scenario.onActivity {
-                    val place = activity.supportFragmentManager
-                        .findFragmentById(R.id.fragmentContainerView) as PlaceFragment
-
-                    Assert.assertEquals(
-                        "The tapped row's place id must reach the place screen",
-                        1L,
-                        place.requireArguments().getLong(PlaceFragment.ARG_PLACE_ID),
-                    )
-                    Assert.assertEquals(
-                        "A place opened outside the map fills the shared body",
-                        1L,
-                        place.requireView()
-                            .findViewById<PlaceComposeView>(R.id.placeContent)
-                            .place
-                            ?.id,
-                    )
-                }
+                composeTestRule.onNodeWithText("Test Merchant").assertExists()
             }
         } finally {
             app.mapStyleUriForTesting = null
@@ -152,6 +114,11 @@ class ActivityFeedPlaceNavigationTest : AppTestCase() {
     }
 
     private companion object {
+        val FEED_ROUTE = AppRoute.Feed(
+            areaIds = listOf("1"),
+            areaNames = listOf("Area"),
+            areaTypes = listOf("community"),
+        )
         const val FEED_TAG = "feed"
         const val OFFLINE_STYLE_URI = "asset://map-styles/test/style.json"
 

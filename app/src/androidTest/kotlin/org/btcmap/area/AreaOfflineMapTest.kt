@@ -1,34 +1,27 @@
 package org.btcmap.area
 
 import kotlinx.coroutines.runBlocking
-import android.view.View
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
-import androidx.core.view.isVisible
+import androidx.compose.ui.test.performClick
 import androidx.test.core.app.ActivityScenario
-import androidx.test.espresso.Espresso.onView
-import androidx.test.espresso.action.ViewActions.click
-import androidx.test.espresso.assertion.ViewAssertions.doesNotExist
-import androidx.test.espresso.assertion.ViewAssertions.matches
-import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
-import androidx.test.espresso.matcher.ViewMatchers.withId
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.btcmap.Activity
 import org.btcmap.R
 import org.btcmap.offline.OfflineAreaState
 import org.btcmap.settings.MapStyle
 import org.btcmap.settings.mapStyle
+import org.btcmap.ui.AREA_DESCRIPTION_TAG
 import org.btcmap.ui.AREA_OFFLINE_DELETE_TAG
 import org.btcmap.ui.AREA_OFFLINE_DOWNLOAD_TAG
 import org.btcmap.ui.AREA_OFFLINE_STATUS_TAG
 import org.btcmap.ui.AREA_OFFLINE_TAG
-import org.btcmap.util.waitUntilOnMain
-import org.junit.Assert
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -44,10 +37,10 @@ class AreaOfflineMapTest : AreaScreenTest() {
         apiRule.server.dispatcher = areaDispatcher()
         databaseRule.db.area.insert(listOf(area()))
 
-        withArea { _, area ->
-            waitUntilOnMain { !area.requireView().findViewById<View>(R.id.loading).isVisible }
+        withArea { _, _ ->
+            awaitArea()
 
-            onView(withId(R.id.download)).check(matches(isDisplayed()))
+            composeTestRule.onNodeWithContentDescription(offlineAction()).assertExists()
             composeTestRule.onNodeWithTag(AREA_OFFLINE_TAG).assertDoesNotExist()
         }
     }
@@ -59,10 +52,10 @@ class AreaOfflineMapTest : AreaScreenTest() {
             listOf(area(bboxWest = null, bboxSouth = null, bboxEast = null, bboxNorth = null)),
         )
 
-        withArea { _, area ->
-            waitUntilOnMain { !area.requireView().findViewById<View>(R.id.loading).isVisible }
+        withArea { _, _ ->
+            awaitArea()
 
-            onView(withId(R.id.download)).check(doesNotExist())
+            composeTestRule.onNodeWithContentDescription(offlineAction()).assertDoesNotExist()
             composeTestRule.onNodeWithTag(AREA_OFFLINE_TAG).assertDoesNotExist()
         }
     }
@@ -72,10 +65,10 @@ class AreaOfflineMapTest : AreaScreenTest() {
         apiRule.server.dispatcher = areaDispatcher()
         databaseRule.db.area.insert(listOf(area()))
 
-        withArea { _, area ->
-            waitUntilOnMain { !area.requireView().findViewById<View>(R.id.loading).isVisible }
+        withArea { _, _ ->
+            awaitArea()
 
-            onView(withId(R.id.download)).perform(click())
+            composeTestRule.onNodeWithContentDescription(offlineAction()).performClick()
 
             composeTestRule.waitUntil(5_000) {
                 composeTestRule
@@ -96,8 +89,8 @@ class AreaOfflineMapTest : AreaScreenTest() {
         apiRule.server.dispatcher = areaDispatcher()
         databaseRule.db.area.insert(listOf(area()))
 
-        withArea { scenario, fragment ->
-            waitUntilOnMain { !fragment.requireView().findViewById<View>(R.id.loading).isVisible }
+        withArea { scenario, _ ->
+            awaitArea()
 
             injectState(scenario, OfflineAreaState.Failed("boom"))
 
@@ -114,8 +107,8 @@ class AreaOfflineMapTest : AreaScreenTest() {
         databaseRule.db.area.insert(listOf(area()))
         preferencesRule.prefs.mapStyle = MapStyle.Dark
 
-        withArea { scenario, fragment ->
-            waitUntilOnMain { !fragment.requireView().findViewById<View>(R.id.loading).isVisible }
+        withArea { scenario, _ ->
+            awaitArea()
 
             injectState(scenario, completeState(styleUrl = LIBERTY_STYLE_URL))
 
@@ -133,8 +126,8 @@ class AreaOfflineMapTest : AreaScreenTest() {
         // light style must still read as the same family rather than a mismatch.
         preferencesRule.prefs.mapStyle = MapStyle.Dark
 
-        withArea { scenario, fragment ->
-            waitUntilOnMain { !fragment.requireView().findViewById<View>(R.id.loading).isVisible }
+        withArea { scenario, _ ->
+            awaitArea()
 
             injectState(scenario, completeState(styleUrl = AUTO_LIGHT_STYLE_URL))
 
@@ -143,6 +136,16 @@ class AreaOfflineMapTest : AreaScreenTest() {
                 .assertCountEquals(0)
         }
     }
+
+    /** Waits for the area body to render before driving its actions. */
+    private fun awaitArea() {
+        composeTestRule.waitUntil(5_000) {
+            composeTestRule.onAllNodesWithTag(AREA_DESCRIPTION_TAG)
+                .fetchSemanticsNodes().isNotEmpty()
+        }
+    }
+
+    private fun offlineAction(): String = app.getString(R.string.offline_map)
 
     private fun hasTag(tag: String): Boolean =
         composeTestRule.onAllNodesWithTag(tag).fetchSemanticsNodes().isNotEmpty()

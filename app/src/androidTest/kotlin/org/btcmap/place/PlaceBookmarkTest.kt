@@ -1,16 +1,14 @@
 package org.btcmap.place
 
 import kotlinx.coroutines.runBlocking
-import androidx.appcompat.widget.Toolbar
+import androidx.compose.ui.test.junit4.createEmptyComposeRule
+import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
 import androidx.fragment.app.commitNow
 import androidx.fragment.app.replace
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
-import androidx.test.espresso.Espresso.onView
-import androidx.test.espresso.assertion.ViewAssertions.matches
-import androidx.test.espresso.matcher.RootMatchers.isDialog
-import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
-import androidx.test.espresso.matcher.ViewMatchers.withText
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import mockwebserver3.Dispatcher
 import mockwebserver3.MockResponse
@@ -21,29 +19,37 @@ import org.btcmap.R
 import org.btcmap.db.table.place.Place
 import org.btcmap.db.table.user.SavedItem
 import org.btcmap.db.table.user.User
+import org.btcmap.nav.AppRootFragment
 import org.btcmap.settings.authToken
+import org.btcmap.ui.ACCOUNT_USERNAME_TAG
+import org.btcmap.ui.AppRoute
+import org.btcmap.ui.PLACE_MENU_TAG
 import org.btcmap.util.AppTestCase
 import org.btcmap.util.waitUntil
 import org.junit.Assert
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import kotlin.time.Instant
 import java.util.concurrent.atomic.AtomicBoolean
 
 /**
- * The saved-place counterpart of [org.btcmap.area.AreaBookmarkTest]: the place
- * screen's bookmark adds, removes and, when signed out, opens the auth dialog
- * instead of calling the API.
+ * The place screen's bookmark adds, removes and, when signed out, opens the auth
+ * dialog instead of calling the API.
  */
 @RunWith(AndroidJUnit4::class)
 class PlaceBookmarkTest : AppTestCase() {
 
     private val app = ApplicationProvider.getApplicationContext<App>()
 
+    @get:Rule
+    val composeTestRule = createEmptyComposeRule()
+
     @Test
     fun save_whenAuthorized_postsToApiAndPersistsPlace() = runBlocking<Unit> {
         preferencesRule.prefs.setAuthTokenForTesting("test-token")
         databaseRule.db.user.insert(user(savedPlaceIds = emptyList()))
+        databaseRule.db.place.insert(listOf(placeRow()))
         val posted = AtomicBoolean(false)
         apiRule.server.dispatcher = object : Dispatcher() {
             override fun dispatch(request: RecordedRequest): MockResponse {
@@ -59,8 +65,8 @@ class PlaceBookmarkTest : AppTestCase() {
             }
         }
 
-        withPlace { scenario, place ->
-            scenario.onActivity { save(place) }
+        withPlace {
+            save()
 
             waitUntil { posted.get() }
             waitUntil { savedPlaceIds().contains(1L) }
@@ -71,6 +77,7 @@ class PlaceBookmarkTest : AppTestCase() {
     fun save_whenAlreadySaved_deletesFromApiAndPersistsChange() = runBlocking<Unit> {
         preferencesRule.prefs.setAuthTokenForTesting("test-token")
         databaseRule.db.user.insert(user(savedPlaceIds = listOf(1)))
+        databaseRule.db.place.insert(listOf(placeRow()))
         val deleted = AtomicBoolean(false)
         apiRule.server.dispatcher = object : Dispatcher() {
             override fun dispatch(request: RecordedRequest): MockResponse {
@@ -86,8 +93,8 @@ class PlaceBookmarkTest : AppTestCase() {
             }
         }
 
-        withPlace { scenario, place ->
-            scenario.onActivity { save(place) }
+        withPlace {
+            save()
 
             waitUntil { deleted.get() }
             waitUntil { savedPlaceIds().isEmpty() }
@@ -96,6 +103,7 @@ class PlaceBookmarkTest : AppTestCase() {
 
     @Test
     fun save_whenUnauthorized_showsAuthDialogAndDoesNotCallApi() = runBlocking<Unit> {
+        databaseRule.db.place.insert(listOf(placeRow()))
         val saving = AtomicBoolean(false)
         apiRule.server.dispatcher = object : Dispatcher() {
             override fun dispatch(request: RecordedRequest): MockResponse {
@@ -106,15 +114,14 @@ class PlaceBookmarkTest : AppTestCase() {
             }
         }
 
-        withPlace { scenario, place ->
-            scenario.onActivity { save(place) }
+        withPlace {
+            save()
 
-            waitUntil {
+            composeTestRule.waitUntil(5_000) {
                 try {
-                    onView(withText(R.string.account)).inRoot(isDialog())
-                        .check(matches(isDisplayed()))
+                    composeTestRule.onNodeWithTag(ACCOUNT_USERNAME_TAG).assertExists()
                     true
-                } catch (t: Throwable) {
+                } catch (_: Throwable) {
                     false
                 }
             }
@@ -122,29 +129,42 @@ class PlaceBookmarkTest : AppTestCase() {
         }
     }
 
-    private fun withPlace(block: (ActivityScenario<Activity>, PlaceFragment) -> Unit) {
+    private fun withPlace(block: (ActivityScenario<Activity>) -> Unit) {
         app.mapStyleUriForTesting = OFFLINE_STYLE_URI
         try {
             ActivityScenario.launch(Activity::class.java).use { scenario ->
-                lateinit var fragment: PlaceFragment
                 scenario.onActivity { activity ->
-                    fragment = PlaceFragment()
                     activity.supportFragmentManager.commitNow {
                         setReorderingAllowed(true)
-                        replace(R.id.fragmentContainerView, fragment, PLACE_TAG)
+                        replace(
+                            R.id.fragmentContainerView,
+                            AppRootFragment.create(AppRoute.Place(1L)),
+                            PLACE_TAG,
+                        )
                     }
-                    fragment.setPlace(placeRow())
                 }
-                block(scenario, fragment)
+                awaitPlace()
+                block(scenario)
             }
         } finally {
             app.mapStyleUriForTesting = null
         }
     }
 
-    private fun save(place: PlaceFragment) {
-        place.requireView().findViewById<Toolbar>(R.id.toolbar)
-            .menu.performIdentifierAction(R.id.save, 0)
+    private fun awaitPlace() {
+        composeTestRule.waitUntil(5_000) {
+            try {
+                composeTestRule.onNodeWithTag(PLACE_MENU_TAG).assertExists()
+                true
+            } catch (_: Throwable) {
+                false
+            }
+        }
+    }
+
+    private fun save() {
+        composeTestRule.onNodeWithTag(PLACE_MENU_TAG).performClick()
+        composeTestRule.onNodeWithText(app.getString(R.string.save)).performClick()
     }
 
     private fun savedPlaceIds(): List<Long> {

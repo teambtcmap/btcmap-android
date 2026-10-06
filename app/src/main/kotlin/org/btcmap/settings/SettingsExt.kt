@@ -29,18 +29,6 @@ fun init(app: App) {
  * Where the map was last left. The map screen saves these as the camera comes to
  * rest and reopens there, so the app returns to what the user was looking at.
  */
-var Settings.mapCenterLat: Double
-    get() = getFloat("mapCenterLat", DEFAULT_MAP_CENTER_LAT.toFloat()).toDouble()
-    set(value) = putFloat("mapCenterLat", value.toFloat())
-
-var Settings.mapCenterLon: Double
-    get() = getFloat("mapCenterLon", DEFAULT_MAP_CENTER_LON.toFloat()).toDouble()
-    set(value) = putFloat("mapCenterLon", value.toFloat())
-
-var Settings.mapZoom: Double
-    get() = getFloat("mapZoom", DEFAULT_MAP_ZOOM.toFloat()).toDouble()
-    set(value) = putFloat("mapZoom", value.toFloat())
-
 fun MapStyle.name(context: Context): String {
     return when (this) {
         MapStyle.Auto -> context.getString(R.string.style_auto)
@@ -152,26 +140,11 @@ fun Int.toVerifiedFilterYears(context: Context): String {
     }
 }
 
-enum class ActivityInterval(val days: Int) {
-    Day(1),
-    Week(7),
-    Month(30),
-    HalfYear(180),
-    Year(365);
-
-    fun name(context: Context): String = when (this) {
-        Day -> context.getString(R.string.activity_interval_day)
-        Week -> context.getString(R.string.activity_interval_week)
-        Month -> context.getString(R.string.activity_interval_month)
-        HalfYear -> context.getString(R.string.activity_interval_half_year)
-        Year -> context.getString(R.string.activity_interval_year)
-    }
+/** The Android label for an activity interval. */
+fun ActivityInterval.name(context: Context): String = when (this) {
+    ActivityInterval.Day -> context.getString(R.string.activity_interval_day)
+    ActivityInterval.Week -> context.getString(R.string.activity_interval_week)
+    ActivityInterval.Month -> context.getString(R.string.activity_interval_month)
+    ActivityInterval.HalfYear -> context.getString(R.string.activity_interval_half_year)
+    ActivityInterval.Year -> context.getString(R.string.activity_interval_year)
 }
-
-private const val KEY_ACTIVITY_INTERVAL_DAYS = "activity_interval_days"
-
-var Settings.activityIntervalDays: Int
-    get() = getInt(KEY_ACTIVITY_INTERVAL_DAYS, ActivityInterval.HalfYear.days)
-    set(value) {
-        putInt(KEY_ACTIVITY_INTERVAL_DAYS, value)
-    }

@@ -179,7 +179,7 @@ fun AccountScreen(
  * made (a too-short or mismatched password).
  */
 @Composable
-private fun AccountAuthForm(
+internal fun AccountAuthForm(
     signUp: Boolean,
     username: String,
     password: String,

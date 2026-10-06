@@ -1,24 +1,23 @@
 package org.btcmap.area
 
 import kotlinx.coroutines.runBlocking
-import android.view.View
-import androidx.appcompat.widget.Toolbar
 import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
-import androidx.core.view.isVisible
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.btcmap.Activity
 import org.btcmap.R
 import org.btcmap.db.table.place.Place
-import org.btcmap.event.EventFragment
+import org.btcmap.nav.AppRootFragment
 import org.btcmap.ui.AREA_BOOSTED_CARD_TAG
 import org.btcmap.ui.AREA_BOOSTED_TITLE_TAG
 import org.btcmap.ui.AREA_DESCRIPTION_TAG
 import org.btcmap.ui.AREA_EVENTS_TITLE_TAG
 import org.btcmap.ui.AREA_EVENT_CARD_TAG
+import org.btcmap.ui.AREA_HEADER_TAG
 import org.btcmap.ui.AREA_ISSUES_TITLE_TAG
 import org.btcmap.ui.AREA_ISSUE_CARD_TAG
 import org.btcmap.ui.AREA_READ_MORE_TAG
@@ -41,18 +40,11 @@ class AreaContentTest : AreaScreenTest() {
         apiRule.server.dispatcher = areaDispatcher()
         databaseRule.db.area.insert(listOf(area(description = "Greater Paris")))
 
-        withArea { scenario, area ->
-            waitUntilOnMain { !area.view().findViewById<View>(R.id.loading).isVisible }
-
-            scenario.onActivity {
-                Assert.assertEquals(
-                    "Grand Paris",
-                    area.view().findViewById<Toolbar>(R.id.toolbar).title,
-                )
-                Assert.assertTrue(area.view().findViewById<View>(R.id.content).isVisible)
-            }
-
+        withArea { _, _ ->
             composeTestRule.waitUntil { hasTag(AREA_DESCRIPTION_TAG) }
+
+            composeTestRule.onNodeWithText("Grand Paris").assertExists()
+
             composeTestRule.onNodeWithTag(AREA_DESCRIPTION_TAG)
                 .assertTextContains("Greater Paris")
             composeTestRule.onNodeWithTag(AREA_WEBSITE_TAG)
@@ -66,7 +58,7 @@ class AreaContentTest : AreaScreenTest() {
         databaseRule.db.area.insert(listOf(area(description = "Greater Paris")))
 
         withArea { _, area ->
-            waitUntilOnMain { !area.view().findViewById<View>(R.id.loading).isVisible }
+            composeTestRule.waitUntil { hasTag(AREA_DESCRIPTION_TAG) }
             composeTestRule.waitUntil { hasTag(AREA_DESCRIPTION_TAG) }
 
             composeTestRule.onNodeWithTag(AREA_READ_MORE_TAG).assertDoesNotExist()
@@ -81,7 +73,7 @@ class AreaContentTest : AreaScreenTest() {
         )
 
         withArea { _, area ->
-            waitUntilOnMain { !area.view().findViewById<View>(R.id.loading).isVisible }
+            composeTestRule.waitUntil { hasTag(AREA_DESCRIPTION_TAG) }
             composeTestRule.waitUntil { hasTag(AREA_READ_MORE_TAG) }
 
             composeTestRule.onNodeWithTag(AREA_DESCRIPTION_TAG)
@@ -127,7 +119,7 @@ class AreaContentTest : AreaScreenTest() {
         databaseRule.db.area.insert(listOf(area()))
 
         withArea { _, area ->
-            waitUntilOnMain { !area.view().findViewById<View>(R.id.loading).isVisible }
+            composeTestRule.waitUntil { hasTag(AREA_DESCRIPTION_TAG) }
 
             composeTestRule.onNodeWithTag(AREA_EVENTS_TITLE_TAG).assertDoesNotExist()
         }
@@ -151,7 +143,7 @@ class AreaContentTest : AreaScreenTest() {
 
             waitUntilOnMain {
                 activity.supportFragmentManager
-                    .findFragmentById(R.id.fragmentContainerView) is EventFragment
+                    .findFragmentById(R.id.fragmentContainerView) is AppRootFragment
             }
         }
     }
@@ -223,7 +215,7 @@ class AreaContentTest : AreaScreenTest() {
         databaseRule.db.area.insert(listOf(area()))
 
         withArea { _, area ->
-            waitUntilOnMain { !area.view().findViewById<View>(R.id.loading).isVisible }
+            composeTestRule.waitUntil { hasTag(AREA_DESCRIPTION_TAG) }
 
             composeTestRule.onNodeWithTag(AREA_ISSUES_TITLE_TAG).assertDoesNotExist()
         }
@@ -234,10 +226,10 @@ class AreaContentTest : AreaScreenTest() {
         apiRule.server.dispatcher = areaDispatcher()
         databaseRule.db.area.insert(listOf(area(icon = null)))
 
-        withArea { _, area ->
-            waitUntilOnMain { !area.view().findViewById<View>(R.id.loading).isVisible }
+        withArea { _, _ ->
+            composeTestRule.waitUntil { hasTag(AREA_DESCRIPTION_TAG) }
 
-            Assert.assertFalse(area.view().findViewById<View>(R.id.icon).isVisible)
+            composeTestRule.onNodeWithTag(AREA_HEADER_TAG).assertDoesNotExist()
         }
     }
 
@@ -248,12 +240,10 @@ class AreaContentTest : AreaScreenTest() {
             listOf(area(icon = "https://example.com/icon.png")),
         )
 
-        withArea { _, area ->
-            waitUntilOnMain {
-                !area.view().findViewById<View>(R.id.loading).isVisible
-            }
+        withArea { _, _ ->
+            composeTestRule.waitUntil { hasTag(AREA_DESCRIPTION_TAG) }
 
-            Assert.assertTrue(area.view().findViewById<View>(R.id.icon).isVisible)
+            composeTestRule.onNodeWithTag(AREA_HEADER_TAG).assertExists()
         }
     }
 
@@ -309,7 +299,7 @@ class AreaContentTest : AreaScreenTest() {
         )
 
         withArea { _, area ->
-            waitUntilOnMain { !area.view().findViewById<View>(R.id.loading).isVisible }
+            composeTestRule.waitUntil { hasTag(AREA_DESCRIPTION_TAG) }
 
             composeTestRule.onNodeWithTag(AREA_BOOSTED_TITLE_TAG).assertDoesNotExist()
         }
@@ -329,8 +319,6 @@ class AreaContentTest : AreaScreenTest() {
     private fun boostedCards() = composeTestRule.onAllNodesWithTag(AREA_BOOSTED_CARD_TAG)
 
     private fun boostedCount() = boostedCards().fetchSemanticsNodes().size
-
-    private fun AreaFragment.view(): View = requireView()
 
     private fun place(
         osmId: String,

@@ -1,7 +1,6 @@
 package org.btcmap.area
 
 import kotlinx.coroutines.runBlocking
-import android.os.Bundle
 import androidx.fragment.app.commit
 import androidx.fragment.app.replace
 import androidx.test.core.app.ActivityScenario
@@ -15,6 +14,8 @@ import org.btcmap.App
 import org.btcmap.R
 import org.btcmap.db.table.area.Area
 import org.btcmap.db.table.event.Event
+import org.btcmap.nav.AppRootFragment
+import org.btcmap.ui.AppRoute
 import org.btcmap.util.AppTestCase
 import org.junit.Rule
 import kotlin.time.Instant
@@ -32,16 +33,14 @@ abstract class AreaScreenTest : AppTestCase() {
     protected fun withArea(
         areaId: Long = 1,
         addToBackStack: Boolean = false,
-        block: (ActivityScenario<Activity>, AreaFragment) -> Unit,
+        block: (ActivityScenario<Activity>, AppRootFragment) -> Unit,
     ) {
         app.mapStyleUriForTesting = OFFLINE_STYLE_URI
         try {
             ActivityScenario.launch(Activity::class.java).use { scenario ->
-                lateinit var fragment: AreaFragment
+                lateinit var fragment: AppRootFragment
                 scenario.onActivity { activity ->
-                    fragment = AreaFragment().apply {
-                        arguments = Bundle().apply { putLong(ARG_AREA_ID, areaId) }
-                    }
+                    fragment = AppRootFragment.create(AppRoute.Area(areaId))
                     activity.supportFragmentManager.commit {
                         setReorderingAllowed(true)
                         replace(R.id.fragmentContainerView, fragment, AREA_TAG)

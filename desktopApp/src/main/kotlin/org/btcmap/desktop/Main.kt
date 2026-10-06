@@ -136,6 +136,7 @@ import org.btcmap.ui.ProfileScreen
 import org.btcmap.ui.UploadedImagesLabels
 import org.btcmap.ui.ReportPlaceLabels
 import org.btcmap.ui.ReportPlaceScreen
+import org.btcmap.ui.ScreenPage
 import org.btcmap.ui.SettingsPage
 import org.btcmap.ui.SettingsPageLabels
 import org.btcmap.ui.StatsScreen
@@ -146,6 +147,7 @@ import org.btcmap.ui.EventScreen
 import org.btcmap.ui.EventScreenLabels
 import org.btcmap.ui.areaChipPalette
 import org.btcmap.ui.markerPalette
+import org.btcmap.ui.rememberNavController
 import org.btcmap.api.GetEventsItem
 import org.btcmap.area.AreaIssues
 import org.btcmap.area.AreaPlaceIssue
@@ -231,8 +233,10 @@ private fun runApp() = application {
                     // The map screen owns its own affordances (the search bar's
                     // settings, the chips and the pulse button), so the desktop
                     // keeps no navigation of its own: the settings and the feed
-                    // are full-window pages the map opens.
-                    var route by remember { mutableStateOf(Route.Map) }
+                    // are full-window pages the map opens. The shared
+                    // NavController is the back stack those pages push and pop.
+                    val nav = rememberNavController(Route.Map)
+                    val route = nav.current
                     val scope = rememberCoroutineScope()
                     // The place the sheet is showing, and whether the account has
                     // it saved, which is what the sheet's Save row renders.
@@ -278,18 +282,17 @@ private fun runApp() = application {
                     var addPlace by remember { mutableStateOf<Pair<Double, Double>?>(null) }
                     // Where the add-event screen was opened from, and what it is
                     // pre-filled with: blank from the map, an event to duplicate
-                    // from the profile.
+                    // from the profile. Its back target is the stack entry below
+                    // it, so the map and the profile both return correctly.
                     var addEvent by remember { mutableStateOf<AddEventPrefill?>(null) }
-                    var addEventBackRoute by remember { mutableStateOf(Route.Map) }
                     // The place a boost or comment payment screen is for.
                     var paymentPlace by remember { mutableStateOf<Pair<Long, String>?>(null) }
                     // The area a chip (or an area search result) opened, and the
-                    // event an area row or search result opened.
+                    // event an area row or search result opened. An opened event
+                    // returns to the stack entry below it, so the area that listed
+                    // it and the map both return correctly.
                     var selectedAreaId by remember { mutableStateOf<Long?>(null) }
                     var selectedEvent by remember { mutableStateOf<Event?>(null) }
-                    // Where an opened event returns to: the area that listed it,
-                    // or the map when it came from a search result.
-                    var eventBackRoute by remember { mutableStateOf(Route.Map) }
 
                     // Whether the signed-in account may open the infrastructure
                     // dashboard. Re-derived whenever the map is (re)entered, so a
@@ -352,25 +355,24 @@ private fun runApp() = application {
                             placeSheetStrings = PLACE_SHEET_STRINGS,
                             attributionText = "© OpenStreetMap contributors",
                             attributionTextColor = attributionColor,
-                            searchActions = SearchActions(onSettings = { route = Route.Settings }),
+                            searchActions = SearchActions(onSettings = { nav.push(Route.Settings) }),
                             onAddPlace = { lat, lon ->
                                 addPlace = lat to lon
-                                route = if (settings.authorized) Route.AddPlace else Route.Account
+                                nav.push(if (settings.authorized) Route.AddPlace else Route.Account)
                             },
                             onAddEvent = { lat, lon ->
                                 addEvent = AddEventPrefill(lat = lat, lon = lon)
-                                addEventBackRoute = Route.Map
-                                route = if (settings.authorized) Route.AddEvent else Route.Account
+                                nav.push(if (settings.authorized) Route.AddEvent else Route.Account)
                             },
                             addLocationLabels = ADD_LOCATION_LABELS,
-                            onOpenFeed = { route = Route.Feed },
+                            onOpenFeed = { nav.push(Route.Feed) },
                             onOpenInfra = if (isAdmin) {
-                                { route = Route.Infra }
+                                { nav.push(Route.Infra) }
                             } else {
                                 null
                             },
                             onOpenEventReview = if (canManageEvents) {
-                                { route = Route.EventReview }
+                                { nav.push(Route.EventReview) }
                             } else {
                                 null
                             },
@@ -406,9 +408,9 @@ private fun runApp() = application {
                                             } else {
                                                 null
                                             }
-                                            route = Route.Report
+                                            nav.push(Route.Report)
                                         } else {
-                                            route = Route.Account
+                                            nav.push(Route.Account)
                                         }
                                     }
 
@@ -421,7 +423,7 @@ private fun runApp() = application {
                                                 bookmarked = SavedItems.isPlaceSaved(db, place.id)
                                             }
                                         } else {
-                                            route = Route.Account
+                                            nav.push(Route.Account)
                                         }
                                     }
 
@@ -430,12 +432,12 @@ private fun runApp() = application {
                                     // Lightning payment is the gate.
                                     PlaceAction.Boost -> {
                                         paymentPlace = place.id to place.name.orEmpty()
-                                        route = Route.Boost
+                                        nav.push(Route.Boost)
                                     }
 
                                     PlaceAction.AddComment -> {
                                         paymentPlace = place.id to place.name.orEmpty()
-                                        route = Route.AddComment
+                                        nav.push(Route.AddComment)
                                     }
 
                                     else -> handlePlaceAction(place, action)
@@ -443,12 +445,11 @@ private fun runApp() = application {
                             },
                             onSelectEvent = { event ->
                                 selectedEvent = event
-                                eventBackRoute = Route.Map
-                                route = Route.Event
+                                nav.push(Route.Event)
                             },
                             onSelectArea = { areaId ->
                                 selectedAreaId = areaId
-                                route = Route.Area
+                                nav.push(Route.Area)
                             },
                             onCameraIdle = { lat, lon, _ ->
                                 mapCenterLat = lat
@@ -463,7 +464,7 @@ private fun runApp() = application {
 
                         Route.Report -> ScreenPage(
                             title = reportPlace?.second?.ifBlank { "Report a place" } ?: "Report a place",
-                            onBack = { route = Route.Map },
+                            onBack = { nav.pop() },
                         ) {
                             ReportPlaceScreen(
                                 initialType = reportType,
@@ -472,7 +473,7 @@ private fun runApp() = application {
                                     api.submitReport(placeId = reportPlace?.first ?: 0L, draft = draft)
                                 },
                                 pickPhotos = reportPhotoPicker(window),
-                                onBack = { route = Route.Map },
+                                onBack = { nav.pop() },
                             )
                         }
 
@@ -498,7 +499,7 @@ private fun runApp() = application {
                                     description = draft.description.takeIf { it.isNotEmpty() },
                                 )
                             },
-                            onBack = { route = Route.Map },
+                            onBack = { nav.pop() },
                         )
 
                         Route.AddEvent -> AddEventScreen(
@@ -523,12 +524,12 @@ private fun runApp() = application {
                                     endsAt = draft.endsAt,
                                 )
                             },
-                            onBack = { route = addEventBackRoute },
+                            onBack = { nav.pop() },
                         )
 
                         Route.AddComment -> ScreenPage(
                             title = paymentPlace?.second?.ifBlank { "Add comment" } ?: "Add comment",
-                            onBack = { route = Route.Map },
+                            onBack = { nav.pop() },
                         ) {
                             CommentScreen(
                                 api = api,
@@ -536,13 +537,13 @@ private fun runApp() = application {
                                 labels = COMMENT_LABELS,
                                 onPay = { openUrl("lightning:$it") },
                                 onCopy = { copyToClipboard(it) },
-                                onBack = { route = Route.Map },
+                                onBack = { nav.pop() },
                             )
                         }
 
                         Route.Boost -> ScreenPage(
                             title = paymentPlace?.second?.ifBlank { "Boost merchant" } ?: "Boost merchant",
-                            onBack = { route = Route.Map },
+                            onBack = { nav.pop() },
                         ) {
                             BoostScreen(
                                 api = api,
@@ -550,13 +551,13 @@ private fun runApp() = application {
                                 labels = BOOST_LABELS,
                                 onPay = { openUrl("lightning:$it") },
                                 onCopy = { copyToClipboard(it) },
-                                onBack = { route = Route.Map },
+                                onBack = { nav.pop() },
                             )
                         }
 
                         Route.Infra -> ScreenPage(
                             title = "Infra dashboard",
-                            onBack = { route = Route.Map },
+                            onBack = { nav.pop() },
                             actions = {
                                 if (infraRefreshing) {
                                     CircularProgressIndicator(
@@ -598,7 +599,7 @@ private fun runApp() = application {
                             approve = { api.setEventStatus(it.id, "live") },
                             reject = { api.setEventStatus(it.id, "rejected") },
                             onOpenUrl = { openUrl(it) },
-                            onBack = { route = Route.Map },
+                            onBack = { nav.pop() },
                             title = "Review events",
                             iconFont = iconFont,
                             map = { event, mapModifier ->
@@ -615,29 +616,29 @@ private fun runApp() = application {
 
                         Route.Settings -> ScreenPage(
                             title = "Settings",
-                            onBack = { route = Route.Map },
+                            onBack = { nav.pop() },
                         ) {
                             SettingsPage(
                                 settings = settings,
                                 db = db,
                                 labels = SETTINGS_PAGE_LABELS,
                                 includeImageStats = false,
-                                onOpenAccount = { route = Route.Account },
-                                onOpenColors = { route = Route.Colors },
-                                onOpenDbStats = { route = Route.DbStats },
+                                onOpenAccount = { nav.push(Route.Account) },
+                                onOpenColors = { nav.push(Route.Colors) },
+                                onOpenDbStats = { nav.push(Route.DbStats) },
                             )
                         }
 
                         Route.Colors -> ScreenPage(
                             title = "Customize colors",
-                            onBack = { route = Route.Settings },
+                            onBack = { nav.pop() },
                         ) {
                             ColorsPage(settings = settings, labels = COLORS_PAGE_LABELS)
                         }
 
                         Route.DbStats -> ScreenPage(
                             title = "Database",
-                            onBack = { route = Route.Settings },
+                            onBack = { nav.pop() },
                         ) {
                             DbStatsPage(
                                 db = db,
@@ -664,7 +665,7 @@ private fun runApp() = application {
                                     when {
                                         showUploadedImages -> showUploadedImages = false
                                         showMyEvents -> showMyEvents = false
-                                        else -> route = Route.Settings
+                                        else -> nav.pop()
                                     }
                                 },
                             ) {
@@ -700,8 +701,7 @@ private fun runApp() = application {
                                                     startsAt = event.startsAtLocal,
                                                     endsAt = event.endsAtLocal,
                                                 )
-                                                addEventBackRoute = Route.Account
-                                                route = Route.AddEvent
+                                                nav.push(Route.AddEvent)
                                             },
                                             onLoggedOut = {
                                                 showUploadedImages = false
@@ -719,22 +719,21 @@ private fun runApp() = application {
                         Route.Area -> {
                             val areaId = selectedAreaId
                             if (areaId == null) {
-                                LaunchedEffect(Unit) { route = Route.Map }
+                                LaunchedEffect(Unit) { nav.pop() }
                             } else {
                                 DesktopAreaScreen(
                                     areaId = areaId,
                                     db = db,
                                     api = api,
                                     boostedMarkerColor = markerPalette(settings).boostedMarkerBackground,
-                                    onBack = { route = Route.Map },
+                                    onBack = { nav.pop() },
                                     onOpenPlace = { placeId ->
                                         feedPlaceId = placeId
-                                        route = Route.Map
+                                        nav.reset(Route.Map)
                                     },
                                     onOpenEvent = { event ->
                                         selectedEvent = event
-                                        eventBackRoute = Route.Area
-                                        route = Route.Event
+                                        nav.push(Route.Event)
                                     },
                                 )
                             }
@@ -745,11 +744,11 @@ private fun runApp() = application {
                         Route.Event -> {
                             val event = selectedEvent
                             if (event == null) {
-                                LaunchedEffect(Unit) { route = Route.Map }
+                                LaunchedEffect(Unit) { nav.pop() }
                             } else {
                                 ScreenPage(
                                     title = event.name,
-                                    onBack = { route = eventBackRoute },
+                                    onBack = { nav.pop() },
                                 ) {
                                     EventScreen(
                                         event = event,
@@ -767,7 +766,7 @@ private fun runApp() = application {
 
                         Route.Feed -> ScreenPage(
                             title = "Activity",
-                            onBack = { route = Route.Map },
+                            onBack = { nav.pop() },
                         ) {
                             DesktopFeedScreen(
                                 api = api,
@@ -776,42 +775,13 @@ private fun runApp() = application {
                                 lon = mapCenterLon,
                             ) { placeId ->
                                 feedPlaceId = placeId
-                                route = Route.Map
+                                nav.reset(Route.Map)
                             }
                         }
                     }
                 }
             }
         }
-    }
-}
-
-/** A screen the map opens, with a back affordance of its own. */
-@androidx.compose.runtime.Composable
-internal fun ScreenPage(
-    title: String,
-    onBack: () -> Unit,
-    actions: @androidx.compose.runtime.Composable androidx.compose.foundation.layout.RowScope.() -> Unit = {},
-    content: @androidx.compose.runtime.Composable () -> Unit,
-) {
-    Column(modifier = Modifier.fillMaxSize()) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(8.dp),
-        ) {
-            IconButton(onClick = onBack) {
-                MaterialSymbol(glyph = "arrow_back", contentDescription = "Back")
-            }
-            Text(
-                text = title,
-                style = MaterialTheme.typography.titleLarge,
-                modifier = Modifier.weight(1f),
-            )
-            actions()
-        }
-        content()
     }
 }
 
@@ -871,6 +841,9 @@ private fun DesktopAreaScreen(
                 headerImageUrl = loaded.iconWide ?: loaded.icon,
                 description = loaded.getLocalizedDescription(),
                 websiteText = loaded.websiteUrl.takeIf { it.isNotBlank() }?.let(::websiteDisplayText),
+                onOpenWebsite = loaded.websiteUrl.takeIf { it.isNotBlank() }?.let { url ->
+                    { openUrl(url) }
+                },
                 boostedMerchants = boostedMerchants,
                 events = events,
                 issues = issues,

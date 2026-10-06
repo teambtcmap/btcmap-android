@@ -1,6 +1,5 @@
 package org.btcmap.feed
 
-import android.os.Bundle
 import androidx.fragment.app.commitNow
 import androidx.fragment.app.replace
 import androidx.lifecycle.Lifecycle
@@ -13,6 +12,8 @@ import mockwebserver3.RecordedRequest
 import org.btcmap.Activity
 import org.btcmap.App
 import org.btcmap.R
+import org.btcmap.nav.AppRootFragment
+import org.btcmap.ui.AppRoute
 import org.btcmap.util.AppTestCase
 import org.btcmap.util.assertNoUncaughtException
 import org.btcmap.util.waitUntil
@@ -46,26 +47,13 @@ class ActivityFeedCancellationTest : AppTestCase() {
         try {
             ActivityScenario.launch(Activity::class.java).use { scenario ->
                 scenario.onActivity { activity ->
-                    val feed = TestActivityFeedTab().apply {
-                        arguments = Bundle().apply {
-                            putBoolean(BaseActivityFeedTab.ARG_SHOW_AREA_CHIPS, true)
-                            putStringArrayList(
-                                BaseActivityFeedTab.ARG_INITIAL_AREA_IDS,
-                                arrayListOf("1"),
-                            )
-                            putStringArrayList(
-                                BaseActivityFeedTab.ARG_INITIAL_AREA_NAMES,
-                                arrayListOf("Area"),
-                            )
-                            putStringArrayList(
-                                BaseActivityFeedTab.ARG_INITIAL_AREA_TYPES,
-                                arrayListOf("community"),
-                            )
-                        }
-                    }
                     activity.supportFragmentManager.commitNow {
                         setReorderingAllowed(true)
-                        replace(R.id.fragmentContainerView, feed, FEED_TAG)
+                        replace(
+                            R.id.fragmentContainerView,
+                            AppRootFragment.create(FEED_ROUTE),
+                            FEED_TAG,
+                        )
                     }
                 }
                 waitUntil { apiRule.server.requestCount >= 1 }
@@ -83,11 +71,12 @@ class ActivityFeedCancellationTest : AppTestCase() {
     }
 
     companion object {
+        private val FEED_ROUTE = AppRoute.Feed(
+            areaIds = listOf("1"),
+            areaNames = listOf("Area"),
+            areaTypes = listOf("community"),
+        )
         private const val FEED_TAG = "feed"
         private const val OFFLINE_STYLE_URI = "asset://map-styles/test/style.json"
     }
-}
-
-class TestActivityFeedTab : BaseActivityFeedTab() {
-    override fun emptyMessage(): String = "empty"
 }

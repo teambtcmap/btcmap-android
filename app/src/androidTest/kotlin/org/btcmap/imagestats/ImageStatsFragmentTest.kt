@@ -4,6 +4,7 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -14,10 +15,10 @@ import androidx.fragment.app.replace
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.google.android.material.appbar.MaterialToolbar
 import org.btcmap.Activity
 import org.btcmap.R
-import org.btcmap.settings.SettingsFragment
+import org.btcmap.nav.AppRootFragment
+import org.btcmap.ui.AppRoute
 import org.btcmap.ui.STATS_LIST_TAG
 import org.btcmap.util.AppTestCase
 import org.btcmap.util.waitUntilOnMain
@@ -64,10 +65,7 @@ class ImageStatsFragmentTest : AppTestCase() {
             // A load that happens after the screen opened only shows up once
             // the refresh action re-reads the counters.
             scenario.onActivity { ImageLoadStats.recordStart() }
-            scenario.onActivity {
-                val toolbar = fragment.requireView().findViewById<MaterialToolbar>(R.id.topAppBar)
-                toolbar.menu.performIdentifierAction(R.id.refresh, 0)
-            }
+            composeTestRule.onNodeWithContentDescription("Refresh").performClick()
 
             composeTestRule.onNodeWithTag(STATS_LIST_TAG).performScrollToNode(hasText("Requests"))
             composeTestRule.onNodeWithText("Requests").assertIsDisplayed()
@@ -82,7 +80,7 @@ class ImageStatsFragmentTest : AppTestCase() {
                 activity = it
                 activity.supportFragmentManager.commit {
                     setReorderingAllowed(true)
-                    replace<SettingsFragment>(R.id.fragmentContainerView, null)
+                    replace(R.id.fragmentContainerView, AppRootFragment.create(AppRoute.Settings))
                 }
                 activity.supportFragmentManager.executePendingTransactions()
             }
@@ -94,16 +92,16 @@ class ImageStatsFragmentTest : AppTestCase() {
 
             waitUntilOnMain {
                 activity.supportFragmentManager
-                    .findFragmentById(R.id.fragmentContainerView) is ImageStatsFragment
+                    .findFragmentById(R.id.fragmentContainerView) is AppRootFragment
             }
         }
     }
 
-    private fun launchFragment(block: (ActivityScenario<Activity>, ImageStatsFragment) -> Unit) {
+    private fun launchFragment(block: (ActivityScenario<Activity>, AppRootFragment) -> Unit) {
         ActivityScenario.launch(Activity::class.java).use { scenario ->
-            lateinit var fragment: ImageStatsFragment
+            lateinit var fragment: AppRootFragment
             scenario.onActivity { activity ->
-                fragment = ImageStatsFragment()
+                fragment = AppRootFragment.create(AppRoute.ImageStats)
                 activity.supportFragmentManager.commit {
                     setReorderingAllowed(true)
                     replace(R.id.fragmentContainerView, fragment, IMAGE_STATS_TAG)

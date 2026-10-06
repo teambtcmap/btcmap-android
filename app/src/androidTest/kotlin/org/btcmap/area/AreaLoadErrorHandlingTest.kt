@@ -1,21 +1,15 @@
 package org.btcmap.area
 
 import kotlinx.coroutines.runBlocking
-import android.view.View
-import androidx.appcompat.widget.Toolbar
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
+import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onAllNodesWithText
-import androidx.core.view.isVisible
-import androidx.test.espresso.Espresso.onView
-import androidx.test.espresso.action.ViewActions.click
-import androidx.test.espresso.assertion.ViewAssertions.matches
-import androidx.test.espresso.matcher.RootMatchers.isDialog
-import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
-import androidx.test.espresso.matcher.ViewMatchers.withText
+import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.btcmap.Activity
-import org.btcmap.R
-import org.btcmap.util.waitUntil
+import org.btcmap.ui.AREA_DESCRIPTION_TAG
 import org.btcmap.util.waitUntilOnMain
 import org.junit.Assert
 import org.junit.Rule
@@ -29,44 +23,29 @@ class AreaLoadErrorHandlingTest : AreaScreenTest() {
     val composeTestRule = createEmptyComposeRule()
 
     @Test
-    fun loadSuccess_hidesLoadingIndicatorAndShowsContent() = runBlocking<Unit> {
+    fun loadSuccess_showsContent() = runBlocking<Unit> {
         apiRule.server.dispatcher = areaDispatcher()
         databaseRule.db.area.insert(listOf(area()))
 
-        withArea { scenario, area ->
-            waitUntilOnMain {
-                !area.requireView().findViewById<View>(R.id.loading).isVisible
-            }
+        withArea { _, _ ->
+            awaitArea()
 
-            scenario.onActivity {
-                Assert.assertTrue(
-                    "Content should be visible",
-                    area.requireView().findViewById<View>(R.id.content).isVisible,
-                )
-                Assert.assertEquals(
-                    "Grand Paris",
-                    area.requireView().findViewById<Toolbar>(R.id.toolbar).title,
-                )
-            }
+            composeTestRule.onNodeWithText("Grand Paris").assertExists()
+            composeTestRule.onNodeWithTag(AREA_DESCRIPTION_TAG).assertExists()
         }
     }
 
     @Test
     fun missingCachedArea_showsErrorDialogAndClosesScreenOnDismiss() = runBlocking<Unit> {
-        withArea(addToBackStack = true) { scenario, area ->
+        withArea(addToBackStack = true) { scenario, _ ->
             lateinit var activity: Activity
             scenario.onActivity { activity = it }
 
-            waitUntil {
-                try {
-                    onView(withText(android.R.string.ok)).inRoot(isDialog())
-                        .check(matches(isDisplayed()))
-                    true
-                } catch (t: Throwable) {
-                    false
-                }
+            val ok = app.getString(android.R.string.ok)
+            composeTestRule.waitUntil(5_000) {
+                composeTestRule.onAllNodesWithText(ok).fetchSemanticsNodes().isNotEmpty()
             }
-            onView(withText(android.R.string.ok)).inRoot(isDialog()).perform(click())
+            composeTestRule.onNodeWithText(ok).performClick()
 
             waitUntilOnMain {
                 activity.supportFragmentManager.findFragmentByTag(AREA_TAG) == null
@@ -89,21 +68,11 @@ class AreaLoadErrorHandlingTest : AreaScreenTest() {
             ),
         )
 
-        withArea { scenario, area ->
-            waitUntilOnMain {
-                !area.requireView().findViewById<View>(R.id.loading).isVisible
-            }
+        withArea { _, _ ->
+            awaitArea()
 
-            scenario.onActivity {
-                Assert.assertTrue(
-                    "Cached area should keep content visible",
-                    area.requireView().findViewById<View>(R.id.content).isVisible,
-                )
-                Assert.assertEquals(
-                    "Grand Paris",
-                    area.requireView().findViewById<Toolbar>(R.id.toolbar).title,
-                )
-            }
+            composeTestRule.onNodeWithText("Grand Paris").assertExists()
+            composeTestRule.onNodeWithTag(AREA_DESCRIPTION_TAG).assertExists()
         }
     }
 
@@ -118,27 +87,30 @@ class AreaLoadErrorHandlingTest : AreaScreenTest() {
             listOf(event(id = 1, name = "Meetup", startsAt = "2999-01-01T10:00:00Z")),
         )
 
-        withArea { scenario, area ->
-            waitUntilOnMain {
-                !area.requireView().findViewById<View>(R.id.loading).isVisible
-            }
-            composeTestRule.waitUntil {
+        withArea { scenario, _ ->
+            awaitArea()
+            composeTestRule.waitUntil(5_000) {
                 composeTestRule.onAllNodesWithText("Meetup").fetchSemanticsNodes().isNotEmpty()
             }
 
-            Assert.assertTrue(
-                area.requireView().findViewById<View>(R.id.content).isVisible,
-            )
+            composeTestRule.onNodeWithTag(AREA_DESCRIPTION_TAG).assertExists()
+
             // The issues failure must not interrupt the cached screen with an
-            // error dialog. Espresso's root picker always waits its hard-coded
-            // 60s before reporting a missing root, so assert on the window
-            // focus directly: a shown dialog takes the focus from the activity.
+            // error dialog; a shown dialog would take the window focus.
             scenario.onActivity { activity ->
                 Assert.assertTrue(
                     "issues failure must not show an error dialog",
                     activity.window.decorView.hasWindowFocus(),
                 )
             }
+        }
+    }
+
+    /** Waits for the area body to render. */
+    private fun awaitArea() {
+        composeTestRule.waitUntil(5_000) {
+            composeTestRule.onAllNodesWithTag(AREA_DESCRIPTION_TAG)
+                .fetchSemanticsNodes().isNotEmpty()
         }
     }
 }

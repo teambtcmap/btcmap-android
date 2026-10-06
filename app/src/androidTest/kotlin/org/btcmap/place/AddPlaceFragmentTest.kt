@@ -1,6 +1,5 @@
 package org.btcmap.place
 
-import android.os.Bundle
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
@@ -14,8 +13,10 @@ import androidx.test.core.app.ActivityScenario
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.btcmap.Activity
 import org.btcmap.R
+import org.btcmap.nav.AppRootFragment
 import org.btcmap.ui.ADD_PLACE_NAME_TAG
 import org.btcmap.ui.ADD_PLACE_SUBMIT_TAG
+import org.btcmap.ui.AppRoute
 import org.btcmap.util.AppTestCase
 import org.junit.Rule
 import org.junit.Test
@@ -72,7 +73,7 @@ class AddPlaceFragmentTest : AppTestCase() {
         }
     }
 
-    private fun addFragment(activity: Activity): AddPlaceFragment {
+    private fun addFragment(activity: Activity): AppRootFragment {
         val fragment = newFragment()
         activity.supportFragmentManager.commitNow {
             setReorderingAllowed(true)
@@ -81,12 +82,8 @@ class AddPlaceFragmentTest : AppTestCase() {
         return fragment
     }
 
-    private fun newFragment(): AddPlaceFragment = AddPlaceFragment().apply {
-        arguments = Bundle().apply {
-            putDouble("lat", 1.0)
-            putDouble("lon", 2.0)
-        }
-    }
+    private fun newFragment(): AppRootFragment =
+        AppRootFragment.create(AppRoute.AddPlace(lat = 1.0, lon = 2.0))
 
     private companion object {
         const val TAG = "add-place"

@@ -4,6 +4,7 @@ import kotlinx.coroutines.runBlocking
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
 import androidx.fragment.app.commitNow
 import androidx.fragment.app.replace
 import androidx.test.core.app.ActivityScenario
@@ -17,7 +18,9 @@ import org.btcmap.App
 import org.btcmap.R
 import org.btcmap.db.table.user.SavedItem
 import org.btcmap.db.table.user.User
+import org.btcmap.nav.AppRootFragment
 import org.btcmap.settings.authToken
+import org.btcmap.ui.AppRoute
 import org.btcmap.util.AppTestCase
 import org.junit.Assert
 import org.junit.Rule
@@ -43,7 +46,7 @@ class SavedActivityTabTest : AppTestCase() {
         val apiCalls = AtomicInteger(0)
         apiRule.server.dispatcher = countingDispatcher(apiCalls)
 
-        withSavedTab { _, _ ->
+        withSavedTab {
             assertShowsMessage(R.string.activity_empty_saved_signed_out)
             Assert.assertEquals(0, apiCalls.get())
         }
@@ -56,7 +59,7 @@ class SavedActivityTabTest : AppTestCase() {
         val apiCalls = AtomicInteger(0)
         apiRule.server.dispatcher = countingDispatcher(apiCalls)
 
-        withSavedTab { _, _ ->
+        withSavedTab {
             assertShowsMessage(R.string.activity_empty_saved_no_items)
             Assert.assertEquals(0, apiCalls.get())
         }
@@ -70,7 +73,7 @@ class SavedActivityTabTest : AppTestCase() {
             override fun dispatch(request: RecordedRequest): MockResponse = jsonResponse()
         }
 
-        withSavedTab { _, _ ->
+        withSavedTab {
             assertShowsMessage(R.string.activity_empty_saved_no_activity)
         }
     }
@@ -84,21 +87,29 @@ class SavedActivityTabTest : AppTestCase() {
         composeTestRule.onNodeWithText(message).assertExists()
     }
 
-    private fun withSavedTab(
-        block: (ActivityScenario<Activity>, SavedActivityFragment) -> Unit,
-    ) {
+    private fun withSavedTab(block: (ActivityScenario<Activity>) -> Unit) {
         app.mapStyleUriForTesting = OFFLINE_STYLE_URI
         try {
             ActivityScenario.launch(Activity::class.java).use { scenario ->
-                lateinit var tab: SavedActivityFragment
                 scenario.onActivity { activity ->
-                    tab = SavedActivityFragment()
                     activity.supportFragmentManager.commitNow {
                         setReorderingAllowed(true)
-                        replace(R.id.fragmentContainerView, tab, TAB_TAG)
+                        replace(
+                            R.id.fragmentContainerView,
+                            AppRootFragment.create(FEED_ROUTE),
+                            FEED_TAG,
+                        )
                     }
                 }
-                block(scenario, tab)
+
+                // The feed opens on the Local tab; switch to Saved.
+                val savedTab = app.getString(R.string.activity_tab_saved)
+                composeTestRule.waitUntil(5_000) {
+                    composeTestRule.onAllNodesWithText(savedTab).fetchSemanticsNodes().isNotEmpty()
+                }
+                composeTestRule.onNodeWithText(savedTab).performClick()
+
+                block(scenario)
             }
         } finally {
             app.mapStyleUriForTesting = null
@@ -131,7 +142,12 @@ class SavedActivityTabTest : AppTestCase() {
     }
 
     private companion object {
-        const val TAB_TAG = "saved-tab"
+        val FEED_ROUTE = AppRoute.Feed(
+            areaIds = emptyList(),
+            areaNames = emptyList(),
+            areaTypes = emptyList(),
+        )
+        const val FEED_TAG = "feed"
         const val OFFLINE_STYLE_URI = "asset://map-styles/test/style.json"
     }
 }

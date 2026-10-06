@@ -99,8 +99,10 @@ fun SearchOverlay(
                     }
                     // The map's actions live inside the field, as the SearchBar's
                     // menu did, rather than beside it. Hide them while the field
-                    // is focused so the query has room.
-                    if (!isFocused) {
+                    // is focused or a search is showing, so the query and its
+                    // results have room; de-focusing with a live query must not
+                    // bring them back over the results.
+                    if (!isFocused && !active) {
                         actions?.let { actions ->
                             AddLocationAction(
                                 onAddPlace = actions.onAddPlace,

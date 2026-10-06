@@ -1,0 +1,553 @@
+package org.btcmap.ui
+
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.size
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.IconButton
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+import org.btcmap.api.getDashboard
+import org.btcmap.api.getPendingEvents
+import org.btcmap.api.setEventStatus
+import org.btcmap.api.submitEvent
+import org.btcmap.api.submitPlace
+import org.btcmap.db.table.event.Event
+import org.btcmap.dbstats.BundleStats
+import org.btcmap.map.toEventGeoJson
+import org.btcmap.place.submitReport
+import org.btcmap.settings.authorized
+import org.btcmap.sync.SyncState
+import org.btcmap.ui.map.EventMiniMap
+
+/**
+ * The shared application root: the app's navigation, owned by `:ui` so it no
+ * longer depends on Android's `FragmentManager`.
+ *
+ * It holds a [NavController] of [AppRoute] and renders the screen for the
+ * current route, wiring each to the host's [AppServices], [AppLabels] and
+ * [AppPlatform]. A host embeds it in a single Compose view; the back affordance
+ * pops the stack and, once the start route is reached, calls [onExit] so the
+ * host can close the screen or the window.
+ *
+ * Screens migrate here one cluster at a time; the routes that have not moved yet
+ * stay with the host.
+ */
+@Composable
+fun AppRoot(
+    services: AppServices,
+    platform: AppPlatform,
+    labels: AppLabels,
+    startRoute: AppRoute,
+    onExit: () -> Unit,
+    /** A place a deep link or feed row wants the map to open. */
+    openPlaceId: Long? = null,
+    onOpenPlaceConsumed: () -> Unit = {},
+    /** An event a deep link wants the root to open. */
+    pendingEvent: Event? = null,
+    onEventConsumed: () -> Unit = {},
+    /** Gives the host a way to pop the root's stack for a system back press. */
+    registerBack: ((() -> Boolean)) -> Unit = {},
+    modifier: Modifier = Modifier,
+) {
+    AppTheme(iconFont = services.iconFont) {
+        val nav = rememberNavController(startRoute)
+        LaunchedEffect(Unit) { registerBack { nav.pop() } }
+        // The auth dialog is shown by the root, so any screen can ask for a
+        // session; a success bumps a key the account screens re-read.
+        var showAuth by remember { mutableStateOf(false) }
+        var authReload by remember { mutableStateOf(0) }
+        val back = {
+            // At the start route there is nothing left on the stack to pop, so
+            // the host closes the screen instead.
+            if (!nav.pop()) onExit()
+        }
+
+        LaunchedEffect(pendingEvent) {
+            val event = pendingEvent ?: return@LaunchedEffect
+            nav.push(AppRoute.EventDetails(event))
+            onEventConsumed()
+        }
+
+        // The keyboard inset is applied to every screen except the map: the map
+        // is full-bleed and moving its top edge would shift the camera.
+        val route = nav.current
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .then(if (route == AppRoute.Map) Modifier else Modifier.imePadding()),
+        ) {
+            when (route) {
+            AppRoute.Map -> MapRoute(
+                services = services,
+                platform = platform,
+                labels = labels,
+                openPlaceId = openPlaceId,
+                onOpenPlaceConsumed = onOpenPlaceConsumed,
+                onNavigate = { nav.push(it) },
+                onShowAuth = { showAuth = true },
+                modifier = modifier,
+            )
+            AppRoute.InfraDashboard -> InfraDashboardRoute(
+                services = services,
+                labels = labels,
+                onBack = back,
+                modifier = modifier,
+            )
+
+            AppRoute.EventReview -> EventReviewScreen(
+                labels = labels.eventReview,
+                load = {
+                    services.api.getPendingEvents().map { event ->
+                        PendingEventUi(
+                            id = event.id,
+                            lat = event.lat,
+                            lon = event.lon,
+                            name = event.name,
+                            website = event.website?.toString().orEmpty(),
+                            startsAt = event.startsAt,
+                            endsAt = event.endsAt,
+                        )
+                    }
+                },
+                approve = { services.api.setEventStatus(it.id, "live") },
+                reject = { services.api.setEventStatus(it.id, "rejected") },
+                onOpenUrl = platform::openUrl,
+                onBack = back,
+                title = labels.eventReviewTitle,
+                modifier = modifier,
+                iconFont = services.iconFont,
+                map = { event, mapModifier ->
+                    EventMiniMap(
+                        lat = event.lat,
+                        lon = event.lon,
+                        styleUrl = services.styleUrl,
+                        styleJson = services.styleJson,
+                        palette = markerPalette(services.settings),
+                        modifier = mapModifier,
+                    )
+                },
+            )
+
+            is AppRoute.Boost -> ScreenPage(
+                title = route.placeName.ifBlank { labels.boostTitle },
+                onBack = back,
+                backContentDescription = labels.back,
+            ) {
+                BoostScreen(
+                    api = services.api,
+                    placeId = route.placeId,
+                    labels = labels.boost,
+                    onPay = platform::openLightningWallet,
+                    onCopy = { platform.copyBolt11(labels.boostPaymentRequest, it) },
+                    onBack = back,
+                    onPosted = {
+                        platform.showMessage(labels.boost.active)
+                        back()
+                    },
+                )
+            }
+
+            is AppRoute.AddComment -> ScreenPage(
+                title = route.placeName.ifBlank { labels.addCommentTitle },
+                onBack = back,
+                backContentDescription = labels.back,
+            ) {
+                CommentScreen(
+                    api = services.api,
+                    placeId = route.placeId,
+                    labels = labels.addComment,
+                    onPay = platform::openLightningWallet,
+                    onCopy = { platform.copyBolt11(labels.commentPaymentRequest, it) },
+                    onBack = back,
+                    onPosted = {
+                        platform.showMessage(labels.addComment.posted)
+                        back()
+                    },
+                )
+            }
+
+            is AppRoute.EventDetails -> ScreenPage(
+                title = route.event.name,
+                onBack = back,
+                backContentDescription = labels.back,
+                actions = {
+                    IconButton(
+                        onClick = { platform.openDirections(route.event.lat, route.event.lon) },
+                    ) {
+                        MaterialSymbol(
+                            glyph = "directions",
+                            contentDescription = labels.directions,
+                        )
+                    }
+                },
+            ) {
+                EventScreen(
+                    event = route.event,
+                    geoJson = listOf(route.event).toEventGeoJson(),
+                    styleUrl = services.styleUrl,
+                    styleJson = services.styleJson,
+                    palette = markerPalette(services.settings),
+                    iconFont = services.iconFont,
+                    usingOpenFreeMap = services.usingOpenFreeMap,
+                    labels = labels.eventScreen,
+                )
+            }
+
+            is AppRoute.AddPlace -> AddPlaceScreen(
+                lat = route.lat,
+                lon = route.lon,
+                styleUrl = services.styleUrl,
+                styleJson = services.styleJson,
+                labels = labels.addPlace,
+                iconFont = services.iconFont,
+                palette = markerPalette(services.settings),
+                submit = { draft ->
+                    services.api.submitPlace(
+                        lat = draft.lat,
+                        lon = draft.lon,
+                        category = draft.category,
+                        name = draft.name,
+                        address = draft.address.takeIf { it.isNotEmpty() },
+                        website = draft.website.takeIf { it.isNotEmpty() },
+                        description = draft.description.takeIf { it.isNotEmpty() },
+                    )
+                },
+                onBack = back,
+            )
+
+            is AppRoute.AddEvent -> AddEventScreen(
+                lat = route.lat,
+                lon = route.lon,
+                styleUrl = services.styleUrl,
+                styleJson = services.styleJson,
+                labels = labels.addEvent,
+                iconFont = services.iconFont,
+                palette = markerPalette(services.settings),
+                submit = { draft ->
+                    services.api.submitEvent(
+                        lat = draft.lat,
+                        lon = draft.lon,
+                        name = draft.name,
+                        website = draft.website,
+                        startsAt = draft.startsAt,
+                        endsAt = draft.endsAt,
+                    )
+                },
+                onBack = back,
+                initialName = route.name,
+                initialWebsite = route.website,
+                initialStartsAt = route.startsAt,
+                initialEndsAt = route.endsAt,
+            )
+
+            is AppRoute.Report -> ScreenPage(
+                title = route.placeName,
+                onBack = back,
+                backContentDescription = labels.back,
+            ) {
+                ReportPlaceScreen(
+                    initialType = route.defaultType,
+                    labels = labels.report,
+                    submit = { draft ->
+                        services.api.submitReport(placeId = route.placeId, draft = draft)
+                    },
+                    onBack = back,
+                    pickPhotos = platform::pickPhotos,
+                )
+            }
+
+            AppRoute.Colors -> ScreenPage(
+                title = labels.colorsTitle,
+                onBack = back,
+                backContentDescription = labels.back,
+            ) {
+                ColorsPage(settings = services.settings, labels = labels.colors)
+            }
+
+            AppRoute.DbStats -> DbStatsRoute(
+                services = services,
+                platform = platform,
+                labels = labels,
+                onBack = back,
+            )
+
+            AppRoute.ImageStats -> ImageStatsRoute(
+                services = services,
+                platform = platform,
+                labels = labels,
+                onBack = back,
+            )
+
+            is AppRoute.Feed -> FeedRoute(
+                services = services,
+                platform = platform,
+                labels = labels,
+                route = route,
+                onBack = back,
+                onOpenPlace = { placeId -> nav.push(AppRoute.Place(placeId)) },
+            )
+
+            is AppRoute.Area -> AreaRoute(
+                services = services,
+                platform = platform,
+                labels = labels,
+                route = route,
+                onBack = back,
+                onOpenEvent = { event -> nav.push(AppRoute.EventDetails(event.toEvent())) },
+                onShowAuth = { showAuth = true },
+            )
+
+            AppRoute.Settings -> ScreenPage(
+                title = labels.settingsTitle,
+                onBack = back,
+                backContentDescription = labels.back,
+            ) {
+                SettingsPage(
+                    settings = services.settings,
+                    db = services.db,
+                    labels = labels.settings,
+                    includeImageStats = true,
+                    onOpenAccount = {
+                        if (services.settings.authorized) {
+                            nav.push(AppRoute.UserProfile)
+                        } else {
+                            showAuth = true
+                        }
+                    },
+                    onOpenColors = { nav.push(AppRoute.Colors) },
+                    onOpenDbStats = { nav.push(AppRoute.DbStats) },
+                    onOpenImageStats = { nav.push(AppRoute.ImageStats) },
+                    reloadKey = authReload,
+                )
+            }
+
+            AppRoute.UserProfile -> UserProfileRoute(
+                services = services,
+                labels = labels,
+                onBack = back,
+                onDuplicateEvent = { event ->
+                    nav.push(
+                        AppRoute.AddEvent(
+                            lat = event.lat,
+                            lon = event.lon,
+                            name = event.name,
+                            website = event.website,
+                            startsAt = event.startsAtLocal.toLocalDateTimeOrNull(),
+                            endsAt = event.endsAtLocal?.toLocalDateTimeOrNull(),
+                        ),
+                    )
+                },
+            )
+
+            is AppRoute.Place -> PlaceRoute(
+                services = services,
+                platform = platform,
+                labels = labels,
+                route = route,
+                onBack = back,
+                onNavigate = { nav.push(it) },
+                onShowAuth = { showAuth = true },
+            )
+            }
+        }
+
+        if (showAuth) {
+            AuthDialog(
+                api = services.api,
+                db = services.db,
+                settings = services.settings,
+                tokenLabel = services.authTokenLabel,
+                labels = labels.account,
+                onDismiss = { showAuth = false },
+                onAuthenticated = {
+                    showAuth = false
+                    authReload++
+                },
+            )
+        }
+    }
+}
+
+/**
+ * The account route: the shared [ProfileScreen] under a bar whose title follows
+ * the profile's current sub-screen (uploaded images or my events), so the back
+ * affordance returns to the profile before leaving the screen.
+ */
+@Composable
+private fun UserProfileRoute(
+    services: AppServices,
+    labels: AppLabels,
+    onBack: () -> Unit,
+    onDuplicateEvent: (MyEventUi) -> Unit,
+) {
+    var showUploadedImages by remember { mutableStateOf(false) }
+    var showMyEvents by remember { mutableStateOf(false) }
+
+    ScreenPage(
+        title = when {
+            showUploadedImages -> labels.uploadedImagesTitle
+            showMyEvents -> labels.myEventsTitle
+            else -> labels.profileTitle
+        },
+        onBack = {
+            when {
+                showUploadedImages -> showUploadedImages = false
+                showMyEvents -> showMyEvents = false
+                else -> onBack()
+            }
+        },
+        backContentDescription = labels.back,
+    ) {
+        ProfileScreen(
+            api = services.api,
+            db = services.db,
+            settings = services.settings,
+            profileLabels = labels.userProfile,
+            formLabels = labels.profileForm,
+            imagesLabels = labels.uploadedImages,
+            eventsLabels = labels.myEvents,
+            mapStyleUrl = services.styleUrl,
+            mapStyleJson = services.styleJson,
+            showUploadedImages = showUploadedImages,
+            onShowUploadedImagesChange = { showUploadedImages = it },
+            showMyEvents = showMyEvents,
+            onShowMyEventsChange = { showMyEvents = it },
+            onDuplicateEvent = onDuplicateEvent,
+            onLoggedOut = onBack,
+        )
+    }
+}
+
+/** Parses the floating local date-time a duplicate pre-fill carries, or null. */
+private fun String.toLocalDateTimeOrNull(): java.time.LocalDateTime? =
+    runCatching { java.time.LocalDateTime.parse(this) }.getOrNull()
+
+/**
+ * The database stats route: the shared [DbStatsPage] under the standard top bar,
+ * whose refresh action starts the app-scoped sync and disables itself while one
+ * is running. The bundled snapshot stats are read once, off the main thread.
+ */
+@Composable
+private fun DbStatsRoute(
+    services: AppServices,
+    platform: AppPlatform,
+    labels: AppLabels,
+    onBack: () -> Unit,
+) {
+    val syncState by services.syncController.state.collectAsState()
+    var bundles by remember { mutableStateOf(emptyMap<String, BundleStats>()) }
+
+    LaunchedEffect(Unit) {
+        bundles = platform.loadBundles()
+    }
+
+    ScreenPage(
+        title = labels.dbStatsTitle,
+        onBack = onBack,
+        backContentDescription = labels.back,
+        actions = {
+            IconButton(
+                onClick = { services.syncController.start() },
+                enabled = syncState == SyncState.Idle,
+            ) {
+                MaterialSymbol(
+                    glyph = "sync",
+                    contentDescription = labels.dbStats.syncNow,
+                )
+            }
+        },
+    ) {
+        DbStatsPage(
+            db = services.db,
+            settings = services.settings,
+            syncState = syncState,
+            labels = labels.dbStats,
+            onSync = { services.syncController.start() },
+            bundles = bundles,
+            showSyncButton = false,
+        )
+    }
+}
+
+/**
+ * The image stats route: the shared [ImageStatsPage] under the standard top bar,
+ * with a refresh action that re-reads the cache snapshot.
+ */
+@Composable
+private fun ImageStatsRoute(
+    services: AppServices,
+    platform: AppPlatform,
+    labels: AppLabels,
+    onBack: () -> Unit,
+) {
+    var refreshKey by remember { mutableStateOf(0) }
+
+    ScreenPage(
+        title = labels.imageStatsTitle,
+        onBack = onBack,
+        backContentDescription = labels.back,
+        actions = {
+            IconButton(onClick = { refreshKey++ }) {
+                MaterialSymbol(glyph = "refresh", contentDescription = labels.refresh)
+            }
+        },
+    ) {
+        ImageStatsPage(
+            imageLoader = services.imageLoader,
+            homeDirectory = services.imageHomeDirectory,
+            labels = labels.imageStats,
+            refreshKey = refreshKey,
+            onError = platform::showError,
+        )
+    }
+}
+
+/**
+ * The infrastructure dashboard route: the shared [InfraDashboardScreen] under
+ * the standard [ScreenPage] bar, whose refresh action swaps to a spinner while a
+ * load is in flight.
+ */
+@Composable
+private fun InfraDashboardRoute(
+    services: AppServices,
+    labels: AppLabels,
+    onBack: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    var refreshKey by remember { mutableStateOf(0) }
+    var refreshing by remember { mutableStateOf(false) }
+
+    ScreenPage(
+        title = labels.infraTitle,
+        onBack = onBack,
+        backContentDescription = labels.back,
+        actions = {
+            if (refreshing) {
+                CircularProgressIndicator(
+                    strokeWidth = 2.dp,
+                    modifier = Modifier.size(24.dp),
+                )
+            } else {
+                IconButton(onClick = { refreshKey++ }) {
+                    MaterialSymbol(glyph = "refresh", contentDescription = labels.refresh)
+                }
+            }
+        },
+    ) {
+        InfraDashboardScreen(
+            load = { services.api.getDashboard() },
+            refreshKey = refreshKey,
+            onLoadingChange = { refreshing = it },
+            modifier = modifier,
+        )
+    }
+}

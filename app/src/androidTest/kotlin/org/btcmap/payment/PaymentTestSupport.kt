@@ -12,8 +12,8 @@ import mockwebserver3.RecordedRequest
 import org.btcmap.Activity
 import org.btcmap.App
 import org.btcmap.R
-import org.btcmap.boost.BoostFragment
-import org.btcmap.comment.AddCommentFragment
+import org.btcmap.nav.AppRootFragment
+import org.btcmap.ui.AppRoute
 import org.btcmap.util.AppTestCase
 import org.junit.Rule
 import java.util.concurrent.CopyOnWriteArrayList
@@ -122,14 +122,12 @@ abstract class PaymentScreenTest : AppTestCase() {
 
     protected fun withBoost(
         addToBackStack: Boolean = false,
-        block: (ActivityScenario<Activity>, BoostFragment) -> Unit,
+        block: (ActivityScenario<Activity>, AppRootFragment) -> Unit,
     ) {
         ActivityScenario.launch(Activity::class.java).use { scenario ->
-            lateinit var fragment: BoostFragment
+            lateinit var fragment: AppRootFragment
             scenario.onActivity { activity ->
-                fragment = BoostFragment().apply {
-                    arguments = Bundle().apply { putLong("place_id", 1L) }
-                }
+                fragment = AppRootFragment.create(AppRoute.Boost(placeId = 1L, placeName = ""))
                 showFragment(activity, fragment, BOOST_TAG, addToBackStack)
             }
             block(scenario, fragment)
@@ -138,14 +136,12 @@ abstract class PaymentScreenTest : AppTestCase() {
 
     protected fun withComment(
         addToBackStack: Boolean = false,
-        block: (ActivityScenario<Activity>, AddCommentFragment) -> Unit,
+        block: (ActivityScenario<Activity>, AppRootFragment) -> Unit,
     ) {
         ActivityScenario.launch(Activity::class.java).use { scenario ->
-            lateinit var fragment: AddCommentFragment
+            lateinit var fragment: AppRootFragment
             scenario.onActivity { activity ->
-                fragment = AddCommentFragment().apply {
-                    arguments = Bundle().apply { putLong("place_id", 1L) }
-                }
+                fragment = AppRootFragment.create(AppRoute.AddComment(placeId = 1L, placeName = ""))
                 showFragment(activity, fragment, COMMENT_TAG, addToBackStack)
             }
             block(scenario, fragment)

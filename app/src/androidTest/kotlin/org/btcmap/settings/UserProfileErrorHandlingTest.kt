@@ -8,6 +8,8 @@ import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.performClick
 import androidx.fragment.app.commitNow
 import androidx.fragment.app.replace
+import org.btcmap.nav.AppRootFragment
+import org.btcmap.ui.AppRoute
 import androidx.sqlite.SQLiteConnection
 import androidx.sqlite.SQLiteDriver
 import androidx.sqlite.SQLiteStatement
@@ -66,7 +68,7 @@ class UserProfileErrorHandlingTest : AppTestCase() {
                 scenario.onActivity { activity ->
                     activity.supportFragmentManager.commitNow {
                         setReorderingAllowed(true)
-                        replace(R.id.fragmentContainerView, UserProfileFragment(), PROFILE_TAG)
+                        replace(R.id.fragmentContainerView, AppRootFragment.create(AppRoute.UserProfile), PROFILE_TAG)
                     }
                 }
 

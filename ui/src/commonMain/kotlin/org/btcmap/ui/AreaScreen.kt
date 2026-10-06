@@ -16,6 +16,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -48,6 +49,7 @@ import java.time.format.FormatStyle
 
 /** Test tags for the area body's sections and rows. */
 const val AREA_DESCRIPTION_TAG = "area-description"
+const val AREA_HEADER_TAG = "area-header"
 const val AREA_READ_MORE_TAG = "area-read-more"
 const val AREA_WEBSITE_TAG = "area-website"
 const val AREA_BOOSTED_TITLE_TAG = "area-boosted-title"
@@ -115,6 +117,8 @@ data class AreaOfflineDialog(
 fun AreaScreen(
     description: String?,
     websiteText: String?,
+    /** Opens the area's website; null leaves [websiteText] as plain text. */
+    onOpenWebsite: (() -> Unit)? = null,
     boostedMerchants: List<Place>,
     events: List<GetEventsItem>,
     issues: AreaIssues?,
@@ -151,7 +155,10 @@ fun AreaScreen(
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 16.dp),
+            // The image is the first child; an 8dp top matches the 8dp spacer
+            // under it, so the header's spacing is symmetrical. The bottom keeps
+            // the body's 16dp.
+            .padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 16.dp),
     ) {
         headerImageUrl?.let { url ->
             AsyncImage(
@@ -161,14 +168,21 @@ fun AreaScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(AREA_HEADER_HEIGHT)
-                    .clip(RoundedCornerShape(12.dp)),
+                    .clip(RoundedCornerShape(12.dp))
+                    .testTag(AREA_HEADER_TAG),
             )
-            Spacer(modifier = Modifier.height(16.dp))
+            // With a description following, a 16dp gap; with the URL next, 20dp
+            // here plus the URL row's own 8dp top padding makes 28dp.
+            Spacer(
+                modifier = Modifier.height(
+                    if (description.isNullOrBlank()) 20.dp else 16.dp,
+                ),
+            )
         }
 
         DescriptionSection(description = description, strings = strings)
 
-        websiteText?.let { WebsiteRow(it) }
+        websiteText?.let { WebsiteRow(it, onOpenWebsite) }
 
         OfflinePanel(
             state = offlineState,
@@ -177,20 +191,6 @@ fun AreaScreen(
             onDownload = onDownload,
             onDelete = onDelete,
         )
-
-        if (boostedMerchants.isNotEmpty()) {
-            SectionTitle(strings.boostedMerchants, AREA_BOOSTED_TITLE_TAG)
-            boostedMerchants.forEach { place ->
-                AreaCard(
-                    glyph = place.icon,
-                    iconTint = boostedMarkerColor,
-                    title = place.getLocalizedName().takeIf { it.isNotBlank() },
-                    subtitle = boostSubtitle(place.boostedUntil, boostDateFormat, strings),
-                    tag = AREA_BOOSTED_CARD_TAG,
-                    onClick = { onOpenPlace(place.id) },
-                )
-            }
-        }
 
         if (events.isNotEmpty()) {
             SectionTitle(strings.events, AREA_EVENTS_TITLE_TAG)
@@ -202,6 +202,20 @@ fun AreaScreen(
                     subtitle = event.startsAt.format(eventDateFormat),
                     tag = AREA_EVENT_CARD_TAG,
                     onClick = { onOpenEvent(event) },
+                )
+            }
+        }
+
+        if (boostedMerchants.isNotEmpty()) {
+            SectionTitle(strings.boostedMerchants, AREA_BOOSTED_TITLE_TAG)
+            boostedMerchants.forEach { place ->
+                AreaCard(
+                    glyph = place.icon,
+                    iconTint = boostedMarkerColor,
+                    title = place.getLocalizedName().takeIf { it.isNotBlank() },
+                    subtitle = boostSubtitle(place.boostedUntil, boostDateFormat, strings),
+                    tag = AREA_BOOSTED_CARD_TAG,
+                    onClick = { onOpenPlace(place.id) },
                 )
             }
         }
@@ -252,7 +266,7 @@ fun AreaScreen(
 
 @Composable
 private fun DescriptionSection(description: String?, strings: AreaStrings) {
-    if (description == null) return
+    if (description.isNullOrBlank()) return
 
     val paragraphs = remember(description) { descriptionParagraphs(description) }
     if (paragraphs.size <= 1) {
@@ -282,10 +296,12 @@ private fun DescriptionSection(description: String?, strings: AreaStrings) {
 }
 
 @Composable
-private fun WebsiteRow(text: String) {
+private fun WebsiteRow(text: String, onClick: (() -> Unit)?) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier.padding(top = 16.dp),
+        modifier = Modifier
+            .padding(top = 8.dp)
+            .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier),
     ) {
         MaterialSymbol(
             glyph = "public",
@@ -295,6 +311,11 @@ private fun WebsiteRow(text: String) {
         Text(
             text = text,
             style = MaterialTheme.typography.bodyLarge,
+            color = if (onClick != null) {
+                MaterialTheme.colorScheme.secondary
+            } else {
+                LocalContentColor.current
+            },
             modifier = Modifier.padding(start = 16.dp).testTag(AREA_WEBSITE_TAG),
         )
     }

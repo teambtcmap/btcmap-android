@@ -18,13 +18,14 @@ import mockwebserver3.RecordedRequest
 import org.btcmap.Activity
 import org.btcmap.App
 import org.btcmap.R
-import org.btcmap.comment.AddCommentFragment
 import org.btcmap.db.table.comment.Comment
 import org.btcmap.db.table.place.Place
+import org.btcmap.nav.AppRootFragment
+import org.btcmap.ui.AppRoute
+import org.btcmap.ui.COMMENT_CONTINUE_TAG
 import org.btcmap.ui.PLACE_ADD_COMMENT_TAG
-import org.btcmap.ui.PlaceComposeView
+import org.btcmap.ui.PLACE_MENU_TAG
 import org.btcmap.util.AppTestCase
-import org.btcmap.util.waitUntilOnMain
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -40,6 +41,7 @@ class PlaceCommentsTest : AppTestCase() {
 
     @Test
     fun storedComments_arePreviewedInline() = runBlocking<Unit> {
+        databaseRule.db.place.insert(listOf(placeRow()))
         databaseRule.db.comment.insert(
             listOf(
                 comment(1L, "First", "2024-06-01T10:00:00Z"),
@@ -47,7 +49,7 @@ class PlaceCommentsTest : AppTestCase() {
             )
         )
 
-        withPlaceFragment { _, _, _ ->
+        withPlaceFragment { _, _ ->
             composeTestRule.waitUntil(5_000) {
                 composeTestRule.onAllNodesWithText("First").fetchSemanticsNodes().isNotEmpty()
             }
@@ -58,6 +60,7 @@ class PlaceCommentsTest : AppTestCase() {
 
     @Test
     fun addCommentButton_opensTheAddScreen() = runBlocking<Unit> {
+        databaseRule.db.place.insert(listOf(placeRow()))
         // A valid quote keeps the add screen open; otherwise it pops itself as
         // soon as the quote fails to load.
         apiRule.server.dispatcher = object : Dispatcher() {
@@ -68,12 +71,7 @@ class PlaceCommentsTest : AppTestCase() {
                 }
         }
 
-        withPlaceFragment { _, activity, fragment ->
-            waitUntilOnMain {
-                fragment.requireView()
-                    .findViewById<PlaceComposeView>(R.id.placeContent)
-                    .place != null
-            }
+        withPlaceFragment { _, _ ->
             composeTestRule.waitUntil(5_000) {
                 composeTestRule.onAllNodesWithTag(PLACE_ADD_COMMENT_TAG)
                     .fetchSemanticsNodes().isNotEmpty()
@@ -81,31 +79,40 @@ class PlaceCommentsTest : AppTestCase() {
 
             composeTestRule.onNodeWithTag(PLACE_ADD_COMMENT_TAG).performClick()
 
-            waitUntilOnMain {
-                activity.supportFragmentManager
-                    .findFragmentById(R.id.fragmentContainerView) is AddCommentFragment
+            composeTestRule.waitUntil(5_000) {
+                composeTestRule.onAllNodesWithTag(COMMENT_CONTINUE_TAG)
+                    .fetchSemanticsNodes().isNotEmpty()
             }
         }
     }
 
     private fun withPlaceFragment(
-        action: (ActivityScenario<Activity>, Activity, PlaceFragment) -> Unit,
+        action: (ActivityScenario<Activity>, Activity) -> Unit,
     ) {
         app.mapStyleUriForTesting = OFFLINE_STYLE_URI
         try {
             ActivityScenario.launch(Activity::class.java).use { scenario ->
                 lateinit var activity: Activity
-                lateinit var fragment: PlaceFragment
                 scenario.onActivity {
                     activity = it
-                    fragment = PlaceFragment()
                     it.supportFragmentManager.commitNow {
                         setReorderingAllowed(true)
-                        replace(R.id.fragmentContainerView, fragment, PLACE_TAG)
+                        replace(
+                            R.id.fragmentContainerView,
+                            AppRootFragment.create(AppRoute.Place(1L)),
+                            PLACE_TAG,
+                        )
                     }
-                    fragment.setPlace(placeRow())
                 }
-                action(scenario, activity, fragment)
+                composeTestRule.waitUntil(5_000) {
+                    try {
+                        composeTestRule.onNodeWithTag(PLACE_MENU_TAG).assertExists()
+                        true
+                    } catch (_: Throwable) {
+                        false
+                    }
+                }
+                action(scenario, activity)
             }
         } finally {
             app.mapStyleUriForTesting = null

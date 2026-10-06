@@ -1,6 +1,5 @@
 package org.btcmap.feed
 
-import android.os.Bundle
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onAllNodesWithText
@@ -17,6 +16,8 @@ import mockwebserver3.RecordedRequest
 import org.btcmap.Activity
 import org.btcmap.App
 import org.btcmap.R
+import org.btcmap.nav.AppRootFragment
+import org.btcmap.ui.AppRoute
 import org.btcmap.ui.FEED_RETRY_TAG
 import org.btcmap.util.AppTestCase
 import org.btcmap.util.waitUntil
@@ -50,14 +51,7 @@ class ActivityFeedErrorHandlingTest : AppTestCase() {
         app.mapStyleUriForTesting = OFFLINE_STYLE_URI
         try {
             ActivityScenario.launch(Activity::class.java).use { scenario ->
-                lateinit var feed: TestActivityFeedTab
-                scenario.onActivity { activity ->
-                    feed = TestActivityFeedTab().apply { arguments = feedArguments() }
-                    activity.supportFragmentManager.commitNow {
-                        setReorderingAllowed(true)
-                        replace(R.id.fragmentContainerView, feed, FEED_TAG)
-                    }
-                }
+                scenario.onActivity { showFeed(it) }
                 waitUntil { apiRule.server.requestCount >= 1 }
 
                 // The retry affordance only exists on the error state; the empty
@@ -90,14 +84,7 @@ class ActivityFeedErrorHandlingTest : AppTestCase() {
         app.mapStyleUriForTesting = OFFLINE_STYLE_URI
         try {
             ActivityScenario.launch(Activity::class.java).use { scenario ->
-                lateinit var feed: TestActivityFeedTab
-                scenario.onActivity { activity ->
-                    feed = TestActivityFeedTab().apply { arguments = feedArguments() }
-                    activity.supportFragmentManager.commitNow {
-                        setReorderingAllowed(true)
-                        replace(R.id.fragmentContainerView, feed, FEED_TAG)
-                    }
-                }
+                scenario.onActivity { showFeed(it) }
 
                 composeTestRule.waitUntil(5_000) {
                     composeTestRule.onAllNodesWithTag(FEED_RETRY_TAG)
@@ -107,8 +94,9 @@ class ActivityFeedErrorHandlingTest : AppTestCase() {
                 composeTestRule.onNodeWithTag(FEED_RETRY_TAG).performClick()
 
                 // The retry succeeds with an empty list, so the empty state shows.
+                val empty = app.getString(R.string.activity_empty_local)
                 composeTestRule.waitUntil(5_000) {
-                    composeTestRule.onAllNodesWithText(feed.emptyMessage())
+                    composeTestRule.onAllNodesWithText(empty)
                         .fetchSemanticsNodes().isNotEmpty()
                 }
                 Assert.assertEquals(2, attempts.get())
@@ -118,14 +106,19 @@ class ActivityFeedErrorHandlingTest : AppTestCase() {
         }
     }
 
-    private fun feedArguments(): Bundle = Bundle().apply {
-        putBoolean(BaseActivityFeedTab.ARG_SHOW_AREA_CHIPS, true)
-        putStringArrayList(BaseActivityFeedTab.ARG_INITIAL_AREA_IDS, arrayListOf("1"))
-        putStringArrayList(BaseActivityFeedTab.ARG_INITIAL_AREA_NAMES, arrayListOf("Area"))
-        putStringArrayList(BaseActivityFeedTab.ARG_INITIAL_AREA_TYPES, arrayListOf("community"))
+    private fun showFeed(activity: Activity) {
+        activity.supportFragmentManager.commitNow {
+            setReorderingAllowed(true)
+            replace(R.id.fragmentContainerView, AppRootFragment.create(FEED_ROUTE), FEED_TAG)
+        }
     }
 
     companion object {
+        private val FEED_ROUTE = AppRoute.Feed(
+            areaIds = listOf("1"),
+            areaNames = listOf("Area"),
+            areaTypes = listOf("community"),
+        )
         private const val FEED_TAG = "feed"
         private const val OFFLINE_STYLE_URI = "asset://map-styles/test/style.json"
     }

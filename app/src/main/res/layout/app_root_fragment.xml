@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!--
+    The shared application root: the app sets the services, the labels and the
+    start route on the view, and the root runs the screens.
+-->
+<org.btcmap.ui.AppRootComposeView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/appRoot"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" />

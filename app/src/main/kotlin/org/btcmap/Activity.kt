@@ -4,17 +4,12 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
-import androidx.core.view.updatePadding
-import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.launch
 import org.btcmap.util.toUrlOrNull
 import org.btcmap.databinding.ActivityBinding
-import org.btcmap.map.MapFragment
+import org.btcmap.nav.AppRootFragment
 import org.btcmap.util.DeepLink
 import org.btcmap.util.deepLink
 
@@ -50,29 +45,9 @@ class Activity : AppCompatActivity() {
         binding = ActivityBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        ViewCompat.setOnApplyWindowInsetsListener(binding.root) { view, windowInsets ->
-            val ime = windowInsets.getInsets(WindowInsetsCompat.Type.ime()).bottom
-            // The map is full-bleed and draws its own controls, so padding it
-            // for the keyboard would shrink the map and shift its camera when
-            // the search field is focused. Only the other screens need to clear
-            // the keyboard.
-            val onMap = supportFragmentManager
-                .findFragmentById(R.id.fragmentContainerView) is MapFragment
-            view.updatePadding(bottom = if (onMap) 0 else ime)
-            windowInsets
-        }
-
-        // Whether the keyboard inset is applied depends on the current screen,
-        // and switching screens does not change the insets themselves, so
-        // re-dispatch them whenever one is shown.
-        supportFragmentManager.registerFragmentLifecycleCallbacks(
-            object : FragmentManager.FragmentLifecycleCallbacks() {
-                override fun onFragmentResumed(fm: FragmentManager, f: Fragment) {
-                    ViewCompat.requestApplyInsets(binding.root)
-                }
-            },
-            false,
-        )
+        // The keyboard inset is handled in Compose (AppRoot), so the full-bleed
+        // map is never padded and its camera does not move when a field is
+        // focused. The map draws its own insets; the screens clear the keyboard.
 
         deliverDeepLink()
     }
@@ -111,29 +86,20 @@ class Activity : AppCompatActivity() {
 
     private fun deliverDeepLink() {
         val deepLink = pendingDeepLink ?: return
-        // Take ownership right away so restoring MapFragment below doesn't deliver it a second time.
+        // Take ownership right away so a queued link is not delivered twice.
         pendingDeepLink = null
 
-        var fragment = supportFragmentManager
-            .findFragmentById(R.id.fragmentContainerView) as? MapFragment
+        val root = supportFragmentManager
+            .findFragmentById(R.id.fragmentContainerView) as? AppRootFragment
 
-        if (fragment?.view == null) {
-            supportFragmentManager.popBackStackImmediate(
-                null,
-                FragmentManager.POP_BACK_STACK_INCLUSIVE,
-            )
-            fragment = supportFragmentManager
-                .findFragmentById(R.id.fragmentContainerView) as? MapFragment
-        }
-
-        if (fragment == null || !fragment.isAdded || fragment.view == null) {
+        if (root == null || !root.isAdded) {
             pendingDeepLink = deepLink
             return
         }
 
         when (deepLink) {
-            is DeepLink.Place -> fragment.openPlaceById(deepLink.id)
-            is DeepLink.Event -> fragment.openEventById(deepLink.id)
+            is DeepLink.Place -> root.openPlace(deepLink.id)
+            is DeepLink.Event -> root.openEventById(deepLink.id)
         }
     }
 

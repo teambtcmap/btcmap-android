@@ -8,6 +8,8 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.fragment.app.commitNow
 import androidx.fragment.app.replace
+import org.btcmap.nav.AppRootFragment
+import org.btcmap.ui.AppRoute
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -52,7 +54,7 @@ class UserLogoutTest : AppTestCase() {
                 scenario.onActivity { activity ->
                     activity.supportFragmentManager.commitNow {
                         setReorderingAllowed(true)
-                        replace(R.id.fragmentContainerView, UserProfileFragment(), PROFILE_TAG)
+                        replace(R.id.fragmentContainerView, AppRootFragment.create(AppRoute.UserProfile), PROFILE_TAG)
                     }
                 }
 

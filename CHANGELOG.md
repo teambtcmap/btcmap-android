@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+- Move every screen into the shared Compose Multiplatform UI: the Android app now hosts one Compose root instead of the Views fragments, dialog fragments and XML layouts, so Android and the desktop render the same screens from `:ui`
+- Show the area's header image as a plain header in the body instead of the collapsing toolbar
+- Make the area screen's website address tappable, and list its upcoming events above the boosted merchants
+- Tighten the area header's spacing: 8dp above the image, 16dp below when a description follows and 28dp before the website when it does not
+- Stop the map camera from moving when the search field is focused
+- Keep the map's add-location and settings actions hidden while a search query or its results are showing
 - Rebuild the add-place screen on the shared Compose UI so Android and the desktop app render the same screen: a Material 3 top app bar, the map's merchant pin as the positioning pin and a confirmation state
 - Fix the add-place screen showing the literal `location_on` text instead of the pin, the MapLibre logo and attribution pill, and a blank top bar
 - Restore the add-place form's example hints, mark the required fields, chain the keyboard's Next key, show a spinner while submitting, scroll to the first invalid field and surface submit errors in a snackbar

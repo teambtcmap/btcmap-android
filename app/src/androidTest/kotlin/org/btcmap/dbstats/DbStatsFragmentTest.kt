@@ -5,6 +5,7 @@ import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -14,17 +15,15 @@ import androidx.fragment.app.commit
 import androidx.fragment.app.replace
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
-import androidx.test.espresso.Espresso.onView
-import androidx.test.espresso.action.ViewActions.click
-import androidx.test.espresso.matcher.ViewMatchers.withId
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.btcmap.Activity
 import org.btcmap.App
 import org.btcmap.R
 import org.btcmap.db.Database
 import org.btcmap.db.table.place.Place
-import org.btcmap.settings.SettingsFragment
+import org.btcmap.nav.AppRootFragment
 import org.btcmap.sync.SyncState
+import org.btcmap.ui.AppRoute
 import org.btcmap.ui.STATS_LIST_TAG
 import org.btcmap.ui.statsEntryTag
 import org.btcmap.util.AppTestCase
@@ -71,7 +70,7 @@ class DbStatsFragmentTest : AppTestCase() {
 
         launchFragment { _, _ ->
             val before = controller.startedCount
-            onView(withId(R.id.sync)).perform(click())
+            composeTestRule.onNodeWithContentDescription("Sync").performClick()
             waitUntil { controller.startedCount > before }
         }
     }
@@ -125,7 +124,7 @@ class DbStatsFragmentTest : AppTestCase() {
                 activity = it
                 activity.supportFragmentManager.commit {
                     setReorderingAllowed(true)
-                    replace<SettingsFragment>(R.id.fragmentContainerView, null)
+                    replace(R.id.fragmentContainerView, AppRootFragment.create(AppRoute.Settings))
                 }
                 activity.supportFragmentManager.executePendingTransactions()
             }
@@ -137,7 +136,7 @@ class DbStatsFragmentTest : AppTestCase() {
 
             waitUntilOnMain {
                 activity.supportFragmentManager
-                    .findFragmentById(R.id.fragmentContainerView) is DbStatsFragment
+                    .findFragmentById(R.id.fragmentContainerView) is AppRootFragment
             }
         }
     }
@@ -156,11 +155,11 @@ class DbStatsFragmentTest : AppTestCase() {
     private fun entry(sectionKey: String, label: String) =
         composeTestRule.onNodeWithTag(statsEntryTag(sectionKey, label))
 
-    private fun launchFragment(block: (ActivityScenario<Activity>, DbStatsFragment) -> Unit) {
+    private fun launchFragment(block: (ActivityScenario<Activity>, AppRootFragment) -> Unit) {
         ActivityScenario.launch(Activity::class.java).use { scenario ->
-            lateinit var fragment: DbStatsFragment
+            lateinit var fragment: AppRootFragment
             scenario.onActivity { activity ->
-                fragment = DbStatsFragment()
+                fragment = AppRootFragment.create(AppRoute.DbStats)
                 activity.supportFragmentManager.commit {
                     setReorderingAllowed(true)
                     replace(R.id.fragmentContainerView, fragment, DB_STATS_TAG)

@@ -1,7 +1,10 @@
 package org.btcmap.place
 
 import kotlinx.coroutines.runBlocking
-import androidx.appcompat.widget.Toolbar
+import androidx.compose.ui.test.junit4.createEmptyComposeRule
+import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
 import androidx.fragment.app.commitNow
 import androidx.fragment.app.replace
 import androidx.test.core.app.ActivityScenario
@@ -12,7 +15,10 @@ import org.btcmap.App
 import org.btcmap.R
 import org.btcmap.db.table.place.Place
 import org.btcmap.db.table.user.User
+import org.btcmap.nav.AppRootFragment
 import org.btcmap.settings.authToken
+import org.btcmap.ui.AppRoute
+import org.btcmap.ui.PLACE_MENU_TAG
 import org.btcmap.util.AppTestCase
 import org.btcmap.util.assertNoUncaughtException
 import org.junit.Rule
@@ -25,9 +31,13 @@ class PlaceSaveErrorHandlingTest : AppTestCase() {
 
     private val app = ApplicationProvider.getApplicationContext<App>()
 
+    @get:Rule
+    val composeTestRule = createEmptyComposeRule()
+
     @Test
     fun load_whenUserMissingFromDatabase_doesNotLeakUncaughtException() = runBlocking<Unit> {
         preferencesRule.prefs.setAuthTokenForTesting("test-token")
+        databaseRule.db.place.insert(listOf(placeRow()))
 
         withPlaceFragment { }
     }
@@ -36,16 +46,16 @@ class PlaceSaveErrorHandlingTest : AppTestCase() {
     fun save_whenApiFails_doesNotLeakUncaughtException() = runBlocking<Unit> {
         preferencesRule.prefs.setAuthTokenForTesting("test-token")
         databaseRule.db.user.insert(user())
+        databaseRule.db.place.insert(listOf(placeRow()))
 
-        withPlaceFragment { activity ->
-            val fragment = activity.supportFragmentManager
-                .findFragmentByTag(PLACE_TAG) as PlaceFragment
-            val toolbar = fragment.requireView().findViewById<Toolbar>(R.id.toolbar)
-            toolbar.menu.performIdentifierAction(R.id.save, 0)
+        withPlaceFragment {
+            awaitPlace()
+            composeTestRule.onNodeWithTag(PLACE_MENU_TAG).performClick()
+            composeTestRule.onNodeWithText(app.getString(R.string.save)).performClick()
         }
     }
 
-    private fun withPlaceFragment(action: (Activity) -> Unit) {
+    private fun withPlaceFragment(action: () -> Unit) {
         app.mapStyleUriForTesting = OFFLINE_STYLE_URI
         try {
             ActivityScenario.launch(Activity::class.java).use { scenario ->
@@ -53,18 +63,31 @@ class PlaceSaveErrorHandlingTest : AppTestCase() {
                     "Exception escaped the place screen's coroutine to the uncaught handler",
                 ) {
                     scenario.onActivity { activity ->
-                        val place = PlaceFragment()
                         activity.supportFragmentManager.commitNow {
                             setReorderingAllowed(true)
-                            replace(R.id.fragmentContainerView, place, PLACE_TAG)
+                            replace(
+                                R.id.fragmentContainerView,
+                                AppRootFragment.create(AppRoute.Place(1L)),
+                                PLACE_TAG,
+                            )
                         }
-                        place.setPlace(placeRow())
-                        action(activity)
                     }
+                    action()
                 }
             }
         } finally {
             app.mapStyleUriForTesting = null
+        }
+    }
+
+    private fun awaitPlace() {
+        composeTestRule.waitUntil(5_000) {
+            try {
+                composeTestRule.onNodeWithTag(PLACE_MENU_TAG).assertExists()
+                true
+            } catch (_: Throwable) {
+                false
+            }
         }
     }
 
