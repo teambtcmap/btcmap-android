@@ -34,6 +34,15 @@ private const val MAX_RESULTS = 20
 private const val SEARCH_DEBOUNCE_MS = 300L
 private const val AREA_ICON = "public"
 
+/** The search results, whether a search is running, and whether the query is
+ * long enough that one has been run (so "no results" can be told apart from
+ * "not searching"). */
+data class SearchResults(
+    val items: List<SearchAdapterItem> = emptyList(),
+    val loading: Boolean = false,
+    val active: Boolean = false,
+)
+
 /**
  * The local search results for [query], ported from the app's Views search.
  * Places, areas and events come from the
@@ -47,20 +56,21 @@ fun rememberSearchResults(
     state: MapState,
     query: String,
     formatDistance: (Double) -> String,
-): List<SearchAdapterItem> {
+): SearchResults {
     val latestFormatDistance by rememberUpdatedState(formatDistance)
-    var results by remember { mutableStateOf<List<SearchAdapterItem>>(emptyList()) }
+    var results by remember { mutableStateOf(SearchResults()) }
 
     LaunchedEffect(db, state, query) {
         val trimmed = query.trim()
         if (trimmed.length < MIN_QUERY_LENGTH) {
-            results = emptyList()
+            results = SearchResults()
             return@LaunchedEffect
         }
 
+        results = SearchResults(loading = true, active = true)
         delay(SEARCH_DEBOUNCE_MS)
         val camera = state.cameraPosition
-        results = withContext(Dispatchers.IO) {
+        val items = withContext(Dispatchers.IO) {
             search(
                 db = db,
                 query = trimmed,
@@ -69,6 +79,7 @@ fun rememberSearchResults(
                 formatDistance = latestFormatDistance,
             )
         }
+        results = SearchResults(items = items, active = true)
     }
 
     return results

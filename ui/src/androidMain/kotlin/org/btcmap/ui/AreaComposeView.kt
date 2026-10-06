@@ -45,7 +45,7 @@ class AreaComposeView @JvmOverloads constructor(
 
     var strings: AreaStrings? by mutableStateOf(null)
 
-    var bitcoinOrange: Color by mutableStateOf(Color(0xFFF7931A))
+    var boostedMarkerColor: Color by mutableStateOf(Color(0xFFF7931A))
 
     var iconTypeface: Typeface? by mutableStateOf(null)
 
@@ -105,7 +105,7 @@ class AreaComposeView @JvmOverloads constructor(
                 offlineDialog = dialog,
                 onDismissOfflineDialog = onDismissOfflineDialog,
                 onConfirmOfflineDownload = onConfirmOfflineDownload,
-                bitcoinOrange = bitcoinOrange,
+                boostedMarkerColor = boostedMarkerColor,
             )
         }
     }

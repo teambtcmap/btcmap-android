@@ -694,7 +694,10 @@ class MapFragment : Fragment() {
 
     /** Mirrors the distance labels the Views search showed. */
     private fun formatDistance(meters: Double): String {
-        val format = NumberFormat.getNumberInstance().apply { maximumFractionDigits = 1 }
+        val format = NumberFormat.getNumberInstance().apply {
+            // Beyond 10 km the fraction is noise.
+            maximumFractionDigits = if (meters > 10_000) 0 else 1
+        }
         return if (meters < 1_000) {
             getString(R.string.s_m, format.format(meters))
         } else {

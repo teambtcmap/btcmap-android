@@ -46,7 +46,7 @@ URLs.
 ## Styling
 
 The site follows Material 3 (Material You), the same design system as the app's
-`Theme.Material3Expressive.DynamicColors` theme. Everything lives in one
+`Theme.Btcmap` theme. Everything lives in one
 hand-written stylesheet, `static/css/style.css`.
 
 - **Color.** The **light** `--md-sys-color-*` roles are an M3 *tonal spot*

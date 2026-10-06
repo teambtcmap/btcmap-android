@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!--
+    The app's Material 3 theme, generated from the #1F2D61 brand seed (Material
+    Theme Builder). It replaces the DynamicColors theme so the remaining Views
+    chrome wears the same colours as the Compose UI (see btcmapColorScheme in
+    :ui). The dark roles live in values-night/themes.xml.
+-->
+<resources>
+
+    <style name="Theme.Btcmap" parent="Theme.Material3Expressive.DayNight.NoActionBar">
+        <item name="colorPrimary">#FF4E5B92</item>
+        <item name="colorOnPrimary">#FFFFFFFF</item>
+        <item name="colorPrimaryInverse">#FFB7C4FF</item>
+        <item name="colorPrimaryContainer">#FFDDE1FF</item>
+        <item name="colorOnPrimaryContainer">#FF364479</item>
+        <item name="colorPrimaryFixed">#FFDDE1FF</item>
+        <item name="colorPrimaryFixedDim">#FFB7C4FF</item>
+        <item name="colorOnPrimaryFixed">#FF05164B</item>
+        <item name="colorOnPrimaryFixedVariant">#FF364479</item>
+        <item name="colorSecondary">#FF5A5D72</item>
+        <item name="colorOnSecondary">#FFFFFFFF</item>
+        <item name="colorSecondaryContainer">#FFDEE1F9</item>
+        <item name="colorOnSecondaryContainer">#FF424659</item>
+        <item name="colorSecondaryFixed">#FFDEE1F9</item>
+        <item name="colorSecondaryFixedDim">#FFC2C5DD</item>
+        <item name="colorOnSecondaryFixed">#FF171B2C</item>
+        <item name="colorOnSecondaryFixedVariant">#FF424659</item>
+        <item name="colorTertiary">#FF75546F</item>
+        <item name="colorOnTertiary">#FFFFFFFF</item>
+        <item name="colorTertiaryContainer">#FFFFD7F4</item>
+        <item name="colorOnTertiaryContainer">#FF5C3D56</item>
+        <item name="colorTertiaryFixed">#FFFFD7F4</item>
+        <item name="colorTertiaryFixedDim">#FFE4BAD9</item>
+        <item name="colorOnTertiaryFixed">#FF2C1229</item>
+        <item name="colorOnTertiaryFixedVariant">#FF5C3D56</item>
+        <item name="android:colorBackground">#FFFBF8FF</item>
+        <item name="colorOnBackground">#FF1A1B21</item>
+        <item name="colorSurface">#FFFBF8FF</item>
+        <item name="colorOnSurface">#FF1A1B21</item>
+        <item name="colorSurfaceVariant">#FFE2E1EC</item>
+        <item name="colorOnSurfaceVariant">#FF45464F</item>
+        <item name="colorSurfaceInverse">#FF2F3036</item>
+        <item name="colorOnSurfaceInverse">#FFF2F0F7</item>
+        <item name="colorSurfaceBright">#FFFBF8FF</item>
+        <item name="colorSurfaceDim">#FFDBD9E0</item>
+        <item name="colorSurfaceContainer">#FFEFEDF4</item>
+        <item name="colorSurfaceContainerLow">#FFF4F2FA</item>
+        <item name="colorSurfaceContainerHigh">#FFE9E7EF</item>
+        <item name="colorSurfaceContainerLowest">#FFFFFFFF</item>
+        <item name="colorSurfaceContainerHighest">#FFE3E1E9</item>
+        <item name="colorOutline">#FF767680</item>
+        <item name="colorOutlineVariant">#FFC6C5D0</item>
+        <item name="colorError">#FFBA1A1A</item>
+        <item name="colorOnError">#FFFFFFFF</item>
+        <item name="colorErrorContainer">#FFFFDAD6</item>
+        <item name="colorOnErrorContainer">#FF93000A</item>
+    </style>
+
+</resources>

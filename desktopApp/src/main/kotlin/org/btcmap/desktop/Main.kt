@@ -454,7 +454,11 @@ private fun runApp() = application {
                                 mapCenterLat = lat
                                 mapCenterLon = lon
                             },
-                            formatDistance = { meters -> "%.1f km".format(meters / 1000) },
+                            formatDistance = { meters ->
+                                val km = meters / 1_000
+                                // Beyond 10 km the fraction is noise.
+                                if (km > 10) "%.0f km".format(km) else "%.1f km".format(km)
+                            },
                         )
 
                         Route.Report -> ScreenPage(
@@ -721,6 +725,7 @@ private fun runApp() = application {
                                     areaId = areaId,
                                     db = db,
                                     api = api,
+                                    boostedMarkerColor = markerPalette(settings).boostedMarkerBackground,
                                     onBack = { route = Route.Map },
                                     onOpenPlace = { placeId ->
                                         feedPlaceId = placeId
@@ -821,6 +826,7 @@ private fun DesktopAreaScreen(
     areaId: Long,
     db: Database,
     api: Api,
+    boostedMarkerColor: Color,
     onBack: () -> Unit,
     onOpenPlace: (Long) -> Unit,
     onOpenEvent: (Event) -> Unit,
@@ -877,6 +883,7 @@ private fun DesktopAreaScreen(
                 onJoinUs = { openUrl(JOIN_US_URL) },
                 onDownload = {},
                 onDelete = {},
+                boostedMarkerColor = boostedMarkerColor,
                 modifier = Modifier.verticalScroll(rememberScrollState()),
             )
 

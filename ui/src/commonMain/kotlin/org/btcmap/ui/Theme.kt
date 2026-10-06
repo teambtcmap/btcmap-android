@@ -1,10 +1,8 @@
 package org.btcmap.ui
 
-import androidx.compose.material3.ColorScheme
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.darkColorScheme
-import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.staticCompositionLocalOf
@@ -19,8 +17,9 @@ val LocalIconFont = staticCompositionLocalOf<FontFamily?> { null }
 /**
  * The app-wide Material 3 theme.
  *
- * The color scheme comes from the platform — dynamic (Material You) colors on
- * Android, the system light/dark on desktop — and [iconFont] carries the
+ * The colour scheme is the app's own, generated from the brand seed (see
+ * [btcmapColorScheme]), so Android and the desktop render the same colours in
+ * both modes rather than the platform's dynamic palette. [iconFont] carries the
  * Material Symbols typeface the icon ligatures are drawn with.
  */
 @Composable
@@ -33,11 +32,7 @@ fun AppTheme(
     darkTheme: Boolean? = null,
     content: @Composable () -> Unit,
 ) {
-    val scheme = when (darkTheme) {
-        null -> platformColorScheme()
-        true -> darkColorScheme()
-        false -> lightColorScheme()
-    }
+    val scheme = btcmapColorScheme(darkTheme ?: isSystemInDarkTheme())
 
     CompositionLocalProvider(LocalIconFont provides iconFont) {
         MaterialTheme(colorScheme = scheme) {
@@ -51,7 +46,3 @@ fun AppTheme(
         }
     }
 }
-
-/** The color scheme for the current platform and light/dark setting. */
-@Composable
-expect fun platformColorScheme(): ColorScheme

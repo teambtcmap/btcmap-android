@@ -60,6 +60,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Show a place's opening hours as a week, one line per weekday with today underlined, instead of the raw OpenStreetMap value
 - Move the place action buttons directly below the photo carousel and give them icons
 - Load and show a place's photos in the desktop place sheet, matching Android
+- Rebuild the map search field on Material 3, with a spinner while a search runs and a message when it finds nothing
+- Keep the map still when the keyboard opens, and stop it turning black behind the keyboard
+- Draw boosted merchants in the settings' boosted marker colour on the area screen and in the search results
+- Theme the app from the `#1F2D61` brand seed on Android and desktop, replacing the wallpaper-based dynamic colours
+- Drop the fractional distance in search results beyond 10 km
 
 ## [1.2.0] - 2026-09-30
 

@@ -7,6 +7,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updatePadding
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.snackbar.Snackbar
@@ -51,9 +52,27 @@ class Activity : AppCompatActivity() {
 
         ViewCompat.setOnApplyWindowInsetsListener(binding.root) { view, windowInsets ->
             val ime = windowInsets.getInsets(WindowInsetsCompat.Type.ime()).bottom
-            view.updatePadding(bottom = ime)
+            // The map is full-bleed and draws its own controls, so padding it
+            // for the keyboard would shrink the map and shift its camera when
+            // the search field is focused. Only the other screens need to clear
+            // the keyboard.
+            val onMap = supportFragmentManager
+                .findFragmentById(R.id.fragmentContainerView) is MapFragment
+            view.updatePadding(bottom = if (onMap) 0 else ime)
             windowInsets
         }
+
+        // Whether the keyboard inset is applied depends on the current screen,
+        // and switching screens does not change the insets themselves, so
+        // re-dispatch them whenever one is shown.
+        supportFragmentManager.registerFragmentLifecycleCallbacks(
+            object : FragmentManager.FragmentLifecycleCallbacks() {
+                override fun onFragmentResumed(fm: FragmentManager, f: Fragment) {
+                    ViewCompat.requestApplyInsets(binding.root)
+                }
+            },
+            false,
+        )
 
         deliverDeepLink()
     }

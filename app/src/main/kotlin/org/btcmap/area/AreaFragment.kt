@@ -8,7 +8,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.compose.ui.graphics.Color as ComposeColor
-import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
@@ -44,6 +43,7 @@ import org.btcmap.i18n.getLocalizedName
 import org.btcmap.saved.isAreaSaved
 import org.btcmap.saved.toggleSavedArea
 import org.btcmap.settings.authorized
+import org.btcmap.settings.boostedMarkerBackgroundColor
 import org.btcmap.settings.prefs
 import org.btcmap.sync.SyncEvent
 import org.btcmap.syncController
@@ -149,7 +149,7 @@ class AreaFragment : Fragment() {
 
         binding.areaContent.apply {
             strings = requireContext().areaStrings()
-            bitcoinOrange = ComposeColor(ContextCompat.getColor(requireContext(), R.color.bitcoin_orange))
+            boostedMarkerColor = ComposeColor(prefs.boostedMarkerBackgroundColor())
             iconTypeface = typeface
             onOpenPlace = { placeId -> (activity as? Activity)?.openPlace(placeId) }
             onOpenEvent = { event -> navigateToEvent(event) }

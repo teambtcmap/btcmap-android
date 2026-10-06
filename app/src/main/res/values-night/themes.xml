@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!-- The dark roles of Theme.Btcmap; see values/themes.xml. -->
+<resources>
+
+    <style name="Theme.Btcmap" parent="Theme.Material3Expressive.DayNight.NoActionBar">
+        <item name="colorPrimary">#FFB7C4FF</item>
+        <item name="colorOnPrimary">#FF1F2D61</item>
+        <item name="colorPrimaryInverse">#FF4E5B92</item>
+        <item name="colorPrimaryContainer">#FF364479</item>
+        <item name="colorOnPrimaryContainer">#FFDDE1FF</item>
+        <item name="colorPrimaryFixed">#FFDDE1FF</item>
+        <item name="colorPrimaryFixedDim">#FFB7C4FF</item>
+        <item name="colorOnPrimaryFixed">#FF05164B</item>
+        <item name="colorOnPrimaryFixedVariant">#FF364479</item>
+        <item name="colorSecondary">#FFC2C5DD</item>
+        <item name="colorOnSecondary">#FF2C2F42</item>
+        <item name="colorSecondaryContainer">#FF424659</item>
+        <item name="colorOnSecondaryContainer">#FFDEE1F9</item>
+        <item name="colorSecondaryFixed">#FFDEE1F9</item>
+        <item name="colorSecondaryFixedDim">#FFC2C5DD</item>
+        <item name="colorOnSecondaryFixed">#FF171B2C</item>
+        <item name="colorOnSecondaryFixedVariant">#FF424659</item>
+        <item name="colorTertiary">#FFE4BAD9</item>
+        <item name="colorOnTertiary">#FF43273F</item>
+        <item name="colorTertiaryContainer">#FF5C3D56</item>
+        <item name="colorOnTertiaryContainer">#FFFFD7F4</item>
+        <item name="colorTertiaryFixed">#FFFFD7F4</item>
+        <item name="colorTertiaryFixedDim">#FFE4BAD9</item>
+        <item name="colorOnTertiaryFixed">#FF2C1229</item>
+        <item name="colorOnTertiaryFixedVariant">#FF5C3D56</item>
+        <item name="android:colorBackground">#FF121318</item>
+        <item name="colorOnBackground">#FFE3E1E9</item>
+        <item name="colorSurface">#FF121318</item>
+        <item name="colorOnSurface">#FFE3E1E9</item>
+        <item name="colorSurfaceVariant">#FF45464F</item>
+        <item name="colorOnSurfaceVariant">#FFC6C5D0</item>
+        <item name="colorSurfaceInverse">#FFE3E1E9</item>
+        <item name="colorOnSurfaceInverse">#FF2F3036</item>
+        <item name="colorSurfaceBright">#FF38393F</item>
+        <item name="colorSurfaceDim">#FF121318</item>
+        <item name="colorSurfaceContainer">#FF1F1F25</item>
+        <item name="colorSurfaceContainerLow">#FF1A1B21</item>
+        <item name="colorSurfaceContainerHigh">#FF292A2F</item>
+        <item name="colorSurfaceContainerLowest">#FF0D0E13</item>
+        <item name="colorSurfaceContainerHighest">#FF34343A</item>
+        <item name="colorOutline">#FF90909A</item>
+        <item name="colorOutlineVariant">#FF45464F</item>
+        <item name="colorError">#FFFFB4AB</item>
+        <item name="colorOnError">#FF690005</item>
+        <item name="colorErrorContainer">#FF93000A</item>
+        <item name="colorOnErrorContainer">#FFFFDAD6</item>
+    </style>
+
+</resources>

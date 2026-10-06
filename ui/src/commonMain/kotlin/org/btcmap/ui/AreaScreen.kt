@@ -136,7 +136,11 @@ fun AreaScreen(
     offlineDialog: AreaOfflineDialog? = null,
     onDismissOfflineDialog: () -> Unit = {},
     onConfirmOfflineDownload: (maxZoom: Int) -> Unit = {},
-    bitcoinOrange: Color = Color(0xFFF7931A),
+    /**
+     * The boosted marker colour from the user's settings, so the boosted
+     * merchants' list icons match their pins on the map.
+     */
+    boostedMarkerColor: Color = Color(0xFFF7931A),
     modifier: Modifier = Modifier,
 ) {
     val eventDateFormat = remember {
@@ -179,7 +183,7 @@ fun AreaScreen(
             boostedMerchants.forEach { place ->
                 AreaCard(
                     glyph = place.icon,
-                    iconTint = bitcoinOrange,
+                    iconTint = boostedMarkerColor,
                     title = place.getLocalizedName().takeIf { it.isNotBlank() },
                     subtitle = boostSubtitle(place.boostedUntil, boostDateFormat, strings),
                     tag = AREA_BOOSTED_CARD_TAG,

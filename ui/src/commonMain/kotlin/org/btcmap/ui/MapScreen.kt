@@ -78,6 +78,7 @@ import org.btcmap.ui.map.MarkerPalette
 import org.btcmap.ui.map.MerchantLayers
 import org.btcmap.ui.map.SearchActions
 import org.btcmap.ui.map.SearchOverlay
+import org.btcmap.ui.map.platformMapUiOptions
 import org.btcmap.ui.map.rememberSearchResults
 import org.btcmap.ui.map.rememberMapAreas
 import org.btcmap.ui.map.rememberReloadedPlace
@@ -587,6 +588,9 @@ fun MapScreen(
                 modifier = Modifier.fillMaxSize(),
                 state = state,
                 interactions = mapInteractions,
+                // Texture rendering on Android: the default Surface mode leaves
+                // the map blank after the view is resized (maplibre-compose#1121).
+                uiOptions = platformMapUiOptions(),
                 // The map would otherwise include MapOverlay.Default, its
                 // MapLibre logo and expanding attribution pill. The app draws
                 // its own attribution line below, as the Views map did.
@@ -783,7 +787,10 @@ fun MapScreen(
             SearchOverlay(
                 query = searchQuery,
                 onQueryChange = { searchQuery = it },
-                results = searchResults,
+                results = searchResults.items,
+                loading = searchResults.loading,
+                active = searchResults.active,
+                boostedMarkerColor = palette.boostedMarkerBackground,
                 onResultClick = onSearchResultClick,
                 actions = mapSearchActions,
                 addLocationLabels = addLocationLabels,

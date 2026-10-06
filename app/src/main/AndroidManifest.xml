@@ -34,7 +34,7 @@
         android:icon="${appIcon}"
         android:label="${appName}"
         android:supportsRtl="true"
-        android:theme="@style/Theme.Material3Expressive.DynamicColors.DayNight.NoActionBar">
+        android:theme="@style/Theme.Btcmap">
 
         <activity
             android:name="org.btcmap.Activity"
