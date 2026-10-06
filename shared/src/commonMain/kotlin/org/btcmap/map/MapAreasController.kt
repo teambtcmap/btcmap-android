@@ -23,8 +23,8 @@ import kotlin.time.Clock
 import kotlin.time.Instant
 
 /**
- * Finds the communities and countries containing the map centre in the local
- * cache, so panning the map costs no network round trip and works offline.
+ * Finds the communities, countries and cities containing the map centre in the
+ * local cache, so panning the map costs no network round trip and works offline.
  *
  * Areas are synced in full by [org.btcmap.sync.Sync], and their cached GeoJSON is
  * tested with the same bbox pre-filter and point-in-polygon rules the server
@@ -91,7 +91,7 @@ class MapAreasController(
             east = lon + BBOX_EXPANSION,
             north = lat + BBOX_EXPANSION,
         )
-            .filter { it.type == COMMUNITY_TYPE || it.type == COUNTRY_TYPE }
+            .filter { it.type in CHIP_TYPES }
             .filter { it.urlAlias != EARTH_ALIAS }
             .mapNotNull { area ->
                 val geometry = geometryFor(area)
@@ -101,8 +101,9 @@ class MapAreasController(
         if (contained.isEmpty()) return emptyList()
 
         val counts = upcomingEventCounts(contained)
-        // Countries lead the chips as the broader context; the sort is stable,
-        // so communities keep the order they came back in.
+        // Countries lead the chips as the broader context, then communities,
+        // then cities; the sort is stable, so areas of a type keep the order
+        // they came back in.
         return contained.map { (area, _) ->
             MapArea(
                 id = area.id,
@@ -112,7 +113,7 @@ class MapAreasController(
                 upcomingEventsCount = counts[area.id] ?: 0,
                 headerImageUrl = area.iconWide ?: area.icon,
             )
-        }.sortedBy { if (it.type == COUNTRY_TYPE) 0 else 1 }
+        }.sortedBy { CHIP_ORDER.indexOf(it.type) }
     }
 
     private fun geometryFor(area: Area): AreaGeometry {
@@ -156,6 +157,11 @@ class MapAreasController(
 
         private const val COMMUNITY_TYPE = "community"
         private const val COUNTRY_TYPE = "country"
+        private const val CITY_TYPE = "city"
+
+        /** The area types that get a chip, in the order the chips stack. */
+        private val CHIP_ORDER = listOf(COUNTRY_TYPE, COMMUNITY_TYPE, CITY_TYPE)
+        private val CHIP_TYPES = CHIP_ORDER.toSet()
 
         // The whole-world area would contain every point; the server skips it.
         private const val EARTH_ALIAS = "earth"

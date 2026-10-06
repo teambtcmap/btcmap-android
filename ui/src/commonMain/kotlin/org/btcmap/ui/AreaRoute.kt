@@ -35,6 +35,8 @@ import org.btcmap.offline.OfflineAreaState
 import org.btcmap.offline.OfflineBounds
 import org.btcmap.saved.SavedItems
 import org.btcmap.settings.authorized
+import org.btcmap.settings.mapStyle
+import org.btcmap.ui.map.CITY_AREA_TYPE
 import org.btcmap.util.rethrowIfCancellation
 
 private const val JOIN_US_URL = "https://btcmap.org/join-us"
@@ -109,6 +111,13 @@ internal fun AreaRoute(
 
     val name = loaded.getLocalizedName()
     val bounds = loaded.offlineBounds()
+    // Resolved from the current setting, so a pack downloaded after the user
+    // changes the map style uses that style's hosted URL, and a pack from an
+    // earlier style is reported as a mismatch.
+    val offlineStyleUrl = services.offlineStyleUrlFor(services.settings.mapStyle)
+    // A city's website is its generated btcmap.org page, which adds nothing to
+    // the screen, so the row is hidden for cities only.
+    val showWebsite = loaded.type != CITY_AREA_TYPE
 
     ScreenPage(
         title = name,
@@ -146,8 +155,8 @@ internal fun AreaRoute(
     ) {
         AreaScreen(
             description = loaded.getLocalizedDescription(),
-            websiteText = websiteDisplayText(loaded.websiteUrl),
-            onOpenWebsite = if (loaded.websiteUrl.isNotBlank()) {
+            websiteText = if (showWebsite) websiteDisplayText(loaded.websiteUrl) else null,
+            onOpenWebsite = if (showWebsite && loaded.websiteUrl.isNotBlank()) {
                 { platform.openUrl(loaded.websiteUrl) }
             } else {
                 null
@@ -156,7 +165,9 @@ internal fun AreaRoute(
             events = events,
             issues = issues,
             offlineState = packed ?: OfflineAreaState.None,
-            offlineStyleMatches = services.offlineStyleMatches,
+            offlineStyleMatches = { downloaded ->
+                services.offlineStyleMatches(offlineStyleUrl, downloaded)
+            },
             strings = labels.area,
             onOpenPlace = platform::openPlace,
             onOpenEvent = onOpenEvent,
@@ -182,7 +193,7 @@ internal fun AreaRoute(
                         areaId = loaded.id,
                         areaName = name,
                         bounds = region,
-                        styleUrl = services.offlineStyleUrl,
+                        styleUrl = offlineStyleUrl,
                         maxZoom = maxZoom,
                     )
                 }

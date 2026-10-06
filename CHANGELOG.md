@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+- Apply a map style change immediately instead of only after a restart: the map, its offline packs, the attribution line and the system-bar icons now all follow the newly picked style
+- Fix the basemap rendering blank over regions whose labels need CJK or Hangul glyphs (for example Beijing or Seoul): the unbundled glyph ranges are fetched online, falling back to an empty range offline so the tiles still draw
+- Show cities in the map's area chips, below countries and communities, and give cities a city-buildings icon in both the chips and the search results
+- Jump straight to a search result instead of animating across the distance, and leave search mode once a result is picked
+- Change the map search field's hint to "Places, events, areas"
+- Hide the website row on the city area screen
 - Move every screen into the shared Compose Multiplatform UI: the Android app now hosts one Compose root instead of the Views fragments, dialog fragments and XML layouts, so Android and the desktop render the same screens from `:ui`
 - Show the area's header image as a plain header in the body instead of the collapsing toolbar
 - Make the area screen's website address tappable, and list its upcoming events above the boosted merchants

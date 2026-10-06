@@ -99,6 +99,28 @@ class MapSearchTest {
     }
 
     @Test
+    fun cityArea_getsCityIcon() = runBlocking<Unit> {
+        val db = database()
+        db.area.insert(listOf(area(id = 1L, name = "Paris", type = "city")))
+
+        val item = search(db, "paris").single()
+
+        assertTrue(item is SearchAdapterItem.Area)
+        assertEquals("location_city", item.icon)
+    }
+
+    @Test
+    fun nonCityArea_keepsTheGlobeIcon() = runBlocking<Unit> {
+        val db = database()
+        db.area.insert(listOf(area(id = 1L, name = "Grand Paris", type = "community")))
+
+        val item = search(db, "paris").single()
+
+        assertTrue(item is SearchAdapterItem.Area)
+        assertEquals("public", item.icon)
+    }
+
+    @Test
     fun exactNameMatch_ranksAboveSubstring() = runBlocking<Unit> {
         // The exact match is farther away; ranking must still float it first.
         val db = database()
@@ -167,10 +189,10 @@ class MapSearchTest {
         endsAt = null,
     )
 
-    private fun area(id: Long, name: String) = Area(
+    private fun area(id: Long, name: String, type: String = "community") = Area(
         id = id,
         name = name,
-        type = "community",
+        type = type,
         urlAlias = "grand-paris",
         icon = "https://static.example/icon.png",
         iconWide = null,

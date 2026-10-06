@@ -56,7 +56,7 @@ fun SearchOverlay(
     results: List<SearchAdapterItem>,
     onResultClick: (SearchAdapterItem) -> Unit,
     modifier: Modifier = Modifier,
-    placeholder: String = "Search",
+    placeholder: String = "Places, events, areas",
     actions: SearchActions? = null,
     addLocationLabels: AddLocationLabels = AddLocationLabels(
         addPlace = "Add a place",

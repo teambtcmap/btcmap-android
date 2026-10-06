@@ -34,6 +34,7 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.dp
@@ -443,6 +444,7 @@ fun MapScreen(
     }
 
     var searchQuery by remember { mutableStateOf("") }
+    val searchFocusManager = LocalFocusManager.current
     val searchResults = rememberSearchResults(
         db = db,
         state = state,
@@ -451,20 +453,26 @@ fun MapScreen(
     )
     val onSearchResultClick: (SearchAdapterItem) -> Unit = { result ->
         searchQuery = ""
+        // Leave search mode: drop focus so the keyboard closes and the field's
+        // resting actions come back.
+        searchFocusManager.clearFocus()
         when (result) {
             is SearchAdapterItem.Place -> scope.launch {
                 withContext(Dispatchers.Default) { db.place.selectById(result.placeId) }?.let { place ->
                     selectedPlace = place
                     markerKind = if (place.isMerchant()) MarkerKind.Merchants else MarkerKind.Exchanges
                     onPlaceSelected(place)
-                    // A search result can be anywhere, so the map moves to it
-                    // rather than only opening its sheet.
-                    state.animateCamera(
-                        CameraUpdate(
-                            target = Position(place.lon, place.lat),
-                            zoom = OPEN_ZOOM,
-                        ),
-                    )
+                    // A search result can be anywhere, so the map jumps straight
+                    // to it rather than only opening its sheet; the current
+                    // bearing and tilt are kept, as an animated move would.
+                    state.cameraPosition?.let { current ->
+                        state.setCameraPosition(
+                            current.copy(
+                                target = Position(place.lon, place.lat),
+                                zoom = OPEN_ZOOM,
+                            ),
+                        )
+                    }
                 }
             }
 
@@ -475,12 +483,14 @@ fun MapScreen(
 
             // A search result frames the area on the map, as the Views map did;
             // the area screen stays one tap away on the chip that appears. An
-            // area without a bbox has nothing to frame, so it opens instead.
+            // area without a bbox has nothing to frame, so it opens instead. A
+            // result can be a continent away, so the camera jumps rather than
+            // flying there.
             is SearchAdapterItem.Area -> {
                 val bbox = result.bbox
                 if (bbox != null && bbox.size == 4) {
                     scope.launch {
-                        state.animateCameraToBounds(
+                        state.fitCameraToBounds(
                             BoundingBox(
                                 west = bbox[0],
                                 south = bbox[1],

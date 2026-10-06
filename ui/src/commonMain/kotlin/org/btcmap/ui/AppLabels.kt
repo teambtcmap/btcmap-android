@@ -1,6 +1,5 @@
 package org.btcmap.ui
 
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
 import org.btcmap.api.ActivityFeedItem
 import org.btcmap.imagestats.ImageStatsLabels
@@ -84,7 +83,6 @@ data class AppLabels(
     val addLocation: org.btcmap.ui.map.AddLocationLabels,
     /** The map's OpenStreetMap attribution line. */
     val osmAttribution: String,
-    val osmAttributionColor: Color,
     /** Formats a distance in metres for the map's search results. */
     val formatDistance: (Double) -> String,
 )

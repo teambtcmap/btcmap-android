@@ -32,7 +32,6 @@ import kotlin.math.sqrt
 private const val MIN_QUERY_LENGTH = 3
 private const val MAX_RESULTS = 20
 private const val SEARCH_DEBOUNCE_MS = 300L
-private const val AREA_ICON = "public"
 
 /** The search results, whether a search is running, and whether the query is
  * long enough that one has been run (so "no results" can be told apart from
@@ -112,7 +111,7 @@ internal fun search(
                 bbox = bbox,
                 iconUrl = area.icon,
                 headerImageUrl = area.iconWide ?: area.icon,
-                icon = AREA_ICON,
+                icon = areaIcon(area.type),
                 name = area.getLocalizedName(),
                 distanceToUser = distance,
             )

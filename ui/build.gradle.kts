@@ -51,6 +51,8 @@ kotlin {
         }
 
         androidMain.dependencies {
+            // WindowCompat, for the system-bar icon appearance over the map.
+            implementation(libs.androidx.core)
             runtimeOnly(libs.maplibre.compose.runtime.opengl.android)
         }
 

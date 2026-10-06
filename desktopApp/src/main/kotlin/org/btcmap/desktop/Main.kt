@@ -99,6 +99,7 @@ import org.btcmap.settings.Settings
 import org.btcmap.settings.apiUrl
 import org.btcmap.settings.authorized
 import org.btcmap.settings.bundledStyleAsset
+import org.btcmap.settings.isDark
 import org.btcmap.settings.mapRotationEnabled
 import org.btcmap.settings.mapStyle
 import org.maplibre.compose.resource.MapResourceProvider
@@ -326,7 +327,7 @@ private fun runApp() = application {
                     val styleJson = remember(styleAsset) { bundledStyleJson(styleAsset) }
                     // The attribution colour follows the map style's light/dark
                     // tone, shared by the main map and the add-place map.
-                    val attributionColor = if (darkTheme) {
+                    val attributionColor = if (settings.mapStyle.isDark(darkTheme)) {
                         Color.White
                     } else {
                         Color.Black.copy(alpha = 0.8f)

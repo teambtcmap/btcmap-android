@@ -1,5 +1,6 @@
 package org.btcmap.ui
 
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.imePadding
@@ -25,6 +26,8 @@ import org.btcmap.dbstats.BundleStats
 import org.btcmap.map.toEventGeoJson
 import org.btcmap.place.submitReport
 import org.btcmap.settings.authorized
+import org.btcmap.settings.isDark
+import org.btcmap.settings.mapStyle
 import org.btcmap.sync.SyncState
 import org.btcmap.ui.map.EventMiniMap
 
@@ -80,6 +83,24 @@ fun AppRoot(
         // The keyboard inset is applied to every screen except the map: the map
         // is full-bleed and moving its top edge would shift the camera.
         val route = nav.current
+        // Resolved from the current setting on every recomposition of the root,
+        // so returning from the settings screen after a style change rebuilds
+        // the maps with the newly picked style.
+        val mapStyle = services.rememberMapStyle()
+
+        // The system bars overlay the current screen. The map is full-bleed and
+        // can be a light style in a dark app, so its own style decides the icon
+        // tint there; every other screen paints the theme background, which
+        // already matches the platform's choice.
+        val systemDark = isSystemInDarkTheme()
+        PlatformSystemBarIcons(
+            light = if (route == AppRoute.Map) {
+                services.settings.mapStyle.isDark(systemDark)
+            } else {
+                systemDark
+            },
+        )
+
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -129,8 +150,8 @@ fun AppRoot(
                     EventMiniMap(
                         lat = event.lat,
                         lon = event.lon,
-                        styleUrl = services.styleUrl,
-                        styleJson = services.styleJson,
+                        styleUrl = mapStyle.url,
+                        styleJson = mapStyle.json,
                         palette = markerPalette(services.settings),
                         modifier = mapModifier,
                     )
@@ -193,8 +214,8 @@ fun AppRoot(
                 EventScreen(
                     event = route.event,
                     geoJson = listOf(route.event).toEventGeoJson(),
-                    styleUrl = services.styleUrl,
-                    styleJson = services.styleJson,
+                    styleUrl = mapStyle.url,
+                    styleJson = mapStyle.json,
                     palette = markerPalette(services.settings),
                     iconFont = services.iconFont,
                     usingOpenFreeMap = services.usingOpenFreeMap,
@@ -205,8 +226,8 @@ fun AppRoot(
             is AppRoute.AddPlace -> AddPlaceScreen(
                 lat = route.lat,
                 lon = route.lon,
-                styleUrl = services.styleUrl,
-                styleJson = services.styleJson,
+                styleUrl = mapStyle.url,
+                styleJson = mapStyle.json,
                 labels = labels.addPlace,
                 iconFont = services.iconFont,
                 palette = markerPalette(services.settings),
@@ -227,8 +248,8 @@ fun AppRoot(
             is AppRoute.AddEvent -> AddEventScreen(
                 lat = route.lat,
                 lon = route.lon,
-                styleUrl = services.styleUrl,
-                styleJson = services.styleJson,
+                styleUrl = mapStyle.url,
+                styleJson = mapStyle.json,
                 labels = labels.addEvent,
                 iconFont = services.iconFont,
                 palette = markerPalette(services.settings),
@@ -391,6 +412,7 @@ private fun UserProfileRoute(
 ) {
     var showUploadedImages by remember { mutableStateOf(false) }
     var showMyEvents by remember { mutableStateOf(false) }
+    val mapStyle = services.rememberMapStyle()
 
     ScreenPage(
         title = when {
@@ -415,8 +437,8 @@ private fun UserProfileRoute(
             formLabels = labels.profileForm,
             imagesLabels = labels.uploadedImages,
             eventsLabels = labels.myEvents,
-            mapStyleUrl = services.styleUrl,
-            mapStyleJson = services.styleJson,
+            mapStyleUrl = mapStyle.url,
+            mapStyleJson = mapStyle.json,
             showUploadedImages = showUploadedImages,
             onShowUploadedImagesChange = { showUploadedImages = it },
             showMyEvents = showMyEvents,

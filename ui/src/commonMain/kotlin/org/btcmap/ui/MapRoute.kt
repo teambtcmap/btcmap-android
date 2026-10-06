@@ -1,5 +1,6 @@
 package org.btcmap.ui
 
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -9,6 +10,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.btcmap.account.canManageEvents
@@ -29,9 +31,11 @@ import org.btcmap.platform.ioDispatcher
 import org.btcmap.saved.SavedItems
 import org.btcmap.settings.apiUrl
 import org.btcmap.settings.authorized
+import org.btcmap.settings.isDark
 import org.btcmap.settings.mapCenterLat
 import org.btcmap.settings.mapCenterLon
 import org.btcmap.settings.mapRotationEnabled
+import org.btcmap.settings.mapStyle
 import org.btcmap.settings.mapZoom
 import org.btcmap.settings.showAttribution
 import org.btcmap.settings.verifiedFilterMinVerifiedAt
@@ -147,10 +151,16 @@ internal fun MapRoute(
         }
     }
 
+    val mapStyle = services.rememberMapStyle()
+    // The attribution sits on the map itself, so its colour follows the style's
+    // brightness rather than the app theme: a light style in a dark app still
+    // needs dark text.
+    val mapIsDark = services.settings.mapStyle.isDark(isSystemInDarkTheme())
+
     MapScreen(
         db = services.db,
-        styleUrl = services.styleUrl,
-        styleJson = services.styleJson,
+        styleUrl = mapStyle.url,
+        styleJson = mapStyle.json,
         initialLat = services.settings.mapCenterLat,
         initialLon = services.settings.mapCenterLon,
         initialZoom = services.settings.mapZoom,
@@ -196,7 +206,7 @@ internal fun MapRoute(
         updateVisible = updateAvailable,
         onUpdateClick = { platform.showUpdateDialog() },
         attributionText = labels.osmAttribution,
-        attributionTextColor = labels.osmAttributionColor,
+        attributionTextColor = if (mapIsDark) Color.White else Color.Black.copy(alpha = 0.8f),
         onCameraIdle = { lat, lon, zoom ->
             services.settings.mapCenterLat = lat
             services.settings.mapCenterLon = lon

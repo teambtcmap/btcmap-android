@@ -129,10 +129,14 @@ var Settings.mapRotationEnabled: Boolean
         putBoolean(KEY_MAP_ROTATION_ENABLED, value)
     }
 
-/** Whether the picked map style draws a dark basemap. */
-fun Settings.mapStyleIsDark(): Boolean = when (mapStyle) {
+/**
+ * Whether [this] style draws a dark basemap. [MapStyle.Auto] follows the system
+ * theme, so the caller tells us whether the system is in dark mode.
+ */
+fun MapStyle.isDark(darkSystemTheme: Boolean): Boolean = when (this) {
     MapStyle.Dark, MapStyle.DarkMatter -> true
-    MapStyle.Auto, MapStyle.Liberty, MapStyle.Positron, MapStyle.Bright -> false
+    MapStyle.Auto -> darkSystemTheme
+    MapStyle.Liberty, MapStyle.Positron, MapStyle.Bright -> false
 }
 
 private const val KEY_VERIFIED_FILTER_YEARS = "verified_filter_years"

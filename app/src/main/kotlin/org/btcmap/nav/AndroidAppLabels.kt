@@ -3,8 +3,6 @@ package org.btcmap.nav
 import android.content.Context
 import android.text.format.Formatter
 import androidx.annotation.StringRes
-import androidx.compose.ui.graphics.Color
-import androidx.core.content.ContextCompat
 import org.btcmap.R
 import org.btcmap.area.areaStrings
 import org.btcmap.boost.BoostPlan
@@ -337,9 +335,6 @@ internal fun Context.androidAppLabels(): AppLabels = AppLabels(
         addEvent = getString(R.string.add_event),
     ),
     osmAttribution = getString(R.string.osm_attribution),
-    osmAttributionColor = Color(
-        ContextCompat.getColor(this@androidAppLabels, R.color.osm_attribution_text),
-    ),
     formatDistance = { meters ->
         val format = NumberFormat.getNumberInstance().apply {
             // Beyond 10 km the fraction is noise.

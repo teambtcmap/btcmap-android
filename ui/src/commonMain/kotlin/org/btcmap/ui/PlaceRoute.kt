@@ -102,6 +102,7 @@ internal fun PlaceRoute(
     val name = loaded.getLocalizedName()
     val osmUrl = loaded.osmUrl()
     val osmEditUrl = loaded.osmEditUrl()
+    val mapStyle = services.rememberMapStyle()
 
     fun toggleSaved() {
         if (!services.settings.authorized) {
@@ -260,8 +261,8 @@ internal fun PlaceRoute(
                         lat = loaded.lat,
                         lon = loaded.lon,
                         marker = loaded.toMarker(),
-                        styleUrl = services.styleUrl,
-                        styleJson = services.styleJson,
+                        styleUrl = mapStyle.url,
+                        styleJson = mapStyle.json,
                         palette = markerPalette(services.settings),
                         usingOpenFreeMap = services.usingOpenFreeMap,
                         iconFont = services.iconFont,

@@ -18,6 +18,7 @@ typealias SearchArea = AreaSearchProjection
 data class AreaSearchProjection(
     val id: Long,
     val name: String,
+    val type: String,
     val localizedName: JsonObject?,
     val icon: String?,
     val iconWide: String?,
@@ -28,20 +29,21 @@ data class AreaSearchProjection(
 ) {
     companion object {
         const val COLUMNS =
-            "$ID, $NAME, $LOCALIZED_NAME, $ICON, $ICON_WIDE, " +
+            "$ID, $NAME, $TYPE, $LOCALIZED_NAME, $ICON, $ICON_WIDE, " +
                 "$BBOX_WEST, $BBOX_SOUTH, $BBOX_EAST, $BBOX_NORTH"
 
         fun fromStatement(stmt: SQLiteStatement): AreaSearchProjection {
             return AreaSearchProjection(
                 id = stmt.getLong(0),
                 name = stmt.getText(1),
-                localizedName = stmt.getJsonObjectOrNull(2),
-                icon = stmt.getTextOrNull(3),
-                iconWide = stmt.getTextOrNull(4),
-                bboxWest = stmt.getDoubleOrNull(5),
-                bboxSouth = stmt.getDoubleOrNull(6),
-                bboxEast = stmt.getDoubleOrNull(7),
-                bboxNorth = stmt.getDoubleOrNull(8),
+                type = stmt.getText(2),
+                localizedName = stmt.getJsonObjectOrNull(3),
+                icon = stmt.getTextOrNull(4),
+                iconWide = stmt.getTextOrNull(5),
+                bboxWest = stmt.getDoubleOrNull(6),
+                bboxSouth = stmt.getDoubleOrNull(7),
+                bboxEast = stmt.getDoubleOrNull(8),
+                bboxNorth = stmt.getDoubleOrNull(9),
             )
         }
     }

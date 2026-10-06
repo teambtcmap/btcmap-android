@@ -20,11 +20,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import org.btcmap.map.MapArea
+import org.btcmap.ui.MaterialSymbol
 
 /**
- * The communities and countries containing the map centre, shown as chips above
- * the map, ported from `org.btcmap.map.AreasAdapter`. The chip image comes from
- * the API; its initials stay behind it until (and unless) the image loads.
+ * The countries, communities and cities containing the map centre, shown as
+ * chips above the map, ported from `org.btcmap.map.AreasAdapter`. The chip image
+ * comes from the API; behind it a country or community shows its initials and a
+ * city its [areaIcon] glyph, until (and unless) the image loads.
  */
 @Composable
 fun AreaChips(
@@ -83,11 +85,19 @@ private fun AreaChip(
                 .background(palette.buttonBackground),
             contentAlignment = Alignment.Center,
         ) {
-            Text(
-                text = areaInitials(area),
-                color = palette.buttonIcon,
-                fontSize = 20.sp,
-            )
+            if (area.type == CITY_AREA_TYPE) {
+                MaterialSymbol(
+                    glyph = areaIcon(area.type),
+                    contentDescription = null,
+                    tint = palette.buttonIcon,
+                )
+            } else {
+                Text(
+                    text = areaInitials(area),
+                    color = palette.buttonIcon,
+                    fontSize = 20.sp,
+                )
+            }
             AsyncImage(
                 model = "$apiUrl/v4/areas/${area.id}/image?type=square&w=256&h=256",
                 contentDescription = null,

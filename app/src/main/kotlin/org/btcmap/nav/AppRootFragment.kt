@@ -22,13 +22,13 @@ import org.btcmap.databinding.AppRootFragmentBinding
 import org.btcmap.db
 import org.btcmap.db.table.event.Event
 import org.btcmap.event.toEvent
-import org.btcmap.settings.mapStyle
 import org.btcmap.settings.offlineStyleFamily
 import org.btcmap.settings.offlineStyleUrl
 import org.btcmap.settings.prefs
 import org.btcmap.settings.uri
 import org.btcmap.ui.AppRoute
 import org.btcmap.ui.AppServices
+import org.btcmap.ui.MapStyleSpec
 import org.btcmap.ui.key
 import org.btcmap.ui.map.bundledStyleJsonFor
 import org.btcmap.util.iconTypeface
@@ -97,8 +97,6 @@ class AppRootFragment : Fragment() {
         // A test style pinned by the app is hosted, so it has no bundled JSON and
         // does not carry OpenFreeMap's label font.
         val testStyle = app.mapStyleUriForTesting
-        val styleUrl = testStyle ?: prefs.mapStyle.uri(context)
-        val offlineStyleUrl = prefs.mapStyle.offlineStyleUrl(context)
 
         binding.appRoot.apply {
             services = AppServices(
@@ -114,13 +112,19 @@ class AppRootFragment : Fragment() {
                     versionCode = org.btcmap.BuildConfig.VERSION_CODE,
                 ),
                 offlinePacks = app.offlinePacks,
-                offlineStyleUrl = offlineStyleUrl,
-                offlineStyleMatches = { downloaded ->
-                    offlineStyleFamily(downloaded) == offlineStyleFamily(offlineStyleUrl)
+                offlineStyleUrlFor = { style -> style.offlineStyleUrl(context) },
+                offlineStyleMatches = { selected, downloaded ->
+                    offlineStyleFamily(downloaded) == offlineStyleFamily(selected)
                 },
-                styleUrl = styleUrl,
-                styleJson = if (testStyle == null) bundledStyleJsonFor(context, styleUrl) else null,
                 usingOpenFreeMap = testStyle == null,
+                styleFor = { style ->
+                    if (testStyle != null) {
+                        MapStyleSpec(testStyle, null)
+                    } else {
+                        val url = style.uri(context)
+                        MapStyleSpec(url, bundledStyleJsonFor(context, url))
+                    }
+                },
                 iconFont = iconTypeface?.let { FontFamily(it) },
             )
             platform = AndroidAppPlatform(
