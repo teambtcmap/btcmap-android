@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+- Support large screens across the account flow: the signed-in profile and its edit forms stay in a centred column instead of stretching across a wide window, and the sign-in form is capped, headed and centred
+- Label the account form's password-visibility control for screen readers, and keep its submit button tappable so the required-field messages appear
 - Cap the map search field and its results at the place sheet's width and centre them, so they no longer stretch across a large screen
 - Follow OS dark-mode changes in the running desktop app on Linux instead of keeping the launch-time theme until a restart
 - Apply a map style change immediately instead of only after a restart: the map, its offline packs, the attribution line and the system-bar icons now all follow the newly picked style

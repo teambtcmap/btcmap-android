@@ -68,6 +68,10 @@ fun AuthFormContent(
         bottom = 16.dp,
     ),
     fieldSpacing: Dp = 16.dp,
+    /** Announced by a hidden password's toggle; it turns the field visible. */
+    showPassword: String = "Show password",
+    /** Announced by a visible password's toggle; it masks the field again. */
+    hidePassword: String = "Hide password",
 ) {
     Column(modifier = modifier.padding(contentPadding)) {
         fields.forEachIndexed { index, field ->
@@ -109,7 +113,7 @@ fun AuthFormContent(
                         IconButton(onClick = { visible = !visible }) {
                             MaterialSymbol(
                                 glyph = if (visible) "visibility_off" else "visibility",
-                                contentDescription = null,
+                                contentDescription = if (visible) hidePassword else showPassword,
                             )
                         }
                     }

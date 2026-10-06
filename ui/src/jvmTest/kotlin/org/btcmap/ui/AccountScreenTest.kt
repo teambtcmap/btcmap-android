@@ -2,7 +2,7 @@ package org.btcmap.ui
 
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertIsDisplayed
-import androidx.compose.ui.test.assertIsNotEnabled
+import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -28,6 +28,8 @@ class AccountScreenTest {
         alreadyHaveAccount = "I already have an account",
         createAnAccount = "Create an account",
         accountCreated = "Account created. Please sign in.",
+        showPassword = "Show password",
+        hidePassword = "Hide password",
     )
 
     @OptIn(ExperimentalTestApi::class)
@@ -46,7 +48,7 @@ class AccountScreenTest {
             }
             onNodeWithText("Username").assertIsDisplayed()
             onNodeWithText("Password").assertIsDisplayed()
-            onNodeWithText("Sign in").assertIsNotEnabled()
+            onNodeWithTag(ACCOUNT_SUBMIT_TAG).assertIsEnabled()
         }
     }
 
@@ -67,7 +69,7 @@ class AccountScreenTest {
             // The sign-up form adds the confirmation field.
             onNodeWithTag(ACCOUNT_TOGGLE_TAG).performClick()
             onNodeWithText("Confirm password").assertIsDisplayed()
-            onNodeWithText("Create account").assertIsNotEnabled()
+            onNodeWithTag(ACCOUNT_SUBMIT_TAG).assertIsEnabled()
 
             // A too-short password and a mismatch are both reported, and the
             // request never runs.

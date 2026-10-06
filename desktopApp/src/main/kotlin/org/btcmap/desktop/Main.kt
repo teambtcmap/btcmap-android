@@ -1484,6 +1484,8 @@ private val ACCOUNT_LABELS = AccountLabels(
     alreadyHaveAccount = "I already have an account",
     createAnAccount = "Create an account",
     accountCreated = "Account created. Please sign in.",
+    showPassword = "Show password",
+    hidePassword = "Hide password",
 )
 
 private val REPORT_LABELS = ReportPlaceLabels(

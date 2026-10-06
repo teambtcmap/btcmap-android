@@ -129,6 +129,8 @@
     <string name="passwords_do_not_match">Passwords don\'t match</string>
     <string name="field_required">Required</string>
     <string name="password_mask" translatable="false">••••••••</string>
+    <string name="show_password">Show password</string>
+    <string name="hide_password">Hide password</string>
     <string name="profile">Profile</string>
     <string name="change_username">Change username</string>
     <string name="new_username">New username</string>

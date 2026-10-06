@@ -1,5 +1,6 @@
 package org.btcmap.ui
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -60,8 +61,9 @@ internal fun AuthDialog(
             color = MaterialTheme.colorScheme.surface,
         ) {
             Column(
+                verticalArrangement = Arrangement.spacedBy(16.dp),
                 modifier = Modifier
-                    .widthIn(max = 420.dp)
+                    .widthIn(max = AUTH_FORM_MAX_WIDTH)
                     .fillMaxWidth()
                     .verticalScroll(rememberScrollState())
                     .padding(24.dp),

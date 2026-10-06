@@ -226,50 +226,54 @@ fun ProfileScreen(
                     modifier = Modifier.padding(16.dp),
                 )
             }
-            UserProfileScreen(
-                state = UserProfileUiState(
-                    username = current.name,
-                    password = formLabels.passwordMask,
-                    savedPlaces = current.savedPlaces.map { SavedItemUi(it.id, it.name) },
-                    savedAreas = current.savedAreas.map { SavedItemUi(it.id, it.name) },
-                    labels = profileLabels,
-                ),
-                onEditUsername = {
-                    message = null
-                    editing = ProfileEdit.Username
-                },
-                onEditPassword = {
-                    message = null
-                    editing = ProfileEdit.Password
-                },
-                onOpenUploadedImages = {
-                    message = null
-                    onShowUploadedImagesChange(true)
-                },
-                onOpenMyEvents = {
-                    message = null
-                    onShowMyEventsChange(true)
-                },
-                onDeletePlace = { id ->
-                    scope.launch {
-                        SavedItems.removePlace(api, db, id)
-                        reload()
-                    }
-                },
-                onDeleteArea = { id ->
-                    scope.launch {
-                        SavedItems.removeArea(api, db, id)
-                        reload()
-                    }
-                },
-                onLogOut = {
-                    scope.launch {
-                        logOut(api, db, settings)
-                        onLoggedOut()
-                    }
-                },
+            ContentColumn(
                 modifier = Modifier.weight(1f),
-            )
+                maxWidth = CONTENT_MAX_WIDTH,
+            ) {
+                UserProfileScreen(
+                    state = UserProfileUiState(
+                        username = current.name,
+                        password = formLabels.passwordMask,
+                        savedPlaces = current.savedPlaces.map { SavedItemUi(it.id, it.name) },
+                        savedAreas = current.savedAreas.map { SavedItemUi(it.id, it.name) },
+                        labels = profileLabels,
+                    ),
+                    onEditUsername = {
+                        message = null
+                        editing = ProfileEdit.Username
+                    },
+                    onEditPassword = {
+                        message = null
+                        editing = ProfileEdit.Password
+                    },
+                    onOpenUploadedImages = {
+                        message = null
+                        onShowUploadedImagesChange(true)
+                    },
+                    onOpenMyEvents = {
+                        message = null
+                        onShowMyEventsChange(true)
+                    },
+                    onDeletePlace = { id ->
+                        scope.launch {
+                            SavedItems.removePlace(api, db, id)
+                            reload()
+                        }
+                    },
+                    onDeleteArea = { id ->
+                        scope.launch {
+                            SavedItems.removeArea(api, db, id)
+                            reload()
+                        }
+                    },
+                    onLogOut = {
+                        scope.launch {
+                            logOut(api, db, settings)
+                            onLoggedOut()
+                        }
+                    },
+                )
+            }
         }
     }
 }
@@ -287,7 +291,12 @@ fun ChangeUsernameForm(
     var error by remember { mutableStateOf<String?>(null) }
     val scope = rememberCoroutineScope()
 
-    Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
+    ContentColumn(
+        maxWidth = CONTENT_MAX_WIDTH,
+        scroll = true,
+        margin = true,
+        modifier = Modifier.padding(vertical = 16.dp),
+    ) {
         Text(text = labels.changeUsernameTitle, style = MaterialTheme.typography.titleLarge)
         OutlinedTextField(
             value = name,
@@ -364,7 +373,12 @@ fun ChangePasswordForm(
     val newError = newTooShort || errors.contains(AuthError.PasswordRequired)
     val confirmError = errors.contains(AuthError.PasswordsDoNotMatch)
 
-    Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
+    ContentColumn(
+        maxWidth = CONTENT_MAX_WIDTH,
+        scroll = true,
+        margin = true,
+        modifier = Modifier.padding(vertical = 16.dp),
+    ) {
         Text(text = labels.changePasswordTitle, style = MaterialTheme.typography.titleLarge)
         OutlinedTextField(
             value = current,

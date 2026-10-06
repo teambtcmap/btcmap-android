@@ -328,6 +328,8 @@ internal fun Context.androidAppLabels(): AppLabels = AppLabels(
         alreadyHaveAccount = getString(R.string.log_in_with_existing_account),
         createAnAccount = getString(R.string.i_don_t_have_an_account),
         accountCreated = getString(R.string.account_created_sign_in_failed),
+        showPassword = getString(R.string.show_password),
+        hidePassword = getString(R.string.hide_password),
     ),
     placeStrings = placeSheetStrings(),
     addLocation = AddLocationLabels(
