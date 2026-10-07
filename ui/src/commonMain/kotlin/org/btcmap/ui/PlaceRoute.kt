@@ -71,6 +71,7 @@ internal fun PlaceRoute(
     var comments by remember { mutableStateOf(emptyList<CommentsAdapterItem>()) }
     var photos by remember { mutableStateOf(emptyList<PlacePhoto>()) }
     var bookmarked by remember { mutableStateOf(false) }
+    var addingPhoto by remember { mutableStateOf(false) }
     var reloadKey by remember { mutableStateOf(0) }
     var menuOpen by remember { mutableStateOf(false) }
 
@@ -121,15 +122,20 @@ internal fun PlaceRoute(
             return
         }
         scope.launch {
-            val picked = platform.pickPhotos()
-            picked.firstOrNull()?.let { bytes ->
-                try {
-                    services.api.addPlaceImage(loaded.id, bytes)
-                } catch (t: Throwable) {
-                    t.rethrowIfCancellation()
-                    platform.showError(t)
+            addingPhoto = true
+            try {
+                val picked = platform.pickPhotos()
+                picked.firstOrNull()?.let { bytes ->
+                    try {
+                        services.api.addPlaceImage(loaded.id, bytes)
+                    } catch (t: Throwable) {
+                        t.rethrowIfCancellation()
+                        platform.showError(t)
+                    }
+                    photos = loadPhotos(services, loaded.id)
                 }
-                photos = loadPhotos(services, loaded.id)
+            } finally {
+                addingPhoto = false
             }
         }
     }
@@ -250,6 +256,7 @@ internal fun PlaceRoute(
                 }
             },
             showHeader = false,
+            addingPhoto = addingPhoto,
             previewMap = {
                 Box(
                     modifier = Modifier

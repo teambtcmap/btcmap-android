@@ -44,6 +44,7 @@ import org.btcmap.api.getActivity
 import org.btcmap.api.getDashboard
 import org.btcmap.api.getPendingEvents
 import org.btcmap.api.setEventStatus
+import org.btcmap.api.addPlaceImage
 import org.btcmap.api.deletePlaceImage
 import org.btcmap.api.getPlaceImages
 import org.btcmap.feed.feedKey
@@ -73,6 +74,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import org.btcmap.util.toUrl
@@ -267,6 +269,9 @@ private fun runApp() = application {
                     var selectedPhotos by remember { mutableStateOf<List<PlacePhoto>>(emptyList()) }
                     // Bumped after a photo is deleted to reload the strip.
                     var photosReloadKey by remember { mutableStateOf(0) }
+                    // Whether a photo upload is running, so the sheet's add
+                    // affordance is disabled and shows a spinner.
+                    var addingPhoto by remember { mutableStateOf(false) }
                     LaunchedEffect(selectedPlaceId, photosReloadKey) {
                         val placeId = selectedPlaceId
                         bookmarked = placeId?.let { SavedItems.isPlaceSaved(db, it) } ?: false
@@ -414,6 +419,7 @@ private fun runApp() = application {
                             pendingEventCount = pendingEventCount,
                             bookmarked = bookmarked,
                             photos = selectedPhotos,
+                            addingPhoto = addingPhoto,
                             onDeletePhoto = { photo ->
                                 scope.launch {
                                     try {
@@ -473,6 +479,39 @@ private fun runApp() = application {
                                     PlaceAction.AddComment -> {
                                         paymentPlace = place.id to place.name.orEmpty()
                                         nav.push(Route.AddComment)
+                                    }
+
+                                    // Adding a place photo needs a session and a
+                                    // file picker, so it lives here rather than in
+                                    // the link-only handlePlaceAction.
+                                    PlaceAction.AddPhoto -> {
+                                        if (!settings.authorized) {
+                                            nav.push(Route.Account)
+                                        } else {
+                                            // Mark busy before launching so the
+                                            // spinner is painted, then wait a
+                                            // frame: the modal file dialog blocks
+                                            // the UI thread, so without the
+                                            // yield the add tile would still show
+                                            // its glyph over it.
+                                            addingPhoto = true
+                                            scope.launch {
+                                                try {
+                                                    withFrameNanos { }
+                                                    placePhotoPicker(window).invoke()
+                                                        .firstOrNull()
+                                                        ?.let { bytes ->
+                                                            api.addPlaceImage(place.id, bytes)
+                                                            photosReloadKey++
+                                                        }
+                                                } catch (t: Throwable) {
+                                                    t.rethrowIfCancellation()
+                                                    println("desktop: could not add photo: ${t.message}")
+                                                } finally {
+                                                    addingPhoto = false
+                                                }
+                                            }
+                                        }
                                     }
 
                                     else -> handlePlaceAction(place, action)

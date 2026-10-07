@@ -210,6 +210,8 @@ fun MapScreen(
     openPlaceId: Long? = null,
     photos: List<PlacePhoto> = emptyList(),
     bookmarked: Boolean = false,
+    /** Whether a photo upload is running for the shown place. */
+    addingPhoto: Boolean = false,
     onPlaceSelected: (Place) -> Unit = {},
     /**
      * Called when the map closes its own place sheet, so a host that remembers
@@ -731,6 +733,7 @@ fun MapScreen(
                     strings = placeSheetStrings,
                     onAction = { onPlaceAction(place, it) },
                     onDeletePhoto = onDeletePhoto,
+                    addingPhoto = addingPhoto,
                     onDismiss = {
                         selectedPlace = null
                         onPlaceDismissed()

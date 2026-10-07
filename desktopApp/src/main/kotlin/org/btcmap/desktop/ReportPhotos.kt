@@ -23,15 +23,31 @@ private const val PHOTO_JPEG_QUALITY = 0.85f
  * thread (the Compose UI thread), so it is shown there and the chosen files are
  * read and encoded off it. Returns the photos that decoded as images.
  */
-internal fun reportPhotoPicker(window: Frame): suspend () -> List<ByteArray> = {
+internal fun reportPhotoPicker(window: Frame): suspend () -> List<ByteArray> =
+    uploadPhotoPicker(window, title = "Choose photos", multiple = true)
+
+/** A file picker for a single place photo to upload. */
+internal fun placePhotoPicker(window: Frame): suspend () -> List<ByteArray> =
+    uploadPhotoPicker(window, title = "Choose photo", multiple = false)
+
+/**
+ * Shows an AWT file dialog on the Compose UI thread (it must run there) and
+ * reads and encodes the chosen files off it. Returns the photos that decoded as
+ * images.
+ */
+private fun uploadPhotoPicker(
+    window: Frame,
+    title: String,
+    multiple: Boolean,
+): suspend () -> List<ByteArray> = {
     val files = withContext(Dispatchers.Swing) {
-        val dialog = FileDialog(window, "Choose photos", FileDialog.LOAD).apply {
-            isMultipleMode = true
+        val dialog = FileDialog(window, title, FileDialog.LOAD).apply {
+            isMultipleMode = multiple
         }
         dialog.isVisible = true
         dialog.files.toList()
     }
-    withContext(Dispatchers.IO) { files.mapNotNull(::encodeReportPhoto) }
+    withContext(Dispatchers.IO) { files.mapNotNull(::encodeUploadPhoto) }
 }
 
 /**
@@ -40,7 +56,7 @@ internal fun reportPhotoPicker(window: Frame): suspend () -> List<ByteArray> = {
  * not a readable image. EXIF orientation is not applied, so a phone photo that
  * was stored sideways can stay sideways.
  */
-internal fun encodeReportPhoto(file: File): ByteArray? = runCatching {
+internal fun encodeUploadPhoto(file: File): ByteArray? = runCatching {
     val source = ImageIO.read(file) ?: return@runCatching null
 
     val longest = maxOf(source.width, source.height)

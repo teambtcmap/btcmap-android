@@ -20,13 +20,13 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -75,6 +75,12 @@ const val PLACE_WATCH_TAG = "place-watch"
 const val PLACE_ADD_COMMENT_TAG = "place-add-comment"
 const val PLACE_ADD_PHOTO_TAG = "place-add-photo"
 
+/** Test tag prefix for a photo thumbnail in the strip; the suffix is its index. */
+const val PLACE_PHOTO_TAG_PREFIX = "place-photo-"
+
+/** Test tag on the placeholder tile shown when a place has no photos yet. */
+const val PLACE_PHOTO_PLACEHOLDER_TAG = "place-photo-placeholder"
+
 /**
  * The place details shown when a marker is selected, the map's place sheet: the
  * name, the verification state, the contact details and the main actions.
@@ -91,6 +97,7 @@ fun PlaceSheet(
     onDismiss: () -> Unit,
     onDeletePhoto: ((PlacePhoto) -> Unit)? = null,
     previewMap: (@Composable () -> Unit)? = null,
+    addingPhoto: Boolean = false,
 ) {
     // Open at the half-expanded height the Views sheet used, so the map stays
     // visible behind it; the user can drag it up to full screen.
@@ -106,6 +113,7 @@ fun PlaceSheet(
             onDeletePhoto = onDeletePhoto,
             previewMap = previewMap,
             showHeader = true,
+            addingPhoto = addingPhoto,
         )
     }
 }
@@ -127,6 +135,8 @@ fun PlaceDetails(
     onDeletePhoto: ((PlacePhoto) -> Unit)? = null,
     previewMap: (@Composable () -> Unit)? = null,
     showHeader: Boolean = true,
+    /** Whether a photo upload is running, so the add affordance is busy. */
+    addingPhoto: Boolean = false,
 ) {
     Column(
         modifier = Modifier
@@ -159,25 +169,34 @@ fun PlaceDetails(
         // The photos sit above the verification state and the contact details.
         var viewerIndex by remember { mutableStateOf<Int?>(null) }
 
-        if (photos.isNotEmpty()) {
-            LazyRow(
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                contentPadding = PaddingValues(horizontal = 16.dp),
-                modifier = Modifier.padding(top = 8.dp),
-            ) {
-                itemsIndexed(photos) { index, photo ->
-                    AsyncImage(
-                        model = photo.thumbnailUrl,
-                        contentDescription = null,
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier
-                            .size(72.dp)
-                            .clip(RoundedCornerShape(8.dp))
-                            .clickable { viewerIndex = index },
-                    )
-                }
-                // With photos, the add affordance is a trailing tile in the
-                // strip rather than a separate full-width button.
+        // The strip always draws at the same height, with the add tile last:
+        // just the tile when the place has no photos, the photos followed by
+        // the tile otherwise. The photos are fetched after the sheet opens, so
+        // a constant height keeps the actions below from jumping when they
+        // arrive.
+        LazyRow(
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            contentPadding = PaddingValues(horizontal = 16.dp),
+            modifier = Modifier.padding(top = 8.dp, bottom = 8.dp),
+        ) {
+            itemsIndexed(photos) { index, photo ->
+                AsyncImage(
+                    model = photo.thumbnailUrl,
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .size(72.dp)
+                        .clip(RoundedCornerShape(8.dp))
+                        // The tile reads immediately while its bytes load.
+                        .background(MaterialTheme.colorScheme.surfaceVariant)
+                        .clickable { viewerIndex = index }
+                        .testTag(PLACE_PHOTO_TAG_PREFIX + index),
+                )
+            }
+            // A generic photo tile stands in while the place has no photos, so
+            // the strip still reads as a gallery; it goes away once the real
+            // photos arrive.
+            if (photos.isEmpty()) {
                 item {
                     Box(
                         contentAlignment = Alignment.Center,
@@ -185,25 +204,38 @@ fun PlaceDetails(
                             .size(72.dp)
                             .clip(RoundedCornerShape(8.dp))
                             .background(MaterialTheme.colorScheme.surfaceVariant)
-                            .clickable { onAction(PlaceAction.AddPhoto) }
-                            .testTag(PLACE_ADD_PHOTO_TAG),
+                            .testTag(PLACE_PHOTO_PLACEHOLDER_TAG),
                     ) {
+                        MaterialSymbol(glyph = "photo", contentDescription = null)
+                    }
+                }
+            }
+            // The add affordance is a trailing squared tile, so the row keeps
+            // its height whether or not the place has photos.
+            item {
+                Box(
+                    contentAlignment = Alignment.Center,
+                    modifier = Modifier
+                        .size(72.dp)
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(MaterialTheme.colorScheme.surfaceVariant)
+                        .clickable(enabled = !addingPhoto) {
+                            onAction(PlaceAction.AddPhoto)
+                        }
+                        .testTag(PLACE_ADD_PHOTO_TAG),
+                ) {
+                    if (addingPhoto) {
+                        CircularProgressIndicator(
+                            strokeWidth = 2.dp,
+                            modifier = Modifier.size(24.dp),
+                        )
+                    } else {
                         MaterialSymbol(
                             glyph = "add",
                             contentDescription = strings.addPhoto,
                         )
                     }
                 }
-            }
-        } else {
-            OutlinedButton(
-                onClick = { onAction(PlaceAction.AddPhoto) },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 4.dp)
-                    .testTag(PLACE_ADD_PHOTO_TAG),
-            ) {
-                Text(text = strings.addPhoto)
             }
         }
 
@@ -221,12 +253,6 @@ fun PlaceDetails(
                 },
                 onDismiss = { viewerIndex = null },
             )
-        }
-
-        // A little breathing room between the photo carousel and the actions.
-        // The standalone add-photo button already carries its own padding.
-        if (photos.isNotEmpty()) {
-            Spacer(modifier = Modifier.height(8.dp))
         }
 
         // The actions sit directly below the photo carousel.

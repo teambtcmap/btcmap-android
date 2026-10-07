@@ -70,6 +70,7 @@ internal fun MapRoute(
     var selectedPlaceId by remember { mutableStateOf<Long?>(null) }
     var photos by remember { mutableStateOf(emptyList<PlacePhoto>()) }
     var bookmarked by remember { mutableStateOf(false) }
+    var addingPhoto by remember { mutableStateOf(false) }
     var reloadKey by remember { mutableStateOf(0) }
     var isAdmin by remember { mutableStateOf(false) }
     var canManageEvents by remember { mutableStateOf(false) }
@@ -139,14 +140,19 @@ internal fun MapRoute(
             return
         }
         scope.launch {
-            platform.pickPhotos().firstOrNull()?.let { bytes ->
-                try {
-                    services.api.addPlaceImage(place.id, bytes)
-                } catch (t: Throwable) {
-                    t.rethrowIfCancellation()
-                    platform.showError(t)
+            addingPhoto = true
+            try {
+                platform.pickPhotos().firstOrNull()?.let { bytes ->
+                    try {
+                        services.api.addPlaceImage(place.id, bytes)
+                    } catch (t: Throwable) {
+                        t.rethrowIfCancellation()
+                        platform.showError(t)
+                    }
+                    photos = loadPhotos(services, place.id)
                 }
-                photos = loadPhotos(services, place.id)
+            } finally {
+                addingPhoto = false
             }
         }
     }
@@ -218,6 +224,7 @@ internal fun MapRoute(
         openPlaceId = currentOpenPlaceId,
         photos = photos,
         bookmarked = bookmarked,
+        addingPhoto = addingPhoto,
         onPlaceSelected = { place ->
             selectedPlaceId = place.id
             refreshSheet(place)
