@@ -21,6 +21,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.btcmap.api.GetEventsItem
 import org.btcmap.area.AreaIssues
 import org.btcmap.area.AreaPlaceIssue
@@ -33,6 +34,7 @@ import org.btcmap.i18n.getLocalizedDescription
 import org.btcmap.i18n.getLocalizedName
 import org.btcmap.offline.OfflineAreaState
 import org.btcmap.offline.OfflineBounds
+import org.btcmap.platform.ioDispatcher
 import org.btcmap.saved.SavedItems
 import org.btcmap.settings.authorized
 import org.btcmap.settings.mapStyle
@@ -71,7 +73,7 @@ internal fun AreaRoute(
     var showDeleteConfirm by remember { mutableStateOf(false) }
 
     LaunchedEffect(route.areaId) {
-        val loaded = services.db.area.selectById(route.areaId)
+        val loaded = withContext(ioDispatcher) { services.db.area.selectById(route.areaId) }
         if (loaded == null) {
             missing = true
             return@LaunchedEffect
@@ -229,7 +231,8 @@ internal fun AreaRoute(
 
 /** Reads a secondary area section, hiding it when the read or fetch fails. */
 private suspend fun <T> loadSection(block: suspend () -> T): T? = try {
-    block()
+    // The callers run on the UI dispatcher; the section's reads must not.
+    withContext(ioDispatcher) { block() }
 } catch (t: Throwable) {
     t.rethrowIfCancellation()
     null

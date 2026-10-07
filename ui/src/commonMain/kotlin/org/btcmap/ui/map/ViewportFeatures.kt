@@ -37,11 +37,14 @@ fun <T : Any> rememberViewportFeatures(
      */
     reloadKey: Int = 0,
     idOf: (T) -> Long,
+    /** Latitude and longitude of a feature, to keep only the ones near the map. */
+    locationOf: (T) -> Pair<Double, Double>,
     toGeoJson: (Set<T>) -> String,
     fetch: suspend (ViewportBounds) -> List<T>,
 ): ViewportFeatures<T> {
     val latestToGeoJson by rememberUpdatedState(toGeoJson)
     val latestFetch by rememberUpdatedState(fetch)
+    val latestLocationOf by rememberUpdatedState(locationOf)
 
     val store = remember { FeatureStore(idOf) }
     var snapshot by remember { mutableStateOf<Set<T>>(emptySet()) }
@@ -54,9 +57,19 @@ fun <T : Any> rememberViewportFeatures(
             val viewport = state.viewport ?: return
             val bounds = ViewportBounds.expand(viewport.visibleBounds)
             val fetched = withContext(Dispatchers.Default) { latestFetch(bounds) }
-            val merged = store.merge(fetched) ?: return
-            val json = withContext(Dispatchers.Default) { latestToGeoJson(merged) }
-            snapshot = merged
+            // The store keeps everything seen so panning back does not refetch,
+            // but only the features around the current viewport are handed to the
+            // map: an ever-growing source is re-parsed and re-tiled on every
+            // camera move, and a session that has panned around would otherwise
+            // keep paying for features that are nowhere near the screen.
+            store.merge(fetched)
+            val near = store.snapshot().filterTo(mutableListOf()) { item ->
+                val (lat, lon) = latestLocationOf(item)
+                bounds.contains(lat, lon)
+            }.toSet()
+            if (near == snapshot) return
+            val json = withContext(Dispatchers.Default) { latestToGeoJson(near) }
+            snapshot = near
             geoJson = json
         }
 

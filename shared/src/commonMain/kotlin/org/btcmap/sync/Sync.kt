@@ -24,6 +24,16 @@ import org.btcmap.util.toInstant
 private const val PLACES_BATCH_SIZE = 10_000L
 private const val DEFAULT_BATCH_SIZE = 1_000L
 
+/**
+ * Rows per commit when applying a page. A page is fetched in one request but
+ * committed in chunks: the database shares a single connection whose lock is
+ * held for a whole transaction, so committing a 10 000-row page at once would
+ * stall every other read (a tapped pin's row, the map's viewport) for the
+ * length of the insert. Chunks are applied in order and the page's cursor only
+ * advances once they are all in, so an interrupted page is simply refetched.
+ */
+private const val SYNC_INSERT_CHUNK = 500
+
 private val EPOCH: Instant = Instant.fromEpochSeconds(0)
 
 class Sync(val api: Api, val db: Database) {
@@ -47,11 +57,11 @@ class Sync(val api: Api, val db: Database) {
         fetch = { since, limit -> api.getPlaces(since, limit) },
         updatedAt = { it.updatedAt },
         apply = { rows ->
-            db.transaction {
-                // Tombstones are kept as well: a deleted place still carries
-                // its last-known data, which stays available offline, and its
-                // updated_at keeps the cursor moving.
-                db.place.insert(rows.map { it.toPlace() })
+            // Tombstones are kept as well: a deleted place still carries its
+            // last-known data, which stays available offline, and its
+            // updated_at keeps the cursor moving.
+            rows.map { it.toPlace() }.chunked(SYNC_INSERT_CHUNK).forEach { chunk ->
+                db.transaction { db.place.insert(chunk) }
             }
         },
     )

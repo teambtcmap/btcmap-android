@@ -35,7 +35,9 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import androidx.compose.runtime.rememberCoroutineScope
 import org.btcmap.account.canManageEvents
 import org.btcmap.account.isAdmin
@@ -277,7 +279,10 @@ private fun runApp() = application {
                         bookmarked = placeId?.let { SavedItems.isPlaceSaved(db, it) } ?: false
                         selectedPhotos = placeId?.let { id ->
                             try {
-                                val user = db.user.select()
+                                // Off the UI thread: the shared connection's
+                                // lock can be held by the sync, and a blocking
+                                // read here would freeze the whole window.
+                                val user = withContext(Dispatchers.IO) { db.user.select() }
                                 api.getPlaceImages(id).map { image ->
                                     api.toPlacePhoto(
                                         image,
@@ -327,7 +332,7 @@ private fun runApp() = application {
                     var reloadKey by remember { mutableStateOf(0) }
                     LaunchedEffect(route) {
                         if (route == Route.Map) {
-                            val user = db.user.select()
+                            val user = withContext(Dispatchers.IO) { db.user.select() }
                             isAdmin = user?.isAdmin() == true
                             canManageEvents = user?.canManageEvents() == true
                             pendingEventCount = if (canManageEvents) {
@@ -888,7 +893,7 @@ private fun DesktopAreaScreen(
     var issues by remember(areaId) { mutableStateOf<AreaIssues?>(null) }
 
     LaunchedEffect(areaId) {
-        val loaded = db.area.selectById(areaId)
+        val loaded = withContext(Dispatchers.IO) { db.area.selectById(areaId) }
         if (loaded == null) {
             missing = true
             return@LaunchedEffect
@@ -957,7 +962,8 @@ private fun DesktopAreaScreen(
 
 /** Reads a secondary section, hiding it when the read or fetch fails. */
 private suspend fun <T> loadSection(block: suspend () -> T): T? = try {
-    block()
+    // The callers run on the UI dispatcher; the section's reads must not.
+    withContext(Dispatchers.IO) { block() }
 } catch (t: Throwable) {
     t.rethrowIfCancellation()
     null

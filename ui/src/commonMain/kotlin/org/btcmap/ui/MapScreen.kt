@@ -33,6 +33,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontFamily
@@ -105,6 +108,7 @@ import org.maplibre.compose.map.MaplibreMap
 import org.maplibre.compose.map.StyleLoadState
 import org.maplibre.compose.map.rememberMapState
 import org.maplibre.compose.style.BaseStyle
+import org.maplibre.compose.util.DpPadding
 import org.maplibre.spatialk.geojson.BoundingBox
 import org.maplibre.spatialk.geojson.Position
 import kotlin.time.Instant
@@ -232,8 +236,36 @@ fun MapScreen(
     val textMeasurer = rememberTextMeasurer()
     val density = LocalDensity.current
 
+    // The part of the map the search bar and the place sheet leave visible, so a
+    // selected place can be centred in it rather than under the sheet.
+    var searchBarBottomPx by remember { mutableStateOf(0f) }
+    var viewportTopPx by remember { mutableStateOf(0f) }
+    var viewportHeightPx by remember { mutableStateOf(0f) }
+
+    // The camera padding that centres a place between the search bar's bottom
+    // and the sheet's top edge. The sheet opens at half the viewport, so its top
+    // edge sits there; the horizontal padding stays zero, centring the place.
+    fun placeSheetPadding(): DpPadding? {
+        if (!placeSheet || searchBarBottomPx <= 0f || viewportHeightPx <= 0f) return null
+        return with(density) {
+            DpPadding(
+                top = (searchBarBottomPx - viewportTopPx).toDp(),
+                bottom = (viewportHeightPx / 2f).toDp(),
+            )
+        }
+    }
+
+    fun placeCameraUpdate(place: Place) = CameraUpdate(
+        target = Position(place.lon, place.lat),
+        zoom = OPEN_ZOOM,
+        padding = placeSheetPadding(),
+    )
+
     val scope = rememberCoroutineScope()
     var selectedPlace by remember { mutableStateOf<Place?>(null) }
+    // Bumped on every marker tap, even for the place already selected, so the
+    // recentring effect below runs again.
+    var recenterKey by remember { mutableStateOf(0) }
     // The sheet shows the current row: a sync rewrites rows in place, so the
     // selected copy is re-read whenever the host bumps the reload key.
     val shownPlace = rememberReloadedPlace(selectedPlace, db, reloadKey)
@@ -290,6 +322,7 @@ fun MapScreen(
                     withContext(Dispatchers.Default) { db.place.selectById(id) }?.let {
                         selectedPlace = it
                         onPlaceSelected(it)
+                        recenterKey++
                     }
                 }
             }
@@ -391,6 +424,14 @@ fun MapScreen(
 
     val areas = rememberMapAreas(state, db, reloadKey)
 
+    // A marker tap centres the place between the search bar and the sheet. The
+    // padding stays when the sheet closes, so dismissing it does not shift the
+    // map back.
+    LaunchedEffect(recenterKey) {
+        if (recenterKey == 0) return@LaunchedEffect
+        selectedPlace?.let { state.animateCamera(placeCameraUpdate(it)) }
+    }
+
     // The host may want to remember where the user left the map.
     LaunchedEffect(state, onCameraIdle) {
         val callback = onCameraIdle ?: return@LaunchedEffect
@@ -416,9 +457,7 @@ fun MapScreen(
         // before moving to it, as the Views map did.
         markerKind = if (place.isMerchant()) MarkerKind.Merchants else MarkerKind.Exchanges
         onPlaceSelected(place)
-        state.animateCamera(
-            CameraUpdate(target = Position(place.lon, place.lat), zoom = OPEN_ZOOM),
-        )
+        state.animateCamera(placeCameraUpdate(place))
     }
 
     // The host supplies what it can do, but only the map knows where it is
@@ -472,6 +511,7 @@ fun MapScreen(
                             current.copy(
                                 target = Position(place.lon, place.lat),
                                 zoom = OPEN_ZOOM,
+                                padding = placeSheetPadding() ?: DpPadding.Zero,
                             ),
                         )
                     }
@@ -512,6 +552,7 @@ fun MapScreen(
         state = state,
         reloadKey = reloadKey,
         idOf = { it.id },
+        locationOf = { it.lat to it.lon },
         toGeoJson = { it.toMarkerGeoJson() },
     ) { bounds ->
         bounds.longitudeRanges().flatMap { (minLon, maxLon) ->
@@ -523,6 +564,7 @@ fun MapScreen(
         state = state,
         reloadKey = reloadKey,
         idOf = { it.id },
+        locationOf = { it.lat to it.lon },
         toGeoJson = { it.toMarkerGeoJson() },
     ) { bounds ->
         bounds.longitudeRanges().flatMap { (minLon, maxLon) ->
@@ -534,6 +576,7 @@ fun MapScreen(
         state = state,
         reloadKey = reloadKey,
         idOf = { it.id },
+        locationOf = { it.lat to it.lon },
         toGeoJson = { it.toEventGeoJson() },
     ) { bounds ->
         val now = Clock.System.now()
@@ -571,8 +614,41 @@ fun MapScreen(
     }
 
     val loadState = state.style.loadState
+    // The marker image names already registered in the style. Building a bitmap
+    // is not cheap (it parses the pin path, measures the glyph and paints), and
+    // a marker's name fully determines its image, so only the names the loaded
+    // features just added are built and registered. Redrawing them all on every
+    // viewport change is what froze the UI once a session had accumulated many.
+    val registeredImages = remember { mutableSetOf<String>() }
+    var imagesCachedFor by remember { mutableStateOf<Any?>(null) }
+    var imagesCachedFactory by remember { mutableStateOf<MarkerBitmapFactory?>(null) }
+
     LaunchedEffect(state, factory, markersByName, exchangeIcons, hasEvents, loadState) {
         if (loadState !is StyleLoadState.Ready) return@LaunchedEffect
+
+        // A reloaded style drops the registered images, and a new palette
+        // repaints them, so rebuild everything instead of trusting the cache.
+        if (imagesCachedFor !== loadState || imagesCachedFactory !== factory) {
+            registeredImages.clear()
+            imagesCachedFor = loadState
+            imagesCachedFactory = factory
+        }
+
+        // What the map currently needs, and how to draw each missing one.
+        val wanted = LinkedHashMap<String, () -> ImageBitmap>()
+        wanted[MARKER_PIN_IMAGE_ID] = { factory.pin(palette.markerBackground) }
+        if (hasEvents) {
+            wanted[EVENT_MARKER_ICON_NAME] = { factory.icon(EVENT_ICON, palette.markerIcon) }
+        }
+        markersByName.forEach { (name, marker) ->
+            wanted[name] = { factory.merchantMarker(marker) }
+        }
+        exchangeIcons.forEach { icon ->
+            wanted[exchangeMarkerIconImageName(icon)] = { factory.icon(icon, palette.markerIcon) }
+        }
+
+        val missing = wanted.keys.filterNot { it in registeredImages }
+        if (missing.isEmpty()) return@LaunchedEffect
 
         // Take the marker layers out for a frame so they are declared again, and
         // so resolve the image names the loaded features added.
@@ -580,22 +656,23 @@ fun MapScreen(
         withFrameNanos { }
 
         val images = state.style.images
-        images.setBitmap(MARKER_PIN_IMAGE_ID, factory.pin(palette.markerBackground))
-        if (hasEvents) {
-            images.setBitmap(EVENT_MARKER_ICON_NAME, factory.icon(EVENT_ICON, palette.markerIcon))
-        }
-        markersByName.forEach { (name, marker) ->
-            images.setBitmap(name, factory.merchantMarker(marker))
-        }
-        exchangeIcons.forEach { icon ->
-            images.setBitmap(exchangeMarkerIconImageName(icon), factory.icon(icon, palette.markerIcon))
+        missing.forEach { name ->
+            images.setBitmap(name, wanted.getValue(name)())
+            registeredImages.add(name)
         }
 
         imagesReady = true
     }
 
     AppTheme(iconFont = iconFont) {
-        Box(modifier = modifier.fillMaxSize()) {
+        Box(
+            modifier = modifier
+                .fillMaxSize()
+                .onGloballyPositioned {
+                    viewportTopPx = it.positionInRoot().y
+                    viewportHeightPx = it.size.height.toFloat()
+                },
+        ) {
             MaplibreMap(
                 modifier = Modifier.fillMaxSize(),
                 state = state,
@@ -813,7 +890,12 @@ fun MapScreen(
                     // 16dp margin; the map is edge-to-edge, so the inset is drawn
                     // here rather than by the window.
                     .windowInsetsPadding(WindowInsets.statusBars)
-                    .padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 16.dp),
+                    .padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 16.dp)
+                    // Its bottom edge, with the map's origin as the reference,
+                    // bounds the top of the gap a selected place is centred in.
+                    .onGloballyPositioned {
+                        searchBarBottomPx = it.positionInRoot().y + it.size.height
+                    },
             )
         }
     }

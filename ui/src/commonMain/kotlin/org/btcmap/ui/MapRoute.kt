@@ -101,7 +101,7 @@ internal fun MapRoute(
 
     LaunchedEffect(openPlaceId) {
         val id = openPlaceId ?: return@LaunchedEffect
-        val cached = services.db.place.selectById(id)
+        val cached = withContext(ioDispatcher) { services.db.place.selectById(id) }
         if (cached != null) {
             currentOpenPlaceId = id
         } else {

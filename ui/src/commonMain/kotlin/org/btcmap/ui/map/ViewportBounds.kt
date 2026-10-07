@@ -49,6 +49,13 @@ data class ViewportBounds(
         }
     }
 
+    /** Whether a point at [latitude]/[longitude] falls inside this bounds. */
+    fun contains(latitude: Double, longitude: Double): Boolean {
+        if (latitude < south || latitude > north) return false
+        val lon = normalizeLongitude(longitude)
+        return longitudeRanges().any { (west, east) -> lon in west..east }
+    }
+
     /**
      * The longitude range(s) that together cover this bounds, split in two when
      * it crosses the antimeridian.

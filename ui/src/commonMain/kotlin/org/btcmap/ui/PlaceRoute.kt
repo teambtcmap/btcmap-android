@@ -76,7 +76,8 @@ internal fun PlaceRoute(
     var menuOpen by remember { mutableStateOf(false) }
 
     LaunchedEffect(route.placeId, reloadKey) {
-        val loaded = services.db.place.selectById(route.placeId) ?: return@LaunchedEffect
+        val loaded = withContext(ioDispatcher) { services.db.place.selectById(route.placeId) }
+            ?: return@LaunchedEffect
         place = loaded
         comments = withContext(ioDispatcher) {
             val formatter = commentDateFormatter()

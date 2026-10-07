@@ -51,6 +51,9 @@ class FeatureStore<T>(
         }
     }
 
+    /** The retained features, whether or not the last [merge] added anything. */
+    fun snapshot(): Set<T> = lock.withLock { items.toSet() }
+
     val size: Int
         get() = lock.withLock { items.size }
 }

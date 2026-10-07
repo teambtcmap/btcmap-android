@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+- Center a place in the map area left between the search bar and the place sheet when it is opened, instead of leaving it behind the sheet
+- Cut the stutter when a place is opened: the database reads that ran on the UI thread now run in the background, marker images are only redrawn when new ones appear rather than on every map move, a large sync page is committed in smaller batches so it does not hold the database lock, and only the features near the viewport are sent to the map instead of everything loaded so far
 - Remember the desktop map's last position and zoom, so it reopens where the user left it instead of always starting at Curaçao
 - Keep the place sheet's photo row at a fixed height: a squared add-photo tile with a placeholder photo tile stands in while a place has no photos, so the row no longer jumps when the photos arrive
 - Disable the place sheet's add-photo tile and show a spinner while a photo upload is in flight, and let the desktop app upload a place photo instead of ignoring the action
