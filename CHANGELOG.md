@@ -6,6 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+- Show the desktop map's sync indicator again, and re-run the sync every time the map is entered rather than only at launch, so returning from a sub-screen refreshes the data
 - Support large screens across the account flow: the signed-in profile and its edit forms stay in a centred column instead of stretching across a wide window, and the sign-in form is capped, headed and centred
 - Label the account form's password-visibility control for screen readers, and keep its submit button tappable so the required-field messages appear
 - Cap the map search field and its results at the place sheet's width and centre them, so they no longer stretch across a large screen

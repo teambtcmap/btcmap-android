@@ -211,6 +211,65 @@ Shares `:shared` and `:ui`; it opens the shared database under `$BTCMAP_HOME` or
   the life of the window, so launch it detached with its output in a named log,
   e.g. `(./gradlew :desktopApp:run > /tmp/btcmap-desktop.log 2>&1 &)`, and return
   control immediately.
+- The user's workflow is this editor tiled on the **left** and the app tiled on
+  the **right**, so **every fresh launch must end in a half/half layout**:
+  un-maximize the focused editor with `Super+Down`, split it left with
+  `Super+Left`, then tile the app to the right half. Do it all in one detached
+  step, so control still returns immediately while the build runs:
+  ```bash
+  (
+    ydotool key 125:1 108:1 108:0 125:0       # Super+Down: un-maximize the editor
+    ydotool key 125:1 105:1 105:0 125:0       # Super+Left: editor to left half
+    ./gradlew :desktopApp:run > /tmp/btcmap-desktop.log 2>&1 &
+    wid=""
+    for i in $(seq 1 600); do
+      wid=$(xdotool search --name "BTC Map" 2>/dev/null | head -n1)
+      [ -n "$wid" ] && break
+      sleep 0.05
+    done
+    [ -n "$wid" ] || exit 0
+    # Tile only once the app itself holds focus, never the editor: poll
+    # windowactivate until _NET_ACTIVE_WINDOW is the "BTC Map" window. This is
+    # what lets us drop the old fixed ~2.5 s sleep that left the window sitting
+    # at its 480×720 default before it snapped to the tile.
+    focused=0
+    for i in $(seq 1 200); do
+      xdotool windowactivate "$wid" >/dev/null 2>&1
+      active=$(xdotool getactivewindow 2>/dev/null)
+      if [ "$(xdotool getwindowname "$active" 2>/dev/null)" = "BTC Map" ]; then focused=1; break; fi
+      sleep 0.05
+    done
+    [ "$focused" = 1 ] && ydotool key 125:1 106:1 106:0 125:0   # Super+Right: split right
+  ) &
+  ```
+  The poll loops are the sanctioned exception to "never poll waiting for it to
+  start": they run inside the backgrounded step, not in the foreground. On this
+  4096×2304 physical / 2×-scale display the right half is `x=2048`, `width=2048`,
+  full height; verify with `xdotool getwindowgeometry <frame-id>` (the tiled frame
+  sits at `2048,138`). Skip the tiling only if the user asks for a different
+  placement. The desktop app's shipped default is now maximized
+  (`rememberWindowState(placement = WindowPlacement.Maximized)` in
+  `desktopApp/src/main/kotlin/org/btcmap/desktop/Main.kt`), so on launch the window
+  appears full screen and only then tiles to the right half (~0.7 s later) — that
+  is AWT window-map latency, not a fixed sleep. `mutter` *does* honour an initial
+  window position (a Swing `JFrame` with `setBounds(3100,1650,600,380)` landed at
+  exactly `x=3100`), so a truly flash-free start would instead have to open the
+  desktop window directly at the right half via `WindowState`; that would change
+  the shipped default again, so do not do it unless the user asks.
+  The leading `Super+Down`/`Super+Left` acts on **whatever window is focused**, so
+  it only shrinks the editor when the editor holds focus: that is true for a fresh
+  start (the user has just typed in it) and right after killing the app (GNOME
+  returns focus to the editor), but *not* after driving the app with `ydotool`
+  (the app keeps focus) — there the editor would silently stay full and the app's
+  tile would be the only change. When in doubt, check `xdotool getactivewindow`
+  (a focused Wayland window shows a bare, no-property dummy; the app is the
+  `BTC Map` window) and only send the keys when the app is not active. Both keys
+  are needed: after the close flow maximized the editor (`Super+Up`), `Super+Left`
+  **alone did not un-maximize the Wayland editor** (it did for the X11 app), so
+  the editor stayed full until `Super+Down` was sent first. `Alt+Tab` does *not*
+  switch focus here (ydotool sends it, the active X11 window never changes), so
+  the editor cannot be refocused by keyboard; verify visually if a click is not
+  acceptable.
 - The running app is identified by `pgrep -f "org.btcmap.desktop.MainK[t]"`
   (the brackets keep the pattern from matching the shell). Check it *before*
   launching: if it is already listed, the window is already open — do not start a
@@ -221,7 +280,13 @@ Shares `:shared` and `:ui`; it opens the shared database under `$BTCMAP_HOME` or
 - Stop a running window with
   `pgrep -f "org.btcmap.desktop.MainK[t]" | xargs -r kill` (the brackets keep the
   pattern from matching the shell). Do this before a restart so only one instance
-  is ever open.
+  is ever open. When closing (not restarting) the app that was tiled in the right
+  half, GNOME leaves the freed space empty, so make the left window fill it:
+  send `Super+Up` once (`ydotool key 125:1 103:1 103:0 125:0`). Focus returns to
+  the editor on its own (it is a native Wayland window, invisible to X11 tools),
+  and `maximize` is a one-way binding here (`unmaximize` is Super+Down/Alt+F5), so
+  it is safe even if the editor already filled the space. Do not do this on a
+  restart, which immediately re-tiles the app to the right.
 - The running app is an XWayland client (Compose Desktop's Skiko renderer is
   X11-only on Linux), so X11 tools see it even though the session is Wayland.
   Find its window with `xdotool search --name "BTC Map"`; the client window
@@ -268,8 +333,11 @@ Shares `:shared` and `:ui`; it opens the shared database under `$BTCMAP_HOME` or
   - **Check focus, then position the pointer from a known origin.** The app must
     be the active window (`xdotool getactivewindow` matches its client id), or
     the events land on the desktop and nothing happens. `xdotool`/`wmctrl` cannot
-    move or resize the window (GNOME ignores X configure requests) — maximize
-    with Super+Up instead.
+    move or resize the window (GNOME ignores X configure requests) — use the GNOME
+    tiling shortcuts instead: Super+Up to maximize
+    (`ydotool key 125:1 103:1 103:0 125:0`), Super+Right to split right
+    (`ydotool key 125:1 106:1 106:0 125:0`), which is the app's default placement
+    above.
   - `ydotool` moves in the compositor's **logical** pixels, but
     `xdotool getwindowgeometry`, `import` captures and `xrandr` are in
     **physical** pixels: on this 2×-scale display logical = physical/2 (the same

@@ -7,9 +7,9 @@ import androidx.compose.ui.pollSystemTheme
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.platform.Font
-import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Window
+import androidx.compose.ui.window.WindowPlacement
 import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
 import kotlinx.io.files.Path
@@ -232,7 +232,7 @@ private fun runApp() = application {
     Window(
         onCloseRequest = ::exitApplication,
         title = "BTC Map",
-        state = rememberWindowState(size = DpSize(480.dp, 720.dp)),
+        state = rememberWindowState(placement = WindowPlacement.Maximized),
     ) {
         val mapHost = rememberAwtComposeMapPresentationHost(window)
         ProvideMapPresentationHost(mapHost) {
@@ -241,7 +241,6 @@ private fun runApp() = application {
                 // transparent rows of screens like the settings list.
                 Surface(modifier = Modifier.fillMaxSize()) {
                     val syncState by syncManager.state.collectAsState()
-                    LaunchedEffect(Unit) { syncManager.start() }
 
                     // The map screen owns its own affordances (the search bar's
                     // settings, the chips and the pulse button), so the desktop
@@ -313,6 +312,10 @@ private fun runApp() = application {
                     var isAdmin by remember { mutableStateOf(false) }
                     var canManageEvents by remember { mutableStateOf(false) }
                     var pendingEventCount by remember { mutableStateOf(0) }
+                    // Bumped after a sync changes the data, so the map re-queries
+                    // its features rather than leaving them stale until the next
+                    // camera move, as Android's MapRoute does.
+                    var reloadKey by remember { mutableStateOf(0) }
                     LaunchedEffect(route) {
                         if (route == Route.Map) {
                             val user = db.user.select()
@@ -323,6 +326,19 @@ private fun runApp() = application {
                             } else {
                                 0
                             }
+                        }
+                    }
+
+                    // Started every time the map is (re)entered, as Android's
+                    // MapRoute does with its own LaunchedEffect, so returning
+                    // from a sub-screen refreshes the data and shows the sync
+                    // indicator. The manager ignores a start while one is
+                    // already running, and the job lives on its own scope. The
+                    // sync's events bump reloadKey so the map re-queries.
+                    LaunchedEffect(route) {
+                        if (route == Route.Map) {
+                            syncManager.start()
+                            syncManager.events.collect { reloadKey++ }
                         }
                     }
 
@@ -364,6 +380,8 @@ private fun runApp() = application {
                             usingOpenFreeMap = true,
                             mapRotationEnabled = settings.mapRotationEnabled,
                             showAttribution = settings.showAttribution,
+                            syncVisible = syncState != SyncState.Idle,
+                            reloadKey = reloadKey,
                             iconFont = iconFont,
                             placeSheetStrings = PLACE_SHEET_STRINGS,
                             attributionText = "© OpenStreetMap contributors",
