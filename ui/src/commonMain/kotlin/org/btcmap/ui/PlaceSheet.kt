@@ -102,7 +102,13 @@ fun PlaceSheet(
     // Open at the half-expanded height the Views sheet used, so the map stays
     // visible behind it; the user can drag it up to full screen.
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
-    ModalBottomSheet(onDismissRequest = onDismiss, sheetState = sheetState) {
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        sheetState = sheetState,
+        // The default scrim dims the whole map behind the sheet. The map is the
+        // context the sheet is about, so keep it fully visible instead.
+        scrimColor = Color.Transparent,
+    ) {
         PlaceDetails(
             place = place,
             comments = comments,
