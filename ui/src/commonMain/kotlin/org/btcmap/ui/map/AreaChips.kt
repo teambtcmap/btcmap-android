@@ -74,15 +74,18 @@ private fun AreaChip(
                 }
             }
         },
-        modifier = modifier
-            .size(AREA_CHIP_SIZE)
-            .clickable { onClick(area) },
+        modifier = modifier.size(AREA_CHIP_SIZE),
     ) {
         Box(
             modifier = Modifier
                 .size(AREA_CHIP_SIZE)
                 .clip(CircleShape)
-                .background(palette.buttonBackground),
+                .background(palette.buttonBackground)
+                // The click (and its hover/ripple indication) is bound to the
+                // circle rather than the chip's square bounds, and the badge
+                // outside it stays clickable-free, so desktop shows a round
+                // hover instead of a square one.
+                .clickable { onClick(area) },
             contentAlignment = Alignment.Center,
         ) {
             if (area.type == CITY_AREA_TYPE) {
