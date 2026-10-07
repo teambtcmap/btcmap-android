@@ -164,6 +164,8 @@ internal val RU: Map<String, String> = mapOf(
         "map_rotation" to "Разрешить вращение карты",
         "map_rotation_secondary" to "Компас появляется, когда не смотрит на север",
         "map_style" to "Стиль карты",
+        "map_tilt" to "Разрешить наклон карты",
+        "map_tilt_secondary" to "Наклоните карту для вида сверху",
         "marker_background_color" to "Фон маркера",
         "marker_icon_color" to "Иконка маркера",
         "months_1" to "1 месяц",

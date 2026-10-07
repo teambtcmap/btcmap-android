@@ -164,6 +164,8 @@ internal val SR: Map<String, String> = mapOf(
         "map_rotation" to "Дозволи ротацију мапе",
         "map_rotation_secondary" to "Компас се појављује кад није окренут на север",
         "map_style" to "Стил мапе",
+        "map_tilt" to "Дозволи нагињање мапе",
+        "map_tilt_secondary" to "Нагните мапу за поглед из птичје перспективе",
         "marker_background_color" to "Позадина маркера",
         "marker_icon_color" to "Иконица маркера",
         "months_1" to "1 месец",

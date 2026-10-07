@@ -164,6 +164,8 @@ internal val BN: Map<String, String> = mapOf(
         "map_rotation" to "মানচিত্র ঘোরানোর অনুমতি দিন",
         "map_rotation_secondary" to "উত্তরমুখী না হলে কম্পাস দেখা যায়",
         "map_style" to "ম্যাপ স্টাইল",
+        "map_tilt" to "মানচিত্র কাত করার অনুমতি দিন",
+        "map_tilt_secondary" to "পাখির চোখে দেখতে মানচিত্র কাত করুন",
         "marker_background_color" to "মার্কার পটভূমি",
         "marker_icon_color" to "মার্কার আইকন",
         "months_1" to "১ মাস",

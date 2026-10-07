@@ -164,6 +164,8 @@ internal val NL: Map<String, String> = mapOf(
         "map_rotation" to "Kaartrotatie toestaan",
         "map_rotation_secondary" to "Kompas verschijnt als niet op noord gericht",
         "map_style" to "Kaartstijl",
+        "map_tilt" to "Kaartkanteling toestaan",
+        "map_tilt_secondary" to "Kantel de kaart voor een vogelvluchtperspectief",
         "marker_background_color" to "Marker achtergrond",
         "marker_icon_color" to "Marker icoon",
         "months_1" to "1 maand",

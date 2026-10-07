@@ -33,14 +33,19 @@ import org.btcmap.dbstats.DatabaseFile
 import org.btcmap.dbstats.DbStatsLabels
 import org.btcmap.dbstats.DbStatsReader
 import org.btcmap.dbstats.dbStatsSections
+import org.btcmap.map.DEFAULT_MAP_BEARING
+import org.btcmap.map.DEFAULT_MAP_TILT
 import org.btcmap.settings.MapColor
 import org.btcmap.settings.MapStyle
 import org.btcmap.settings.Settings
 import org.btcmap.settings.apiUrl
 import org.btcmap.settings.authorized
+import org.btcmap.settings.mapBearing
 import org.btcmap.settings.mapColor
 import org.btcmap.settings.mapRotationEnabled
 import org.btcmap.settings.mapStyle
+import org.btcmap.settings.mapTilt
+import org.btcmap.settings.mapTiltEnabled
 import org.btcmap.settings.setMapColor
 import org.btcmap.settings.showAttribution
 import org.btcmap.settings.verifiedFilterYears
@@ -86,6 +91,8 @@ data class SettingsPageLabels(
     val showAttributionSecondary: String,
     val mapRotation: String,
     val mapRotationSecondary: String,
+    val mapTilt: String,
+    val mapTiltSecondary: String,
     val dbStats: String,
     val dbStatsSecondary: String,
     val imageStats: String,
@@ -123,6 +130,7 @@ fun SettingsPage(
 ) {
     var attribution by remember { mutableStateOf(settings.showAttribution) }
     var rotation by remember { mutableStateOf(settings.mapRotationEnabled) }
+    var tilt by remember { mutableStateOf(settings.mapTiltEnabled) }
     var mapStyle by remember { mutableStateOf(settings.mapStyle) }
     var verifiedYears by remember { mutableStateOf(settings.verifiedFilterYears) }
 
@@ -170,6 +178,8 @@ fun SettingsPage(
                 showAttributionSecondary = labels.showAttributionSecondary,
                 mapRotation = labels.mapRotation,
                 mapRotationSecondary = labels.mapRotationSecondary,
+                mapTilt = labels.mapTilt,
+                mapTiltSecondary = labels.mapTiltSecondary,
                 dbStats = labels.dbStats,
                 dbStatsSecondary = labels.dbStatsSecondary,
                 imageStats = labels.imageStats,
@@ -182,6 +192,7 @@ fun SettingsPage(
             ),
             showAttribution = attribution,
             mapRotationEnabled = rotation,
+            mapTiltEnabled = tilt,
             includeImageStats = includeImageStats,
             includeManageAreas = canManageAreas,
         ),
@@ -206,6 +217,19 @@ fun SettingsPage(
                 "mapRotation" -> {
                     rotation = checked
                     settings.mapRotationEnabled = checked
+                    // Changing the rotation setting puts the map back to north,
+                    // so a rotation saved while it was allowed does not leave the
+                    // map stuck at an angle once rotation is blocked.
+                    settings.mapBearing = DEFAULT_MAP_BEARING
+                }
+
+                "mapTilt" -> {
+                    tilt = checked
+                    settings.mapTiltEnabled = checked
+                    // As with rotation, changing the tilt setting puts the map
+                    // back to straight down so a saved tilt cannot leave it
+                    // pitched once tilt is blocked.
+                    settings.mapTilt = DEFAULT_MAP_TILT
                 }
             }
         },

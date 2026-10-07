@@ -129,6 +129,14 @@ var Settings.mapRotationEnabled: Boolean
         putBoolean(KEY_MAP_ROTATION_ENABLED, value)
     }
 
+private const val KEY_MAP_TILT_ENABLED = "map_tilt_enabled"
+
+var Settings.mapTiltEnabled: Boolean
+    get() = getBoolean(KEY_MAP_TILT_ENABLED, false)
+    set(value) {
+        putBoolean(KEY_MAP_TILT_ENABLED, value)
+    }
+
 /**
  * Whether [this] style draws a dark basemap. [MapStyle.Auto] follows the system
  * theme, so the caller tells us whether the system is in dark mode.

@@ -49,9 +49,11 @@ class SettingsPersistenceTest : AppTestCase() {
     fun toggles_persistSelection() = runBlocking<Unit> {
         prefs.showAttribution = false
         prefs.mapRotationEnabled = true
+        prefs.mapTiltEnabled = true
 
         Assert.assertFalse(prefs.showAttribution)
         Assert.assertTrue(prefs.mapRotationEnabled)
+        Assert.assertTrue(prefs.mapTiltEnabled)
     }
 
     @Test

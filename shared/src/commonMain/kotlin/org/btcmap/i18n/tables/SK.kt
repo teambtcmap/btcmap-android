@@ -164,6 +164,8 @@ internal val SK: Map<String, String> = mapOf(
         "map_rotation" to "Povoliť otáčanie mapy",
         "map_rotation_secondary" to "Kompas sa zobrazí, keď nesmeruje na sever",
         "map_style" to "Štýl mapy",
+        "map_tilt" to "Povoliť naklonenie mapy",
+        "map_tilt_secondary" to "Nakloňte mapu pre vtáčí pohľad",
         "marker_background_color" to "Pozadie markeru",
         "marker_icon_color" to "Ikona markeru",
         "months_1" to "1 mesiac",

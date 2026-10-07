@@ -6,6 +6,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+- Add an "Allow map tilt" setting below "Allow map rotation", with both translated into every app language, and reset the saved rotation or tilt whenever the rotation or tilt setting is toggled, so a map left at an angle cannot stay stuck there once that movement is blocked
+- Remember the map's rotation and tilt as well as its centre and zoom, so the app reopens at the same angle instead of snapping back to north and straight down
+- Keep the current zoom when opening a place, zooming in to 15 only when the map is further out, so a place is not hidden inside a cluster while a close-up view is left undisturbed
 - Rework the settings screen for Material 3 and large screens: group the rows under Map, Data and Admin headings with leading icons and dividers, cap and centre the settings and colours lists so a wide desktop or tablet window no longer stretches every row edge to edge, toggle a switch from anywhere on its row rather than only on the switch itself, and show a chevron on rows that open another screen
 - Translate the Manage areas screen into every app language: its title, description, search field and empty/error strings were English-only, so all other locales fell back to English
 

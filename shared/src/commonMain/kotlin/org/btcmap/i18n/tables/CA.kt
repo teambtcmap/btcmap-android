@@ -164,6 +164,8 @@ internal val CA: Map<String, String> = mapOf(
         "map_rotation" to "Permet la rotació del mapa",
         "map_rotation_secondary" to "La brúixola apareix si no apunta al nord",
         "map_style" to "Estil del mapa",
+        "map_tilt" to "Permet la inclinació del mapa",
+        "map_tilt_secondary" to "Inclina el mapa per a una vista aèria",
         "marker_background_color" to "Fons del marcador",
         "marker_icon_color" to "Icona del marcador",
         "months_1" to "1 Mes",

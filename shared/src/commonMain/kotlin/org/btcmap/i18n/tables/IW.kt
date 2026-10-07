@@ -164,6 +164,8 @@ internal val IW: Map<String, String> = mapOf(
         "map_rotation" to "אפשר סיבוב מפה",
         "map_rotation_secondary" to "מצפן מופיע כשלא פונה לצפון",
         "map_style" to "סגנון מפה",
+        "map_tilt" to "אפשר הטיית מפה",
+        "map_tilt_secondary" to "הטה את המפה לתצוגת עוף",
         "marker_background_color" to "רקע סמן",
         "marker_icon_color" to "אייקון סמן",
         "months_1" to "חודש",

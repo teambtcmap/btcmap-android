@@ -21,6 +21,8 @@ data class SettingsStrings(
     val showAttributionSecondary: String,
     val mapRotation: String,
     val mapRotationSecondary: String,
+    val mapTilt: String,
+    val mapTiltSecondary: String,
     val dbStats: String,
     val dbStatsSecondary: String,
     val imageStats: String,
@@ -50,6 +52,7 @@ fun settingsItems(
     strings: SettingsStrings,
     showAttribution: Boolean,
     mapRotationEnabled: Boolean,
+    mapTiltEnabled: Boolean,
     includeImageStats: Boolean = true,
     includeManageAreas: Boolean = false,
 ): List<SettingsItem> = buildList {
@@ -102,6 +105,15 @@ fun settingsItems(
             strings.mapRotationSecondary,
             mapRotationEnabled,
             icon = "explore",
+        )
+    )
+    add(
+        SettingsItem.Toggle(
+            "mapTilt",
+            strings.mapTilt,
+            strings.mapTiltSecondary,
+            mapTiltEnabled,
+            icon = "view_in_ar",
         )
     )
     add(SettingsItem.Header("headerData", strings.sectionData))

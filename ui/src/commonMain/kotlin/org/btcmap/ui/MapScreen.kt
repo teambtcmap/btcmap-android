@@ -74,6 +74,7 @@ import org.btcmap.ui.map.FILTER_BUTTON_INSET
 import org.btcmap.ui.map.MAP_BADGE_OFFSET
 import org.btcmap.ui.map.MAP_CONTROLS_GAP
 import org.btcmap.ui.map.MARKER_PIN_IMAGE_ID
+import org.btcmap.ui.map.MapCameraState
 import org.btcmap.ui.map.MarkerBitmapFactory
 import org.btcmap.ui.map.MarkerClickHandler
 import org.btcmap.ui.map.MarkerFilterButtons
@@ -125,6 +126,10 @@ fun MapScreen(
     initialLat: Double,
     initialLon: Double,
     initialZoom: Double,
+    /** The camera's rotation, in degrees clockwise from north. */
+    initialBearing: Double = 0.0,
+    /** The camera's pitch, in degrees from straight down. */
+    initialTilt: Double = 0.0,
     minVerifiedAt: Instant?,
     palette: MarkerPalette,
     areaChipPalette: AreaChipPalette,
@@ -135,6 +140,11 @@ fun MapScreen(
      * moves are unaffected, so the map can still be pointed at a place.
      */
     mapRotationEnabled: Boolean = false,
+    /**
+     * Whether user input may change the map's tilt. Programmatic camera moves
+     * are unaffected, so the map can still be pitched at a place.
+     */
+    mapTiltEnabled: Boolean = false,
     iconFont: FontFamily?,
     placeSheetStrings: PlaceSheetStrings,
     searchActions: SearchActions? = null,
@@ -190,7 +200,7 @@ fun MapScreen(
     /** The colour of [attributionText], which the host resolves from its theme. */
     attributionTextColor: Color = Color.Black.copy(alpha = 0.8f),
     /** Reports where the camera came to rest, so the host can remember it. */
-    onCameraIdle: ((Double, Double, Double) -> Unit)? = null,
+    onCameraIdle: ((MapCameraState) -> Unit)? = null,
     /**
      * Called once, after the first non-empty marker snapshot has been drawn, for
      * startup metrics. Android's default fully-drawn moment is the first frame,
@@ -255,9 +265,12 @@ fun MapScreen(
         }
     }
 
-    fun placeCameraUpdate(place: Place) = CameraUpdate(
+    // Opening a place is a coordinate jump: the zoom the user is at is kept when
+    // it is already close enough (15+, where the cluster layers stop clustering),
+    // otherwise the map zooms in to 15 so the place is not lost inside a cluster.
+    fun placeCameraUpdate(place: Place, currentZoom: Double?): CameraUpdate = CameraUpdate(
         target = Position(place.lon, place.lat),
-        zoom = OPEN_ZOOM,
+        zoom = if (currentZoom != null && currentZoom < PLACE_MIN_ZOOM) PLACE_MIN_ZOOM else null,
         padding = placeSheetPadding(),
     )
 
@@ -274,13 +287,15 @@ fun MapScreen(
     // once instead of on every recomposition; the dismissal callback goes
     // through a live state so a changed host lambda is still the one called.
     val currentOnPlaceDismissed by rememberUpdatedState(onPlaceDismissed)
-    val mapInteractions = remember(mapRotationEnabled) {
+    val mapInteractions = remember(mapRotationEnabled, mapTiltEnabled) {
         MapInteractions {
             camera {
                 // Bearing permission. A gesture binding cannot re-enable a
                 // movement the camera disallows, so this alone stops user
                 // rotation (two-finger twist, drag, keys).
                 rotate { enabled = mapRotationEnabled }
+                // Pitch permission, on the same terms as rotation.
+                tilt { enabled = mapTiltEnabled }
             }
             callbacks {
                 click {
@@ -369,6 +384,8 @@ fun MapScreen(
         initialCameraPosition = CameraPosition(
             target = Position(initialLon, initialLat),
             zoom = initialZoom,
+            bearing = initialBearing,
+            tilt = initialTilt,
         ),
     ) {
         // Only the selected kind is declared: 0.19.0 fixed the 0.18.0 quirk that
@@ -429,7 +446,7 @@ fun MapScreen(
     // map back.
     LaunchedEffect(recenterKey) {
         if (recenterKey == 0) return@LaunchedEffect
-        selectedPlace?.let { state.animateCamera(placeCameraUpdate(it)) }
+        selectedPlace?.let { state.animateCamera(placeCameraUpdate(it, state.cameraPosition?.zoom)) }
     }
 
     // The host may want to remember where the user left the map.
@@ -437,7 +454,15 @@ fun MapScreen(
         val callback = onCameraIdle ?: return@LaunchedEffect
         state.events.filterIsInstance<MapEvent.CameraMoveEnded>().collect {
             val camera = state.cameraPosition ?: return@collect
-            callback(camera.target.latitude, camera.target.longitude, camera.zoom)
+            callback(
+                MapCameraState(
+                    lat = camera.target.latitude,
+                    lon = camera.target.longitude,
+                    zoom = camera.zoom,
+                    bearing = camera.bearing,
+                    tilt = camera.tilt,
+                ),
+            )
         }
     }
 
@@ -457,7 +482,7 @@ fun MapScreen(
         // before moving to it, as the Views map did.
         markerKind = if (place.isMerchant()) MarkerKind.Merchants else MarkerKind.Exchanges
         onPlaceSelected(place)
-        state.animateCamera(placeCameraUpdate(place))
+        state.animateCamera(placeCameraUpdate(place, state.cameraPosition?.zoom))
     }
 
     // The host supplies what it can do, but only the map knows where it is
@@ -505,12 +530,13 @@ fun MapScreen(
                     onPlaceSelected(place)
                     // A search result can be anywhere, so the map jumps straight
                     // to it rather than only opening its sheet; the current
-                    // bearing and tilt are kept, as an animated move would.
+                    // bearing and tilt are kept, and the zoom only moves when it
+                    // is below the un-clustering threshold.
                     state.cameraPosition?.let { current ->
                         state.setCameraPosition(
                             current.copy(
                                 target = Position(place.lon, place.lat),
-                                zoom = OPEN_ZOOM,
+                                zoom = maxOf(current.zoom, PLACE_MIN_ZOOM),
                                 padding = placeSheetPadding() ?: DpPadding.Zero,
                             ),
                         )
@@ -910,8 +936,15 @@ private val ATTRIBUTION_BOTTOM = 32.dp
  */
 private val MAP_CONTROLS_BOTTOM = ATTRIBUTION_BOTTOM + 20.dp
 
-/** The zoom a place the map was asked to open is shown at. */
+/** The zoom a host-supplied map target is shown at. */
 private const val OPEN_ZOOM = 16.0
+
+/**
+ * The zoom at which markers stop clustering: the map sources cap clustering at
+ * zoom 14, so this is the first zoom where a place jumped to is shown
+ * un-clustered.
+ */
+private const val PLACE_MIN_ZOOM = 15.0
 
 /** The zoom the location button moves to, matching the Android map's own. */
 private const val LOCATION_ZOOM = 14.0

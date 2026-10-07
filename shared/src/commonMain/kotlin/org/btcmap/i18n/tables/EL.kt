@@ -164,6 +164,8 @@ internal val EL: Map<String, String> = mapOf(
         "map_rotation" to "Να επιτρέπεται η περιστροφή χάρτη",
         "map_rotation_secondary" to "Η πυξίδα εμφανίζεται όταν δεν δείχνει βορρά",
         "map_style" to "Στυλ Χάρτη",
+        "map_tilt" to "Να επιτρέπεται η κλίση χάρτη",
+        "map_tilt_secondary" to "Γείρετε τον χάρτη για προβολή από ψηλά",
         "marker_background_color" to "Φόντο δείκτη",
         "marker_icon_color" to "Εικονίδιο δείκτη",
         "months_1" to "1 Μήνας",

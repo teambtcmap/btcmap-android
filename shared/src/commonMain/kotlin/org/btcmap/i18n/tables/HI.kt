@@ -164,6 +164,8 @@ internal val HI: Map<String, String> = mapOf(
         "map_rotation" to "मानचित्र घुमाने की अनुमति दें",
         "map_rotation_secondary" to "उत्तर की ओर न होने पर कंपास दिखता है",
         "map_style" to "मानचित्र शैली",
+        "map_tilt" to "मानचित्र झुकाने की अनुमति दें",
+        "map_tilt_secondary" to "पक्षी-दृष्टि के लिए मानचित्र झुकाएँ",
         "marker_background_color" to "मार्कर पृष्ठभूमि",
         "marker_icon_color" to "मार्कर आइकन",
         "months_1" to "1 महीना",

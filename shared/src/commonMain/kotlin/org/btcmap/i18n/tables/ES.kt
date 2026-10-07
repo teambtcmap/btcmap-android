@@ -164,6 +164,8 @@ internal val ES: Map<String, String> = mapOf(
         "map_rotation" to "Permitir rotación del mapa",
         "map_rotation_secondary" to "La brújula aparece si no apunta al norte",
         "map_style" to "Estilo de mapa",
+        "map_tilt" to "Permitir inclinación del mapa",
+        "map_tilt_secondary" to "Inclina el mapa para una vista aérea",
         "marker_background_color" to "Fondo del marcador",
         "marker_icon_color" to "Icono del marcador",
         "months_1" to "1 Mes",

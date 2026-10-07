@@ -32,10 +32,13 @@ import org.btcmap.saved.SavedItems
 import org.btcmap.settings.apiUrl
 import org.btcmap.settings.authorized
 import org.btcmap.settings.isDark
+import org.btcmap.settings.mapBearing
 import org.btcmap.settings.mapCenterLat
 import org.btcmap.settings.mapCenterLon
 import org.btcmap.settings.mapRotationEnabled
 import org.btcmap.settings.mapStyle
+import org.btcmap.settings.mapTilt
+import org.btcmap.settings.mapTiltEnabled
 import org.btcmap.settings.mapZoom
 import org.btcmap.settings.showAttribution
 import org.btcmap.settings.verifiedFilterMinVerifiedAt
@@ -170,12 +173,15 @@ internal fun MapRoute(
         initialLat = services.settings.mapCenterLat,
         initialLon = services.settings.mapCenterLon,
         initialZoom = services.settings.mapZoom,
+        initialBearing = services.settings.mapBearing,
+        initialTilt = services.settings.mapTilt,
         minVerifiedAt = services.settings.verifiedFilterMinVerifiedAt(),
         palette = markerPalette(services.settings),
         areaChipPalette = areaChipPalette(services.settings),
         apiUrl = services.settings.apiUrl.toString(),
         usingOpenFreeMap = services.usingOpenFreeMap,
         mapRotationEnabled = services.settings.mapRotationEnabled,
+        mapTiltEnabled = services.settings.mapTiltEnabled,
         iconFont = services.iconFont,
         placeSheetStrings = labels.placeStrings,
         searchActions = SearchActions(onSettings = { onNavigate(AppRoute.Settings) }),
@@ -213,10 +219,12 @@ internal fun MapRoute(
         onUpdateClick = { platform.showUpdateDialog() },
         attributionText = labels.osmAttribution,
         attributionTextColor = if (mapIsDark) Color.White else Color.Black.copy(alpha = 0.8f),
-        onCameraIdle = { lat, lon, zoom ->
-            services.settings.mapCenterLat = lat
-            services.settings.mapCenterLon = lon
-            services.settings.mapZoom = zoom
+        onCameraIdle = { camera ->
+            services.settings.mapCenterLat = camera.lat
+            services.settings.mapCenterLon = camera.lon
+            services.settings.mapZoom = camera.zoom
+            services.settings.mapBearing = camera.bearing
+            services.settings.mapTilt = camera.tilt
         },
         onFeaturesDrawn = { platform.reportFullyDrawn() },
         placeSheet = true,

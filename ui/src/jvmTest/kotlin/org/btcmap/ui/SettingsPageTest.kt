@@ -3,15 +3,20 @@ package org.btcmap.ui
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.hasScrollAction
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isToggleable
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollToNode
 import androidx.compose.ui.test.runComposeUiTest
 import kotlinx.coroutines.runBlocking
 import org.btcmap.db.table.user.User
 import org.btcmap.settings.MapStyle
+import org.btcmap.settings.mapBearing
 import org.btcmap.settings.mapStyle
+import org.btcmap.settings.mapTilt
 import org.btcmap.settings.showAttribution
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -37,6 +42,7 @@ class SettingsPageTest {
             onNodeWithText("Only show places").assertIsDisplayed()
             onNodeWithText("Show attribution").assertIsDisplayed()
             onNodeWithText("Allow map rotation").assertIsDisplayed()
+            onNodeWithText("Allow map tilt").assertIsDisplayed()
             onNodeWithText("Database").assertIsDisplayed()
             onNodeWithText("Account").assertIsDisplayed()
         }
@@ -112,6 +118,30 @@ class SettingsPageTest {
 
     @OptIn(ExperimentalTestApi::class)
     @Test
+    fun togglingMapRotation_resetsTheBearing() {
+        settings.mapBearing = 45.0
+        runComposeUiTest {
+            setContent { SettingsPage(settings, db, TEST_SETTINGS_PAGE_LABELS, onOpenAccount = {}, onOpenColors = {}, onOpenDbStats = {}) }
+            // The first toggle is Show attribution, the second Map rotation.
+            onAllNodes(isToggleable())[1].performClick()
+        }
+        assertEquals(0.0, settings.mapBearing)
+    }
+
+    @OptIn(ExperimentalTestApi::class)
+    @Test
+    fun togglingMapTilt_resetsTheTilt() {
+        settings.mapTilt = 45.0
+        runComposeUiTest {
+            setContent { SettingsPage(settings, db, TEST_SETTINGS_PAGE_LABELS, onOpenAccount = {}, onOpenColors = {}, onOpenDbStats = {}) }
+            // Show attribution, Map rotation, then Map tilt.
+            onAllNodes(isToggleable())[2].performClick()
+        }
+        assertEquals(0.0, settings.mapTilt)
+    }
+
+    @OptIn(ExperimentalTestApi::class)
+    @Test
     fun rows_areGroupedUnderHeaders() {
         runComposeUiTest {
             setContent { SettingsPage(settings, db, TEST_SETTINGS_PAGE_LABELS, onOpenAccount = {}, onOpenColors = {}, onOpenDbStats = {}) }
@@ -126,9 +156,12 @@ class SettingsPageTest {
         signIn(roles = listOf("area_admin"))
         runComposeUiTest {
             setContent { SettingsPage(settings, db, TEST_SETTINGS_PAGE_LABELS, onOpenAccount = {}, onOpenColors = {}, onOpenDbStats = {}) }
+            // The list is lazy, so the admin-only rows at the bottom are only
+            // composed once scrolled into view.
             waitUntil(timeoutMillis = 5_000) {
-                onAllNodesWithText("Manage areas").fetchSemanticsNodes().isNotEmpty()
+                onAllNodesWithText("Image cache").fetchSemanticsNodes().isNotEmpty()
             }
+            onNode(hasScrollAction()).performScrollToNode(hasText("Manage areas"))
         }
     }
 
@@ -138,7 +171,12 @@ class SettingsPageTest {
         signIn(roles = listOf("user"))
         runComposeUiTest {
             setContent { SettingsPage(settings, db, TEST_SETTINGS_PAGE_LABELS, onOpenAccount = {}, onOpenColors = {}, onOpenDbStats = {}) }
-            waitForIdle()
+            waitUntil(timeoutMillis = 5_000) {
+                onAllNodesWithText("Image cache").fetchSemanticsNodes().isNotEmpty()
+            }
+            // Scroll to the last row a regular user has, so an absent admin row
+            // is proven absent rather than merely uncomposed.
+            onNode(hasScrollAction()).performScrollToNode(hasText("Image cache"))
             onAllNodesWithText("Manage areas").assertCountEquals(0)
         }
     }

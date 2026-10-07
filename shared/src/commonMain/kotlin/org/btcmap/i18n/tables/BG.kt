@@ -164,6 +164,8 @@ internal val BG: Map<String, String> = mapOf(
         "map_rotation" to "Разрешаване на завъртане на картата",
         "map_rotation_secondary" to "Компасът се появява, когато не сочи север",
         "map_style" to "Стил на картата",
+        "map_tilt" to "Разрешаване на накланяне на картата",
+        "map_tilt_secondary" to "Наклонете картата за изглед отвисоко",
         "marker_background_color" to "Фон на маркера",
         "marker_icon_color" to "Икона на маркера",
         "months_1" to "1 месец",

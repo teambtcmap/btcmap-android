@@ -204,6 +204,8 @@ internal val EN: Map<String, String> = mapOf(
         "map_rotation" to "Allow map rotation",
         "map_rotation_secondary" to "Compass appears when not facing north",
         "map_style" to "Map style",
+        "map_tilt" to "Allow map tilt",
+        "map_tilt_secondary" to "Tilt the map for a bird's-eye view",
         "marker_background_color" to "Marker background",
         "marker_icon_color" to "Marker icon",
         "months_1" to "1 Month",

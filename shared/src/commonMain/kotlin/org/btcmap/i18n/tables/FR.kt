@@ -164,6 +164,8 @@ internal val FR: Map<String, String> = mapOf(
         "map_rotation" to "Autoriser la rotation de la carte",
         "map_rotation_secondary" to "Boussole affichée si pas orientée au nord",
         "map_style" to "Style de carte",
+        "map_tilt" to "Autoriser l'inclinaison de la carte",
+        "map_tilt_secondary" to "Inclinez la carte pour une vue aérienne",
         "marker_background_color" to "Arrière-plan du marqueur",
         "marker_icon_color" to "Icône du marqueur",
         "months_1" to "1 mois",

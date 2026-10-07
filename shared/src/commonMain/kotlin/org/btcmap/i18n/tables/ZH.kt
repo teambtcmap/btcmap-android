@@ -164,6 +164,8 @@ internal val ZH: Map<String, String> = mapOf(
         "map_rotation" to "允许地图旋转",
         "map_rotation_secondary" to "不朝北时显示指南针",
         "map_style" to "地图样式",
+        "map_tilt" to "允许地图倾斜",
+        "map_tilt_secondary" to "倾斜地图以获得鸟瞰视图",
         "marker_background_color" to "标记背景",
         "marker_icon_color" to "标记图标",
         "months_1" to "1 个月",

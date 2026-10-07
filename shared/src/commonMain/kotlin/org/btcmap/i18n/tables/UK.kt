@@ -164,6 +164,8 @@ internal val UK: Map<String, String> = mapOf(
         "map_rotation" to "Дозволити обертання карти",
         "map_rotation_secondary" to "Компас з'являється, коли не вказує на північ",
         "map_style" to "Стиль карти",
+        "map_tilt" to "Дозволити нахил карти",
+        "map_tilt_secondary" to "Нахиліть карту для вигляду з висоти",
         "marker_background_color" to "Фон маркера",
         "marker_icon_color" to "Іконка маркера",
         "months_1" to "1 місяць",

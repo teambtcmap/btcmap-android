@@ -220,6 +220,8 @@ fun appLabels(
         showAttributionSecondary = strings["show_attribution_secondary"],
         mapRotation = strings["map_rotation"],
         mapRotationSecondary = strings["map_rotation_secondary"],
+        mapTilt = strings["map_tilt"],
+        mapTiltSecondary = strings["map_tilt_secondary"],
         dbStats = strings["database_stats"],
         dbStatsSecondary = strings["database_stats_secondary"],
         imageStats = strings["image_stats"],

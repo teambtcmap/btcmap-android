@@ -113,10 +113,13 @@ import org.btcmap.settings.apiUrl
 import org.btcmap.settings.authorized
 import org.btcmap.settings.bundledStyleAsset
 import org.btcmap.settings.isDark
+import org.btcmap.settings.mapBearing
 import org.btcmap.settings.mapCenterLat
 import org.btcmap.settings.mapCenterLon
 import org.btcmap.settings.mapRotationEnabled
 import org.btcmap.settings.mapStyle
+import org.btcmap.settings.mapTilt
+import org.btcmap.settings.mapTiltEnabled
 import org.btcmap.settings.mapZoom
 import org.maplibre.compose.resource.MapResourceProvider
 import org.btcmap.settings.showAttribution
@@ -392,6 +395,8 @@ private fun runApp() = application {
                             initialLat = settings.mapCenterLat,
                             initialLon = settings.mapCenterLon,
                             initialZoom = settings.mapZoom,
+                            initialBearing = settings.mapBearing,
+                            initialTilt = settings.mapTilt,
                             // The user's verification window and colour choices
                             // come from the shared settings, so the desktop map
                             // honours the same screen Android does.
@@ -401,6 +406,7 @@ private fun runApp() = application {
                             apiUrl = API_URL,
                             usingOpenFreeMap = true,
                             mapRotationEnabled = settings.mapRotationEnabled,
+                            mapTiltEnabled = settings.mapTiltEnabled,
                             showAttribution = settings.showAttribution,
                             syncVisible = syncState != SyncState.Idle,
                             reloadKey = reloadKey,
@@ -538,14 +544,16 @@ private fun runApp() = application {
                                 selectedAreaId = areaId
                                 nav.push(Route.Area)
                             },
-                            onCameraIdle = { lat, lon, zoom ->
+                            onCameraIdle = { camera ->
                                 // Remember the camera for the feed and for the
                                 // next launch, as Android's map route does.
-                                settings.mapCenterLat = lat
-                                settings.mapCenterLon = lon
-                                settings.mapZoom = zoom
-                                mapCenterLat = lat
-                                mapCenterLon = lon
+                                settings.mapCenterLat = camera.lat
+                                settings.mapCenterLon = camera.lon
+                                settings.mapZoom = camera.zoom
+                                settings.mapBearing = camera.bearing
+                                settings.mapTilt = camera.tilt
+                                mapCenterLat = camera.lat
+                                mapCenterLon = camera.lon
                             },
                             formatDistance = { meters ->
                                 val km = meters / 1_000

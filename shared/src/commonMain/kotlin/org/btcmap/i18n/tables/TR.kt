@@ -164,6 +164,8 @@ internal val TR: Map<String, String> = mapOf(
         "map_rotation" to "Harita döndürmeye izin ver",
         "map_rotation_secondary" to "Kuzeye bakmadığında pusula görünür",
         "map_style" to "Harita stili",
+        "map_tilt" to "Harita eğimine izin ver",
+        "map_tilt_secondary" to "Kuş bakışı için haritayı eğin",
         "marker_background_color" to "İşaretçi arka planı",
         "marker_icon_color" to "İşaretçi simgesi",
         "months_1" to "1 Ay",

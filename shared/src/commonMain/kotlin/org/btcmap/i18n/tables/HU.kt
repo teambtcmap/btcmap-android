@@ -164,6 +164,8 @@ internal val HU: Map<String, String> = mapOf(
         "map_rotation" to "Térkép forgatásának engedélyezése",
         "map_rotation_secondary" to "Iránytű jelenik meg, ha nem északra néz",
         "map_style" to "Térkép stílus",
+        "map_tilt" to "Térkép döntésének engedélyezése",
+        "map_tilt_secondary" to "Döntse meg a térképet madártávlathoz",
         "marker_background_color" to "Jelölő háttér",
         "marker_icon_color" to "Jelölő ikon",
         "months_1" to "1 hónap",

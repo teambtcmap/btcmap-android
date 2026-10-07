@@ -164,6 +164,8 @@ internal val AF: Map<String, String> = mapOf(
         "map_rotation" to "Laat kaartrotasie toe",
         "map_rotation_secondary" to "Kompas verskyn as noord nie bo is nie",
         "map_style" to "Kaartstyl",
+        "map_tilt" to "Laat kaartkantel toe",
+        "map_tilt_secondary" to "Kantel die kaart vir 'n voëlvlug",
         "marker_background_color" to "Merker agtergrond",
         "marker_icon_color" to "Merker ikoon",
         "months_1" to "1 Maand",

@@ -164,6 +164,8 @@ internal val JA: Map<String, String> = mapOf(
         "map_rotation" to "地図の回転を許可",
         "map_rotation_secondary" to "北を向いていないとコンパスを表示",
         "map_style" to "マップスタイル",
+        "map_tilt" to "地図の傾きを許可",
+        "map_tilt_secondary" to "鳥瞰表示のために地図を傾ける",
         "marker_background_color" to "マーカー背景",
         "marker_icon_color" to "マーカーアイコン",
         "months_1" to "1ヶ月",

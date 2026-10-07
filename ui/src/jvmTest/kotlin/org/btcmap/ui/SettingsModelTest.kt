@@ -23,7 +23,7 @@ class SettingsModelTest {
 
     @Test
     fun settingsItems_areTheAndroidEntriesInOrder() {
-        val items = settingsItems(strings(), showAttribution = true, mapRotationEnabled = false)
+        val items = settingsItems(strings(), showAttribution = true, mapRotationEnabled = false, mapTiltEnabled = false)
 
         assertEquals(
             listOf(
@@ -34,6 +34,7 @@ class SettingsModelTest {
                 "verifiedFilter",
                 "showAttribution",
                 "mapRotation",
+                "mapTilt",
                 "headerData",
                 "dbStats",
                 "imageStats",
@@ -48,6 +49,7 @@ class SettingsModelTest {
             strings(),
             showAttribution = true,
             mapRotationEnabled = false,
+            mapTiltEnabled = false,
             includeManageAreas = true,
         )
 
@@ -58,7 +60,7 @@ class SettingsModelTest {
         )
 
         assertTrue(
-            settingsItems(strings(), showAttribution = true, mapRotationEnabled = false)
+            settingsItems(strings(), showAttribution = true, mapRotationEnabled = false, mapTiltEnabled = false)
                 .none { it.key == "manageAreas" },
         )
     }
@@ -69,6 +71,7 @@ class SettingsModelTest {
             strings(),
             showAttribution = true,
             mapRotationEnabled = false,
+            mapTiltEnabled = false,
             includeImageStats = false,
         )
 
@@ -81,6 +84,7 @@ class SettingsModelTest {
                 "verifiedFilter",
                 "showAttribution",
                 "mapRotation",
+                "mapTilt",
                 "headerData",
                 "dbStats",
             ),
@@ -94,6 +98,7 @@ class SettingsModelTest {
             strings(),
             showAttribution = true,
             mapRotationEnabled = false,
+            mapTiltEnabled = false,
             includeManageAreas = true,
         )
 
@@ -127,6 +132,8 @@ class SettingsModelTest {
         showAttributionSecondary = "show-attribution-secondary",
         mapRotation = "map-rotation",
         mapRotationSecondary = "map-rotation-secondary",
+        mapTilt = "map-tilt",
+        mapTiltSecondary = "map-tilt-secondary",
         dbStats = "db-stats",
         dbStatsSecondary = "db-stats-secondary",
         imageStats = "image-stats",

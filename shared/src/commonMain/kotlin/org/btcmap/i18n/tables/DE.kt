@@ -164,6 +164,8 @@ internal val DE: Map<String, String> = mapOf(
         "map_rotation" to "Kartenrotation erlauben",
         "map_rotation_secondary" to "Kompass erscheint, wenn nicht nach Norden",
         "map_style" to "Kartenstil",
+        "map_tilt" to "Kartenneigung erlauben",
+        "map_tilt_secondary" to "Karte für eine Vogelperspektive neigen",
         "marker_background_color" to "Marker-Hintergrund",
         "marker_icon_color" to "Marker-Symbol",
         "months_1" to "1 Monat",

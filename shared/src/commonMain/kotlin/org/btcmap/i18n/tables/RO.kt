@@ -164,6 +164,8 @@ internal val RO: Map<String, String> = mapOf(
         "map_rotation" to "Permite rotirea hărții",
         "map_rotation_secondary" to "Busola apare când nu e orientată spre nord",
         "map_style" to "Stilul hărții",
+        "map_tilt" to "Permite înclinarea hărții",
+        "map_tilt_secondary" to "Înclină harta pentru o vedere de sus",
         "marker_background_color" to "Fundal marker",
         "marker_icon_color" to "Pictogramă marker",
         "months_1" to "1 lună",

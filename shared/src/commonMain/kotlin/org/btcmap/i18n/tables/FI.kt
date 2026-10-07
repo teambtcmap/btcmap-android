@@ -164,6 +164,8 @@ internal val FI: Map<String, String> = mapOf(
         "map_rotation" to "Salli kartan kierto",
         "map_rotation_secondary" to "Kompassi näkyy, kun ei osoita pohjoiseen",
         "map_style" to "Kartan tyyli",
+        "map_tilt" to "Salli kartan kallistus",
+        "map_tilt_secondary" to "Kallista karttaa lintuperspektiiviä varten",
         "marker_background_color" to "Merkin tausta",
         "marker_icon_color" to "Merkin kuvake",
         "months_1" to "1 kuukausi",

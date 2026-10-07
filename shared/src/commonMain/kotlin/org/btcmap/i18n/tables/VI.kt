@@ -164,6 +164,8 @@ internal val VI: Map<String, String> = mapOf(
         "map_rotation" to "Cho phép xoay bản đồ",
         "map_rotation_secondary" to "La bàn hiện khi không hướng bắc",
         "map_style" to "Phong cách bản đồ",
+        "map_tilt" to "Cho phép nghiêng bản đồ",
+        "map_tilt_secondary" to "Nghiêng bản đồ để có góc nhìn từ trên cao",
         "marker_background_color" to "Nền đánh dấu",
         "marker_icon_color" to "Biểu tượng đánh dấu",
         "months_1" to "1 tháng",

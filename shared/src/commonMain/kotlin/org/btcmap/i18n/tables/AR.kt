@@ -164,6 +164,8 @@ internal val AR: Map<String, String> = mapOf(
         "map_rotation" to "السماح بتدوير الخريطة",
         "map_rotation_secondary" to "تظهر البوصلة عند عدم الاتجاه شمالًا",
         "map_style" to "نمط الخريطة",
+        "map_tilt" to "السماح بإمالة الخريطة",
+        "map_tilt_secondary" to "أمِل الخريطة للحصول على عرض من منظور الطيور",
         "marker_background_color" to "خلفية العلامة",
         "marker_icon_color" to "أيقونة العلامة",
         "months_1" to "شهر واحد",

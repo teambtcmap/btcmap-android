@@ -164,6 +164,8 @@ internal val KO: Map<String, String> = mapOf(
         "map_rotation" to "지도 회전 허용",
         "map_rotation_secondary" to "북쪽이 아니면 나침반 표시",
         "map_style" to "지도 스타일",
+        "map_tilt" to "지도 기울기 허용",
+        "map_tilt_secondary" to "조감도를 위해 지도를 기울이세요",
         "marker_background_color" to "마커 배경",
         "marker_icon_color" to "마커 아이콘",
         "months_1" to "1개월",

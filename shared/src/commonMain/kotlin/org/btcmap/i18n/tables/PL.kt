@@ -164,6 +164,8 @@ internal val PL: Map<String, String> = mapOf(
         "map_rotation" to "Zezwól na obrót mapy",
         "map_rotation_secondary" to "Kompas pojawia się, gdy nie na północ",
         "map_style" to "Styl mapy",
+        "map_tilt" to "Zezwól na pochylenie mapy",
+        "map_tilt_secondary" to "Pochyl mapę, aby uzyskać widok z lotu ptaka",
         "marker_background_color" to "Tło znacznika",
         "marker_icon_color" to "Ikona znacznika",
         "months_1" to "1 miesiąc",

@@ -164,6 +164,8 @@ internal val UR: Map<String, String> = mapOf(
         "map_rotation" to "نقشے کی گردش کی اجازت دیں",
         "map_rotation_secondary" to "شمال کی طرف نہ ہونے پر کمپاس ظاہر ہوتا ہے",
         "map_style" to "نقشے کا انداز",
+        "map_tilt" to "نقشے کا جھکاؤ کی اجازت دیں",
+        "map_tilt_secondary" to "پرندوں کے نظارے کے لیے نقشے کو جھکائیں",
         "marker_background_color" to "مارکر کا پس منظر",
         "marker_icon_color" to "مارکر آئیکن",
         "months_1" to "1 ماہ",

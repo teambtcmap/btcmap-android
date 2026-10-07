@@ -164,6 +164,8 @@ internal val TH: Map<String, String> = mapOf(
         "map_rotation" to "อนุญาตให้หมุนแผนที่",
         "map_rotation_secondary" to "เข็มทิศจะแสดงเมื่อไม่ได้หันไปทางเหนือ",
         "map_style" to "รูปแบบแผนที่",
+        "map_tilt" to "อนุญาตให้เอียงแผนที่",
+        "map_tilt_secondary" to "เอียงแผนที่เพื่อมุมมองจากที่สูง",
         "marker_background_color" to "พื้นหลังมาร์กเกอร์",
         "marker_icon_color" to "ไอคอนมาร์กเกอร์",
         "months_1" to "1 เดือน",

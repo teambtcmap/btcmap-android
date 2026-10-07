@@ -164,6 +164,8 @@ internal val DA: Map<String, String> = mapOf(
         "map_rotation" to "Tillad kortrotation",
         "map_rotation_secondary" to "Kompas vises, når kortet ikke peger nord",
         "map_style" to "Kortstil",
+        "map_tilt" to "Tillad kortvipning",
+        "map_tilt_secondary" to "Vip kortet for et fugleperspektiv",
         "marker_background_color" to "Marker baggrund",
         "marker_icon_color" to "Marker ikon",
         "months_1" to "1 måned",

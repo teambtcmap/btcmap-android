@@ -164,6 +164,8 @@ internal val FA: Map<String, String> = mapOf(
         "map_rotation" to "اجازه چرخش نقشه",
         "map_rotation_secondary" to "قطب‌نما وقتی رو به شمال نیست ظاهر می‌شود",
         "map_style" to "سبک نقشه",
+        "map_tilt" to "اجازه شیب نقشه",
+        "map_tilt_secondary" to "نقشه را برای نمای پرنده کج کنید",
         "marker_background_color" to "پس‌زمینه نشانگر",
         "marker_icon_color" to "آیکون نشانگر",
         "months_1" to "1 ماه",
