@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-
-<resources>
-    <color name="verify_green">#2E7D32</color>
-    <color name="report_red">#C62828</color>
-    <color name="bitcoin_orange">#F7931A</color>
-</resources>

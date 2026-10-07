@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-
-<resources>
-    <!-- Keeps the form's single column near a 640dp reading width on large
-         tablets and desktop-sized windows. -->
-    <dimen name="form_horizontal_padding">100dp</dimen>
-</resources>
