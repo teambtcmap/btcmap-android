@@ -27,19 +27,24 @@ data class SettingsStrings(
     val imageStatsSecondary: String,
     val manageAreas: String,
     val manageAreasSecondary: String,
+    val sectionMap: String,
+    val sectionData: String,
+    val sectionAdmin: String,
 )
 
 /**
- * The settings rows, in the order both hosts show them.
+ * The settings entries, in the order both hosts show them: a group
+ * [SettingsItem.Header] followed by the rows under it.
  *
  * The keys are stable and name the action a row triggers, so the Android
- * fragment and the desktop window dispatch on the same strings. The account row
- * is passed in already resolved because its text depends on the cached user,
- * which is read off the main thread.
+ * fragment and the desktop window dispatch on the same strings; a header key is
+ * its identity only. Each row's icon is a Material Symbols glyph name. The
+ * account row is passed in already resolved because its text depends on the
+ * cached user, which is read off the main thread.
  *
  * [includeImageStats] is false on the desktop, which has no image-cache
  * telemetry to show. [includeManageAreas] is true only for the area-admins the
- * page resolves the cached user to.
+ * page resolves the cached user to; its header is added only alongside the row.
  */
 fun settingsItems(
     strings: SettingsStrings,
@@ -48,13 +53,29 @@ fun settingsItems(
     includeImageStats: Boolean = true,
     includeManageAreas: Boolean = false,
 ): List<SettingsItem> = buildList {
-    add(SettingsItem.Action("account", strings.accountTitle, strings.accountSecondary))
-    add(SettingsItem.Action("mapStyle", strings.mapStyle, strings.mapStyleValue))
+    add(
+        SettingsItem.Action(
+            "account",
+            strings.accountTitle,
+            strings.accountSecondary,
+            icon = "account_circle",
+        )
+    )
+    add(SettingsItem.Header("headerMap", strings.sectionMap))
+    add(
+        SettingsItem.Action(
+            "mapStyle",
+            strings.mapStyle,
+            strings.mapStyleValue,
+            icon = "map",
+        )
+    )
     add(
         SettingsItem.Action(
             "customizeColors",
             strings.customizeColors,
             strings.customizeColorsSecondary,
+            icon = "palette",
         )
     )
     add(
@@ -62,6 +83,7 @@ fun settingsItems(
             "verifiedFilter",
             strings.verifiedFilter,
             strings.verifiedFilterValue,
+            icon = "verified",
         )
     )
     add(
@@ -70,6 +92,7 @@ fun settingsItems(
             strings.showAttribution,
             strings.showAttributionSecondary,
             showAttribution,
+            icon = "copyright",
         )
     )
     add(
@@ -78,13 +101,37 @@ fun settingsItems(
             strings.mapRotation,
             strings.mapRotationSecondary,
             mapRotationEnabled,
+            icon = "explore",
         )
     )
-    add(SettingsItem.Action("dbStats", strings.dbStats, strings.dbStatsSecondary))
+    add(SettingsItem.Header("headerData", strings.sectionData))
+    add(
+        SettingsItem.Action(
+            "dbStats",
+            strings.dbStats,
+            strings.dbStatsSecondary,
+            icon = "database",
+        )
+    )
     if (includeImageStats) {
-        add(SettingsItem.Action("imageStats", strings.imageStats, strings.imageStatsSecondary))
+        add(
+            SettingsItem.Action(
+                "imageStats",
+                strings.imageStats,
+                strings.imageStatsSecondary,
+                icon = "image",
+            )
+        )
     }
     if (includeManageAreas) {
-        add(SettingsItem.Action("manageAreas", strings.manageAreas, strings.manageAreasSecondary))
+        add(SettingsItem.Header("headerAdmin", strings.sectionAdmin))
+        add(
+            SettingsItem.Action(
+                "manageAreas",
+                strings.manageAreas,
+                strings.manageAreasSecondary,
+                icon = "travel_explore",
+            )
+        )
     }
 }

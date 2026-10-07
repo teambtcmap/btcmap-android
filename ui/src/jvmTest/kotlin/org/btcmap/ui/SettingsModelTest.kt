@@ -22,17 +22,19 @@ class SettingsModelTest {
     }
 
     @Test
-    fun settingsItems_areTheAndroidRowsInOrder() {
+    fun settingsItems_areTheAndroidEntriesInOrder() {
         val items = settingsItems(strings(), showAttribution = true, mapRotationEnabled = false)
 
         assertEquals(
             listOf(
                 "account",
+                "headerMap",
                 "mapStyle",
                 "customizeColors",
                 "verifiedFilter",
                 "showAttribution",
                 "mapRotation",
+                "headerData",
                 "dbStats",
                 "imageStats",
             ),
@@ -73,15 +75,30 @@ class SettingsModelTest {
         assertEquals(
             listOf(
                 "account",
+                "headerMap",
                 "mapStyle",
                 "customizeColors",
                 "verifiedFilter",
                 "showAttribution",
                 "mapRotation",
+                "headerData",
                 "dbStats",
             ),
             items.map { it.key },
         )
+    }
+
+    @Test
+    fun settingsItems_giveEveryRowAnIcon() {
+        val items = settingsItems(
+            strings(),
+            showAttribution = true,
+            mapRotationEnabled = false,
+            includeManageAreas = true,
+        )
+
+        assertTrue(items.filterNot { it is SettingsItem.Header }.all { it.icon != null })
+        assertTrue(items.filterIsInstance<SettingsItem.Header>().all { it.icon == null })
     }
 
     @Test
@@ -116,5 +133,8 @@ class SettingsModelTest {
         imageStatsSecondary = "image-stats-secondary",
         manageAreas = "manage-areas",
         manageAreasSecondary = "manage-areas-secondary",
+        sectionMap = "section-map",
+        sectionData = "section-data",
+        sectionAdmin = "section-admin",
     )
 }

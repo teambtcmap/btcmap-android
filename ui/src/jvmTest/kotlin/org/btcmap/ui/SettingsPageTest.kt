@@ -100,6 +100,28 @@ class SettingsPageTest {
 
     @OptIn(ExperimentalTestApi::class)
     @Test
+    fun togglingAttribution_fromTheLabel_writesItThrough() {
+        assertTrue(settings.showAttribution)
+        runComposeUiTest {
+            setContent { SettingsPage(settings, db, TEST_SETTINGS_PAGE_LABELS, onOpenAccount = {}, onOpenColors = {}, onOpenDbStats = {}) }
+            // The whole row is the toggle, so the label is a target too.
+            onNodeWithText("Show attribution").performClick()
+        }
+        assertFalse(settings.showAttribution)
+    }
+
+    @OptIn(ExperimentalTestApi::class)
+    @Test
+    fun rows_areGroupedUnderHeaders() {
+        runComposeUiTest {
+            setContent { SettingsPage(settings, db, TEST_SETTINGS_PAGE_LABELS, onOpenAccount = {}, onOpenColors = {}, onOpenDbStats = {}) }
+            onNodeWithText("Map").assertIsDisplayed()
+            onNodeWithText("Data").assertIsDisplayed()
+        }
+    }
+
+    @OptIn(ExperimentalTestApi::class)
+    @Test
     fun manageAreasRow_isShownToAreaAdmins() {
         signIn(roles = listOf("area_admin"))
         runComposeUiTest {

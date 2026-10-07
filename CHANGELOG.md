@@ -6,6 +6,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+- Rework the settings screen for Material 3 and large screens: group the rows under Map, Data and Admin headings with leading icons and dividers, cap and centre the settings and colours lists so a wide desktop or tablet window no longer stretches every row edge to edge, toggle a switch from anywhere on its row rather than only on the switch itself, and show a chevron on rows that open another screen
+- Translate the Manage areas screen into every app language: its title, description, search field and empty/error strings were English-only, so all other locales fell back to English
+
 - Add a "Manage areas" settings screen, shown only to area managers, admins and roots: it lists the cached communities with a search field, each row showing its icon and verification state, and orders never-verified areas first and then by the oldest verification date
 - Add an area admin detail screen, opened from the manage-areas list: a non-interactive map fitted to the area's cached polygon above every field the cache holds, with URL values tappable
 - Let area admins verify an area, stamping today's date, from the toolbar and from the verification-date field, and edit the area's name and description
