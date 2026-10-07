@@ -42,6 +42,7 @@ class ValidateTest(unittest.TestCase):
                 localized_description={"en": "A community"},
                 bbox=[-8.72, 42.325, -8.535, 42.535],
                 geo_json={"type": "Polygon", "coordinates": [[[0, 0], [1, 0], [1, 1], [0, 0]]]},
+                verified_at="2026-01-06",
             ),
         ])
 
@@ -111,6 +112,18 @@ class ValidateTest(unittest.TestCase):
     def test_rejects_non_object_geo_json(self):
         with self.assertRaises(RuntimeError):
             bundle_areas.validate([area(geo_json="Polygon")])
+
+    def test_accepts_missing_verified_at(self):
+        bundle_areas.validate([area()])
+
+    def test_accepts_valid_verified_at(self):
+        bundle_areas.validate([area(verified_at="2026-01-06")])
+
+    def test_rejects_invalid_verified_at(self):
+        for value in ("06/01/2026", "2026-01-06T00:00:00Z", "", 5):
+            with self.subTest(verified_at=value):
+                with self.assertRaises(RuntimeError):
+                    bundle_areas.validate([area(verified_at=value)])
 
     def test_accepts_missing_localized_maps(self):
         bundle_areas.validate([area(localized_name=None, localized_description=None)])

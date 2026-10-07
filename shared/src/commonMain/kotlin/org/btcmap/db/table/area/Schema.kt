@@ -24,6 +24,12 @@ const val DELETED_AT = "deleted_at"
 const val LOCALIZED_NAME = "localized_name"
 const val LOCALIZED_DESCRIPTION = "localized_description"
 
+// The last verification date as an ISO-8601 `YYYY-MM-DD` string, or null when
+// the area has never been verified. Kept as a date rather than an instant: the
+// API returns a calendar date with no time, so storing it verbatim avoids a
+// timezone shifting it by a day when read back.
+const val VERIFIED_AT = "verified_at"
+
 const val CREATE = """
     CREATE TABLE $TABLE (
         $ID INTEGER PRIMARY KEY NOT NULL,
@@ -42,7 +48,8 @@ const val CREATE = """
         $UPDATED_AT TEXT NOT NULL,
         $DELETED_AT TEXT,
         $LOCALIZED_NAME TEXT,
-        $LOCALIZED_DESCRIPTION TEXT
+        $LOCALIZED_DESCRIPTION TEXT,
+        $VERIFIED_AT TEXT
     );
  """
 

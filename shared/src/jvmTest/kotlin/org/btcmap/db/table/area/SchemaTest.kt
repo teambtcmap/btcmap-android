@@ -28,6 +28,7 @@ class SchemaTest {
         assertEquals("deleted_at", DELETED_AT)
         assertEquals("localized_name", LOCALIZED_NAME)
         assertEquals("localized_description", LOCALIZED_DESCRIPTION)
+        assertEquals("verified_at", VERIFIED_AT)
     }
 
     @Test
@@ -50,5 +51,6 @@ class SchemaTest {
         assert(CREATE.contains(DELETED_AT))
         assert(CREATE.contains(LOCALIZED_NAME))
         assert(CREATE.contains(LOCALIZED_DESCRIPTION))
+        assert(CREATE.contains(VERIFIED_AT))
     }
 }

@@ -26,6 +26,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import org.btcmap.account.canManageAreas
 import org.btcmap.db.Database
 import org.btcmap.dbstats.BundleStats
 import org.btcmap.dbstats.DatabaseFile
@@ -89,6 +90,8 @@ data class SettingsPageLabels(
     val dbStatsSecondary: String,
     val imageStats: String,
     val imageStatsSecondary: String,
+    val manageAreas: String,
+    val manageAreasSecondary: String,
     val mapStyleDialogTitle: String,
     val verifiedFilterDialogTitle: String,
     val close: String,
@@ -112,6 +115,7 @@ fun SettingsPage(
     onOpenColors: () -> Unit,
     onOpenDbStats: () -> Unit,
     onOpenImageStats: () -> Unit = {},
+    onOpenManageAreas: () -> Unit = {},
     reloadKey: Int = 0,
 ) {
     var attribution by remember { mutableStateOf(settings.showAttribution) }
@@ -124,12 +128,15 @@ fun SettingsPage(
     // observe on its own.
     var accountTitle by remember { mutableStateOf(labels.account) }
     var accountSecondary by remember { mutableStateOf(labels.logIn) }
+    // The manage-areas row is only shown to area admins, resolved from the same
+    // cached user as the account row.
+    var canManageAreas by remember { mutableStateOf(false) }
     LaunchedEffect(reloadKey) {
-        val username = withContext(Dispatchers.IO) {
+        val user = withContext(Dispatchers.IO) {
             if (!settings.authorized) {
                 null
             } else {
-                db.user.select()?.name ?: run {
+                db.user.select() ?: run {
                     // A token without a cached account is not a usable session,
                     // so clear it instead of pointing at a profile that will be
                     // dropped.
@@ -138,8 +145,9 @@ fun SettingsPage(
                 }
             }
         }
-        accountTitle = if (username != null) labels.loggedInAs(username) else labels.account
-        accountSecondary = if (username != null) labels.openProfile else labels.logIn
+        accountTitle = if (user != null) labels.loggedInAs(user.name) else labels.account
+        accountSecondary = if (user != null) labels.openProfile else labels.logIn
+        canManageAreas = user?.canManageAreas() == true
     }
 
     var dialog by remember { mutableStateOf<SettingsDialog?>(null) }
@@ -163,10 +171,13 @@ fun SettingsPage(
                 dbStatsSecondary = labels.dbStatsSecondary,
                 imageStats = labels.imageStats,
                 imageStatsSecondary = labels.imageStatsSecondary,
+                manageAreas = labels.manageAreas,
+                manageAreasSecondary = labels.manageAreasSecondary,
             ),
             showAttribution = attribution,
             mapRotationEnabled = rotation,
             includeImageStats = includeImageStats,
+            includeManageAreas = canManageAreas,
         ),
         onItemClick = { key ->
             when (key) {
@@ -176,6 +187,7 @@ fun SettingsPage(
                 "verifiedFilter" -> dialog = SettingsDialog.VerifiedFilter
                 "dbStats" -> onOpenDbStats()
                 "imageStats" -> onOpenImageStats()
+                "manageAreas" -> onOpenManageAreas()
             }
         },
         onItemCheckedChange = { key, checked ->

@@ -66,6 +66,7 @@ class BundledAreasTest {
               "bbox": [2.22, 48.81, 2.47, 48.91],
               "geo_json": {"type": "Polygon", "coordinates": [[[0.0, 0.0], [1.0, 0.0], [1.0, 1.0], [0.0, 0.0]]]},
               "updated_at": "2026-03-01T12:00:00Z",
+              "verified_at": "2026-01-06",
               "unknown": "ignored"
             }
         """.trimIndent()
@@ -73,6 +74,7 @@ class BundledAreasTest {
         val area = parseBundledArea(json)
 
         Assert.assertEquals(42L, area.id)
+        Assert.assertEquals("2026-01-06", area.verifiedAt)
         Assert.assertEquals("Grand Paris", area.name)
         Assert.assertEquals("community", area.type)
         Assert.assertEquals("grand-paris", area.urlAlias)
@@ -128,6 +130,7 @@ class BundledAreasTest {
         Assert.assertNull(area.description)
         Assert.assertNull(area.localizedName)
         Assert.assertNull(area.localizedDescription)
+        Assert.assertNull(area.verifiedAt)
         Assert.assertNull(area.bboxWest)
         Assert.assertNull(area.bboxSouth)
         Assert.assertNull(area.bboxEast)
@@ -153,6 +156,25 @@ class BundledAreasTest {
 
         Assert.assertNull(area.bboxWest)
         Assert.assertNull(area.bboxNorth)
+    }
+
+    @Test
+    fun readBundledArea_treatsMalformedVerifiedAtAsAbsent() {
+        val json = """
+            {
+              "id": 1,
+              "name": "Community",
+              "type": "community",
+              "url_alias": "community",
+              "website_url": "https://btcmap.org/community/community",
+              "updated_at": "2026-03-01T12:00:00Z",
+              "verified_at": "06/01/2026"
+            }
+        """.trimIndent()
+
+        val area = parseBundledArea(json)
+
+        Assert.assertNull(area.verifiedAt)
     }
 
     @Test

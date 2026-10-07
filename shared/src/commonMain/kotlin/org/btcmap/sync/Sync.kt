@@ -232,6 +232,7 @@ private fun GetAreasDeltaItem.toArea(): Area = Area(
     iconWide = iconWide,
     websiteUrl = websiteUrl,
     description = description,
+    verifiedAt = verifiedAt,
     bboxWest = bboxWest,
     bboxSouth = bboxSouth,
     bboxEast = bboxEast,

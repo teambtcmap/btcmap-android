@@ -8,6 +8,7 @@ import org.btcmap.settings.Settings
 import org.btcmap.settings.setMapColor
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 /**
  * The shared settings model: the row list both hosts render and the colour rows
@@ -36,6 +37,27 @@ class SettingsModelTest {
                 "imageStats",
             ),
             items.map { it.key },
+        )
+    }
+
+    @Test
+    fun settingsItems_includeManageAreasOnlyForAreaAdmins() {
+        val items = settingsItems(
+            strings(),
+            showAttribution = true,
+            mapRotationEnabled = false,
+            includeManageAreas = true,
+        )
+
+        assertEquals("manageAreas", items.last().key)
+        assertEquals(
+            "manage-areas",
+            (items.last() as SettingsItem.Action).title,
+        )
+
+        assertTrue(
+            settingsItems(strings(), showAttribution = true, mapRotationEnabled = false)
+                .none { it.key == "manageAreas" },
         )
     }
 
@@ -92,5 +114,7 @@ class SettingsModelTest {
         dbStatsSecondary = "db-stats-secondary",
         imageStats = "image-stats",
         imageStatsSecondary = "image-stats-secondary",
+        manageAreas = "manage-areas",
+        manageAreasSecondary = "manage-areas-secondary",
     )
 }

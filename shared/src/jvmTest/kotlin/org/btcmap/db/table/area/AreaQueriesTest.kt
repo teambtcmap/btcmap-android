@@ -19,6 +19,7 @@ class AreaQueriesTest {
         updatedAt: String = "2024-01-01T00:00:00Z",
         deletedAt: Instant? = null,
         geoJson: String? = null,
+        verifiedAt: String? = null,
     ): Area {
         return Area(
             id = id,
@@ -36,6 +37,7 @@ class AreaQueriesTest {
             geoJson = geoJson,
             updatedAt = Instant.parse(updatedAt),
             deletedAt = deletedAt,
+            verifiedAt = verifiedAt,
         )
     }
 
@@ -75,6 +77,16 @@ class AreaQueriesTest {
         val result = db.area.selectById(7L)!!
         Assert.assertEquals(nameTranslations, result.localizedName)
         Assert.assertEquals(descriptionTranslations, result.localizedDescription)
+    }
+
+    @Test
+    fun insert_and_selectVerifiedAt() = runBlocking<Unit> {
+        val db = createDatabase()
+
+        db.area.insert(listOf(area(7L, verifiedAt = "2026-01-06")))
+
+        val result = db.area.selectById(7L)!!
+        Assert.assertEquals("2026-01-06", result.verifiedAt)
     }
 
     @Test

@@ -1,11 +1,15 @@
 package org.btcmap.ui
 
 import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.isToggleable
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.runComposeUiTest
+import kotlinx.coroutines.runBlocking
+import org.btcmap.db.table.user.User
 import org.btcmap.settings.MapStyle
 import org.btcmap.settings.mapStyle
 import org.btcmap.settings.showAttribution
@@ -92,5 +96,41 @@ class SettingsPageTest {
             onAllNodes(isToggleable())[0].performClick()
         }
         assertFalse(settings.showAttribution)
+    }
+
+    @OptIn(ExperimentalTestApi::class)
+    @Test
+    fun manageAreasRow_isShownToAreaAdmins() {
+        signIn(roles = listOf("area_admin"))
+        runComposeUiTest {
+            setContent { SettingsPage(settings, db, TEST_SETTINGS_PAGE_LABELS, onOpenAccount = {}, onOpenColors = {}, onOpenDbStats = {}) }
+            waitUntil(timeoutMillis = 5_000) {
+                onAllNodesWithText("Manage areas").fetchSemanticsNodes().isNotEmpty()
+            }
+        }
+    }
+
+    @OptIn(ExperimentalTestApi::class)
+    @Test
+    fun manageAreasRow_isHiddenFromRegularUsers() {
+        signIn(roles = listOf("user"))
+        runComposeUiTest {
+            setContent { SettingsPage(settings, db, TEST_SETTINGS_PAGE_LABELS, onOpenAccount = {}, onOpenColors = {}, onOpenDbStats = {}) }
+            waitForIdle()
+            onAllNodesWithText("Manage areas").assertCountEquals(0)
+        }
+    }
+
+    private fun signIn(roles: List<String>) = runBlocking {
+        settings.setAuthTokenForTesting("token")
+        db.user.insert(
+            User(
+                id = 1L,
+                name = "tester",
+                roles = roles,
+                savedPlaces = emptyList(),
+                savedAreas = emptyList(),
+            ),
+        )
     }
 }

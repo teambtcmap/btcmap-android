@@ -38,12 +38,14 @@ data class FullProjection(
     // no translation for any language.
     val localizedName: JsonObject? = null,
     val localizedDescription: JsonObject? = null,
+    // ISO-8601 `YYYY-MM-DD`, or null when the area has never been verified.
+    val verifiedAt: String? = null,
 ) {
     companion object {
         const val COLUMNS =
             "$ID, $NAME, $TYPE, $URL_ALIAS, $ICON, $ICON_WIDE, $WEBSITE_URL, $DESCRIPTION, " +
                 "$BBOX_WEST, $BBOX_SOUTH, $BBOX_EAST, $BBOX_NORTH, $GEO_JSON, $UPDATED_AT, " +
-                "$DELETED_AT, $LOCALIZED_NAME, $LOCALIZED_DESCRIPTION"
+                "$DELETED_AT, $LOCALIZED_NAME, $LOCALIZED_DESCRIPTION, $VERIFIED_AT"
 
         fun fromStatement(stmt: SQLiteStatement): FullProjection {
             return FullProjection(
@@ -64,6 +66,7 @@ data class FullProjection(
                 deletedAt = stmt.getInstantOrNull(14),
                 localizedName = stmt.getJsonObjectOrNull(15),
                 localizedDescription = stmt.getJsonObjectOrNull(16),
+                verifiedAt = stmt.getTextOrNull(17),
             )
         }
     }

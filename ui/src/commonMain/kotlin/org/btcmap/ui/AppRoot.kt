@@ -16,19 +16,26 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.withContext
 import org.btcmap.api.getDashboard
 import org.btcmap.api.getPendingEvents
 import org.btcmap.api.setEventStatus
+import org.btcmap.api.setAreaDescription
+import org.btcmap.api.setAreaName
 import org.btcmap.api.submitEvent
 import org.btcmap.api.submitPlace
+import org.btcmap.api.verifyArea
+import org.btcmap.db.table.area.Area
 import org.btcmap.db.table.event.Event
 import org.btcmap.dbstats.BundleStats
 import org.btcmap.map.toEventGeoJson
 import org.btcmap.place.submitReport
+import org.btcmap.platform.ioDispatcher
 import org.btcmap.settings.authorized
 import org.btcmap.settings.isDark
 import org.btcmap.settings.mapStyle
 import org.btcmap.sync.SyncState
+import org.btcmap.ui.map.AreaPreviewMap
 import org.btcmap.ui.map.EventMiniMap
 
 /**
@@ -347,9 +354,25 @@ fun AppRoot(
                     onOpenColors = { nav.push(AppRoute.Colors) },
                     onOpenDbStats = { nav.push(AppRoute.DbStats) },
                     onOpenImageStats = { nav.push(AppRoute.ImageStats) },
+                    onOpenManageAreas = { nav.push(AppRoute.ManageAreas) },
                     reloadKey = authReload,
                 )
             }
+
+            AppRoute.ManageAreas -> ManageAreasRoute(
+                services = services,
+                labels = labels,
+                onBack = back,
+                onOpenArea = { area -> nav.push(AppRoute.AreaAdmin(area.id)) },
+            )
+
+            is AppRoute.AreaAdmin -> AreaAdminRoute(
+                services = services,
+                platform = platform,
+                labels = labels,
+                route = route,
+                onBack = back,
+            )
 
             AppRoute.UserProfile -> UserProfileRoute(
                 services = services,
@@ -498,6 +521,87 @@ private fun DbStatsRoute(
             showSyncButton = false,
         )
     }
+}
+
+/**
+ * The manage-areas route: the shared [ManageAreasScreen] under the standard top
+ * bar, listing every cached area. Only the settings row (itself hidden from
+ * non-admins) opens it.
+ */
+@Composable
+private fun ManageAreasRoute(
+    services: AppServices,
+    labels: AppLabels,
+    onBack: () -> Unit,
+    onOpenArea: (Area) -> Unit,
+) {
+    ScreenPage(
+        title = labels.manageAreasTitle,
+        onBack = onBack,
+        backContentDescription = labels.back,
+    ) {
+        ManageAreasScreen(
+            labels = labels.manageAreas,
+            load = { withContext(ioDispatcher) { services.db.area.selectAll() } },
+            onAreaClick = onOpenArea,
+        )
+    }
+}
+
+/**
+ * The area admin route: the shared [AreaAdminPage] with the host's map preview
+ * and a verify action that stamps today's date on the server and in the cache.
+ */
+@Composable
+private fun AreaAdminRoute(
+    services: AppServices,
+    platform: AppPlatform,
+    labels: AppLabels,
+    route: AppRoute.AreaAdmin,
+    onBack: () -> Unit,
+) {
+    val mapStyle = services.rememberMapStyle()
+
+    AreaAdminPage(
+        areaId = route.areaId,
+        labels = labels,
+        onOpenUrl = platform::openUrl,
+        load = { withContext(ioDispatcher) { services.db.area.selectById(route.areaId) } },
+        verify = { id, date ->
+            services.api.verifyArea(id, date)
+            withContext(ioDispatcher) {
+                services.db.area.selectById(id)?.let {
+                    services.db.area.insert(listOf(it.copy(verifiedAt = date)))
+                }
+            }
+        },
+        rename = { name ->
+            services.api.setAreaName(route.areaId, name)
+            withContext(ioDispatcher) {
+                services.db.area.selectById(route.areaId)?.let {
+                    services.db.area.insert(listOf(it.copy(name = name)))
+                }
+            }
+        },
+        updateDescription = { description ->
+            services.api.setAreaDescription(route.areaId, description)
+            withContext(ioDispatcher) {
+                services.db.area.selectById(route.areaId)?.let {
+                    services.db.area.insert(listOf(it.copy(description = description)))
+                }
+            }
+        },
+        onBack = onBack,
+        map = { area ->
+            AreaPreviewMap(
+                area = area,
+                styleUrl = mapStyle.url,
+                styleJson = mapStyle.json,
+                borderColor = markerPalette(services.settings).markerBackground,
+                modifier = Modifier.fillMaxSize(),
+            )
+        },
+    )
 }
 
 /**

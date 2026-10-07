@@ -25,6 +25,8 @@ data class SettingsStrings(
     val dbStatsSecondary: String,
     val imageStats: String,
     val imageStatsSecondary: String,
+    val manageAreas: String,
+    val manageAreasSecondary: String,
 )
 
 /**
@@ -36,13 +38,15 @@ data class SettingsStrings(
  * which is read off the main thread.
  *
  * [includeImageStats] is false on the desktop, which has no image-cache
- * telemetry to show.
+ * telemetry to show. [includeManageAreas] is true only for the area-admins the
+ * page resolves the cached user to.
  */
 fun settingsItems(
     strings: SettingsStrings,
     showAttribution: Boolean,
     mapRotationEnabled: Boolean,
     includeImageStats: Boolean = true,
+    includeManageAreas: Boolean = false,
 ): List<SettingsItem> = buildList {
     add(SettingsItem.Action("account", strings.accountTitle, strings.accountSecondary))
     add(SettingsItem.Action("mapStyle", strings.mapStyle, strings.mapStyleValue))
@@ -79,5 +83,8 @@ fun settingsItems(
     add(SettingsItem.Action("dbStats", strings.dbStats, strings.dbStatsSecondary))
     if (includeImageStats) {
         add(SettingsItem.Action("imageStats", strings.imageStats, strings.imageStatsSecondary))
+    }
+    if (includeManageAreas) {
+        add(SettingsItem.Action("manageAreas", strings.manageAreas, strings.manageAreasSecondary))
     }
 }

@@ -86,6 +86,32 @@ private const val VERSION_105_AREA_CREATE = """
 """
 
 /**
+ * The `area` table as it stood through schema version 107, with the per-language
+ * columns but before `verified_at`. Migration 107 appends that column in place.
+ */
+private const val VERSION_107_AREA_CREATE = """
+    CREATE TABLE area (
+        id INTEGER PRIMARY KEY NOT NULL,
+        name TEXT NOT NULL,
+        type TEXT NOT NULL,
+        url_alias TEXT NOT NULL,
+        icon TEXT,
+        icon_wide TEXT,
+        website_url TEXT NOT NULL,
+        description TEXT,
+        bbox_west REAL,
+        bbox_south REAL,
+        bbox_east REAL,
+        bbox_north REAL,
+        geo_json TEXT,
+        updated_at TEXT NOT NULL,
+        deleted_at TEXT,
+        localized_name TEXT,
+        localized_description TEXT
+    );
+"""
+
+/**
  * The `event` table as it shipped through schema version 104, with the legacy
  * `area_id` column. Migration 104 rebuilds it without that column.
  */
@@ -659,7 +685,7 @@ class DatabaseTest {
             conn.execSQL(VERSION_106_PLACE_CREATE)
             conn.execSQL(org.btcmap.db.table.event.CREATE)
             conn.execSQL(org.btcmap.db.table.comment.CREATE)
-            conn.execSQL(org.btcmap.db.table.area.CREATE)
+            conn.execSQL(VERSION_107_AREA_CREATE)
             conn.execSQL(org.btcmap.db.table.preference.CREATE)
             conn.execSQL(org.btcmap.db.table.comment.CREATE_INDEX_PLACE_ID_CREATED_AT)
             conn.execSQL(org.btcmap.db.table.comment.CREATE_INDEX_UPDATED_AT)

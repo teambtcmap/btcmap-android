@@ -28,7 +28,7 @@ class Database(driver: SQLiteDriver, val path: String) {
          * project's history, so the stale file can be told apart from ours by
          * the pragma alone (see [initialize]).
          */
-        const val VERSION = 107
+        const val VERSION = 108
 
         /**
          * The first version this app is responsible for upgrading. Anything
@@ -433,6 +433,21 @@ class Database(driver: SQLiteDriver, val path: String) {
                     conn.execSQL(org.btcmap.db.table.place.CREATE_INDEX_UPDATED_AT)
                     conn.execSQL(org.btcmap.db.table.place.CREATE_INDEX_OSM_ID)
                     conn.execSQL(org.btcmap.db.table.place.CREATE_INDEX_BOUNDS)
+                }
+
+                107 -> {
+                    // Areas now cache their last verification date. Add the
+                    // column and clear the cached areas so the refreshed bundled
+                    // snapshot re-seeds them with it: the delta sync would only
+                    // fill it for areas that change afterwards, leaving every
+                    // already-cached area looking unverified. Clearing is safe
+                    // for the same reasons as the 105 migration (areas are a
+                    // pure cache; the seed reads the asset offline).
+                    conn.execSQL(
+                        "ALTER TABLE ${org.btcmap.db.table.area.TABLE} " +
+                            "ADD COLUMN ${org.btcmap.db.table.area.VERIFIED_AT} TEXT;"
+                    )
+                    conn.execSQL("DELETE FROM ${org.btcmap.db.table.area.TABLE};")
                 }
 
                 else -> throw Exception("migration is missing for version $version")

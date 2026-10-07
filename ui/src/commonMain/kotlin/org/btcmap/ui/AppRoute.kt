@@ -77,6 +77,18 @@ sealed interface AppRoute {
     /** The settings list (see `SettingsPage`). */
     data object Settings : AppRoute
 
+    /**
+     * The admin-only area management list (see `ManageAreasScreen`), reached from
+     * the settings row shown to area admins.
+     */
+    data object ManageAreas : AppRoute
+
+    /**
+     * One area's cached fields, read-only, opened from the manage-areas list
+     * (see `AreaAdminScreen`).
+     */
+    data class AreaAdmin(val areaId: Long) : AppRoute
+
     /** The signed-in account page (see `ProfileScreen`). */
     data object UserProfile : AppRoute
 
@@ -103,6 +115,8 @@ fun AppRoute.key(): String = when (this) {
     is AppRoute.Feed -> "feed"
     is AppRoute.Area -> "area"
     is AppRoute.Settings -> "settings"
+    is AppRoute.ManageAreas -> "manage-areas"
+    is AppRoute.AreaAdmin -> "area-admin"
     is AppRoute.UserProfile -> "user-profile"
     is AppRoute.Place -> "place"
     is AppRoute.Map -> "map"

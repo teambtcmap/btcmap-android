@@ -236,6 +236,8 @@ private fun AppRoute.toArgs(): Bundle = Bundle().apply {
 
         is AppRoute.Area -> putLong(ARG_AREA_ID, areaId)
 
+        is AppRoute.AreaAdmin -> putLong(ARG_AREA_ID, areaId)
+
         is AppRoute.Place -> putLong(ARG_PLACE_ID, placeId)
 
         else -> {}
@@ -299,8 +301,10 @@ private fun routeFromArgs(args: Bundle?): AppRoute = when (args?.getString(ARG_K
     )
 
     "area" -> AppRoute.Area(areaId = args.getLong(ARG_AREA_ID))
+    "area-admin" -> AppRoute.AreaAdmin(areaId = args.getLong(ARG_AREA_ID))
 
     "settings" -> AppRoute.Settings
+    "manage-areas" -> AppRoute.ManageAreas
     "user-profile" -> AppRoute.UserProfile
     "place" -> AppRoute.Place(placeId = args.getLong(ARG_PLACE_ID))
 

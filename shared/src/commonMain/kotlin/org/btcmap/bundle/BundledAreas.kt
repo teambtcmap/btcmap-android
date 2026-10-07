@@ -2,6 +2,7 @@
 
 package org.btcmap.bundle
 
+import kotlinx.datetime.LocalDate
 import org.btcmap.util.useSource
 import org.btcmap.platform.ioDispatcher
 import kotlin.time.Duration
@@ -133,6 +134,7 @@ internal class BundledAreaJson(
     val bbox: List<Double>? = null,
     @SerialName("geo_json") val geoJson: JsonElement? = null,
     @SerialName("updated_at") val updatedAt: String? = null,
+    @SerialName("verified_at") val verifiedAt: String? = null,
 )
 
 internal fun BundledAreaJson.toArea(): Area {
@@ -174,5 +176,13 @@ internal fun BundledAreaJson.toArea(): Area {
         deletedAt = null,
         localizedName = localizedName as? JsonObject,
         localizedDescription = localizedDescription as? JsonObject,
+        // A malformed date is dropped rather than failing the whole seed:
+        // unlike `updated_at` it drives no cursor, so an area simply reads as
+        // unverified if its date cannot be parsed.
+        verifiedAt = verifiedAt?.toIsoDateOrNull(),
     )
 }
+
+/** The canonical ISO-8601 date for a bundled `verified_at`, or null if malformed. */
+private fun String.toIsoDateOrNull(): String? =
+    runCatching { LocalDate.parse(this).toString() }.getOrNull()

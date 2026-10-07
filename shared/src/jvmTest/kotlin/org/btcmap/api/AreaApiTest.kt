@@ -97,8 +97,8 @@ class AreaApiTest : ApiTestBase() {
         Assert.assertEquals("GET", request.method)
         Assert.assertEquals("/v4/areas", request.url.encodedPath)
         Assert.assertEquals(
-            "id,name,type,url_alias,icon,icon_wide,website_url,description,localized_name," +
-                "localized_description,bbox,geo_json,updated_at,deleted_at",
+            "id,name,type,url_alias,icon,icon_wide,website_url,description,verified_at," +
+                "localized_name,localized_description,bbox,geo_json,updated_at,deleted_at",
             request.url.queryParameter("fields"),
         )
         Assert.assertEquals(
@@ -116,6 +116,7 @@ class AreaApiTest : ApiTestBase() {
         Assert.assertEquals("Greater Paris", area.description)
         Assert.assertEquals("Большой Париж", area.localizedName!!.getValue("ru").jsonPrimitive.content)
         Assert.assertEquals("Greater Paris", area.localizedDescription!!.getValue("en").jsonPrimitive.content)
+        Assert.assertEquals("2026-01-06", area.verifiedAt)
         Assert.assertEquals(2.22, area.bboxWest!!, 0.0001)
         Assert.assertEquals(48.91, area.bboxNorth!!, 0.0001)
         Assert.assertEquals(
@@ -137,10 +138,96 @@ class AreaApiTest : ApiTestBase() {
         Assert.assertNull(area.description)
         Assert.assertNull(area.localizedName)
         Assert.assertNull(area.localizedDescription)
+        Assert.assertNull(area.verifiedAt)
         Assert.assertNull(area.deletedAt)
         Assert.assertNull(area.bboxWest)
         Assert.assertNull(area.bboxNorth)
         Assert.assertNull(area.geoJson)
+    }
+
+    @Test
+    fun verifyArea_patchesTheVerifiedDate() = runTest {
+        enqueueJson(
+            """
+            {
+                "id": 7,
+                "name": "Grand Paris",
+                "type": "community",
+                "url_alias": "grand-paris",
+                "website_url": "https://btcmap.org/community/grand-paris",
+                "verified_at": "2026-10-07"
+            }
+            """.trimIndent()
+        )
+
+        api().verifyArea(7L, "2026-10-07")
+
+        val request = takeRequest()
+        Assert.assertEquals("PATCH", request.method)
+        Assert.assertEquals("/v4/areas/7", request.url.encodedPath)
+        Assert.assertEquals("""{"verified_at":"2026-10-07"}""", request.jsonBody())
+    }
+
+    @Test
+    fun setAreaName_patchesTheName() = runTest {
+        enqueueJson(
+            """
+            {
+                "id": 7,
+                "name": "New Name",
+                "type": "community",
+                "url_alias": "grand-paris",
+                "website_url": "https://btcmap.org/community/grand-paris"
+            }
+            """.trimIndent()
+        )
+
+        api().setAreaName(7L, "New Name")
+
+        val request = takeRequest()
+        Assert.assertEquals("PATCH", request.method)
+        Assert.assertEquals("/v4/areas/7", request.url.encodedPath)
+        Assert.assertEquals("""{"name":"New Name"}""", request.jsonBody())
+    }
+
+    @Test
+    fun setAreaDescription_patchesTheDescription() = runTest {
+        enqueueJson(
+            """
+            {
+                "id": 7,
+                "name": "Grand Paris",
+                "type": "community",
+                "url_alias": "grand-paris",
+                "website_url": "https://btcmap.org/community/grand-paris",
+                "description": "New"
+            }
+            """.trimIndent()
+        )
+
+        api().setAreaDescription(7L, "New")
+
+        Assert.assertEquals("""{"description":"New"}""", takeRequest().jsonBody())
+    }
+
+    @Test
+    fun setAreaDescription_nullClearsIt() = runTest {
+        enqueueJson(
+            """
+            {
+                "id": 7,
+                "name": "Grand Paris",
+                "type": "community",
+                "url_alias": "grand-paris",
+                "website_url": "https://btcmap.org/community/grand-paris",
+                "description": null
+            }
+            """.trimIndent()
+        )
+
+        api().setAreaDescription(7L, null)
+
+        Assert.assertEquals("""{"description":null}""", takeRequest().jsonBody())
     }
 
     @Test
@@ -184,6 +271,7 @@ class AreaApiTest : ApiTestBase() {
                     "localized_description": {"en": "Greater Paris"},
                     "bbox": [2.22, 48.81, 2.47, 48.91],
                     "geo_json": {"type":"Polygon","coordinates":[[[2.22,48.81],[2.47,48.81],[2.47,48.91],[2.22,48.81]]]},
+                    "verified_at": "2026-01-06",
                     "updated_at": "2025-06-11T00:00:00Z",
                     "deleted_at": "2025-06-12T00:00:00Z"
                 }

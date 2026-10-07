@@ -2,6 +2,9 @@ package org.btcmap.api
 
 import io.ktor.http.HttpMethod
 import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonObjectBuilder
+import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.put
 import org.btcmap.util.toJsonArray
 import org.btcmap.util.toJsonObject
 import kotlin.time.Instant
@@ -32,6 +35,8 @@ data class GetAreasDeltaItem(
     val iconWide: String?,
     val websiteUrl: String,
     val description: String?,
+    // ISO-8601 `YYYY-MM-DD`, or null when the area has never been verified.
+    val verifiedAt: String?,
     // Per-language `name:<lang>` / `description:<lang>` maps keyed by a
     // two-letter code, merged into one object by the API. Null when the area
     // carries no translation for any language.
@@ -48,8 +53,8 @@ data class GetAreasDeltaItem(
 )
 
 private const val AREA_DELTA_FIELDS =
-    "id,name,type,url_alias,icon,icon_wide,website_url,description,localized_name," +
-        "localized_description,bbox,geo_json,updated_at,deleted_at"
+    "id,name,type,url_alias,icon,icon_wide,website_url,description,verified_at," +
+        "localized_name,localized_description,bbox,geo_json,updated_at,deleted_at"
 
 suspend fun Api.getAreas(updatedSince: Instant, limit: Long): List<GetAreasDeltaItem> {
     val url = buildUrl("v4", "areas") {
@@ -87,6 +92,33 @@ suspend fun Api.getArea(
     }
 }
 
+/**
+ * Sets an area's last verification date (`PATCH /v4/areas/{id}`), stored by the
+ * server as the `verified:date` tag. [date] is a `YYYY-MM-DD` string. Only area
+ * managers, admins and roots may call it; the server rejects anyone else with
+ * `403`. Returns once the server has accepted the change.
+ */
+suspend fun Api.verifyArea(id: Long, date: String) = patchArea(id) {
+    put("verified_at", date)
+}
+
+/** Renames an area (`PATCH /v4/areas/{id}`); [name] must not be blank. */
+suspend fun Api.setAreaName(id: Long, name: String) = patchArea(id) {
+    put("name", name)
+}
+
+/** Sets an area's description (`PATCH /v4/areas/{id}`); null clears it. */
+suspend fun Api.setAreaDescription(id: Long, description: String?) = patchArea(id) {
+    put("description", description)
+}
+
+/** Sends one partial update of the fields [fields] adds to the area `{id}`. */
+private suspend fun Api.patchArea(id: Long, fields: JsonObjectBuilder.() -> Unit) {
+    val url = buildUrl("v4", "areas", "$id")
+    val req = buildJsonObject(fields)
+    call(HttpMethod.Patch, url, body = req) { }
+}
+
 suspend fun Api.saveArea(id: Long): List<Long> = saveItem("areas", id)
 
 suspend fun Api.removeSavedArea(id: Long): List<Long> = removeSavedItem("areas", id)
@@ -103,6 +135,7 @@ private fun JsonObject.toGetAreasDeltaItem(): GetAreasDeltaItem {
         iconWide = nonBlankStringOrNull("icon_wide"),
         websiteUrl = string("website_url"),
         description = nonBlankStringOrNull("description"),
+        verifiedAt = nonBlankStringOrNull("verified_at"),
         localizedName = objectOrNull("localized_name"),
         localizedDescription = objectOrNull("localized_description"),
         bboxWest = bbox?.get(0),

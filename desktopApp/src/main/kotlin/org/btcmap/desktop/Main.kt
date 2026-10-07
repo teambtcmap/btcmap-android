@@ -62,6 +62,7 @@ import org.btcmap.ui.ActivityFeedScreen
 import org.btcmap.ui.ActivityFeedState
 import org.btcmap.ui.MaterialSymbol
 import org.btcmap.ui.map.AddLocationLabels
+import org.btcmap.ui.map.AreaPreviewMap
 import org.btcmap.ui.map.EventMiniMap
 import org.btcmap.ui.map.SearchActions
 import kotlinx.coroutines.flow.first
@@ -79,8 +80,11 @@ import androidx.compose.ui.Modifier
 import org.btcmap.util.toUrl
 import org.btcmap.api.Api
 import org.btcmap.api.signIn
+import org.btcmap.api.setAreaDescription
+import org.btcmap.api.setAreaName
 import org.btcmap.api.submitEvent
 import org.btcmap.api.submitPlace
+import org.btcmap.api.verifyArea
 import org.btcmap.ui.PlaceAction
 import org.btcmap.ui.PendingEventUi
 import org.btcmap.ui.PlacePhoto
@@ -95,6 +99,7 @@ import org.btcmap.boost.BoostPlan
 import org.btcmap.db.Database
 import org.btcmap.dbstats.DbStatsLabels
 import org.btcmap.payment.PaymentInvoice
+import org.btcmap.platform.ioDispatcher
 import org.btcmap.place.ReportType
 import org.btcmap.place.submitReport
 import org.btcmap.sync.Sync
@@ -142,6 +147,7 @@ import org.btcmap.ui.InvoicePaymentLabels
 import org.btcmap.ui.InvoicePaymentSection
 import org.btcmap.ui.InvoicePaymentSectionLabels
 import org.btcmap.ui.MapScreen
+import org.btcmap.ui.ManageAreasScreen
 import org.btcmap.ui.ProfileFormLabels
 import org.btcmap.ui.MyEventsLabels
 import org.btcmap.ui.ProfileScreen
@@ -153,6 +159,7 @@ import org.btcmap.ui.SettingsPage
 import org.btcmap.ui.SettingsPageLabels
 import org.btcmap.ui.StatsScreen
 import org.btcmap.ui.UserProfileLabels
+import org.btcmap.ui.AreaAdminPage
 import org.btcmap.ui.AreaScreen
 import org.btcmap.ui.AreaStrings
 import org.btcmap.ui.EventScreen
@@ -711,7 +718,76 @@ private fun runApp() = application {
                                 onOpenAccount = { nav.push(Route.Account) },
                                 onOpenColors = { nav.push(Route.Colors) },
                                 onOpenDbStats = { nav.push(Route.DbStats) },
+                                onOpenManageAreas = { nav.push(Route.ManageAreas) },
                             )
+                        }
+
+                        Route.ManageAreas -> ScreenPage(
+                            title = LABELS.manageAreasTitle,
+                            onBack = { nav.pop() },
+                        ) {
+                            ManageAreasScreen(
+                                labels = LABELS.manageAreas,
+                                load = {
+                                    withContext(ioDispatcher) { db.area.selectAll() }
+                                },
+                                onAreaClick = { area ->
+                                    selectedAreaId = area.id
+                                    nav.push(Route.AreaAdmin)
+                                },
+                            )
+                        }
+
+                        Route.AreaAdmin -> {
+                            val areaId = selectedAreaId
+                            if (areaId == null) {
+                                LaunchedEffect(Unit) { nav.pop() }
+                            } else {
+                                AreaAdminPage(
+                                    areaId = areaId,
+                                    labels = LABELS,
+                                    load = {
+                                        withContext(Dispatchers.IO) { db.area.selectById(areaId) }
+                                    },
+                                    verify = { id, date ->
+                                        api.verifyArea(id, date)
+                                        withContext(Dispatchers.IO) {
+                                            db.area.selectById(id)?.let {
+                                                db.area.insert(listOf(it.copy(verifiedAt = date)))
+                                            }
+                                        }
+                                    },
+                                    rename = { name ->
+                                        api.setAreaName(areaId, name)
+                                        withContext(Dispatchers.IO) {
+                                            db.area.selectById(areaId)?.let {
+                                                db.area.insert(listOf(it.copy(name = name)))
+                                            }
+                                        }
+                                    },
+                                    updateDescription = { description ->
+                                        api.setAreaDescription(areaId, description)
+                                        withContext(Dispatchers.IO) {
+                                            db.area.selectById(areaId)?.let {
+                                                db.area.insert(
+                                                    listOf(it.copy(description = description)),
+                                                )
+                                            }
+                                        }
+                                    },
+                                    onBack = { nav.pop() },
+                                    onOpenUrl = { openUrl(it) },
+                                    map = { area ->
+                                        AreaPreviewMap(
+                                            area = area,
+                                            styleUrl = HOSTED_STYLE_URL,
+                                            styleJson = styleJson,
+                                            borderColor = markerPalette(settings).markerBackground,
+                                            modifier = Modifier.fillMaxSize(),
+                                        )
+                                    },
+                                )
+                            }
                         }
 
                         Route.Colors -> ScreenPage(
@@ -985,7 +1061,7 @@ private fun AreaPlaceIssue.osmEditUrl(): String =
 private const val JOIN_US_URL = "https://btcmap.org/join-us"
 
 /** The desktop app's full-window pages. */
-private enum class Route { Map, Area, Event, Feed, Settings, Colors, DbStats, Account, Report, AddPlace, AddEvent, AddComment, Boost, Infra, EventReview }
+private enum class Route { Map, Area, AreaAdmin, Event, Feed, Settings, Colors, DbStats, ManageAreas, Account, Report, AddPlace, AddEvent, AddComment, Boost, Infra, EventReview }
 
 /**
  * What the add-event screen opens with. From the map it is just the centre; from
@@ -1011,6 +1087,9 @@ private const val SCREENSHOT_ARG = "--screenshot="
  * Renders one screen to a PNG without opening a window, so the desktop UI can be
  * checked from a headless/CI run: `--screenshot=<screen>:<path>`. The map needs a
  * real window and GPU context, so it is not one of the screens this can draw.
+ *
+ * Recognised screens: `settings`, `manageareas`, `colors`, `dbstats`, `report`,
+ * `account`, `addplace`, `addevent`, `payment`, `infra`.
  */
 private fun renderScreen(spec: String) {
     val parts = spec.split(':')
@@ -1044,6 +1123,11 @@ private fun renderScreen(spec: String) {
                         onOpenAccount = {},
                         onOpenColors = {},
                         onOpenDbStats = {},
+                    )
+
+                    "manageareas" -> ManageAreasScreen(
+                        labels = LABELS.manageAreas,
+                        load = { runBlocking { db.area.selectAll() } },
                     )
 
                     "colors" -> ColorsPage(settings = settings, labels = COLORS_PAGE_LABELS)

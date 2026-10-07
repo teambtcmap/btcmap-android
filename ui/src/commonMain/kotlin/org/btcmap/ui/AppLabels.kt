@@ -71,6 +71,20 @@ data class AppLabels(
     val errorMessage: String,
     val settingsTitle: String,
     val settings: SettingsPageLabels,
+    val manageAreasTitle: String,
+    val manageAreas: ManageAreasLabels,
+    /** The area admin screen's verify action. */
+    val verifyArea: String,
+    /** The area admin screen's name edit action and dialog title. */
+    val editName: String,
+    /** The area name field's label, in the edit dialog. */
+    val nameField: String,
+    /** The area admin screen's description edit action and dialog title. */
+    val editDescription: String,
+    /** The area description field's label, in the edit dialog. */
+    val descriptionField: String,
+    /** A generic cancel label, for the name edit dialog. */
+    val cancel: String,
     val profileTitle: String,
     val uploadedImagesTitle: String,
     val myEventsTitle: String,
