@@ -49,9 +49,6 @@ import org.btcmap.api.deletePlaceImage
 import org.btcmap.api.getPlaceImages
 import org.btcmap.feed.feedKey
 import org.btcmap.feed.iconGlyph
-import org.btcmap.map.DEFAULT_MAP_CENTER_LAT
-import org.btcmap.map.DEFAULT_MAP_CENTER_LON
-import org.btcmap.map.DEFAULT_MAP_ZOOM
 import org.btcmap.map.MapAreasController
 import org.btcmap.place.canDeletePlaceImage
 import org.btcmap.i18n.Strings
@@ -109,8 +106,11 @@ import org.btcmap.settings.apiUrl
 import org.btcmap.settings.authorized
 import org.btcmap.settings.bundledStyleAsset
 import org.btcmap.settings.isDark
+import org.btcmap.settings.mapCenterLat
+import org.btcmap.settings.mapCenterLon
 import org.btcmap.settings.mapRotationEnabled
 import org.btcmap.settings.mapStyle
+import org.btcmap.settings.mapZoom
 import org.maplibre.compose.resource.MapResourceProvider
 import org.btcmap.settings.showAttribution
 import org.btcmap.settings.verifiedFilterMinVerifiedAt
@@ -296,9 +296,9 @@ private fun runApp() = application {
                     var feedPlaceId by remember { mutableStateOf<Long?>(null) }
                     // Where the map is looking, tracked so the feed lists the
                     // areas the user is actually around rather than a fixed
-                    // point. Starts at the shared default view.
-                    var mapCenterLat by remember { mutableStateOf(DEFAULT_MAP_CENTER_LAT) }
-                    var mapCenterLon by remember { mutableStateOf(DEFAULT_MAP_CENTER_LON) }
+                    // point. Starts where the map was last left.
+                    var mapCenterLat by remember { mutableStateOf(settings.mapCenterLat) }
+                    var mapCenterLon by remember { mutableStateOf(settings.mapCenterLon) }
                     // Where the add-place screen was opened from the map.
                     var addPlace by remember { mutableStateOf<Pair<Double, Double>?>(null) }
                     // Where the add-event screen was opened from, and what it is
@@ -376,9 +376,10 @@ private fun runApp() = application {
                             openPlaceId = feedPlaceId,
                             styleUrl = HOSTED_STYLE_URL,
                             styleJson = styleJson,
-                            initialLat = DEFAULT_MAP_CENTER_LAT,
-                            initialLon = DEFAULT_MAP_CENTER_LON,
-                            initialZoom = DEFAULT_MAP_ZOOM,
+                            // Reopen where the user left the map, like Android.
+                            initialLat = settings.mapCenterLat,
+                            initialLon = settings.mapCenterLon,
+                            initialZoom = settings.mapZoom,
                             // The user's verification window and colour choices
                             // come from the shared settings, so the desktop map
                             // honours the same screen Android does.
@@ -525,7 +526,12 @@ private fun runApp() = application {
                                 selectedAreaId = areaId
                                 nav.push(Route.Area)
                             },
-                            onCameraIdle = { lat, lon, _ ->
+                            onCameraIdle = { lat, lon, zoom ->
+                                // Remember the camera for the feed and for the
+                                // next launch, as Android's map route does.
+                                settings.mapCenterLat = lat
+                                settings.mapCenterLon = lon
+                                settings.mapZoom = zoom
                                 mapCenterLat = lat
                                 mapCenterLon = lon
                             },
