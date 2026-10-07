@@ -1,5 +1,7 @@
 package org.btcmap.area
 
+import org.btcmap.i18n.Strings
+
 import kotlinx.coroutines.runBlocking
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertTextContains
@@ -145,7 +147,7 @@ class AreaOfflineMapTest : AreaScreenTest() {
         }
     }
 
-    private fun offlineAction(): String = app.getString(R.string.offline_map)
+    private fun offlineAction(): String = Strings.current()["offline_map"]
 
     private fun hasTag(tag: String): Boolean =
         composeTestRule.onAllNodesWithTag(tag).fetchSemanticsNodes().isNotEmpty()

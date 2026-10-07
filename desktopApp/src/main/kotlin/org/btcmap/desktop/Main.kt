@@ -53,7 +53,11 @@ import org.btcmap.map.DEFAULT_MAP_CENTER_LON
 import org.btcmap.map.DEFAULT_MAP_ZOOM
 import org.btcmap.map.MapAreasController
 import org.btcmap.place.canDeletePlaceImage
+import org.btcmap.i18n.Strings
 import org.btcmap.ui.ActivityFeedRow
+import org.btcmap.ui.AppLabels
+import org.btcmap.ui.activityFeedRow
+import org.btcmap.ui.appLabels
 import org.btcmap.ui.ActivityFeedScreen
 import org.btcmap.ui.ActivityFeedState
 import org.btcmap.ui.MaterialSymbol
@@ -494,7 +498,7 @@ private fun runApp() = application {
                         )
 
                         Route.Report -> ScreenPage(
-                            title = reportPlace?.second?.ifBlank { "Report a place" } ?: "Report a place",
+                            title = reportPlace?.second?.ifBlank { STRINGS["report_a_place"] } ?: STRINGS["report_a_place"],
                             onBack = { nav.pop() },
                         ) {
                             ReportPlaceScreen(
@@ -559,7 +563,7 @@ private fun runApp() = application {
                         )
 
                         Route.AddComment -> ScreenPage(
-                            title = paymentPlace?.second?.ifBlank { "Add comment" } ?: "Add comment",
+                            title = paymentPlace?.second?.ifBlank { LABELS.addCommentTitle } ?: LABELS.addCommentTitle,
                             onBack = { nav.pop() },
                         ) {
                             CommentScreen(
@@ -573,7 +577,7 @@ private fun runApp() = application {
                         }
 
                         Route.Boost -> ScreenPage(
-                            title = paymentPlace?.second?.ifBlank { "Boost merchant" } ?: "Boost merchant",
+                            title = paymentPlace?.second?.ifBlank { LABELS.boostTitle } ?: LABELS.boostTitle,
                             onBack = { nav.pop() },
                         ) {
                             BoostScreen(
@@ -587,7 +591,7 @@ private fun runApp() = application {
                         }
 
                         Route.Infra -> ScreenPage(
-                            title = "Infra dashboard",
+                            title = LABELS.infraTitle,
                             onBack = { nav.pop() },
                             actions = {
                                 if (infraRefreshing) {
@@ -599,7 +603,7 @@ private fun runApp() = application {
                                     IconButton(onClick = { infraRefreshKey++ }) {
                                         MaterialSymbol(
                                             glyph = "refresh",
-                                            contentDescription = "Refresh",
+                                            contentDescription = LABELS.refresh,
                                         )
                                     }
                                 }
@@ -631,7 +635,7 @@ private fun runApp() = application {
                             reject = { api.setEventStatus(it.id, "rejected") },
                             onOpenUrl = { openUrl(it) },
                             onBack = { nav.pop() },
-                            title = "Review events",
+                            title = LABELS.eventReviewTitle,
                             iconFont = iconFont,
                             map = { event, mapModifier ->
                                 EventMiniMap(
@@ -646,7 +650,7 @@ private fun runApp() = application {
                         )
 
                         Route.Settings -> ScreenPage(
-                            title = "Settings",
+                            title = LABELS.settingsTitle,
                             onBack = { nav.pop() },
                         ) {
                             SettingsPage(
@@ -661,14 +665,14 @@ private fun runApp() = application {
                         }
 
                         Route.Colors -> ScreenPage(
-                            title = "Customize colors",
+                            title = LABELS.colorsTitle,
                             onBack = { nav.pop() },
                         ) {
                             ColorsPage(settings = settings, labels = COLORS_PAGE_LABELS)
                         }
 
                         Route.DbStats -> ScreenPage(
-                            title = "Database",
+                            title = LABELS.dbStatsTitle,
                             onBack = { nav.pop() },
                         ) {
                             DbStatsPage(
@@ -690,7 +694,7 @@ private fun runApp() = application {
                                 title = when {
                                     showUploadedImages -> PROFILE_LABELS.uploadedImages
                                     showMyEvents -> PROFILE_LABELS.myEvents
-                                    else -> "Account"
+                                    else -> STRINGS["account"]
                                 },
                                 onBack = {
                                     when {
@@ -796,7 +800,7 @@ private fun runApp() = application {
                         }
 
                         Route.Feed -> ScreenPage(
-                            title = "Activity",
+                            title = LABELS.feedTitle,
                             onBack = { nav.pop() },
                         ) {
                             DesktopFeedScreen(
@@ -892,7 +896,7 @@ private fun DesktopAreaScreen(
             )
 
             missing -> Text(
-                text = "This area is not available.",
+                text = STRINGS["area_unavailable"],
                 modifier = Modifier.padding(16.dp),
             )
 
@@ -1131,18 +1135,18 @@ private fun placeIdOf(key: String): Long? = key.split(':').getOrNull(1)?.toLongO
 private suspend fun loadFeed(api: Api, db: Database, lat: Double, lon: Double): ActivityFeedState {
     val aliases = areaAliases(db, lat, lon)
     if (aliases.isEmpty()) {
-        return ActivityFeedState.Empty("No area found for the feed.", retryable = true)
+        return ActivityFeedState.Empty(LABELS.feedEmptyLocal, retryable = true)
     }
 
     return try {
         val items = api.getActivity(areaIds = aliases, days = 7)
         if (items.isEmpty()) {
-            ActivityFeedState.Empty("No recent activity.", retryable = true)
+            ActivityFeedState.Empty(LABELS.feedEmptyLocal, retryable = true)
         } else {
-            ActivityFeedState.Content(items.map { it.toRow() })
+            ActivityFeedState.Content(items.map { activityFeedRow(STRINGS, it, ::desktopFeedDate) })
         }
     } catch (t: Throwable) {
-        ActivityFeedState.Empty("Could not load the feed.", retryable = true)
+        ActivityFeedState.Empty(LABELS.feedError, retryable = true)
     }
 }
 
@@ -1158,35 +1162,6 @@ private suspend fun areaAliases(db: Database, lat: Double, lon: Double): List<St
     }
 }
 
-/** A feed item as a row, with the labels spelled out for the desktop. */
-private fun ActivityFeedItem.toRow(): ActivityFeedRow {
-    val subtitle = when (type) {
-        ActivityFeedItem.TYPE_PLACE_BOOSTED -> durationDays?.let { "Boosted for $it days" }.orEmpty()
-        ActivityFeedItem.TYPE_PLACE_COMMENTED -> comment.orEmpty()
-        ActivityFeedItem.TYPE_PLACE_ADDED -> osmUserName?.let { "Added by $it" }.orEmpty()
-        ActivityFeedItem.TYPE_PLACE_UPDATED -> osmUserName?.let { "Updated by $it" }.orEmpty()
-        ActivityFeedItem.TYPE_PLACE_DELETED -> osmUserName?.let { "Deleted by $it" }.orEmpty()
-        else -> osmUserName?.let { "by $it" }.orEmpty()
-    }
-
-    return ActivityFeedRow(
-        key = feedKey(),
-        icon = iconGlyph(),
-        placeName = placeName.orEmpty(),
-        subtitle = subtitle,
-        date = relativeDate(date),
-    )
-}
-
-private fun relativeDate(date: String): String = runCatching {
-    val then = java.time.OffsetDateTime.parse(date).atZoneSameInstant(java.time.ZoneId.systemDefault())
-    val days = java.time.Duration.between(then, java.time.ZonedDateTime.now()).toDays()
-    when {
-        days <= 0L -> "today"
-        days == 1L -> "yesterday"
-        else -> "$days days ago"
-    }
-}.getOrDefault(date)
 
 private const val API_URL = "https://api.btcmap.org"
 private const val USER_AGENT = "btcmap-desktop"
@@ -1273,396 +1248,58 @@ private fun resourceBytes(path: String): ByteArray? =
 private fun bundledSnapshot(fileName: String): Source? =
     Thread.currentThread().contextClassLoader.getResourceAsStream(fileName)?.source()
 
-private val INVOICE_LABELS = InvoicePaymentLabels(
-    qrDescription = "Lightning invoice QR code",
-    pay = "Pay",
-    copy = "Copy",
-    startOver = "Start over",
-)
+/** The device locale's string catalog, shared with Android. */
+private val STRINGS = Strings.current()
 
-private val INVOICE_SECTION_LABELS = InvoicePaymentSectionLabels(
-    invoice = INVOICE_LABELS,
-    discardMessage = "Discard this invoice? It stays payable until it expires, so " +
-        "starting over and paying the old one too would charge you twice.",
-    discard = "Discard",
-    cancel = "Cancel",
-)
-
-private val BOOST_LABELS = BoostScreenLabels(
-    active = "Your boost is active.",
-    backToMap = "Back to the map",
-    planLabel = {
-        when (it) {
-            BoostPlan.ONE_MONTH -> "1 month"
-            BoostPlan.THREE_MONTHS -> "3 months"
-            BoostPlan.TWELVE_MONTHS -> "12 months"
-        }
+/**
+ * The shared labels, built from the cross-platform catalog so the desktop and
+ * Android render the same text. Only formatting (byte sizes, distances, dates)
+ * stays platform-specific.
+ */
+private val LABELS: AppLabels = appLabels(
+    strings = STRINGS,
+    currentStyle = MapStyle.Auto,
+    formatNumber = { value, digits ->
+        java.text.NumberFormat.getNumberInstance().apply {
+            maximumFractionDigits = digits
+        }.format(value)
     },
-    description = "Boosting a place keeps it at the top of search results and " +
-        "highlights it on the map.",
-    durationTitle = "For how long?",
-    continueLabel = "Continue",
-    invoice = INVOICE_SECTION_LABELS,
+    formatBytes = ::formatBytes,
+    formatFeedDate = ::desktopFeedDate,
 )
 
-private val COMMENT_LABELS = CommentScreenLabels(
-    posted = "Your comment has been posted.",
-    backToMap = "Back to the map",
-    form = AddCommentLabels(
-        disclosure = "A comment carries a small anti-spam fee, paid in sats over the " +
-            "Lightning Network.",
-        currentFee = "Current fee",
-        comment = "Comment",
-        placeholder = "Your comment",
-        continueLabel = "Continue",
-        emptyComment = "The comment cannot be empty.",
-        failedToLoad = "The fee could not be loaded.",
-        tapToRetry = "Tap to retry",
-    ),
-    invoice = INVOICE_SECTION_LABELS,
-)
-
-private val VERIFIED_FILTER_YEARS = listOf(1, 2, 3)
-
-private fun mapStyleName(style: MapStyle): String = when (style) {
-    MapStyle.Auto -> "Auto (system)"
-    MapStyle.Liberty -> "OpenFreeMap Liberty"
-    MapStyle.Positron -> "OpenFreeMap Positron"
-    MapStyle.Bright -> "OpenFreeMap Bright"
-    MapStyle.Dark -> "OpenFreeMap Dark"
-    MapStyle.DarkMatter -> "OpenFreeMap Dark Matter"
-}
-
-private fun verifiedFilterName(years: Int): String = when (years) {
-    1 -> "Verified within 1 year"
-    2 -> "Verified within 2 years"
-    3 -> "Verified within 3 years"
-    else -> ""
-}
-
-private fun mapColorTitle(color: MapColor): String = when (color) {
-    MapColor.MarkerBackground -> "Marker background"
-    MapColor.MarkerIcon -> "Marker icon"
-    MapColor.BoostedMarkerBackground -> "Boosted marker background"
-    MapColor.BoostedMarkerIcon -> "Boosted marker icon"
-    MapColor.BadgeBackground -> "Badge background"
-    MapColor.BadgeText -> "Badge text"
-    MapColor.ButtonBackground -> "Button background"
-    MapColor.ButtonIcon -> "Button icon"
-    MapColor.ButtonBorder -> "Button border"
-}
-
-private fun syncStateLabel(state: SyncState): String = when (state) {
-    SyncState.Idle -> "Idle"
-    SyncState.UnbundlingPlaces -> "Unbundling places"
-    SyncState.SyncingPlaces -> "Syncing places"
-    SyncState.UnbundlingEvents -> "Unbundling events"
-    SyncState.SyncingEvents -> "Syncing events"
-    SyncState.UnbundlingComments -> "Unbundling comments"
-    SyncState.SyncingComments -> "Syncing comments"
-    SyncState.UnbundlingAreas -> "Unbundling areas"
-    SyncState.SyncingAreas -> "Syncing areas"
-}
-
-private val DESKTOP_DB_STATS_LABELS = DbStatsLabels(
-    database = "Database",
-    file = "File",
-    version = "Version",
-    size = "Size",
-    table = { "Table $it" },
-    bundle = { "Bundle $it" },
-    location = "Location",
-    visibleRows = "Visible rows",
-    deletedRows = "Deleted rows",
-    futureRows = "Future rows",
-    rows = "Rows",
-    newestUpdate = "Newest update",
-)
-
-private val SETTINGS_PAGE_LABELS = SettingsPageLabels(
-    account = "Account",
-    logIn = "Log in",
-    loggedInAs = { "Logged in as $it" },
-    openProfile = "Click to see your profile",
-    mapStyle = "Map style",
-    mapStyleValue = ::mapStyleName,
-    customizeColors = "Customize colors",
-    customizeColorsSecondary = "Marker, badge and button colors",
-    verifiedFilter = "Only show places",
-    verifiedFilterValue = ::verifiedFilterName,
-    verifiedFilterYears = VERIFIED_FILTER_YEARS,
-    showAttribution = "Show attribution",
-    showAttributionSecondary = "Visible by default per OSM policy",
-    mapRotation = "Allow map rotation",
-    mapRotationSecondary = "Compass appears when not facing north",
-    dbStats = "Database",
-    dbStatsSecondary = "Database metadata and table management",
-    imageStats = "Image cache",
-    imageStatsSecondary = "Memory and disk caches metadata plus load stats",
-    mapStyleDialogTitle = "Map style",
-    verifiedFilterDialogTitle = "Only show places",
-    close = "Close",
-)
-
-private val COLORS_PAGE_LABELS = ColorsPageLabels(
-    colorTitle = ::mapColorTitle,
-    red = "Red",
-    green = "Green",
-    blue = "Blue",
-    alpha = "Alpha",
-    ok = "OK",
-    reset = "Reset",
-    cancel = "Cancel",
-)
-
-private val DB_STATS_PAGE_LABELS = DbStatsPageLabels(
-    dbStats = DESKTOP_DB_STATS_LABELS,
-    sync = "Sync",
-    source = "Source",
-    state = "State",
-    syncNow = "Sync now",
-    syncStateLabel = ::syncStateLabel,
-)
+// The shared labels, named as the desktop screens already expect them.
+private val INVOICE_LABELS = LABELS.boost.invoice.invoice
+private val INVOICE_SECTION_LABELS = LABELS.boost.invoice
+private val BOOST_LABELS = LABELS.boost
+private val COMMENT_LABELS = LABELS.addComment
+private val VERIFIED_FILTER_YEARS = LABELS.settings.verifiedFilterYears
+private val DESKTOP_DB_STATS_LABELS = LABELS.dbStats.dbStats
+private val SETTINGS_PAGE_LABELS = LABELS.settings
+private val COLORS_PAGE_LABELS = LABELS.colors
+private val DB_STATS_PAGE_LABELS = LABELS.dbStats
+private val PROFILE_LABELS = LABELS.userProfile
+private val UPLOADED_IMAGES_LABELS = LABELS.uploadedImages
+private val MY_EVENTS_LABELS = LABELS.myEvents
+private val EVENT_REVIEW_LABELS = LABELS.eventReview
+private val PROFILE_FORM_LABELS = LABELS.profileForm
+private val ACCOUNT_LABELS = LABELS.account
+private val REPORT_LABELS = LABELS.report
+private val ADD_PLACE_LABELS = LABELS.addPlace
+private val ADD_EVENT_LABELS = LABELS.addEvent
+private val ADD_LOCATION_LABELS = LABELS.addLocation
+private val PLACE_SHEET_STRINGS = LABELS.placeStrings
+private val DESKTOP_AREA_STRINGS = LABELS.area
+private val EVENT_SCREEN_LABELS = LABELS.eventScreen
 
 private const val DESKTOP_TOKEN_LABEL = "BTC Map desktop"
 
-private val PROFILE_LABELS = UserProfileLabels(
-    username = "Username",
-    password = "Password",
-    savedPlaces = "Saved places",
-    savedAreas = "Saved areas",
-    noSavedPlaces = "No saved places.",
-    noSavedAreas = "No saved areas.",
-    logOut = "Log out",
-    editUsername = "Change username",
-    editPassword = "Change password",
-    delete = "Delete",
-    uploadedImages = "Uploaded images",
-    myEvents = "My events",
-)
-
-private val UPLOADED_IMAGES_LABELS = UploadedImagesLabels(
-    empty = "You haven't uploaded any images yet.",
-    delete = "Delete",
-    failed = "Couldn't delete the image.",
-    retry = "Retry",
-    unknownPlace = { "Place #$it" },
-)
-
-private val MY_EVENTS_LABELS = MyEventsLabels(
-    empty = "You haven't submitted any events yet.",
-    failed = "Couldn't load your events",
-    retry = "Retry",
-    duplicate = "Duplicate",
-    revoke = "Revoke",
-    revokeFailed = "Couldn't revoke the event",
-    statusPending = "Pending review",
-    statusLive = "Live",
-    statusRejected = "Rejected",
-    dateRange = { date, start, end -> "$date, $start - $end" },
-)
-
-private val EVENT_REVIEW_LABELS = EventReviewLabels(
-    back = "Navigate up",
-    empty = "No events are waiting for review",
-    failed = "Couldn't load the events",
-    retry = "Retry",
-    approve = "Approve",
-    reject = "Reject",
-    actionFailed = "Couldn't update the event",
-    dateRange = { date, start, end -> "$date, $start - $end" },
-)
-
-private val PROFILE_FORM_LABELS = ProfileFormLabels(
-    passwordMask = "••••••••",
-    required = "Required",
-    changeUsernameTitle = "Change username",
-    changePasswordTitle = "Change password",
-    username = "Username",
-    currentPassword = "Current password",
-    newPassword = "New password",
-    confirmPassword = "Confirm password",
-    passwordsDoNotMatch = "Passwords do not match",
-    passwordTooShort = { "At least $it characters" },
-    save = "Save",
-    cancel = "Cancel",
-    usernameChanged = "Username changed.",
-    passwordChanged = "Password changed.",
-)
-
-private val ACCOUNT_LABELS = AccountLabels(
-    username = "Username",
-    password = "Password",
-    confirmPassword = "Confirm password",
-    required = "Required",
-    passwordTooShort = { "At least $it characters" },
-    passwordsDoNotMatch = "Passwords do not match",
-    signIn = "Sign in",
-    createAccount = "Create account",
-    alreadyHaveAccount = "I already have an account",
-    createAnAccount = "Create an account",
-    accountCreated = "Account created. Please sign in.",
-    showPassword = "Show password",
-    hidePassword = "Hide password",
-)
-
-private val REPORT_LABELS = ReportPlaceLabels(
-    intro = "Let editors know the current state of this place. Your report will be " +
-        "reviewed by the BTC Map community.",
-    reasonLabel = {
-        when (it) {
-            ReportType.Verified -> "Verified - still accepts Bitcoin"
-            ReportType.RefusedSats -> "Refused Bitcoin payment"
-            ReportType.OutOfBusiness -> "Out of business"
-        }
-    },
-    reasonDescription = {
-        when (it) {
-            ReportType.Verified ->
-                "You confirmed this place exists and currently accepts Bitcoin payments."
-
-            ReportType.RefusedSats ->
-                "An attempt to pay with Bitcoin on-site was refused by the merchant."
-
-            ReportType.OutOfBusiness ->
-                "The place has been permanently closed or is no longer operating."
-        }
-    },
-    noteHint = "Additional notes (optional)",
-    addPhoto = { taken, max -> "Add photo ($taken/$max)" },
-    removePhoto = "Remove photo",
-    submit = "Submit",
-    submitted = "Report submitted.",
-    backToMap = "Back to the map",
-)
-
-private val ADD_PLACE_LABELS = AddPlaceLabels(
-    title = "Add a place",
-    back = "Navigate up",
-    name = "Name",
-    namePlaceholder = "Satoshi Cafe",
-    category = "Category",
-    categoryPlaceholder = "cafe",
-    address = "Address",
-    addressPlaceholder = "1 HODL Lane, Block 21",
-    website = "Website (optional)",
-    websitePlaceholder = "example.com",
-    description = "Description (optional)",
-    descriptionPlaceholder = "Accepts Lightning payments via Blink wallet, ATM in the back room",
-    dragMap = "Drag the map to set the exact location",
-    required = "Required",
-    submit = "Submit place",
-    submitted = "Place submitted for review.",
-    backToMap = "Back to the map",
-)
-
-private val ADD_EVENT_LABELS = AddEventLabels(
-    title = "Add an event",
-    back = "Navigate up",
-    name = "Name",
-    namePlaceholder = "Phuket Bitcoin Meetup",
-    website = "Website",
-    websitePlaceholder = "example.com",
-    startsAt = "Starts at",
-    endsAt = "Ends (optional)",
-    selectDateTime = "Select date and time",
-    clearEnd = "Remove end time",
-    dragMap = "Drag the map to set the exact location",
-    required = "Required",
-    submit = "Submit event",
-    submitted = "Event submitted.",
-    backToMap = "Back to the map",
-    ok = "OK",
-    cancel = "Cancel",
-)
-
-private val ADD_LOCATION_LABELS = AddLocationLabels(
-    addPlace = "Add a place",
-    addEvent = "Add an event",
-)
-
-private val PLACE_SHEET_STRINGS = org.btcmap.ui.PlaceSheetStrings(
-    directions = "Directions",
-    share = "Share",
-    viewOnBtcmap = "View on btcmap.org",
-    viewOnOsm = "View on openstreetmap.org",
-    editOnOsm = "Edit on openstreetmap.org",
-    notVerified = "Not verified",
-    companionWarning = { "This place needs a companion app ($it)." },
-    verificationWarningTitle = "Verification needed",
-    verificationWarningOutdated = "This place was last verified more than a year ago.",
-    verificationWarningNotVerified = "This place has not been verified yet.",
-    ok = "OK",
-    verify = "Verify",
-    report = "Report",
-    boost = "Boost",
-    commentsTitle = { "Comments ($it)" },
-    addComment = "Add comment",
-    watch = "Watch",
-    unwatch = "Unwatch",
-    addPhoto = "Add photo",
-    uploadedBy = { "Uploaded by $it" },
-    deletePhoto = "Delete photo",
-    openingHoursClosed = "Closed",
-    openingHoursOpen24_7 = "Open 24/7",
-)
-
-private val DESKTOP_AREA_STRINGS = AreaStrings(
-    readMore = "Read more",
-    collapse = "Collapse",
-    boostedMerchants = "Boosted merchants",
-    events = "Events",
-    howToHelp = "How to help?",
-    offlineMap = "Offline map",
-    offlineDownload = "Download map",
-    offlineDownloadAgain = "Download again",
-    offlineDelete = "Delete",
-    cancel = "Cancel",
-    boosted = "Boosted",
-    boostedUntil = { date -> "Boosted until $date" },
-    issues = { shown, total ->
-        if (shown < total) "Issues ($shown of $total)" else "Issues ($total)"
-    },
-    issueDescription = ::desktopIssueDescription,
-    offlineStatusDownloading = { size -> "Downloading… $size" },
-    offlineStatusProgress = { percent, size -> "Downloading… $percent% ($size)" },
-    offlineStatusDownloaded = { size, minZoom, maxZoom ->
-        "Downloaded · $size · zoom $minZoom–$maxZoom"
-    },
-    offlineStyleMismatch = "Downloaded for a different map style. Download again to " +
-        "use it with the current style.",
-    offlineStatusFailed = { message -> "Download failed: $message" },
-    offlineDialogDescription = { areaName ->
-        "Download the map of $areaName for offline use, so it stays available " +
-            "without a connection."
-    },
-    offlineDialogStyle = { styleName -> "Map style: $styleName" },
-    offlineDialogMaxZoom = { zoom -> "Maximum zoom: $zoom" },
-    offlineDialogEstimatedSize = { size -> "Estimated size: ~$size" },
-    offlineDialogTooLarge = { size -> "Too large to download offline (estimated $size)." },
-    offlineDialogEstimateNote = "This is only an estimate. The actual size depends " +
-        "on how much map data the area contains.",
-    formatBytes = ::formatBytes,
-)
-
-private val EVENT_SCREEN_LABELS = EventScreenLabels(
-    dateRange = { date, start, end -> "$date, $start - $end" },
-)
-
-/** The issue codes the API returns, matching the Android resource strings. */
-private fun desktopIssueDescription(code: String): String = when {
-    code == "outdated" -> "Outdated, needs verification"
-    code == "outdated_soon" -> "Will be outdated soon"
-    code == "not_verified" -> "Not verified"
-    code == "missing_icon" -> "Missing icon"
-    code.startsWith("invalid_tag_value:") ->
-        "Invalid value for ${code.substringAfter("invalid_tag_value:")}"
-
-    code.startsWith("misspelled_tag_name:") ->
-        "Misspelled tag name: ${code.substringAfter("misspelled_tag_name:")}"
-
-    else -> "Unknown issue"
-}
+/** A medium date for feed rows older than a week. */
+private fun desktopFeedDate(iso: String): String = runCatching {
+    java.time.format.DateTimeFormatter.ofLocalizedDate(java.time.format.FormatStyle.MEDIUM)
+        .withLocale(java.util.Locale.getDefault())
+        .format(java.time.ZonedDateTime.parse(iso))
+}.getOrDefault(iso)
 
 /** A human-readable byte size for the offline estimate. */
 private fun formatBytes(bytes: Long): String = when {

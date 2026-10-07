@@ -1,5 +1,7 @@
 package org.btcmap.imagestats
 
+import org.btcmap.i18n.Strings
+
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
@@ -86,7 +88,7 @@ class ImageStatsFragmentTest : AppTestCase() {
             }
 
             composeTestRule
-                .onNodeWithText(context.getString(R.string.image_stats))
+                .onNodeWithText(Strings.current()["image_stats"])
                 .performScrollTo()
                 .performClick()
 

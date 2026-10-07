@@ -1,5 +1,7 @@
 package org.btcmap.area
 
+import org.btcmap.i18n.Strings
+
 import kotlinx.coroutines.runBlocking
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
@@ -112,7 +114,7 @@ class AreaBookmarkTest : AreaScreenTest() {
 
             waitUntil {
                 try {
-                    onView(withText(R.string.account)).inRoot(isDialog())
+                    onView(withText(Strings.current()["account"])).inRoot(isDialog())
                         .check(matches(isDisplayed()))
                     true
                 } catch (_: Throwable) {
@@ -197,7 +199,7 @@ class AreaBookmarkTest : AreaScreenTest() {
 
     private fun save() {
         composeTestRule.onNodeWithContentDescription(
-            app.getString(R.string.save),
+            Strings.current()["save"],
         ).performClick()
     }
 

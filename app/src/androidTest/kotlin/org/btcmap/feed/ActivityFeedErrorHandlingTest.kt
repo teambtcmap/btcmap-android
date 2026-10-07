@@ -1,5 +1,7 @@
 package org.btcmap.feed
 
+import org.btcmap.i18n.Strings
+
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onAllNodesWithText
@@ -94,7 +96,7 @@ class ActivityFeedErrorHandlingTest : AppTestCase() {
                 composeTestRule.onNodeWithTag(FEED_RETRY_TAG).performClick()
 
                 // The retry succeeds with an empty list, so the empty state shows.
-                val empty = app.getString(R.string.activity_empty_local)
+                val empty = Strings.current()["activity_empty_local"]
                 composeTestRule.waitUntil(5_000) {
                     composeTestRule.onAllNodesWithText(empty)
                         .fetchSemanticsNodes().isNotEmpty()

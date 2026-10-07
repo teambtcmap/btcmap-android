@@ -12,8 +12,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.btcmap.BuildConfig
-import org.btcmap.R
 import org.btcmap.api.apiHttpClient
+import org.btcmap.i18n.Strings
 import org.btcmap.update.AvailableUpdate
 import org.btcmap.update.UpdateCheck
 import org.btcmap.util.rethrowIfCancellation
@@ -68,28 +68,29 @@ class UpdateNotificationController(
     /** Opens the update dialog, if a newer build was found. */
     fun showDialog() {
         val update = availableUpdate ?: return
+        val strings = Strings.current()
 
         MaterialAlertDialogBuilder(context)
-            .setTitle(R.string.update_available)
+            .setTitle(strings["update_available"])
             .setMessage(
                 if (isBeta) {
-                    context.getString(
-                        R.string.update_available_description_beta,
+                    strings.format(
+                        "update_available_description_beta",
                         BuildConfig.VERSION_CODE, update.versionCode
                     )
                 } else {
-                    context.getString(
-                        R.string.update_available_description,
+                    strings.format(
+                        "update_available_description",
                         BuildConfig.VERSION_NAME, update.versionName
                     )
                 }
             )
-            .setPositiveButton(R.string.get_apk) { _, _ ->
+            .setPositiveButton(strings["get_apk"]) { _, _ ->
                 val intent = Intent(Intent.ACTION_VIEW)
                 intent.data = update.url.toUri()
                 context.startActivity(intent)
             }
-            .setNegativeButton(R.string.ignore, null)
+            .setNegativeButton(strings["ignore"], null)
             .show()
     }
 

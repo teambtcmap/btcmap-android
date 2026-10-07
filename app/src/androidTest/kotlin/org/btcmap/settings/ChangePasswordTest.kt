@@ -1,5 +1,7 @@
 package org.btcmap.settings
 
+import org.btcmap.i18n.Strings
+
 import kotlinx.coroutines.runBlocking
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
 import androidx.compose.ui.test.onAllNodesWithContentDescription
@@ -79,7 +81,7 @@ class ChangePasswordTest : AppTestCase() {
 
         composeTestRule.waitUntil(5_000) {
             composeTestRule
-                .onAllNodesWithContentDescription(app.getString(R.string.change_password))
+                .onAllNodesWithContentDescription(Strings.current()["change_password"])
                 .fetchSemanticsNodes()
                 .isNotEmpty()
         }
@@ -87,7 +89,7 @@ class ChangePasswordTest : AppTestCase() {
 
     private fun openChangePasswordForm() {
         composeTestRule
-            .onNodeWithContentDescription(app.getString(R.string.change_password))
+            .onNodeWithContentDescription(Strings.current()["change_password"])
             .performClick()
 
         composeTestRule.waitUntil(5_000) {

@@ -1,5 +1,7 @@
 package org.btcmap.settings
 
+import org.btcmap.i18n.Strings
+
 import kotlinx.coroutines.runBlocking
 import androidx.core.graphics.toColorInt
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -84,26 +86,26 @@ class SettingsPersistenceTest : AppTestCase() {
     }
 
     @Test
-    fun mapStyle_rendersLocalizedResourceName() = runBlocking<Unit> {
+    fun mapStyle_rendersLocalizedName() = runBlocking<Unit> {
         Assert.assertEquals(
-            preferencesRule.context.getString(R.string.style_dark),
-            MapStyle.Dark.name(preferencesRule.context),
+            "OpenFreeMap Dark",
+            Strings.forLocale("en")["style_dark"],
         )
     }
 
     @Test
-    fun verifiedFilterYears_rendersLocalizedResourceName() = runBlocking<Unit> {
+    fun verifiedFilterYears_rendersLocalizedName() = runBlocking<Unit> {
         Assert.assertEquals(
-            preferencesRule.context.getString(R.string.verified_filter_2_years),
-            2.toVerifiedFilterYears(preferencesRule.context),
+            "Verified within 2 years",
+            Strings.forLocale("en")["verified_filter_2_years"],
         )
     }
 
     @Test
-    fun activityInterval_rendersLocalizedResourceName() = runBlocking<Unit> {
+    fun activityInterval_rendersLocalizedName() = runBlocking<Unit> {
         Assert.assertEquals(
-            preferencesRule.context.getString(R.string.activity_interval_week),
-            ActivityInterval.Week.name(preferencesRule.context),
+            "1w",
+            Strings.forLocale("en")["activity_interval_week"],
         )
     }
 }

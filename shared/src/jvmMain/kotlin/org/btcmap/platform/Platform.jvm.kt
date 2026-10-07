@@ -11,6 +11,8 @@ actual val ioDispatcher: CoroutineDispatcher = Dispatchers.IO
 
 actual fun currentLanguage(): String = Locale.getDefault().language
 
+actual fun currentLocale(): String = Locale.getDefault().toLanguageTag()
+
 actual fun formatInteger(value: Long): String = NumberFormat.getIntegerInstance().format(value)
 
 actual fun weekdayName(isoDayNumber: Int, language: String): String =

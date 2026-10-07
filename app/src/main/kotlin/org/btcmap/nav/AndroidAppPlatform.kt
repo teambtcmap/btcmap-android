@@ -18,7 +18,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import okio.source
 import org.btcmap.App
-import org.btcmap.R
 import org.btcmap.api.ActivityFeedItem
 import org.btcmap.api.getPlaceOsmId
 import org.btcmap.bundle.BundledAreas
@@ -31,6 +30,7 @@ import org.btcmap.db.table.event.TABLE as EVENT_TABLE
 import org.btcmap.db.table.place.TABLE as PLACE_TABLE
 import org.btcmap.dbstats.BundleStats
 import org.btcmap.dbstats.readBundles
+import org.btcmap.i18n.Strings
 import org.btcmap.map.UpdateNotificationController
 import org.btcmap.place.toOsmUrl
 import org.btcmap.ui.AppPlatform
@@ -80,14 +80,14 @@ class AndroidAppPlatform(
         try {
             activity.startActivity(intent)
         } catch (_: ActivityNotFoundException) {
-            activity.showMessage(activity.getString(R.string.you_dont_have_a_compatible_wallet))
+            activity.showMessage(Strings.current()["you_dont_have_a_compatible_wallet"])
         }
     }
 
     override fun copyBolt11(label: String, bolt11: String) {
         val clipboard = activity.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
         clipboard.setPrimaryClip(ClipData.newPlainText(label, bolt11))
-        activity.showMessage(activity.getString(R.string.copied_to_clipboard))
+        activity.showMessage(Strings.current()["copied_to_clipboard"])
     }
 
     override fun showMessage(message: String) {
@@ -170,7 +170,7 @@ class AndroidAppPlatform(
     override fun showError(throwable: Throwable) {
         Toast.makeText(
             activity,
-            throwable.userFacingMessage(activity.getString(R.string.error)),
+            throwable.userFacingMessage(Strings.current()["error"]),
             Toast.LENGTH_LONG,
         ).show()
     }

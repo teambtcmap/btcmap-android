@@ -11,6 +11,12 @@ expect val ioDispatcher: CoroutineDispatcher
 /** The device language as a BCP-47 language tag, e.g. "en" or "de". */
 expect fun currentLanguage(): String
 
+/**
+ * The device locale as a BCP-47 tag including any region, e.g. "en", "pt-BR".
+ * UI strings resolve against this so a regional variant can be picked.
+ */
+expect fun currentLocale(): String
+
 /** Formats an integer with the device's grouping, e.g. "1,234". */
 expect fun formatInteger(value: Long): String
 

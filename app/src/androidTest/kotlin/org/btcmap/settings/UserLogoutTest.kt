@@ -1,5 +1,7 @@
 package org.btcmap.settings
 
+import org.btcmap.i18n.Strings
+
 import kotlinx.coroutines.runBlocking
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
@@ -58,7 +60,7 @@ class UserLogoutTest : AppTestCase() {
                     }
                 }
 
-                val logOut = app.getString(R.string.logout)
+                val logOut = Strings.current()["logout"]
                 composeTestRule.waitUntil(5_000) {
                     composeTestRule.onAllNodesWithText(logOut).fetchSemanticsNodes().isNotEmpty()
                 }

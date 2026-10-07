@@ -1,5 +1,7 @@
 package org.btcmap.settings
 
+import org.btcmap.i18n.Strings
+
 import kotlinx.coroutines.runBlocking
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
 import androidx.compose.ui.test.onAllNodesWithContentDescription
@@ -140,7 +142,7 @@ class UserProfileSavedItemsTest : AppTestCase() {
 
     private fun deleteFirst() {
         composeTestRule
-            .onAllNodesWithContentDescription(app.getString(R.string.delete))
+            .onAllNodesWithContentDescription(Strings.current()["delete"])
             .onFirst()
             .performClick()
     }

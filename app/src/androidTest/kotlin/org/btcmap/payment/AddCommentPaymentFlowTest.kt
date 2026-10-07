@@ -1,5 +1,7 @@
 package org.btcmap.payment
 
+import org.btcmap.i18n.Strings
+
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
@@ -29,9 +31,7 @@ class AddCommentPaymentFlowTest : PaymentScreenTest() {
     @get:Rule
     val composeTestRule = createEmptyComposeRule()
 
-    private val startOver =
-        ApplicationProvider.getApplicationContext<android.content.Context>()
-            .getString(R.string.start_over)
+    private val startOver = Strings.current()["start_over"]
 
     private fun continueShown(): Boolean =
         composeTestRule.onAllNodesWithTag(COMMENT_CONTINUE_TAG).fetchSemanticsNodes().isNotEmpty()

@@ -5,14 +5,13 @@ import android.net.Uri
 import android.widget.Toast
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.annotation.StringRes
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.CancellableContinuation
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
-import org.btcmap.R
+import org.btcmap.i18n.Strings
 import org.btcmap.place.MAX_REPORT_PHOTOS
 import org.btcmap.util.createPhotoCaptureTarget
 import org.btcmap.util.encodePhoto
@@ -29,6 +28,8 @@ import kotlin.coroutines.resume
  * [pick] to the platform implementation.
  */
 class AndroidPhotoPicker(private val fragment: Fragment) {
+
+    private val strings = Strings.current()
 
     /** The continuation awaiting the user's next photo pick, if any. */
     private var continuation: CancellableContinuation<List<ByteArray>>? = null
@@ -65,11 +66,11 @@ class AndroidPhotoPicker(private val fragment: Fragment) {
 
     private fun showAddPhotoDialog() {
         MaterialAlertDialogBuilder(fragment.requireContext())
-            .setTitle(R.string.add_photo)
+            .setTitle(strings["add_photo"])
             .setItems(
                 arrayOf(
-                    fragment.getString(R.string.report_photo_take),
-                    fragment.getString(R.string.report_photo_choose),
+                    strings["report_photo_take"],
+                    strings["report_photo_choose"],
                 ),
             ) { _, which ->
                 when (which) {
@@ -95,7 +96,7 @@ class AndroidPhotoPicker(private val fragment: Fragment) {
             pendingCameraUri = null
             pendingCameraFile = null
             file.delete()
-            fragment.toast(R.string.report_photo_no_camera)
+            fragment.toast(strings["report_photo_no_camera"])
             resume(emptyList())
         }
     }
@@ -125,7 +126,7 @@ class AndroidPhotoPicker(private val fragment: Fragment) {
                         null
                     }
                 }
-                if (failed) fragment.toast(R.string.report_photo_failed)
+                if (failed) fragment.toast(strings["report_photo_failed"])
                 resume(encoded)
             } finally {
                 cleanupFile?.delete()
@@ -140,6 +141,6 @@ class AndroidPhotoPicker(private val fragment: Fragment) {
     }
 }
 
-private fun Fragment.toast(@StringRes message: Int) {
+private fun Fragment.toast(message: String) {
     Toast.makeText(requireContext(), message, Toast.LENGTH_LONG).show()
 }

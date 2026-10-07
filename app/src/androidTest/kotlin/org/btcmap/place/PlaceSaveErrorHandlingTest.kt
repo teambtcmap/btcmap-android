@@ -1,5 +1,7 @@
 package org.btcmap.place
 
+import org.btcmap.i18n.Strings
+
 import kotlinx.coroutines.runBlocking
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
 import androidx.compose.ui.test.onNodeWithTag
@@ -51,7 +53,7 @@ class PlaceSaveErrorHandlingTest : AppTestCase() {
         withPlaceFragment {
             awaitPlace()
             composeTestRule.onNodeWithTag(PLACE_MENU_TAG).performClick()
-            composeTestRule.onNodeWithText(app.getString(R.string.save)).performClick()
+            composeTestRule.onNodeWithText(Strings.current()["save"]).performClick()
         }
     }
 

@@ -6,7 +6,7 @@ import android.widget.Toast
 import androidx.core.content.FileProvider
 import androidx.core.net.toUri
 import androidx.fragment.app.Fragment
-import org.btcmap.R
+import org.btcmap.i18n.Strings
 import java.io.File
 
 /**
@@ -51,7 +51,7 @@ fun Fragment.openEmail(email: String?) {
 fun Fragment.showError(throwable: Throwable) {
     Toast.makeText(
         requireContext(),
-        throwable.userFacingMessage(getString(R.string.error)),
+        throwable.userFacingMessage(Strings.current()["error"]),
         Toast.LENGTH_LONG,
     ).show()
 }

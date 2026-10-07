@@ -1,5 +1,7 @@
 package org.btcmap.area
 
+import org.btcmap.i18n.Strings
+
 import kotlinx.coroutines.runBlocking
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
@@ -41,7 +43,7 @@ class AreaLoadErrorHandlingTest : AreaScreenTest() {
             lateinit var activity: Activity
             scenario.onActivity { activity = it }
 
-            val ok = app.getString(android.R.string.ok)
+            val ok = Strings.current()["ok"]
             composeTestRule.waitUntil(5_000) {
                 composeTestRule.onAllNodesWithText(ok).fetchSemanticsNodes().isNotEmpty()
             }

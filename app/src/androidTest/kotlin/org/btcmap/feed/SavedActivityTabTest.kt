@@ -1,5 +1,7 @@
 package org.btcmap.feed
 
+import org.btcmap.i18n.Strings
+
 import kotlinx.coroutines.runBlocking
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
@@ -47,7 +49,7 @@ class SavedActivityTabTest : AppTestCase() {
         apiRule.server.dispatcher = countingDispatcher(apiCalls)
 
         withSavedTab {
-            assertShowsMessage(R.string.activity_empty_saved_signed_out)
+            assertShowsMessage(Strings.current()["activity_empty_saved_signed_out"])
             Assert.assertEquals(0, apiCalls.get())
         }
     }
@@ -60,7 +62,7 @@ class SavedActivityTabTest : AppTestCase() {
         apiRule.server.dispatcher = countingDispatcher(apiCalls)
 
         withSavedTab {
-            assertShowsMessage(R.string.activity_empty_saved_no_items)
+            assertShowsMessage(Strings.current()["activity_empty_saved_no_items"])
             Assert.assertEquals(0, apiCalls.get())
         }
     }
@@ -74,13 +76,12 @@ class SavedActivityTabTest : AppTestCase() {
         }
 
         withSavedTab {
-            assertShowsMessage(R.string.activity_empty_saved_no_activity)
+            assertShowsMessage(Strings.current()["activity_empty_saved_no_activity"])
         }
     }
 
     /** Waits for the given empty message to be rendered, then asserts it. */
-    private fun assertShowsMessage(resId: Int) {
-        val message = app.getString(resId)
+    private fun assertShowsMessage(message: String) {
         composeTestRule.waitUntil(5_000) {
             composeTestRule.onAllNodesWithText(message).fetchSemanticsNodes().isNotEmpty()
         }
@@ -103,7 +104,7 @@ class SavedActivityTabTest : AppTestCase() {
                 }
 
                 // The feed opens on the Local tab; switch to Saved.
-                val savedTab = app.getString(R.string.activity_tab_saved)
+                val savedTab = Strings.current()["activity_tab_saved"]
                 composeTestRule.waitUntil(5_000) {
                     composeTestRule.onAllNodesWithText(savedTab).fetchSemanticsNodes().isNotEmpty()
                 }

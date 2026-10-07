@@ -1,5 +1,7 @@
 package org.btcmap.dbstats
 
+import org.btcmap.i18n.Strings
+
 import kotlinx.coroutines.runBlocking
 import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.hasText
@@ -130,7 +132,7 @@ class DbStatsFragmentTest : AppTestCase() {
             }
 
             composeTestRule
-                .onNodeWithText(app.getString(R.string.database_stats))
+                .onNodeWithText(Strings.current()["database_stats"])
                 .performScrollTo()
                 .performClick()
 

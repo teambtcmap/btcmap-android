@@ -1,41 +1,41 @@
 package org.btcmap.area
 
-import org.btcmap.R
+import org.btcmap.i18n.Strings
+import org.btcmap.ui.areaStrings
 import org.junit.Assert
 import org.junit.Test
 
-/** Only the resource-bound half of the area formatting: the rest lives in `:shared`. */
+/** The area issue descriptions, now resolved from the shared string catalog. */
 class AreaFormattingTest {
 
+    private val strings = areaStrings(Strings.forLocale("en")) { "0 B" }
+
     @Test
-    fun describeIssue_knownCodesMapToResourceIds() {
-        Assert.assertEquals(R.string.issue_outdated, describeIssue("outdated").resId)
-        Assert.assertEquals(R.string.issue_outdated_soon, describeIssue("outdated_soon").resId)
-        Assert.assertEquals(R.string.not_verified, describeIssue("not_verified").resId)
-        Assert.assertEquals(R.string.issue_missing_icon, describeIssue("missing_icon").resId)
+    fun describeIssue_knownCodesMapToText() {
+        Assert.assertEquals("Outdated, needs verification", strings.issueDescription("outdated"))
+        Assert.assertEquals("Will be outdated soon", strings.issueDescription("outdated_soon"))
+        Assert.assertEquals("Not verified", strings.issueDescription("not_verified"))
+        Assert.assertEquals("Missing icon", strings.issueDescription("missing_icon"))
     }
 
     @Test
     fun describeIssue_invalidTagValueCarriesArgument() {
-        val description = describeIssue("invalid_tag_value:name")
-
-        Assert.assertEquals(R.string.issue_invalid_tag_value, description.resId)
-        Assert.assertEquals("name", description.formatArg)
+        Assert.assertEquals(
+            "Invalid value for name",
+            strings.issueDescription("invalid_tag_value:name"),
+        )
     }
 
     @Test
     fun describeIssue_misspelledTagNameCarriesArgument() {
-        val description = describeIssue("misspelled_tag_name:opening_hours")
-
-        Assert.assertEquals(R.string.issue_misspelled_tag_name, description.resId)
-        Assert.assertEquals("opening_hours", description.formatArg)
+        Assert.assertEquals(
+            "Misspelled tag name: opening_hours",
+            strings.issueDescription("misspelled_tag_name:opening_hours"),
+        )
     }
 
     @Test
     fun describeIssue_unknownCodeFallsBack() {
-        val description = describeIssue("something_new")
-
-        Assert.assertEquals(R.string.issue_unknown, description.resId)
-        Assert.assertNull(description.formatArg)
+        Assert.assertEquals("Unknown issue", strings.issueDescription("something_new"))
     }
 }

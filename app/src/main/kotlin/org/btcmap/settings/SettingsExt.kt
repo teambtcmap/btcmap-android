@@ -6,7 +6,6 @@ import android.content.Context
 import android.content.res.Configuration
 import androidx.core.content.edit
 import org.btcmap.App
-import org.btcmap.R
 import org.btcmap.map.DEFAULT_MAP_CENTER_LAT
 import org.btcmap.map.DEFAULT_MAP_CENTER_LON
 import org.btcmap.map.DEFAULT_MAP_ZOOM
@@ -29,17 +28,6 @@ fun init(app: App) {
  * Where the map was last left. The map screen saves these as the camera comes to
  * rest and reopens there, so the app returns to what the user was looking at.
  */
-fun MapStyle.name(context: Context): String {
-    return when (this) {
-        MapStyle.Auto -> context.getString(R.string.style_auto)
-        MapStyle.Liberty -> context.getString(R.string.style_liberty)
-        MapStyle.Positron -> context.getString(R.string.style_positron)
-        MapStyle.Bright -> context.getString(R.string.style_bright)
-        MapStyle.Dark -> context.getString(R.string.style_dark)
-        MapStyle.DarkMatter -> context.getString(R.string.style_dark_matter)
-    }
-}
-
 fun MapStyle.uri(context: Context): String {
     return "asset://" + bundledStyleAsset(darkSystemTheme = isNightMode(context))
 }
@@ -130,21 +118,3 @@ fun Settings.setButtonIconColor(color: Int?) = setMapColor(MapColor.ButtonIcon, 
 fun Settings.buttonBorderColor(context: Context): Int = mapColor(MapColor.ButtonBorder)
 
 fun Settings.setButtonBorderColor(color: Int?) = setMapColor(MapColor.ButtonBorder, color)
-
-fun Int.toVerifiedFilterYears(context: Context): String {
-    return when (this) {
-        1 -> context.getString(R.string.verified_filter_1_year)
-        2 -> context.getString(R.string.verified_filter_2_years)
-        3 -> context.getString(R.string.verified_filter_3_years)
-        else -> ""
-    }
-}
-
-/** The Android label for an activity interval. */
-fun ActivityInterval.name(context: Context): String = when (this) {
-    ActivityInterval.Day -> context.getString(R.string.activity_interval_day)
-    ActivityInterval.Week -> context.getString(R.string.activity_interval_week)
-    ActivityInterval.Month -> context.getString(R.string.activity_interval_month)
-    ActivityInterval.HalfYear -> context.getString(R.string.activity_interval_half_year)
-    ActivityInterval.Year -> context.getString(R.string.activity_interval_year)
-}

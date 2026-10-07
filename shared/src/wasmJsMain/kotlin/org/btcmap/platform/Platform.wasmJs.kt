@@ -9,6 +9,8 @@ actual val ioDispatcher: CoroutineDispatcher = Dispatchers.Default
 
 actual fun currentLanguage(): String = "en"
 
+actual fun currentLocale(): String = "en"
+
 /**
  * Simple thousands grouping. The browser's `Intl.NumberFormat` is the proper
  * source; wiring it needs JS interop, so the web target starts with a neutral

@@ -6,6 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+- Localize the desktop app: Android and the desktop now share one cross-platform string catalog, so the desktop follows the system language instead of always showing English
 - Fix the map-style and verified-filter picker dialogs: the options now align with the dialog title, each row is a full-height tap target, a long list scrolls, the mouse-hover row highlight is gone, and the map style "Auto" now reads "Auto (system)"
 - Get rid of the square hover the desktop map's area chips showed, painting it round to match the other map controls
 - Show the desktop map's sync indicator again, and re-run the sync every time the map is entered rather than only at launch, so returning from a sub-screen refreshes the data
