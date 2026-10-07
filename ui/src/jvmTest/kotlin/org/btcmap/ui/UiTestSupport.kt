@@ -68,7 +68,7 @@ internal val TEST_SETTINGS_PAGE_LABELS = SettingsPageLabels(
     mapStyle = "Map style",
     mapStyleValue = {
         when (it) {
-            MapStyle.Auto -> "Auto"
+            MapStyle.Auto -> "Auto (system)"
             MapStyle.Liberty -> "OpenFreeMap Liberty"
             MapStyle.Positron -> "OpenFreeMap Positron"
             MapStyle.Bright -> "OpenFreeMap Bright"

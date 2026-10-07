@@ -387,7 +387,11 @@ private fun RadioPickerDialog(
                 onSelect = onSelect,
             )
         },
-        confirmButton = {
+        // Applying a choice already closes the dialog, so the only action is a
+        // dismissal; M3 puts that in the dismiss slot rather than the confirm
+        // one. With an empty confirm it still renders right-aligned.
+        confirmButton = {},
+        dismissButton = {
             TextButton(onClick = onDismiss) { Text(text = close) }
         },
     )

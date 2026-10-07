@@ -1325,7 +1325,7 @@ private val COMMENT_LABELS = CommentScreenLabels(
 private val VERIFIED_FILTER_YEARS = listOf(1, 2, 3)
 
 private fun mapStyleName(style: MapStyle): String = when (style) {
-    MapStyle.Auto -> "Auto"
+    MapStyle.Auto -> "Auto (system)"
     MapStyle.Liberty -> "OpenFreeMap Liberty"
     MapStyle.Positron -> "OpenFreeMap Positron"
     MapStyle.Bright -> "OpenFreeMap Bright"

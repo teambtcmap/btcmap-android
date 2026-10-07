@@ -52,7 +52,7 @@
     <string name="map_style">Map style</string>
     <string name="customize_colors">Customize colors</string>
     <string name="customize_colors_secondary">Marker, badge and button colors</string>
-    <string name="style_auto">Auto</string>
+    <string name="style_auto">Auto (system)</string>
     <string name="style_liberty">OpenFreeMap Liberty</string>
     <string name="style_positron">OpenFreeMap Positron</string>
     <string name="style_bright">OpenFreeMap Bright</string>
