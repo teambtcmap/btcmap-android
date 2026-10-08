@@ -29,4 +29,17 @@ sealed class SearchAdapterItem {
         override val name: String,
         override val distanceToUser: String?,
     ) : SearchAdapterItem()
+
+    /**
+     * A latitude/longitude pair typed into the search field, offered so the map
+     * can move there directly. Unlike the other results it has no cached row
+     * behind it.
+     */
+    data class Coordinate(
+        val lat: Double,
+        val lon: Double,
+        override val icon: String,
+        override val name: String,
+        override val distanceToUser: String?,
+    ) : SearchAdapterItem()
 }

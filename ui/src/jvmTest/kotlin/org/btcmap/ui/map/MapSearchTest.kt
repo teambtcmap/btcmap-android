@@ -7,6 +7,7 @@ import kotlin.time.Instant
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import org.btcmap.db.Database
 import org.btcmap.db.table.area.Area
@@ -134,6 +135,44 @@ class MapSearchTest {
         val names = search(db, "paris").map { it.name }
 
         assertEquals(listOf("Paris", "Paris Cafe"), names)
+    }
+
+    @Test
+    fun coordinateQuery_parsesToASingleResult() {
+        val item = coordinateSearchItem("39.936212,116.437600")
+
+        assertNotNull(item)
+        assertEquals(39.936212, item.lat)
+        assertEquals(116.4376, item.lon)
+        assertEquals("place", item.icon)
+        assertEquals("39.936212, 116.4376", item.name)
+    }
+
+    @Test
+    fun urlEncodedCoordinateQuery_isAccepted() {
+        // A comma copied from a map link arrives percent-encoded.
+        val item = coordinateSearchItem("39.936212%2C116.437600")
+
+        assertNotNull(item)
+        assertEquals(39.936212, item.lat)
+        assertEquals(116.4376, item.lon)
+    }
+
+    @Test
+    fun coordinateQuery_maySeparateNumbersWithSpace() {
+        assertEquals(SearchCoordinates(39.94, 116.44), parseCoordinates("39.94 116.44"))
+    }
+
+    @Test
+    fun outOfRangeCoordinate_isNotACoordinate() {
+        assertNull(parseCoordinates("91,0"))
+        assertNull(parseCoordinates("0,181"))
+    }
+
+    @Test
+    fun name_isNotACoordinate() {
+        assertNull(parseCoordinates("bitcoin cafe"))
+        assertNull(parseCoordinates("Holiday Inn Express"))
     }
 
     private fun search(db: Database, query: String) = search(

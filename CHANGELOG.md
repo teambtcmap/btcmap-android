@@ -6,6 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+- Let the map search accept coordinates: typing a latitude/longitude pair (including a URL-encoded comma, as copied from a map link) offers a result that moves the map there
 - Fix the desktop map's "find my location" button: on Linux the XDG portal's separate permission probe consumed GeoClue's single fix, so the tracking session that followed never received a location and the map never recentred; the app now grants the permission itself and lets the tracking session do the authorization, so the button finds the user
 - Give the event screen Material 3 polish: its website is tappable and opens in the browser again, its date row carries the schedule icon, its zoom controls sit on a tonal container with accessible names, the map drops MapLibre's logo and attribution, the body is capped and centred on large screens, and the event's name is no longer duplicated under the top bar
 - Add a Language setting that overrides the system language: it offers all 36 app languages plus "System default", applying immediately in Android and at the next launch on the desktop, and drives the whole UI including the string catalog, localized place and area names, opening hours, the API's language parameter and number formatting; the new strings are translated into every app language

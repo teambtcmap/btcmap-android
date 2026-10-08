@@ -613,6 +613,14 @@ fun MapScreen(
                     ?.let(onSelectEvent)
             }
 
+            // A typed coordinate has no row behind it: the map simply moves to
+            // the point, as a host-supplied target would.
+            is SearchAdapterItem.Coordinate -> scope.launch {
+                state.animateCamera(
+                    CameraUpdate(target = Position(result.lon, result.lat), zoom = OPEN_ZOOM),
+                )
+            }
+
             // A search result frames the area on the map, as the Views map did;
             // the area screen stays one tap away on the chip that appears. An
             // area without a bbox has nothing to frame, so it opens instead. A

@@ -47,7 +47,8 @@ data class SearchResults(
  * Places, areas and events come from the
  * local cache only, so search needs no network call. Results are ordered like
  * the server: boosted places first, then exact, prefix and substring name
- * matches, with proximity breaking ties.
+ * matches, with proximity breaking ties. A query that is a `lat,lon` pair is
+ * offered as a single coordinate result instead.
  */
 @Composable
 fun rememberSearchResults(
@@ -63,6 +64,13 @@ fun rememberSearchResults(
         val trimmed = query.trim()
         if (trimmed.length < MIN_QUERY_LENGTH) {
             results = SearchResults()
+            return@LaunchedEffect
+        }
+
+        // A typed coordinate pair is a result on its own, with no cache lookup
+        // and no debounce: the map can move there straight away.
+        coordinateSearchItem(trimmed)?.let { coordinate ->
+            results = SearchResults(items = listOf(coordinate), active = true)
             return@LaunchedEffect
         }
 
