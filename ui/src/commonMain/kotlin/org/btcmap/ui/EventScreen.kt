@@ -1,14 +1,18 @@
 package org.btcmap.ui
 
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.IconButton
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.FilledTonalIconButton
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -18,24 +22,43 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import org.btcmap.db.table.event.Event
 import org.btcmap.ui.map.EventPreviewMap
 import org.btcmap.ui.map.MarkerPalette
 import org.maplibre.compose.map.MapState
-import java.time.format.DateTimeFormatter
-import java.time.format.FormatStyle
+
+/** Test tags for the event body's map, rows and controls. */
+const val EVENT_MAP_TAG = "event-map"
+const val EVENT_ZOOM_IN_TAG = "event-zoom-in"
+const val EVENT_ZOOM_OUT_TAG = "event-zoom-out"
+const val EVENT_DATE_TAG = "event-date"
+const val EVENT_WEBSITE_TAG = "event-website"
 
 /** The event screen's strings, so the screen stays resource-free. */
 data class EventScreenLabels(
     /** Formats a same-day event's date and its start and end times. */
     val dateRange: (date: String, start: String, end: String) -> String,
+    /** The content description of the map's zoom-in control. */
+    val zoomIn: String,
+    /** The content description of the map's zoom-out control. */
+    val zoomOut: String,
 )
 
 /**
- * An event's details: its own map, its name, its dates and its website. The host
- * supplies its own top bar (with the directions action) and back affordance.
+ * An event's details: its own map, its dates and its website. The host supplies
+ * its own top bar (with the event's name, the directions action and a back
+ * affordance), so the body carries no title of its own.
+ *
+ * [map] renders the event's map; the host supplies it so a test can render the
+ * screen without a GPU. [onOpenWebsite] opens the event's website; null leaves
+ * it as plain text.
+ *
+ * The body is a [ContentColumn], so a wide desktop or tablet window caps and
+ * centres it rather than stretching the map and rows edge to edge.
  */
 @Composable
 fun EventScreen(
@@ -47,22 +70,10 @@ fun EventScreen(
     iconFont: FontFamily?,
     usingOpenFreeMap: Boolean,
     labels: EventScreenLabels,
+    onOpenWebsite: (() -> Unit)? = null,
     modifier: Modifier = Modifier,
-) {
-    var mapState by remember { mutableStateOf<MapState?>(null) }
-
-    val dateFormatter = remember { DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM) }
-    val timeFormatter = remember { DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT) }
-    val dateTimeFormatter = remember {
-        DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM, FormatStyle.SHORT)
-    }
-
-    Column(
-        modifier = modifier
-            .verticalScroll(rememberScrollState())
-            .padding(16.dp),
-    ) {
-        Box(modifier = Modifier.fillMaxWidth().height(240.dp)) {
+    map: @Composable (modifier: Modifier, onState: (MapState) -> Unit) -> Unit =
+        { mapModifier, onState ->
             EventPreviewMap(
                 lat = event.lat,
                 lon = event.lon,
@@ -72,57 +83,120 @@ fun EventScreen(
                 palette = palette,
                 usingOpenFreeMap = usingOpenFreeMap,
                 iconFont = iconFont,
-                onState = { mapState = it },
-                modifier = Modifier.fillMaxSize(),
+                onState = onState,
+                modifier = mapModifier,
             )
-            Column(modifier = Modifier.align(Alignment.TopEnd).padding(8.dp)) {
-                IconButton(onClick = { mapState?.zoomBy(1.0) }) {
-                    MaterialSymbol(glyph = "add", contentDescription = null)
+        },
+) {
+    var mapState by remember { mutableStateOf<MapState?>(null) }
+
+    ContentColumn(
+        modifier = modifier,
+        scroll = true,
+        margin = true,
+    ) {
+        // ContentColumn caps and centres the body but leaves the screen's
+        // vertical 16dp to it.
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Box(modifier = Modifier.fillMaxWidth().height(240.dp)) {
+            // Only the map is clipped; the zoom controls float above it so their
+            // own corners are not cut by the map's rounded shape.
+            map(
+                Modifier
+                    .fillMaxSize()
+                    .clip(RoundedCornerShape(12.dp))
+                    .testTag(EVENT_MAP_TAG),
+                { mapState = it },
+            )
+            // The zoom controls sit on a tonal container so they stay legible
+            // over the map imagery, the way the main map's controls do.
+            Column(
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier.align(Alignment.TopEnd).padding(8.dp),
+            ) {
+                FilledTonalIconButton(
+                    onClick = { mapState?.zoomBy(1.0) },
+                    modifier = Modifier.testTag(EVENT_ZOOM_IN_TAG),
+                ) {
+                    MaterialSymbol(glyph = "add", contentDescription = labels.zoomIn)
                 }
-                IconButton(onClick = { mapState?.zoomBy(-1.0) }) {
-                    MaterialSymbol(glyph = "remove", contentDescription = null)
+                FilledTonalIconButton(
+                    onClick = { mapState?.zoomBy(-1.0) },
+                    modifier = Modifier.testTag(EVENT_ZOOM_OUT_TAG),
+                ) {
+                    MaterialSymbol(glyph = "remove", contentDescription = labels.zoomOut)
                 }
             }
         }
 
-        Text(
-            text = event.name,
-            style = MaterialTheme.typography.titleLarge,
-            modifier = Modifier.padding(top = 16.dp),
+        // A multi-day event spans two lines; everything else fits on one.
+        val time = eventTimeText(event.startsAt, event.endsAt, labels.dateRange)
+
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier
+                .padding(top = 16.dp)
+                .testTag(EVENT_DATE_TAG),
+        ) {
+            MaterialSymbol(
+                glyph = "schedule",
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.secondary,
+            )
+            Column(modifier = Modifier.padding(start = 16.dp)) {
+                Text(text = time.start, style = MaterialTheme.typography.bodyLarge)
+                time.end?.let {
+                    Text(text = it, style = MaterialTheme.typography.bodyLarge)
+                }
+            }
+        }
+
+        event.website?.let { url ->
+            WebsiteRow(
+                text = url.toString(),
+                onClick = onOpenWebsite,
+                modifier = Modifier
+                    .padding(top = 16.dp)
+                    .testTag(EVENT_WEBSITE_TAG),
+            )
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+    }
+}
+
+/**
+ * The event's website: an earth glyph and, when [onClick] is set, a tappable
+ * link in the secondary colour, matching the area screen's website row.
+ */
+@Composable
+private fun WebsiteRow(
+    text: String,
+    onClick: (() -> Unit)?,
+    modifier: Modifier = Modifier,
+) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = modifier.then(
+            if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier,
+        ),
+    ) {
+        MaterialSymbol(
+            glyph = "public",
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.secondary,
         )
-
-        val start = event.startsAt
-        val end = event.endsAt
-        when {
-            end == null -> Text(
-                text = start.format(dateTimeFormatter),
-                modifier = Modifier.padding(top = 8.dp),
-            )
-
-            start.toLocalDate() == end.toLocalDate() -> Text(
-                text = labels.dateRange(
-                    start.format(dateFormatter),
-                    start.format(timeFormatter),
-                    end.format(timeFormatter),
-                ),
-                modifier = Modifier.padding(top = 8.dp),
-            )
-
-            else -> {
-                Text(
-                    text = start.format(dateTimeFormatter),
-                    modifier = Modifier.padding(top = 8.dp),
-                )
-                Text(text = end.format(dateTimeFormatter))
-            }
-        }
-
-        event.website?.let {
-            Text(
-                text = it.toString(),
-                modifier = Modifier.padding(top = 8.dp),
-            )
-        }
+        Text(
+            text = text,
+            style = MaterialTheme.typography.bodyLarge,
+            color = if (onClick != null) {
+                MaterialTheme.colorScheme.secondary
+            } else {
+                LocalContentColor.current
+            },
+            modifier = Modifier.padding(start = 16.dp),
+        )
     }
 }
 

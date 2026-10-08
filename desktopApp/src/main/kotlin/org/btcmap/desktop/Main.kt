@@ -999,6 +999,9 @@ private fun runApp() = application {
                                         iconFont = iconFont,
                                         usingOpenFreeMap = true,
                                         labels = EVENT_SCREEN_LABELS,
+                                        onOpenWebsite = event.website?.let { url ->
+                                            { openUrl(url.toString()) }
+                                        },
                                     )
                                 }
                             }

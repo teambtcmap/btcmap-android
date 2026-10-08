@@ -72,6 +72,8 @@ fun appLabels(
         dateRange = { date, start, end ->
             strings.format("event_date_time_range", date, start, end)
         },
+        zoomIn = strings["zoom_in"],
+        zoomOut = strings["zoom_out"],
     ),
     directions = strings["directions"],
     addPlace = AddPlaceLabels(

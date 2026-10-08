@@ -25,7 +25,8 @@ import org.maplibre.spatialk.geojson.Position
 /**
  * The event's own map, interactive, ported from the `MapView` in
  * `event_fragment.xml`. It draws the event marker with the same pin and glyph
- * the main map uses.
+ * the main map uses, and drops MapLibre's logo and attribution pill the way the
+ * mini and positioning maps do.
  */
 @Composable
 fun EventPreviewMap(
@@ -86,7 +87,14 @@ fun EventPreviewMap(
         imagesReady = true
     }
 
-    MaplibreMap(modifier = modifier, state = state)
+    MaplibreMap(
+        modifier = modifier,
+        state = state,
+        // The event map is a detail preview, so drop MapLibre's logo and
+        // expanding attribution pill the way the mini and positioning maps do.
+        // `overlay` is what removes them, not `MapUiOptions`.
+        overlay = {},
+    )
 }
 
 private const val EVENT_ZOOM = 14.0

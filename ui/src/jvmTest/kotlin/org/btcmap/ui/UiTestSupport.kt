@@ -179,3 +179,9 @@ internal val TEST_EVENT_REVIEW_LABELS = EventReviewLabels(
     actionFailed = "Couldn't update the event",
     dateRange = { date, start, end -> "$date, $start - $end" },
 )
+
+internal val TEST_EVENT_SCREEN_LABELS = EventScreenLabels(
+    dateRange = { date, start, end -> "$date, $start - $end" },
+    zoomIn = "Zoom in",
+    zoomOut = "Zoom out",
+)

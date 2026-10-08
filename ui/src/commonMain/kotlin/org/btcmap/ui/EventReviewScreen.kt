@@ -49,8 +49,6 @@ import androidx.compose.ui.unit.sp
 import kotlin.time.Instant
 import kotlinx.coroutines.launch
 import org.btcmap.util.rethrowIfCancellation
-import java.time.format.DateTimeFormatter
-import java.time.format.FormatStyle
 
 /** Test tag so a test can retry a failed load. */
 const val EVENT_REVIEW_RETRY_TAG = "event-review-retry"
@@ -255,8 +253,9 @@ private fun PendingEventCard(
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
                 )
+                val time = eventTimeText(event.startsAt, event.endsAt, labels.dateRange)
                 Text(
-                    text = eventTimeText(event, labels),
+                    text = listOfNotNull(time.start, time.end).joinToString(" - "),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(top = 4.dp),
@@ -321,29 +320,6 @@ private fun PendingEventCard(
                 }
             }
         }
-    }
-}
-
-@Composable
-private fun eventTimeText(event: PendingEventUi, labels: EventReviewLabels): String {
-    val dateFormatter = remember { DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM) }
-    val timeFormatter = remember { DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT) }
-    val dateTimeFormatter = remember {
-        DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM, FormatStyle.SHORT)
-    }
-
-    val start = event.startsAt
-    val end = event.endsAt
-    return when {
-        end == null -> start.format(dateTimeFormatter)
-
-        start.toLocalDate() == end.toLocalDate() -> labels.dateRange(
-            start.format(dateFormatter),
-            start.format(timeFormatter),
-            end.format(timeFormatter),
-        )
-
-        else -> start.format(dateTimeFormatter) + " - " + end.format(dateTimeFormatter)
     }
 }
 

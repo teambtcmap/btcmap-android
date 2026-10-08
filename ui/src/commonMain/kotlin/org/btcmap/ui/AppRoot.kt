@@ -239,6 +239,9 @@ fun AppRoot(
                     iconFont = services.iconFont,
                     usingOpenFreeMap = services.usingOpenFreeMap,
                     labels = labels.eventScreen,
+                    onOpenWebsite = route.event.website?.let { url ->
+                        { platform.openUrl(url.toString()) }
+                    },
                 )
             }
 
