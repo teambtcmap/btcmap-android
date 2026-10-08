@@ -177,8 +177,13 @@ fun MapScreen(
      * [onAddPlace] and [onAddEvent] in the add-location chooser.
      */
     onAddNote: ((Double, Double) -> Unit)? = null,
-    /** The strings of the read-only dialog a note pin opens. */
-    noteDialogLabels: NoteDialogLabels = NoteDialogLabels(title = "Note", ok = "OK"),
+    /** The strings of the sheet a note pin opens. */
+    noteSheetLabels: NoteSheetLabels = NoteSheetLabels(
+        title = "Note",
+        public = "Public",
+        private = "Private",
+        created = { "Created $it" },
+    ),
     /** The labels of the add-location chooser. */
     addLocationLabels: AddLocationLabels = AddLocationLabels(
         addPlace = "Add a place",
@@ -395,7 +400,7 @@ fun MapScreen(
         }
     }
 
-    // Tapping a note pin opens a read-only dialog with its text and icon.
+    // Tapping a note pin opens a sheet with its details and icon.
     var shownNote by remember { mutableStateOf<DbNote?>(null) }
     val onNoteClick: MarkerClickHandler = { features ->
         val id = features.firstOrNull()?.properties?.get("id")?.jsonPrimitive?.longOrNull
@@ -534,10 +539,15 @@ fun MapScreen(
         selectedPlace?.let { state.animateCamera(placeCameraUpdate(it, state.cameraPosition?.zoom)) }
     }
 
-    // The host may want to remember where the user left the map.
-    LaunchedEffect(state, onCameraIdle) {
-        val callback = onCameraIdle ?: return@LaunchedEffect
+    // The host may want to remember where the user left the map. The callback is
+    // read through a live state so a recomposition that hands over a new lambda
+    // never restarts the collector: `state.events` is replay-less, so a restart
+    // would drop a CameraMoveEnded emitted in the gap and the last camera would
+    // never be saved.
+    val currentOnCameraIdle by rememberUpdatedState(onCameraIdle)
+    LaunchedEffect(state) {
         state.events.filterIsInstance<MapEvent.CameraMoveEnded>().collect {
+            val callback = currentOnCameraIdle ?: return@collect
             val camera = state.cameraPosition ?: return@collect
             callback(
                 MapCameraState(
@@ -839,10 +849,12 @@ fun MapScreen(
                 overlay = {},
             )
             shownNote?.let { note ->
-                NoteDialog(
+                NoteSheet(
                     text = note.text,
                     icon = note.icon,
-                    labels = noteDialogLabels,
+                    public = note.public,
+                    createdAt = note.createdAt,
+                    labels = noteSheetLabels,
                     onDismiss = { shownNote = null },
                 )
             }

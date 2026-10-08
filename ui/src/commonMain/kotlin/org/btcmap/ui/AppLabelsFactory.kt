@@ -221,9 +221,11 @@ fun appLabels(
     ),
     feedRow = { item -> activityFeedRow(strings, item, formatFeedDate) },
     ok = strings["ok"],
-    noteDialog = NoteDialogLabels(
+    noteSheet = NoteSheetLabels(
         title = strings["note_text"],
-        ok = strings["ok"],
+        public = strings["note_public"],
+        private = strings["note_private"],
+        created = { date -> strings.format("note_created", date) },
     ),
     area = areaStrings(strings, formatBytes),
     offlineStyleName = strings[currentStyle.styleNameKey()],

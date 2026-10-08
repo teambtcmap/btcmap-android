@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+- Open a note tapped on the map in a bottom sheet, as places and events do, showing its text, its public/private visibility and its creation date instead of a plain dialog
+- Fix the map sometimes reopening at an older camera on restart: the camera-change listener was restarted on every recomposition, and because MapLibre's event flow does not replay, the final change was dropped and never saved; the listener now stays subscribed
 - Keep the selected place open when leaving the map for the report/verify screen (or boost or add-comment) and coming back: the place sheet reopens and the map recentres the pin above it, instead of dropping the selection and leaving the pin behind the sheet
 - Make the desktop app's area screen offer offline map downloads like Android: a download action in its toolbar, the zoom/size dialog, the progress panel and delete, all backed by the same shared offline manager
 - Cap and centre the report/verify, boost, add-comment and area bodies at a readable width on tablets and desktop windows, so they no longer stretch edge to edge; the report form also gets full-row reason selection, an inline submit spinner and a centred confirmation, matching the other forms

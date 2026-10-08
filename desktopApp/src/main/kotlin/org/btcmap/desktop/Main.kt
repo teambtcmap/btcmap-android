@@ -497,7 +497,7 @@ private fun runApp() = application {
                             // under the header (a snackbar would sit behind it).
                             placeShareConfirmation = STRINGS["place_link_copied"],
                             placeOverflowInline = true,
-                            noteDialogLabels = LABELS.noteDialog,
+                            noteSheetLabels = LABELS.noteSheet,
                             attributionText = "© OpenStreetMap contributors",
                             attributionTextColor = attributionColor,
                             searchActions = SearchActions(onSettings = { nav.push(Route.Settings) }),

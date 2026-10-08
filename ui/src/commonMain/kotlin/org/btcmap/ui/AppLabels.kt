@@ -60,8 +60,8 @@ data class AppLabels(
     val feedRow: (ActivityFeedItem) -> ActivityFeedRow,
     /** A generic confirmation label, for the feed filter's OK button. */
     val ok: String,
-    /** The strings of the dialog a note pin opens (see `NoteDialog`). */
-    val noteDialog: NoteDialogLabels,
+    /** The strings of the sheet a note pin opens (see `NoteSheet`). */
+    val noteSheet: NoteSheetLabels,
     val area: AreaStrings,
     /** The current map style's display name, for the offline download dialog. */
     val offlineStyleName: String,

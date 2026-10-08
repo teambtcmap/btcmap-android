@@ -262,7 +262,7 @@ internal fun MapRoute(
             }
         },
         addLocationLabels = labels.addLocation,
-        noteDialogLabels = labels.noteDialog,
+        noteSheetLabels = labels.noteSheet,
         onOpenFeed = { areas -> onNavigate(areas.toFeedRoute()) },
         onOpenInfra = if (isAdmin) {
             { onNavigate(AppRoute.InfraDashboard) }
