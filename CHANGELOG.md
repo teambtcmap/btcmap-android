@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+- Add notes: choose "Add a note" from the map's add-location action to drop a note (public or private) at the map centre, and manage your notes — flip a note between public and private, or delete it — from a new "My notes" screen in the profile; the notes are cached locally and refreshed by the app's sync, are drawn on the map as their own amber, never-clustered pins that open the note's text when tapped, and tapping a note's map banner in the profile returns to the main map centred on that note
+- Refresh the signed-in profile as the last step of the app-scoped sync, so a role granted or revoked on btcmap.org (event manager, area admin, admin) reaches the app's admin and manage-areas affordances without signing out and back in
 - Add an "Allow map tilt" setting below "Allow map rotation", with both translated into every app language, and reset the saved rotation or tilt whenever the rotation or tilt setting is toggled, so a map left at an angle cannot stay stuck there once that movement is blocked
 - Remember the map's rotation and tilt as well as its centre and zoom, so the app reopens at the same angle instead of snapping back to north and straight down
 - Keep the current zoom when opening a place, zooming in to 15 only when the map is further out, so a place is not hidden inside a cluster while a close-up view is left undisturbed

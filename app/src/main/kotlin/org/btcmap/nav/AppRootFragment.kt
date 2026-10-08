@@ -213,6 +213,11 @@ private fun AppRoute.toArgs(): Bundle = Bundle().apply {
             putDouble(ARG_LON, lon)
         }
 
+        is AppRoute.AddNote -> {
+            putDouble(ARG_LAT, lat)
+            putDouble(ARG_LON, lon)
+        }
+
         is AppRoute.AddEvent -> {
             putDouble(ARG_LAT, lat)
             putDouble(ARG_LON, lon)
@@ -271,6 +276,11 @@ private fun routeFromArgs(args: Bundle?): AppRoute = when (args?.getString(ARG_K
     )
 
     "add-place" -> AppRoute.AddPlace(
+        lat = args.getDouble(ARG_LAT),
+        lon = args.getDouble(ARG_LON),
+    )
+
+    "add-note" -> AppRoute.AddNote(
         lat = args.getDouble(ARG_LAT),
         lon = args.getDouble(ARG_LON),
     )

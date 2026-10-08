@@ -43,11 +43,13 @@ import org.btcmap.auth.AuthValidation
 import org.btcmap.db.Database
 import org.btcmap.db.table.user.User
 import org.btcmap.i18n.getLocalizedName
+import org.btcmap.note.Notes
 import org.btcmap.saved.SavedItems
 import org.btcmap.saved.withLocalizedAreaNames
 import org.btcmap.saved.withLocalizedPlaceNames
 import org.btcmap.settings.Settings
 import org.btcmap.ui.map.EventMiniMap
+import org.btcmap.ui.map.NoteMiniMap
 
 /** Test tags so a test can drive the profile forms. */
 const val PROFILE_USERNAME_FIELD_TAG = "profile-username-field"
@@ -96,6 +98,7 @@ fun ProfileScreen(
     formLabels: ProfileFormLabels,
     imagesLabels: UploadedImagesLabels,
     eventsLabels: MyEventsLabels,
+    notesLabels: MyNotesLabels,
     /** The map style the my-events previews render with. */
     mapStyleUrl: String,
     mapStyleJson: String?,
@@ -103,8 +106,12 @@ fun ProfileScreen(
     onShowUploadedImagesChange: (Boolean) -> Unit,
     showMyEvents: Boolean,
     onShowMyEventsChange: (Boolean) -> Unit,
+    showMyNotes: Boolean,
+    onShowMyNotesChange: (Boolean) -> Unit,
     /** Opens the add-event screen pre-filled from one of the user's events. */
     onDuplicateEvent: (MyEventUi) -> Unit = {},
+    /** Moves the app back to the map, centred on one of the user's notes. */
+    onOpenNoteOnMap: (MyNoteUi) -> Unit = {},
     onLoggedOut: () -> Unit,
 ) {
     var account by remember { mutableStateOf<User?>(null) }
@@ -198,6 +205,34 @@ fun ProfileScreen(
             },
         )
 
+        showMyNotes -> MyNotesScreen(
+            labels = notesLabels,
+            load = {
+                Notes.load(db).map { note ->
+                    MyNoteUi(
+                        id = note.id,
+                        text = note.text,
+                        public = note.public,
+                        lat = note.lat,
+                        lon = note.lon,
+                    )
+                }
+            },
+            update = { id, public -> Notes.updateVisibility(api, db, id, public) },
+            delete = { note -> Notes.delete(api, db, note.id) },
+            onOpenOnMap = onOpenNoteOnMap,
+            map = { note, mapModifier ->
+                NoteMiniMap(
+                    lat = note.lat,
+                    lon = note.lon,
+                    styleUrl = mapStyleUrl,
+                    styleJson = mapStyleJson,
+                    palette = markerPalette(settings),
+                    modifier = mapModifier,
+                )
+            },
+        )
+
         editing == ProfileEdit.Username -> ChangeUsernameForm(
             currentName = current.name,
             labels = formLabels,
@@ -253,6 +288,10 @@ fun ProfileScreen(
                     onOpenMyEvents = {
                         message = null
                         onShowMyEventsChange(true)
+                    },
+                    onOpenMyNotes = {
+                        message = null
+                        onShowMyNotesChange(true)
                     },
                     onDeletePlace = { id ->
                         scope.launch {

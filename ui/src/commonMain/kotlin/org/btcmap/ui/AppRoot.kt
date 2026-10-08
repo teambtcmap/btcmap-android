@@ -18,6 +18,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.withContext
 import org.btcmap.api.getDashboard
+import org.btcmap.api.createNote
 import org.btcmap.api.getPendingEvents
 import org.btcmap.api.setEventStatus
 import org.btcmap.api.setAreaDescription
@@ -75,6 +76,9 @@ fun AppRoot(
         // session; a success bumps a key the account screens re-read.
         var showAuth by remember { mutableStateOf(false) }
         var authReload by remember { mutableStateOf(0) }
+        // A coordinate a screen asked the map to centre on (a note's banner),
+        // passed to the map and cleared once it has moved there.
+        var mapFocus by remember { mutableStateOf<Pair<Double, Double>?>(null) }
         val back = {
             // At the start route there is nothing left on the stack to pop, so
             // the host closes the screen instead.
@@ -123,6 +127,8 @@ fun AppRoot(
                 onNavigate = { nav.push(it) },
                 onShowAuth = { showAuth = true },
                 modifier = modifier,
+                focusTarget = mapFocus,
+                onFocusTargetConsumed = { mapFocus = null },
             )
             AppRoute.InfraDashboard -> InfraDashboardRoute(
                 services = services,
@@ -247,6 +253,25 @@ fun AppRoot(
                         address = draft.address.takeIf { it.isNotEmpty() },
                         website = draft.website.takeIf { it.isNotEmpty() },
                         description = draft.description.takeIf { it.isNotEmpty() },
+                    )
+                },
+                onBack = back,
+            )
+
+            is AppRoute.AddNote -> AddNoteScreen(
+                lat = route.lat,
+                lon = route.lon,
+                styleUrl = mapStyle.url,
+                styleJson = mapStyle.json,
+                labels = labels.addNote,
+                iconFont = services.iconFont,
+                palette = markerPalette(services.settings),
+                submit = { draft ->
+                    services.api.createNote(
+                        lat = draft.lat,
+                        lon = draft.lon,
+                        text = draft.text,
+                        public = draft.public,
                     )
                 },
                 onBack = back,
@@ -390,6 +415,10 @@ fun AppRoot(
                         ),
                     )
                 },
+                onOpenNoteOnMap = { note ->
+                    mapFocus = note.lat to note.lon
+                    nav.reset(AppRoute.Map)
+                },
             )
 
             is AppRoute.Place -> PlaceRoute(
@@ -423,8 +452,8 @@ fun AppRoot(
 
 /**
  * The account route: the shared [ProfileScreen] under a bar whose title follows
- * the profile's current sub-screen (uploaded images or my events), so the back
- * affordance returns to the profile before leaving the screen.
+ * the profile's current sub-screen (uploaded images, my events or my notes), so
+ * the back affordance returns to the profile before leaving the screen.
  */
 @Composable
 private fun UserProfileRoute(
@@ -432,21 +461,25 @@ private fun UserProfileRoute(
     labels: AppLabels,
     onBack: () -> Unit,
     onDuplicateEvent: (MyEventUi) -> Unit,
+    onOpenNoteOnMap: (MyNoteUi) -> Unit,
 ) {
     var showUploadedImages by remember { mutableStateOf(false) }
     var showMyEvents by remember { mutableStateOf(false) }
+    var showMyNotes by remember { mutableStateOf(false) }
     val mapStyle = services.rememberMapStyle()
 
     ScreenPage(
         title = when {
             showUploadedImages -> labels.uploadedImagesTitle
             showMyEvents -> labels.myEventsTitle
+            showMyNotes -> labels.myNotesTitle
             else -> labels.profileTitle
         },
         onBack = {
             when {
                 showUploadedImages -> showUploadedImages = false
                 showMyEvents -> showMyEvents = false
+                showMyNotes -> showMyNotes = false
                 else -> onBack()
             }
         },
@@ -460,13 +493,17 @@ private fun UserProfileRoute(
             formLabels = labels.profileForm,
             imagesLabels = labels.uploadedImages,
             eventsLabels = labels.myEvents,
+            notesLabels = labels.myNotes,
             mapStyleUrl = mapStyle.url,
             mapStyleJson = mapStyle.json,
             showUploadedImages = showUploadedImages,
             onShowUploadedImagesChange = { showUploadedImages = it },
             showMyEvents = showMyEvents,
             onShowMyEventsChange = { showMyEvents = it },
+            showMyNotes = showMyNotes,
+            onShowMyNotesChange = { showMyNotes = it },
             onDuplicateEvent = onDuplicateEvent,
+            onOpenNoteOnMap = onOpenNoteOnMap,
             onLoggedOut = onBack,
         )
     }

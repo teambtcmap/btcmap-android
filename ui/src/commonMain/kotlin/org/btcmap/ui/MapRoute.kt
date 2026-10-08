@@ -42,6 +42,7 @@ import org.btcmap.settings.mapTiltEnabled
 import org.btcmap.settings.mapZoom
 import org.btcmap.settings.showAttribution
 import org.btcmap.settings.verifiedFilterMinVerifiedAt
+import org.btcmap.sync.SyncEvent
 import org.btcmap.sync.SyncState
 import org.btcmap.ui.map.SearchActions
 import org.btcmap.util.rethrowIfCancellation
@@ -63,6 +64,9 @@ internal fun MapRoute(
     onNavigate: (AppRoute) -> Unit,
     onShowAuth: () -> Unit,
     modifier: Modifier = Modifier,
+    /** A coordinate a screen (e.g. a note's banner) wants the map centred on. */
+    focusTarget: Pair<Double, Double>? = null,
+    onFocusTargetConsumed: () -> Unit = {},
 ) {
     val scope = rememberCoroutineScope()
     val syncState by services.syncController.state.collectAsState()
@@ -75,6 +79,10 @@ internal fun MapRoute(
     var bookmarked by remember { mutableStateOf(false) }
     var addingPhoto by remember { mutableStateOf(false) }
     var reloadKey by remember { mutableStateOf(0) }
+    // Bumped when the sync reports a profile change, so the role-gated buttons
+    // below re-derive after a promotion without waiting for the screen to be
+    // re-entered.
+    var userVersion by remember { mutableStateOf(0) }
     var isAdmin by remember { mutableStateOf(false) }
     var canManageEvents by remember { mutableStateOf(false) }
     var pendingEventCount by remember { mutableStateOf(0) }
@@ -84,17 +92,28 @@ internal fun MapRoute(
     LaunchedEffect(Unit) { services.syncController.start() }
 
     // A finished sync asks the map to re-query its features rather than leaving
-    // it stale until the user moves it.
+    // it stale until the user moves it. A profile change additionally re-derives
+    // the role-gated buttons.
     LaunchedEffect(Unit) {
-        services.syncController.events.collect { reloadKey++ }
+        services.syncController.events.collect { event ->
+            reloadKey++
+            if (event == SyncEvent.UserChanged) userVersion++
+        }
     }
 
     // The admin and event-manager buttons are role-gated and re-derived whenever
-    // the map is (re)entered, so a sign-in or sign-out is reflected.
-    LaunchedEffect(Unit) {
+    // the map is (re)entered, a sync reports a profile change, or a sync
+    // finishes (its last step re-reads the profile), so a sign-in, a sign-out or
+    // a promotion made elsewhere is reflected.
+    LaunchedEffect(userVersion, syncState) {
         val user = withContext(ioDispatcher) { services.db.user.select() }
         isAdmin = user?.isAdmin() == true
         canManageEvents = user?.canManageEvents() == true
+    }
+
+    // The pending-event badge is a network read, so it is refreshed only when
+    // the event-manager role changes rather than on every sync state change.
+    LaunchedEffect(canManageEvents) {
         pendingEventCount = if (canManageEvents) {
             runCatching { services.api.getPendingEvents().size }.getOrDefault(0)
         } else {
@@ -117,6 +136,15 @@ internal fun MapRoute(
             if (coordinates != null) openTarget = coordinates.lat to coordinates.lon
         }
         onOpenPlaceConsumed()
+    }
+
+    // A screen asked the map to centre on a coordinate (a note's banner, say):
+    // hand it to the same camera move the deep-link fallback uses, then tell the
+    // host it was consumed.
+    LaunchedEffect(focusTarget) {
+        val target = focusTarget ?: return@LaunchedEffect
+        openTarget = target
+        onFocusTargetConsumed()
     }
 
     fun refreshSheet(place: Place) {
@@ -199,7 +227,15 @@ internal fun MapRoute(
                 onShowAuth()
             }
         },
+        onAddNote = { lat, lon ->
+            if (services.settings.authorized) {
+                onNavigate(AppRoute.AddNote(lat, lon))
+            } else {
+                onShowAuth()
+            }
+        },
         addLocationLabels = labels.addLocation,
+        noteDialogLabels = labels.noteDialog,
         onOpenFeed = { areas -> onNavigate(areas.toFeedRoute()) },
         onOpenInfra = if (isAdmin) {
             { onNavigate(AppRoute.InfraDashboard) }
@@ -229,6 +265,7 @@ internal fun MapRoute(
         onFeaturesDrawn = { platform.reportFullyDrawn() },
         placeSheet = true,
         openTarget = openTarget,
+        onOpenTargetConsumed = { openTarget = null },
         openPlaceId = currentOpenPlaceId,
         photos = photos,
         bookmarked = bookmarked,

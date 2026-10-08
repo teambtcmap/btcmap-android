@@ -175,7 +175,7 @@ class DatabaseTest {
         try {
             Assert.assertEquals(Database.VERSION, userVersion(db.conn))
             Assert.assertEquals(
-                listOf("area", "comment", "event", "place", "pref"),
+                listOf("area", "comment", "event", "note", "place", "pref"),
                 tables(db.conn),
             )
         } finally {
@@ -219,7 +219,7 @@ class DatabaseTest {
             // it so the bundled snapshot re-seeds it.
             Assert.assertEquals(Database.VERSION, userVersion(db.conn))
             Assert.assertEquals(
-                listOf("area", "comment", "event", "place", "pref"),
+                listOf("area", "comment", "event", "note", "place", "pref"),
                 tables(db.conn),
             )
             Assert.assertEquals(0L, db.place.selectCount())

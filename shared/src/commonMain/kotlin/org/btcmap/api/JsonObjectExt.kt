@@ -5,6 +5,7 @@ import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonNull
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.boolean
 import kotlinx.serialization.json.double
 import kotlinx.serialization.json.int
 import kotlinx.serialization.json.jsonArray
@@ -19,6 +20,8 @@ fun JsonObject.long(name: String): Long = required(name) { it.jsonPrimitive.long
 fun JsonObject.double(name: String): Double = required(name) { it.jsonPrimitive.double }
 
 fun JsonObject.int(name: String): Int = required(name) { it.jsonPrimitive.int }
+
+fun JsonObject.boolean(name: String): Boolean = required(name) { it.jsonPrimitive.boolean }
 
 fun JsonObject.obj(name: String): JsonObject = required(name) { it.jsonObject }
 

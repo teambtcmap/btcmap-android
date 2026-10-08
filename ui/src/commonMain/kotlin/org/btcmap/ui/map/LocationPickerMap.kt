@@ -24,7 +24,7 @@ import org.maplibre.spatialk.geojson.Position
 private const val LOCATION_PICKER_ZOOM = 16.0
 
 /** Which stock pin the location picker previews at its centre. */
-enum class LocationPickerPin { Place, Event }
+enum class LocationPickerPin { Place, Event, Note }
 
 /**
  * The positioning map shared by the add-place and add-event screens: pan and
@@ -72,6 +72,7 @@ fun LocationPickerMap(
         when (pin) {
             LocationPickerPin.Place -> factory.merchantPin()
             LocationPickerPin.Event -> factory.eventPin()
+            LocationPickerPin.Note -> factory.notePin()
         }
     }
     // The pin's tip, not its centre, marks the position, so the bitmap is lifted

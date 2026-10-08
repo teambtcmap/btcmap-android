@@ -30,6 +30,20 @@ import kotlin.time.Duration
  */
 class SyncManager(
     private val sync: () -> Sync,
+    /**
+     * Re-reads the signed-in profile from the server and returns true when the
+     * cached user changed. Run as the last step of a full sync, so a role
+     * granted or revoked elsewhere reaches the role-gated UI without a
+     * re-login. The host decides whether a session exists; a signed-out user
+     * returns false without a request.
+     */
+    private val refreshUser: suspend () -> Boolean,
+    /**
+     * Rewrites the cached personal notes from the server and returns whether they
+     * changed. Run with [refreshUser] at the end of a full sync; the host decides
+     * whether a session exists, and a signed-out call returns false.
+     */
+    private val syncNotes: suspend () -> Boolean,
     private val scope: CoroutineScope = CoroutineScope(SupervisorJob() + ioDispatcher),
     /**
      * Seeds the places table, invoking the callback with the running total
@@ -111,6 +125,17 @@ class SyncManager(
             if (areasImported > 0 || (areas?.rowsAffected ?: 0L) > 0) {
                 emit(SyncEvent.AreasChanged)
             }
+
+            // Refresh the user-scoped state last, so it neither delays the
+            // bundled places import (and the first pins) nor the data deltas:
+            // the cached personal notes are rewritten, then the profile is
+            // re-read and a change is announced so the role-gated UI re-derives.
+            if (guarded { syncNotes() } == true) {
+                emit(SyncEvent.NotesChanged)
+            }
+            if (guarded { refreshUser() } == true) {
+                emit(SyncEvent.UserChanged)
+            }
         } finally {
             _state.value = SyncState.Idle
         }
@@ -131,14 +156,22 @@ class SyncManager(
      */
     private suspend fun <T> step(state: SyncState, block: suspend () -> T): T? {
         _state.value = state
-        return try {
+        return guarded(block)
+    }
+
+    /**
+     * [step]'s failure guard without publishing a [SyncState]: used by the
+     * profile refresh, which is not a table unbundle or delta and must not add a
+     * sync state of its own.
+     */
+    private suspend fun <T> guarded(block: suspend () -> T): T? =
+        try {
             block()
         } catch (e: Exception) {
             e.rethrowIfCancellation()
             reportSyncFailure(e)
             null
         }
-    }
 
     private fun emit(event: SyncEvent) {
         _events.tryEmit(event)

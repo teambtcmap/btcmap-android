@@ -16,6 +16,7 @@ import kotlinx.coroutines.withContext
 import okio.Path.Companion.toPath
 import okio.Source
 import okio.source
+import org.btcmap.account.AccountSession
 import org.btcmap.api.Api
 import org.btcmap.api.apiHttpClient
 import org.btcmap.api.signOut
@@ -26,6 +27,7 @@ import org.btcmap.bundle.BundledPlaces
 import org.btcmap.db.Database
 import org.btcmap.db.LegacyDatabases
 import org.btcmap.io.platformFileSystem
+import org.btcmap.note.Notes
 import org.btcmap.ui.ImageStatsEventListener
 import org.btcmap.ui.map.OfflinePacks
 import org.btcmap.settings.apiUrl
@@ -78,6 +80,8 @@ class App : Application(), SingletonImageLoader.Factory {
     private val defaultSyncManager: SyncManager by lazy {
         SyncManager(
             sync = { sync },
+            refreshUser = { AccountSession.refresh(api, db, prefs) },
+            syncNotes = { Notes.sync(api, db, prefs) },
             seedPlaces = { onBatch ->
                 BundledPlaces.import(db, onBatch) { openBundledSnapshot(BundledPlaces.FILE_NAME) }
                     .placesImported

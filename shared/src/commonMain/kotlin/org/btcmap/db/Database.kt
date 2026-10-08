@@ -9,6 +9,7 @@ import okio.Path.Companion.toPath
 import org.btcmap.db.table.area.AreaQueries
 import org.btcmap.db.table.comment.CommentQueries
 import org.btcmap.db.table.event.EventQueries
+import org.btcmap.db.table.note.NoteQueries
 import org.btcmap.db.table.place.PlaceQueries
 import org.btcmap.db.table.preference.PreferenceQueries
 import org.btcmap.db.table.user.UserStore
@@ -28,7 +29,7 @@ class Database(driver: SQLiteDriver, val path: String) {
          * project's history, so the stale file can be told apart from ours by
          * the pragma alone (see [initialize]).
          */
-        const val VERSION = 108
+        const val VERSION = 109
 
         /**
          * The first version this app is responsible for upgrading. Anything
@@ -92,6 +93,8 @@ class Database(driver: SQLiteDriver, val path: String) {
         private set
     lateinit var area: AreaQueries
         private set
+    lateinit var note: NoteQueries
+        private set
     lateinit var preference: PreferenceQueries
         private set
     lateinit var user: UserStore
@@ -130,6 +133,7 @@ class Database(driver: SQLiteDriver, val path: String) {
             comment = CommentQueries(conn)
             event = EventQueries(conn)
             area = AreaQueries(conn)
+            note = NoteQueries(conn)
             preference = PreferenceQueries(conn)
             user = UserStore(preference)
 
@@ -185,6 +189,7 @@ class Database(driver: SQLiteDriver, val path: String) {
         conn.execSQL(org.btcmap.db.table.event.CREATE)
         conn.execSQL(org.btcmap.db.table.comment.CREATE)
         conn.execSQL(org.btcmap.db.table.area.CREATE)
+        conn.execSQL(org.btcmap.db.table.note.CREATE)
         conn.execSQL(org.btcmap.db.table.preference.CREATE)
         conn.execSQL(org.btcmap.db.table.comment.CREATE_INDEX_PLACE_ID_CREATED_AT)
         conn.execSQL(org.btcmap.db.table.comment.CREATE_INDEX_UPDATED_AT)
@@ -448,6 +453,13 @@ class Database(driver: SQLiteDriver, val path: String) {
                             "ADD COLUMN ${org.btcmap.db.table.area.VERIFIED_AT} TEXT;"
                     )
                     conn.execSQL("DELETE FROM ${org.btcmap.db.table.area.TABLE};")
+                }
+
+                108 -> {
+                    // The signed-in user's personal notes are now cached so the
+                    // sync rewrites them in place and the My-notes screen reads
+                    // from the database instead of fetching on every open.
+                    conn.execSQL(org.btcmap.db.table.note.CREATE)
                 }
 
                 else -> throw Exception("migration is missing for version $version")

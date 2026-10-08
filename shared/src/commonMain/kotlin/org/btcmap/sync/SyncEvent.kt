@@ -13,4 +13,18 @@ sealed interface SyncEvent {
     data object EventsChanged : SyncEvent
     data object CommentsChanged : SyncEvent
     data object AreasChanged : SyncEvent
+
+    /**
+     * The signed-in user's cached personal notes changed, so the map redraws its
+     * note layer.
+     */
+    data object NotesChanged : SyncEvent
+
+    /**
+     * The signed-in profile changed on the server: a role was granted or
+     * revoked, the account was renamed, or its saved items changed. Emitted so
+     * the role-gated UI re-derives its admin and event-manager affordances
+     * without a re-login.
+     */
+    data object UserChanged : SyncEvent
 }

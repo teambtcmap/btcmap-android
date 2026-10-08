@@ -32,6 +32,9 @@ sealed interface AppRoute {
     /** Adding a place at a map position (see `AddPlaceScreen`). */
     data class AddPlace(val lat: Double, val lon: Double) : AppRoute
 
+    /** Adding a note at a map position (see `AddNoteScreen`). */
+    data class AddNote(val lat: Double, val lon: Double) : AppRoute
+
     /**
      * Adding an event at a map position (see `AddEventScreen`). The optional
      * pre-fill repeats a submitted event from the profile.
@@ -107,6 +110,7 @@ fun AppRoute.key(): String = when (this) {
     is AppRoute.AddComment -> "add-comment"
     is AppRoute.EventDetails -> "event-details"
     is AppRoute.AddPlace -> "add-place"
+    is AppRoute.AddNote -> "add-note"
     is AppRoute.AddEvent -> "add-event"
     is AppRoute.Report -> "report"
     is AppRoute.Colors -> "colors"

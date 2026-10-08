@@ -228,6 +228,9 @@ class Settings(
                     db.preference.upsert(KEY_AUTH_TOKEN, token)
                 }
                 db.user.delete()
+                // Notes are private to a session, so they never outlive it: a
+                // new sign-in and a sign-out both drop the cached notes.
+                db.note.deleteAll()
                 if (user != null) db.user.insert(user)
             }
             lock.withLock {
@@ -247,6 +250,8 @@ class Settings(
             db.transaction {
                 db.preference.delete(KEY_AUTH_TOKEN)
                 db.user.delete()
+                // Notes are private to a session, so they never outlive it.
+                db.note.deleteAll()
             }
             lock.withLock {
                 cache.remove(KEY_AUTH_TOKEN)
@@ -274,6 +279,8 @@ class Settings(
             db.transaction {
                 db.preference.delete(KEY_AUTH_TOKEN)
                 db.user.delete()
+                // Notes are private to a session, so they never outlive it.
+                db.note.deleteAll()
             }
             lock.withLock {
                 cache.remove(KEY_AUTH_TOKEN)

@@ -112,6 +112,21 @@ fun appLabels(
         ok = strings["ok"],
         cancel = strings["cancel"],
     ),
+    addNote = AddNoteLabels(
+        title = strings["add_note_title"],
+        back = strings["navigate_up"],
+        text = strings["note_text"],
+        textPlaceholder = strings["note_text_placeholder"],
+        private = strings["note_private"],
+        public = strings["note_public"],
+        privateDescription = strings["note_private_description"],
+        publicDescription = strings["note_public_description"],
+        dragMap = strings["add_location_drag_to_adjust"],
+        required = strings["field_required"],
+        submit = strings["submit_note"],
+        submitted = strings["note_submitted"],
+        backToMap = strings["back_to_map"],
+    ),
     report = ReportPlaceLabels(
         intro = strings["verify_or_report_description"],
         reasonLabel = { strings[it.labelKey()] },
@@ -196,6 +211,10 @@ fun appLabels(
     ),
     feedRow = { item -> activityFeedRow(strings, item, formatFeedDate) },
     ok = strings["ok"],
+    noteDialog = NoteDialogLabels(
+        title = strings["note_text"],
+        ok = strings["ok"],
+    ),
     area = areaStrings(strings, formatBytes),
     offlineStyleName = strings[currentStyle.offlineNameKey()],
     save = strings["save"],
@@ -254,6 +273,7 @@ fun appLabels(
     profileTitle = strings["profile"],
     uploadedImagesTitle = strings["uploaded_images"],
     myEventsTitle = strings["my_events"],
+    myNotesTitle = strings["my_notes"],
     userProfile = UserProfileLabels(
         username = strings["username"],
         password = strings["password"],
@@ -267,6 +287,7 @@ fun appLabels(
         delete = strings["delete"],
         uploadedImages = strings["uploaded_images"],
         myEvents = strings["my_events"],
+        myNotes = strings["my_notes"],
     ),
     profileForm = ProfileFormLabels(
         passwordMask = strings["password_mask"],
@@ -305,6 +326,16 @@ fun appLabels(
             strings.format("event_date_time_range", date, start, end)
         },
     ),
+    myNotes = MyNotesLabels(
+        empty = strings["my_notes_empty"],
+        failed = strings["my_notes_failed"],
+        retry = strings["retry"],
+        public = strings["note_public"],
+        private = strings["note_private"],
+        delete = strings["delete"],
+        actionFailed = strings["my_notes_action_failed"],
+        openOnMap = strings["note_show_on_map"],
+    ),
     account = AccountLabels(
         username = strings["username"],
         password = strings["password"],
@@ -324,6 +355,7 @@ fun appLabels(
     addLocation = AddLocationLabels(
         addPlace = strings["add_place_title"],
         addEvent = strings["add_event"],
+        addNote = strings["add_note"],
     ),
     osmAttribution = strings["osm_attribution"],
     formatDistance = { meters ->

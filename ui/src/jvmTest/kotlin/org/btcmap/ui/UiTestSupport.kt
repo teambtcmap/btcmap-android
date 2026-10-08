@@ -114,6 +114,7 @@ internal val TEST_PROFILE_LABELS = UserProfileLabels(
     delete = "Delete",
     uploadedImages = "Uploaded images",
     myEvents = "My events",
+    myNotes = "My notes",
 )
 
 internal val TEST_UPLOADED_IMAGES_LABELS = UploadedImagesLabels(
@@ -135,6 +136,33 @@ internal val TEST_MY_EVENTS_LABELS = MyEventsLabels(
     statusLive = "Live",
     statusRejected = "Rejected",
     dateRange = { date, start, end -> "$date, $start - $end" },
+)
+
+internal val TEST_MY_NOTES_LABELS = MyNotesLabels(
+    empty = "You haven't added any notes yet.",
+    failed = "Couldn't load your notes",
+    retry = "Retry",
+    public = "Public",
+    private = "Private",
+    delete = "Delete",
+    actionFailed = "Couldn't update the note",
+    openOnMap = "Show on map",
+)
+
+internal val TEST_ADD_NOTE_LABELS = AddNoteLabels(
+    title = "Add a note",
+    back = "Navigate up",
+    text = "Note",
+    textPlaceholder = "e.g. ATM is inside, ask at the bar",
+    private = "Private",
+    public = "Public",
+    privateDescription = "Only you can see your private notes",
+    publicDescription = "Public notes can be seen by anyone",
+    dragMap = "Drag the map to set the exact location",
+    required = "Required",
+    submit = "Add note",
+    submitted = "Note added",
+    backToMap = "Back to the map",
 )
 
 internal val TEST_EVENT_REVIEW_LABELS = EventReviewLabels(

@@ -63,6 +63,7 @@ import org.btcmap.map.markerImageName
 import org.btcmap.search.SearchAdapterItem
 import org.btcmap.map.toEventGeoJson
 import org.btcmap.map.toMarkerGeoJson
+import org.btcmap.map.toNoteGeoJson
 import org.btcmap.place.isMerchant
 import org.btcmap.ui.map.AREA_CHIP_SIZE
 import org.btcmap.ui.map.AddLocationLabels
@@ -81,6 +82,8 @@ import org.btcmap.ui.map.MarkerFilterButtons
 import org.btcmap.ui.map.MarkerKind
 import org.btcmap.ui.map.MarkerPalette
 import org.btcmap.ui.map.MerchantLayers
+import org.btcmap.ui.map.NoteLayers
+import org.btcmap.ui.map.NOTE_MARKER_IMAGE_NAME
 import org.btcmap.ui.map.SearchActions
 import org.btcmap.ui.map.SearchOverlay
 import org.btcmap.ui.map.platformMapUiOptions
@@ -158,10 +161,18 @@ fun MapScreen(
      * [onAddPlace] in the add-location chooser.
      */
     onAddEvent: ((Double, Double) -> Unit)? = null,
+    /**
+     * Creates a note at the map centre, if the host can. Offered alongside
+     * [onAddPlace] and [onAddEvent] in the add-location chooser.
+     */
+    onAddNote: ((Double, Double) -> Unit)? = null,
+    /** The strings of the read-only dialog a note pin opens. */
+    noteDialogLabels: NoteDialogLabels = NoteDialogLabels(title = "Note", ok = "OK"),
     /** The labels of the add-location chooser. */
     addLocationLabels: AddLocationLabels = AddLocationLabels(
         addPlace = "Add a place",
         addEvent = "Add an event",
+        addNote = "Add a note",
     ),
     onOpenFeed: ((List<MapArea>) -> Unit)? = null,
     /**
@@ -214,9 +225,11 @@ fun MapScreen(
     placeSheet: Boolean = true,
     /**
      * A point the host wants the map to move to, as latitude to longitude, for
-     * a place that is not in the local cache.
+     * a place that is not in the local cache or a note tapped in the profile.
      */
     openTarget: Pair<Double, Double>? = null,
+    /** Called once the move to [openTarget] has finished. */
+    onOpenTargetConsumed: () -> Unit = {},
     /**
      * A place the host wants the map to open from outside it, such as a deep
      * link. The map selects it and moves to it, as a tap on its marker would.
@@ -345,6 +358,20 @@ fun MapScreen(
         }
     }
 
+    // Tapping a note pin opens a read-only dialog with its text.
+    var shownNoteText by remember { mutableStateOf<String?>(null) }
+    val onNoteClick: MarkerClickHandler = { features ->
+        val id = features.firstOrNull()?.properties?.get("id")?.jsonPrimitive?.longOrNull
+        if (id == null) {
+            ClickResult.Pass
+        } else {
+            scope.launch {
+                withContext(Dispatchers.Default) { db.note.selectById(id) }?.let { shownNoteText = it.text }
+            }
+            ClickResult.Consume
+        }
+    }
+
     val factory = remember(textMeasurer, iconFont, density, palette) {
         MarkerBitmapFactory(
             textMeasurer = textMeasurer,
@@ -363,6 +390,14 @@ fun MapScreen(
     val merchantsGeoJson = remember { mutableStateOf(EMPTY_GEOJSON) }
     val exchangesGeoJson = remember { mutableStateOf(EMPTY_GEOJSON) }
     val eventsGeoJson = remember { mutableStateOf(EMPTY_GEOJSON) }
+    val noteGeoJson = remember { mutableStateOf(EMPTY_GEOJSON) }
+
+    // The signed-in user's personal notes are always drawn, whatever marker kind
+    // is selected. They are not viewport-bound, so every cached note is loaded;
+    // the sync's NotesChanged event bumps reloadKey to refresh them.
+    LaunchedEffect(reloadKey) {
+        noteGeoJson.value = withContext(Dispatchers.Default) { db.note.selectAll().toNoteGeoJson() }
+    }
 
     // The platform's own location provider: the module resolves the Android
     // framework or fused provider and the desktop portal, and reports an
@@ -421,6 +456,14 @@ fun MapScreen(
             )
         }
 
+        // The signed-in user's own notes are always drawn, on top of whichever
+        // marker kind is selected, and never clustered.
+        NoteLayers(
+            geoJson = noteGeoJson.value,
+            showMarkers = imagesReady,
+            onClick = onNoteClick,
+        )
+
         // The puck draws the last known position. The tracking effect is the
         // only thing that moves the camera, and only when the location button
         // asked for it: following every fix would fight the user's gestures.
@@ -471,6 +514,7 @@ fun MapScreen(
         state.animateCamera(
             CameraUpdate(target = Position(target.second, target.first), zoom = OPEN_ZOOM),
         )
+        onOpenTargetConsumed()
     }
 
     LaunchedEffect(openPlaceId) {
@@ -487,7 +531,9 @@ fun MapScreen(
 
     // The host supplies what it can do, but only the map knows where it is
     // looking, so the add-location actions are handed the map centre.
-    val mapSearchActions = if (searchActions == null && onAddPlace == null && onAddEvent == null) {
+    val mapSearchActions = if (
+        searchActions == null && onAddPlace == null && onAddEvent == null && onAddNote == null
+    ) {
         null
     } else {
         SearchActions(
@@ -502,6 +548,13 @@ fun MapScreen(
                 {
                     state.cameraPosition?.target?.let { centre ->
                         createEvent(centre.latitude, centre.longitude)
+                    }
+                }
+            },
+            onAddNote = onAddNote?.let { createNote ->
+                {
+                    state.cameraPosition?.target?.let { centre ->
+                        createNote(centre.latitude, centre.longitude)
                     }
                 }
             },
@@ -663,6 +716,7 @@ fun MapScreen(
         // What the map currently needs, and how to draw each missing one.
         val wanted = LinkedHashMap<String, () -> ImageBitmap>()
         wanted[MARKER_PIN_IMAGE_ID] = { factory.pin(palette.markerBackground) }
+        wanted[NOTE_MARKER_IMAGE_NAME] = { factory.notePin() }
         if (hasEvents) {
             wanted[EVENT_MARKER_ICON_NAME] = { factory.icon(EVENT_ICON, palette.markerIcon) }
         }
@@ -711,6 +765,13 @@ fun MapScreen(
                 // its own attribution line below, as the Views map did.
                 overlay = {},
             )
+            shownNoteText?.let { text ->
+                NoteDialog(
+                    text = text,
+                    labels = noteDialogLabels,
+                    onDismiss = { shownNoteText = null },
+                )
+            }
             if (showAttribution) {
                 Text(
                     text = attributionText,

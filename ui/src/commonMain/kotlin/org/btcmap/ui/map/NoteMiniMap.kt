@@ -4,11 +4,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 
 /**
- * A quiet, non-interactive map thumbnail centred on the event, with the stock
- * event pin over it. See [MiniMap] for what it drops and why.
+ * A quiet, non-interactive map thumbnail centred on the note, with the stock
+ * note pin over it. See [MiniMap] for what it drops and why.
  */
 @Composable
-fun EventMiniMap(
+fun NoteMiniMap(
     lat: Double,
     lon: Double,
     styleUrl: String,
@@ -22,7 +22,7 @@ fun EventMiniMap(
         styleUrl = styleUrl,
         styleJson = styleJson,
         palette = palette,
-        pin = { it.eventPin() },
+        pin = { it.notePin() },
         modifier = modifier,
     )
 }

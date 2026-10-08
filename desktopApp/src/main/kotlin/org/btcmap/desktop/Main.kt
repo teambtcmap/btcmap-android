@@ -39,6 +39,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import androidx.compose.runtime.rememberCoroutineScope
+import org.btcmap.account.AccountSession
 import org.btcmap.account.canManageEvents
 import org.btcmap.account.isAdmin
 import org.btcmap.api.ActivityFeedItem
@@ -84,6 +85,8 @@ import org.btcmap.api.setAreaDescription
 import org.btcmap.api.setAreaName
 import org.btcmap.api.submitEvent
 import org.btcmap.api.submitPlace
+import org.btcmap.api.createNote
+import org.btcmap.note.Notes
 import org.btcmap.api.verifyArea
 import org.btcmap.ui.PlaceAction
 import org.btcmap.ui.PendingEventUi
@@ -103,6 +106,7 @@ import org.btcmap.platform.ioDispatcher
 import org.btcmap.place.ReportType
 import org.btcmap.place.submitReport
 import org.btcmap.sync.Sync
+import org.btcmap.sync.SyncEvent
 import org.btcmap.sync.SyncManager
 import org.btcmap.util.rethrowIfCancellation
 import org.btcmap.settings.KEY_AUTH_TOKEN
@@ -130,6 +134,9 @@ import org.btcmap.ui.AccountScreen
 import org.btcmap.ui.AddEventForm
 import org.btcmap.ui.AddEventLabels
 import org.btcmap.ui.AddEventScreen
+import org.btcmap.ui.AddNoteForm
+import org.btcmap.ui.AddNoteLabels
+import org.btcmap.ui.AddNoteScreen
 import org.btcmap.ui.AddPlaceForm
 import org.btcmap.ui.AddPlaceLabels
 import org.btcmap.ui.AddPlaceScreen
@@ -226,6 +233,8 @@ private fun runApp() = application {
     )
     val syncManager = SyncManager(
         sync = { Sync(api, db) },
+        refreshUser = { AccountSession.refresh(api, db, settings) },
+        syncNotes = { Notes.sync(api, db, settings) },
         seedPlaces = { onBatch ->
             BundledPlaces.import(db, onBatch) { bundledSnapshot(BundledPlaces.FILE_NAME) }.placesImported
         },
@@ -309,6 +318,9 @@ private fun runApp() = application {
                     // map disposes it and coming back rebuilds it, so opening a
                     // row always lands on the map with that place selected.
                     var feedPlaceId by remember { mutableStateOf<Long?>(null) }
+                    // A coordinate a screen asked the map to centre on (a note's
+                    // banner), cleared once the map has moved there.
+                    var mapFocus by remember { mutableStateOf<Pair<Double, Double>?>(null) }
                     // Where the map is looking, tracked so the feed lists the
                     // areas the user is actually around rather than a fixed
                     // point. Starts where the map was last left.
@@ -316,6 +328,8 @@ private fun runApp() = application {
                     var mapCenterLon by remember { mutableStateOf(settings.mapCenterLon) }
                     // Where the add-place screen was opened from the map.
                     var addPlace by remember { mutableStateOf<Pair<Double, Double>?>(null) }
+                    // Where the add-note screen was opened from the map.
+                    var addNote by remember { mutableStateOf<Pair<Double, Double>?>(null) }
                     // Where the add-event screen was opened from, and what it is
                     // pre-filled with: blank from the map, an event to duplicate
                     // from the profile. Its back target is the stack entry below
@@ -330,9 +344,6 @@ private fun runApp() = application {
                     var selectedAreaId by remember { mutableStateOf<Long?>(null) }
                     var selectedEvent by remember { mutableStateOf<Event?>(null) }
 
-                    // Whether the signed-in account may open the infrastructure
-                    // dashboard. Re-derived whenever the map is (re)entered, so a
-                    // sign-in or sign-out is reflected.
                     var isAdmin by remember { mutableStateOf(false) }
                     var canManageEvents by remember { mutableStateOf(false) }
                     var pendingEventCount by remember { mutableStateOf(0) }
@@ -340,16 +351,30 @@ private fun runApp() = application {
                     // its features rather than leaving them stale until the next
                     // camera move, as Android's MapRoute does.
                     var reloadKey by remember { mutableStateOf(0) }
-                    LaunchedEffect(route) {
+                    // Bumped when the sync reports a profile change, so the
+                    // role-gated buttons below re-derive after a promotion.
+                    var userVersion by remember { mutableStateOf(0) }
+                    // Whether the signed-in account may open the infrastructure
+                    // dashboard. Re-derived whenever the map is (re)entered, a
+                    // sync reports a profile change, or a sync finishes (its last
+                    // step re-reads the profile), so a sign-in, a sign-out or a
+                    // promotion made elsewhere is reflected.
+                    LaunchedEffect(route, userVersion, syncState) {
                         if (route == Route.Map) {
                             val user = withContext(Dispatchers.IO) { db.user.select() }
                             isAdmin = user?.isAdmin() == true
                             canManageEvents = user?.canManageEvents() == true
-                            pendingEventCount = if (canManageEvents) {
-                                runCatching { api.getPendingEvents().size }.getOrDefault(0)
-                            } else {
-                                0
-                            }
+                        }
+                    }
+
+                    // The pending-event badge is a network read, so it is
+                    // refreshed only when the event-manager role changes rather
+                    // than on every sync state change.
+                    LaunchedEffect(canManageEvents) {
+                        pendingEventCount = if (canManageEvents) {
+                            runCatching { api.getPendingEvents().size }.getOrDefault(0)
+                        } else {
+                            0
                         }
                     }
 
@@ -358,11 +383,15 @@ private fun runApp() = application {
                     // from a sub-screen refreshes the data and shows the sync
                     // indicator. The manager ignores a start while one is
                     // already running, and the job lives on its own scope. The
-                    // sync's events bump reloadKey so the map re-queries.
+                    // sync's events bump reloadKey so the map re-queries, and a
+                    // profile change bumps userVersion so the buttons re-derive.
                     LaunchedEffect(route) {
                         if (route == Route.Map) {
                             syncManager.start()
-                            syncManager.events.collect { reloadKey++ }
+                            syncManager.events.collect { event ->
+                                reloadKey++
+                                if (event == SyncEvent.UserChanged) userVersion++
+                            }
                         }
                     }
 
@@ -389,6 +418,8 @@ private fun runApp() = application {
                         Route.Map -> MapScreen(
                             db = db,
                             openPlaceId = feedPlaceId,
+                            openTarget = mapFocus,
+                            onOpenTargetConsumed = { mapFocus = null },
                             styleUrl = HOSTED_STYLE_URL,
                             styleJson = styleJson,
                             // Reopen where the user left the map, like Android.
@@ -412,6 +443,7 @@ private fun runApp() = application {
                             reloadKey = reloadKey,
                             iconFont = iconFont,
                             placeSheetStrings = PLACE_SHEET_STRINGS,
+                            noteDialogLabels = LABELS.noteDialog,
                             attributionText = "© OpenStreetMap contributors",
                             attributionTextColor = attributionColor,
                             searchActions = SearchActions(onSettings = { nav.push(Route.Settings) }),
@@ -422,6 +454,10 @@ private fun runApp() = application {
                             onAddEvent = { lat, lon ->
                                 addEvent = AddEventPrefill(lat = lat, lon = lon)
                                 nav.push(if (settings.authorized) Route.AddEvent else Route.Account)
+                            },
+                            onAddNote = { lat, lon ->
+                                addNote = lat to lon
+                                nav.push(if (settings.authorized) Route.AddNote else Route.Account)
                             },
                             addLocationLabels = ADD_LOCATION_LABELS,
                             onOpenFeed = { nav.push(Route.Feed) },
@@ -627,6 +663,25 @@ private fun runApp() = application {
                             onBack = { nav.pop() },
                         )
 
+                        Route.AddNote -> AddNoteScreen(
+                            lat = addNote?.first ?: 0.0,
+                            lon = addNote?.second ?: 0.0,
+                            styleUrl = HOSTED_STYLE_URL,
+                            styleJson = styleJson,
+                            labels = ADD_NOTE_LABELS,
+                            iconFont = iconFont,
+                            palette = markerPalette(settings),
+                            submit = { draft ->
+                                api.createNote(
+                                    lat = draft.lat,
+                                    lon = draft.lon,
+                                    text = draft.text,
+                                    public = draft.public,
+                                )
+                            },
+                            onBack = { nav.pop() },
+                        )
+
                         Route.AddComment -> ScreenPage(
                             title = paymentPlace?.second?.ifBlank { LABELS.addCommentTitle } ?: LABELS.addCommentTitle,
                             onBack = { nav.pop() },
@@ -819,21 +874,24 @@ private fun runApp() = application {
                         }
 
                         Route.Account -> {
-                            // Uploaded images and my events are inside the
-                            // profile, so the screen's back arrow returns to the
-                            // profile page before leaving the account screen.
+                            // Uploaded images, my events and my notes are inside
+                            // the profile, so the screen's back arrow returns to
+                            // the profile page before leaving the account screen.
                             var showUploadedImages by remember { mutableStateOf(false) }
                             var showMyEvents by remember { mutableStateOf(false) }
+                            var showMyNotes by remember { mutableStateOf(false) }
                             ScreenPage(
                                 title = when {
                                     showUploadedImages -> PROFILE_LABELS.uploadedImages
                                     showMyEvents -> PROFILE_LABELS.myEvents
+                                    showMyNotes -> PROFILE_LABELS.myNotes
                                     else -> STRINGS["account"]
                                 },
                                 onBack = {
                                     when {
                                         showUploadedImages -> showUploadedImages = false
                                         showMyEvents -> showMyEvents = false
+                                        showMyNotes -> showMyNotes = false
                                         else -> nav.pop()
                                     }
                                 },
@@ -853,6 +911,7 @@ private fun runApp() = application {
                                             formLabels = PROFILE_FORM_LABELS,
                                             imagesLabels = UPLOADED_IMAGES_LABELS,
                                             eventsLabels = MY_EVENTS_LABELS,
+                                            notesLabels = MY_NOTES_LABELS,
                                             mapStyleUrl = HOSTED_STYLE_URL,
                                             mapStyleJson = styleJson,
                                             showUploadedImages = showUploadedImages,
@@ -861,6 +920,8 @@ private fun runApp() = application {
                                             },
                                             showMyEvents = showMyEvents,
                                             onShowMyEventsChange = { showMyEvents = it },
+                                            showMyNotes = showMyNotes,
+                                            onShowMyNotesChange = { showMyNotes = it },
                                             onDuplicateEvent = { event ->
                                                 addEvent = AddEventPrefill(
                                                     lat = event.lat,
@@ -872,9 +933,14 @@ private fun runApp() = application {
                                                 )
                                                 nav.push(Route.AddEvent)
                                             },
+                                            onOpenNoteOnMap = { note ->
+                                                mapFocus = note.lat to note.lon
+                                                nav.reset(Route.Map)
+                                            },
                                             onLoggedOut = {
                                                 showUploadedImages = false
                                                 showMyEvents = false
+                                                showMyNotes = false
                                                 onLoggedOut()
                                             },
                                         )
@@ -1069,7 +1135,7 @@ private fun AreaPlaceIssue.osmEditUrl(): String =
 private const val JOIN_US_URL = "https://btcmap.org/join-us"
 
 /** The desktop app's full-window pages. */
-private enum class Route { Map, Area, AreaAdmin, Event, Feed, Settings, Colors, DbStats, ManageAreas, Account, Report, AddPlace, AddEvent, AddComment, Boost, Infra, EventReview }
+private enum class Route { Map, Area, AreaAdmin, Event, Feed, Settings, Colors, DbStats, ManageAreas, Account, Report, AddPlace, AddEvent, AddNote, AddComment, Boost, Infra, EventReview }
 
 /**
  * What the add-event screen opens with. From the map it is just the centre; from
@@ -1163,6 +1229,7 @@ private fun renderScreen(spec: String) {
                         )
                         var showUploadedImages by remember { mutableStateOf(false) }
                         var showMyEvents by remember { mutableStateOf(false) }
+                        var showMyNotes by remember { mutableStateOf(false) }
                         AccountScreen(
                             api = api,
                             db = db,
@@ -1178,6 +1245,7 @@ private fun renderScreen(spec: String) {
                                     formLabels = PROFILE_FORM_LABELS,
                                     imagesLabels = UPLOADED_IMAGES_LABELS,
                                     eventsLabels = MY_EVENTS_LABELS,
+                                    notesLabels = MY_NOTES_LABELS,
                                     mapStyleUrl = HOSTED_STYLE_URL,
                                     mapStyleJson = null,
                                     showUploadedImages = showUploadedImages,
@@ -1186,6 +1254,8 @@ private fun renderScreen(spec: String) {
                                     },
                                     showMyEvents = showMyEvents,
                                     onShowMyEventsChange = { showMyEvents = it },
+                                    showMyNotes = showMyNotes,
+                                    onShowMyNotesChange = { showMyNotes = it },
                                     onLoggedOut = onLoggedOut,
                                 )
                             },
@@ -1430,6 +1500,8 @@ private val ACCOUNT_LABELS = LABELS.account
 private val REPORT_LABELS = LABELS.report
 private val ADD_PLACE_LABELS = LABELS.addPlace
 private val ADD_EVENT_LABELS = LABELS.addEvent
+private val ADD_NOTE_LABELS = LABELS.addNote
+private val MY_NOTES_LABELS = LABELS.myNotes
 private val ADD_LOCATION_LABELS = LABELS.addLocation
 private val PLACE_SHEET_STRINGS = LABELS.placeStrings
 private val DESKTOP_AREA_STRINGS = LABELS.area

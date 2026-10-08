@@ -47,12 +47,16 @@ class SyncManagerTest {
 
     private fun manager(
         sync: () -> Sync,
+        refreshUser: suspend () -> Boolean = { false },
+        syncNotes: suspend () -> Boolean = { false },
         seedPlaces: suspend (onBatch: (Long) -> Unit) -> Long = { 0L },
         seedEvents: suspend () -> Long = { 0L },
         seedComments: suspend () -> Long = { 0L },
         seedAreas: suspend () -> Long = { 0L },
     ) = SyncManager(
         sync = sync,
+        refreshUser = refreshUser,
+        syncNotes = syncNotes,
         seedPlaces = seedPlaces,
         seedEvents = seedEvents,
         seedComments = seedComments,
@@ -197,6 +201,84 @@ class SyncManagerTest {
     }
 
     @Test
+    fun runFullSync_emitsUserChangedOnlyWhenTheProfileChanged() = runTest {
+        enqueueEmpty()
+        enqueueEmpty()
+        val sync = Sync(createApi(), createDatabase())
+
+        val results = ArrayDeque(listOf(true, false))
+        val subject = manager(sync = { sync }, refreshUser = { results.removeFirst() })
+
+        val events = mutableListOf<SyncEvent>()
+        backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
+            subject.events.collect { events += it }
+        }
+
+        subject.runFullSync()
+        subject.runFullSync()
+
+        Assert.assertEquals(listOf(SyncEvent.UserChanged), events)
+    }
+
+    @Test
+    fun runFullSync_keepsGoingWhenTheUserRefreshFails() = runTest {
+        enqueueEmpty()
+        val sync = Sync(createApi(), createDatabase())
+
+        val seeded = mutableListOf<String>()
+        val subject = manager(
+            sync = { sync },
+            refreshUser = { throw RuntimeException("refresh failed") },
+            seedPlaces = { seeded += "places"; 0L },
+            seedAreas = { seeded += "areas"; 0L },
+        )
+
+        // Must not throw: the app-scoped sync guards the profile refresh like
+        // any other step, so a failure cannot crash the process.
+        subject.runFullSync()
+
+        Assert.assertEquals(listOf("places", "areas"), seeded)
+        Assert.assertEquals(SyncState.Idle, subject.state.value)
+    }
+
+    @Test
+    fun runFullSync_emitsNotesChangedOnlyWhenTheNotesChanged() = runTest {
+        enqueueEmpty()
+        enqueueEmpty()
+        val sync = Sync(createApi(), createDatabase())
+
+        val results = ArrayDeque(listOf(true, false))
+        val subject = manager(sync = { sync }, syncNotes = { results.removeFirst() })
+
+        val events = mutableListOf<SyncEvent>()
+        backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
+            subject.events.collect { events += it }
+        }
+
+        subject.runFullSync()
+        subject.runFullSync()
+
+        Assert.assertEquals(listOf(SyncEvent.NotesChanged), events)
+    }
+
+    @Test
+    fun runFullSync_refreshesTheProfileLastAndNotesBeforeIt() = runTest {
+        enqueueEmpty()
+        val sync = Sync(createApi(), createDatabase())
+
+        val order = mutableListOf<String>()
+        val subject = manager(
+            sync = { sync },
+            refreshUser = { order += "profile"; false },
+            syncNotes = { order += "notes"; false },
+        )
+
+        subject.runFullSync()
+
+        Assert.assertEquals(listOf("notes", "profile"), order)
+    }
+
+    @Test
     fun syncComments_reportsFailureInsteadOfThrowing() = runTest {
         val subject = manager(sync = { throw RuntimeException("database unavailable") })
 
@@ -215,6 +297,8 @@ class SyncManagerTest {
         try {
             val subject = SyncManager(
                 sync = { throw RuntimeException("not reached in this test") },
+                refreshUser = { false },
+                syncNotes = { false },
                 scope = scope,
                 seedPlaces = { seeds.incrementAndGet(); release.await(); 0L },
                 seedEvents = { 0L },

@@ -36,6 +36,7 @@ data class AppLabels(
     val directions: String,
     val addPlace: AddPlaceLabels,
     val addEvent: AddEventLabels,
+    val addNote: AddNoteLabels,
     val report: ReportPlaceLabels,
     val colorsTitle: String,
     val colors: ColorsPageLabels,
@@ -59,6 +60,8 @@ data class AppLabels(
     val feedRow: (ActivityFeedItem) -> ActivityFeedRow,
     /** A generic confirmation label, for the feed filter's OK button. */
     val ok: String,
+    /** The strings of the dialog a note pin opens (see `NoteDialog`). */
+    val noteDialog: NoteDialogLabels,
     val area: AreaStrings,
     /** The current map style's display name, for the offline download dialog. */
     val offlineStyleName: String,
@@ -88,10 +91,12 @@ data class AppLabels(
     val profileTitle: String,
     val uploadedImagesTitle: String,
     val myEventsTitle: String,
+    val myNotesTitle: String,
     val userProfile: UserProfileLabels,
     val profileForm: ProfileFormLabels,
     val uploadedImages: UploadedImagesLabels,
     val myEvents: MyEventsLabels,
+    val myNotes: MyNotesLabels,
     val account: AccountLabels,
     val placeStrings: PlaceSheetStrings,
     val addLocation: org.btcmap.ui.map.AddLocationLabels,

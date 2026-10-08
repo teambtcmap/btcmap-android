@@ -65,6 +65,7 @@ fun SearchOverlay(
     addLocationLabels: AddLocationLabels = AddLocationLabels(
         addPlace = "Add a place",
         addEvent = "Add an event",
+        addNote = "Add a note",
     ),
     loading: Boolean = false,
     active: Boolean = false,
@@ -114,6 +115,7 @@ fun SearchOverlay(
                             AddLocationAction(
                                 onAddPlace = actions.onAddPlace,
                                 onAddEvent = actions.onAddEvent,
+                                onAddNote = actions.onAddNote,
                                 labels = addLocationLabels,
                             )
                         }
@@ -248,50 +250,51 @@ private fun SearchResultRow(
 
 /**
  * The add-location action: a single icon that acts directly when only one kind
- * of location is offered, or opens a chooser between a place and an event when
- * both are.
+ * of location is offered, or opens a chooser between the place, event and note
+ * kinds when more than one is.
  */
 @Composable
 private fun AddLocationAction(
     onAddPlace: (() -> Unit)?,
     onAddEvent: (() -> Unit)?,
+    onAddNote: (() -> Unit)?,
     labels: AddLocationLabels,
 ) {
-    if (onAddPlace == null && onAddEvent == null) return
+    val items = buildList {
+        onAddPlace?.let { add(AddLocationItem(labels.addPlace, "place", it)) }
+        onAddEvent?.let { add(AddLocationItem(labels.addEvent, "event", it)) }
+        onAddNote?.let { add(AddLocationItem(labels.addNote, "notes", it)) }
+    }
+    if (items.isEmpty()) return
 
     var expanded by remember { mutableStateOf(false) }
 
     Box {
         IconButton(
             onClick = {
-                when {
-                    onAddEvent == null -> onAddPlace?.invoke()
-                    onAddPlace == null -> onAddEvent.invoke()
-                    else -> expanded = true
-                }
+                if (items.size == 1) items.single().onClick() else expanded = true
             },
         ) {
             MaterialSymbol(glyph = "add_location_alt", contentDescription = null)
         }
         DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-            if (onAddPlace != null) {
+            items.forEach { item ->
                 DropdownMenuItem(
-                    text = { Text(labels.addPlace) },
+                    text = { Text(item.label) },
+                    leadingIcon = { MaterialSymbol(glyph = item.glyph, contentDescription = null) },
                     onClick = {
                         expanded = false
-                        onAddPlace()
-                    },
-                )
-            }
-            if (onAddEvent != null) {
-                DropdownMenuItem(
-                    text = { Text(labels.addEvent) },
-                    onClick = {
-                        expanded = false
-                        onAddEvent()
+                        item.onClick()
                     },
                 )
             }
         }
     }
 }
+
+/** One row of the add-location chooser: its label, its leading icon and its action. */
+private data class AddLocationItem(
+    val label: String,
+    val glyph: String,
+    val onClick: () -> Unit,
+)

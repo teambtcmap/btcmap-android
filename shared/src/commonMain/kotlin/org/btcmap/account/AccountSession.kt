@@ -3,16 +3,18 @@ package org.btcmap.account
 import org.btcmap.platform.ioDispatcher
 import kotlinx.coroutines.withContext
 import org.btcmap.api.Api
+import org.btcmap.api.getUser
 import org.btcmap.api.toDbUser
 import org.btcmap.api.updateUsername
 import org.btcmap.db.Database
 import org.btcmap.db.table.user.User as DbUser
 import org.btcmap.settings.Settings
 import org.btcmap.settings.authToken
+import org.btcmap.settings.authorized
 
 /**
  * Account-level operations shared by Android and the desktop: renaming the
- * account and signing out.
+ * account, refreshing the cached profile and signing out.
  */
 object AccountSession {
 
@@ -36,6 +38,33 @@ object AccountSession {
             }
         }
         return updated
+    }
+
+    /**
+     * Re-reads the signed-in profile from the server and caches it, so a role
+     * change, a rename or a saved-items change made elsewhere (e.g. a promotion
+     * on btcmap.org) reaches this device without a re-login. Returns true when
+     * the stored user changed.
+     *
+     * Signed out, the call is skipped and false is returned without touching the
+     * network. The whole profile is replaced because the endpoint returns the
+     * canonical saved lists too; a failure propagates to the caller rather than
+     * being swallowed, so the sync reports it like any other step.
+     */
+    suspend fun refresh(api: Api, db: Database, settings: Settings): Boolean {
+        if (!settings.authorized) return false
+
+        val updated = api.getUser().toDbUser()
+        return withContext(ioDispatcher) {
+            val cached = db.user.select()
+            if (cached == updated) return@withContext false
+
+            db.transaction {
+                db.user.delete()
+                db.user.insert(updated)
+            }
+            true
+        }
     }
 
     /**

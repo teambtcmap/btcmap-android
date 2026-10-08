@@ -101,6 +101,21 @@ class MarkerBitmapFactory(
     )
 
     /**
+     * The stock note pin: the marker-coloured teardrop with the note glyph, the
+     * temporary positioning pin the add-note screen previews. It keeps its own
+     * amber background rather than the user's marker colour, so a note reads as a
+     * note on the map and in the profile's banners.
+     */
+    fun notePin(): ImageBitmap = render(
+        character = NOTE_ICON,
+        outdated = false,
+        boosted = false,
+        comments = null,
+        backgroundColor = NOTE_MARKER_COLOR,
+        iconColor = NOTE_MARKER_ICON_COLOR,
+    )
+
+    /**
      * The place glyph on its own, for the exchange and event markers, which
      * draw the glyph over the shared pin instead of baking it in.
      */
@@ -129,10 +144,13 @@ class MarkerBitmapFactory(
         outdated: Boolean,
         boosted: Boolean,
         comments: Long?,
+        backgroundColor: Color? = null,
+        iconColor: Color? = null,
     ): ImageBitmap {
         val boostedAndCurrent = boosted && !outdated
-        val pinColor = if (boostedAndCurrent) palette.boostedMarkerBackground else palette.markerBackground
-        val glyphColor = when {
+        val pinColor = backgroundColor
+            ?: if (boostedAndCurrent) palette.boostedMarkerBackground else palette.markerBackground
+        val glyphColor = iconColor ?: when {
             outdated -> palette.markerIcon.copy(alpha = palette.markerIcon.alpha * OUTDATED_ICON_ALPHA)
             boostedAndCurrent -> palette.boostedMarkerIcon
             else -> palette.markerIcon
@@ -243,6 +261,7 @@ class MarkerBitmapFactory(
         const val BADGE_TEXT_DP = 11f
         const val BADGE_TOP_PADDING_DP = 10f
         const val FALLBACK_ICON = "storefront"
+        const val NOTE_ICON = "notes"
         const val SINGLE_GLYPH_MAX_WIDTH_RATIO = 1.5f
         const val PIN_VIEWPORT = 24f
         const val ICON_PADDING_PX = 4
