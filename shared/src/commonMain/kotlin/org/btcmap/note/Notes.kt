@@ -70,6 +70,7 @@ private fun ApiNote.toDbNote(): Note = Note(
     lat = lat,
     lon = lon,
     text = text,
+    icon = icon,
     public = public,
     createdAt = createdAt.toInstant(),
     updatedAt = updatedAt.toInstant(),

@@ -24,7 +24,18 @@ class MyNotesScreenTest {
             setContent {
                 MyNotesScreen(
                     labels = labels,
-                    load = { listOf(MyNoteUi(id = 1L, text = "ATM is inside", public = false, lat = 1.0, lon = 2.0)) },
+                    load = {
+                        listOf(
+                            MyNoteUi(
+                                id = 1L,
+                                text = "ATM is inside",
+                                icon = DEFAULT_NOTE_ICON,
+                                public = false,
+                                lat = 1.0,
+                                lon = 2.0,
+                            ),
+                        )
+                    },
                     update = { id, public -> updates += id to public },
                     delete = {},
                 )
@@ -46,7 +57,18 @@ class MyNotesScreenTest {
             setContent {
                 MyNotesScreen(
                     labels = labels,
-                    load = { listOf(MyNoteUi(id = 3L, text = "Reminder", public = true, lat = 1.0, lon = 2.0)) },
+                    load = {
+                        listOf(
+                            MyNoteUi(
+                                id = 3L,
+                                text = "Reminder",
+                                icon = DEFAULT_NOTE_ICON,
+                                public = true,
+                                lat = 1.0,
+                                lon = 2.0,
+                            ),
+                        )
+                    },
                     update = { _, _ -> },
                     delete = { deleted += it.id },
                 )

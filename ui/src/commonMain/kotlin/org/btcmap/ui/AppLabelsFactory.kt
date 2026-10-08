@@ -119,6 +119,7 @@ fun appLabels(
         back = strings["navigate_up"],
         text = strings["note_text"],
         textPlaceholder = strings["note_text_placeholder"],
+        icon = strings["note_icon"],
         private = strings["note_private"],
         public = strings["note_public"],
         privateDescription = strings["note_private_description"],

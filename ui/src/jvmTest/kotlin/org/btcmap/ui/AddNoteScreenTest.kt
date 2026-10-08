@@ -48,7 +48,7 @@ class AddNoteScreenTest {
                     palette = palette,
                     submit = { drafts += it },
                     onBack = {},
-                    map = {},
+                    map = { _, _ -> },
                 )
             }
             onNodeWithTag(ADD_NOTE_SUBMIT_TAG).performScrollTo().performClick()
@@ -73,7 +73,7 @@ class AddNoteScreenTest {
                     palette = palette,
                     submit = { drafts += it },
                     onBack = {},
-                    map = {},
+                    map = { _, _ -> },
                 )
             }
             onNodeWithTag(ADD_NOTE_TEXT_TAG).performTextInput("ATM is inside")
@@ -84,8 +84,35 @@ class AddNoteScreenTest {
         val draft = drafts.single()
         assertEquals("ATM is inside", draft.text)
         assertTrue(draft.public)
+        assertEquals(DEFAULT_NOTE_ICON, draft.icon)
         assertEquals(1.5, draft.lat)
         assertEquals(2.5, draft.lon)
+    }
+
+    @OptIn(ExperimentalTestApi::class)
+    @Test
+    fun choosingAnIcon_submitsThatIcon() {
+        val drafts = mutableListOf<AddNoteDraft>()
+        runComposeUiTest {
+            setContent {
+                AddNoteScreen(
+                    lat = 1.0,
+                    lon = 2.0,
+                    styleUrl = "",
+                    styleJson = null,
+                    labels = labels,
+                    iconFont = null,
+                    palette = palette,
+                    submit = { drafts += it },
+                    onBack = {},
+                    map = { _, _ -> },
+                )
+            }
+            onNodeWithTag(ADD_NOTE_TEXT_TAG).performTextInput("ATM is inside")
+            onNodeWithTag(ADD_NOTE_ICON_TAG_PREFIX + "star").performScrollTo().performClick()
+            onNodeWithTag(ADD_NOTE_SUBMIT_TAG).performScrollTo().performClick()
+        }
+        assertEquals("star", drafts.single().icon)
     }
 
     @OptIn(ExperimentalTestApi::class)
@@ -103,7 +130,7 @@ class AddNoteScreenTest {
                     palette = palette,
                     submit = {},
                     onBack = {},
-                    map = {},
+                    map = { _, _ -> },
                 )
             }
             // Private is the default.

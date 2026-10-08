@@ -27,23 +27,30 @@ class NotesTest {
         baseUrl = { serverRule.server.url("/").toString().toUrl() },
     )
 
-    private fun cached(id: Long, text: String = "cached", public: Boolean = false) = Note(
+    private fun cached(
+        id: Long,
+        text: String = "cached",
+        public: Boolean = false,
+        icon: String = "notes",
+    ) = Note(
         id = id,
         lat = 1.0,
         lon = 2.0,
         text = text,
+        icon = icon,
         public = public,
         createdAt = Instant.fromEpochSeconds(0),
         updatedAt = Instant.fromEpochSeconds(0),
     )
 
-    private fun noteJson(id: Long, text: String, public: Boolean = false) =
+    private fun noteJson(id: Long, text: String, public: Boolean = false, icon: String = "notes") =
         """
         {
             "id": $id,
             "lat": 1.0,
             "lon": 2.0,
             "text": "$text",
+            "icon": "$icon",
             "public": $public,
             "author": { "id": 17, "name": "satoshi" },
             "created_at": "2026-10-07T12:00:00Z",
@@ -68,7 +75,7 @@ class NotesTest {
         // A note the server no longer has: a full rewrite must drop it.
         db.note.insert(listOf(cached(id = 99, text = "stale")))
 
-        enqueue("[${noteJson(id = 7, text = "ATM inside")}]")
+        enqueue("[${noteJson(id = 7, text = "ATM inside", icon = "star")}]")
 
         val changed = Notes.sync(api(), db, settings)
 
@@ -76,6 +83,7 @@ class NotesTest {
         val rows = db.note.selectAll()
         Assert.assertEquals(listOf(7L), rows.map { it.id })
         Assert.assertEquals("ATM inside", rows.single().text)
+        Assert.assertEquals("star", rows.single().icon)
     }
 
     @Test
@@ -90,6 +98,7 @@ class NotesTest {
                     lat = 1.0,
                     lon = 2.0,
                     text = "ATM inside",
+                    icon = "notes",
                     public = false,
                     createdAt = Instant.parse("2026-10-07T12:00:00Z"),
                     updatedAt = Instant.parse("2026-10-07T12:00:00Z"),

@@ -29,7 +29,7 @@ class Database(driver: SQLiteDriver, val path: String) {
          * project's history, so the stale file can be told apart from ours by
          * the pragma alone (see [initialize]).
          */
-        const val VERSION = 109
+        const val VERSION = 110
 
         /**
          * The first version this app is responsible for upgrading. Anything
@@ -459,7 +459,34 @@ class Database(driver: SQLiteDriver, val path: String) {
                     // The signed-in user's personal notes are now cached so the
                     // sync rewrites them in place and the My-notes screen reads
                     // from the database instead of fetching on every open.
-                    conn.execSQL(org.btcmap.db.table.note.CREATE)
+                    // Inline the schema as of version 108 rather than
+                    // note.CREATE: each migration must produce the schema of its
+                    // own version, and note.CREATE has since grown the icon
+                    // column the next step adds.
+                    conn.execSQL(
+                        """
+                        CREATE TABLE ${org.btcmap.db.table.note.TABLE} (
+                            ${org.btcmap.db.table.note.ID} INTEGER PRIMARY KEY NOT NULL,
+                            ${org.btcmap.db.table.note.LAT} REAL NOT NULL,
+                            ${org.btcmap.db.table.note.LON} REAL NOT NULL,
+                            ${org.btcmap.db.table.note.TEXT} TEXT NOT NULL,
+                            ${org.btcmap.db.table.note.IS_PUBLIC} INTEGER NOT NULL,
+                            ${org.btcmap.db.table.note.CREATED_AT} TEXT NOT NULL,
+                            ${org.btcmap.db.table.note.UPDATED_AT} TEXT NOT NULL
+                        );
+                        """
+                    )
+                }
+
+                109 -> {
+                    // Notes gained an `icon` discriminator so a note's pin can
+                    // vary; a note cached before this version keeps the generic
+                    // "notes" pin the API defaults to.
+                    conn.execSQL(
+                        "ALTER TABLE ${org.btcmap.db.table.note.TABLE} " +
+                            "ADD COLUMN ${org.btcmap.db.table.note.ICON} " +
+                            "TEXT NOT NULL DEFAULT 'notes';"
+                    )
                 }
 
                 else -> throw Exception("migration is missing for version $version")

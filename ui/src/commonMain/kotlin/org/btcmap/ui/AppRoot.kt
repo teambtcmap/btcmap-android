@@ -280,6 +280,7 @@ fun AppRoot(
                         lat = draft.lat,
                         lon = draft.lon,
                         text = draft.text,
+                        icon = draft.icon,
                         public = draft.public,
                     )
                 },

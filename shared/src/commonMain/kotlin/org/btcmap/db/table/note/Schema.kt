@@ -6,6 +6,7 @@ const val ID = "id"
 const val LAT = "lat"
 const val LON = "lon"
 const val TEXT = "text"
+const val ICON = "icon"
 const val IS_PUBLIC = "is_public"
 const val CREATED_AT = "created_at"
 const val UPDATED_AT = "updated_at"
@@ -16,6 +17,7 @@ const val CREATE = """
         $LAT REAL NOT NULL,
         $LON REAL NOT NULL,
         $TEXT TEXT NOT NULL,
+        $ICON TEXT NOT NULL DEFAULT 'notes',
         $IS_PUBLIC INTEGER NOT NULL,
         $CREATED_AT TEXT NOT NULL,
         $UPDATED_AT TEXT NOT NULL

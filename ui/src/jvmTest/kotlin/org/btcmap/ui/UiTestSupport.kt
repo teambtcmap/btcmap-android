@@ -158,6 +158,7 @@ internal val TEST_ADD_NOTE_LABELS = AddNoteLabels(
     back = "Navigate up",
     text = "Note",
     textPlaceholder = "e.g. ATM is inside, ask at the bar",
+    icon = "Icon",
     private = "Private",
     public = "Public",
     privateDescription = "Only you can see your private notes",

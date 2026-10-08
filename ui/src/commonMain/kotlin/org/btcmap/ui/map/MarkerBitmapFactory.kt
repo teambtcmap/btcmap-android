@@ -26,6 +26,7 @@ import org.btcmap.map.EVENT_ICON
 import org.btcmap.map.MAX_COMMENT_BADGE
 import org.btcmap.map.isBoosted
 import org.btcmap.map.isOutdated
+import org.btcmap.ui.DEFAULT_NOTE_ICON
 import org.maplibre.compose.map.ResolvedStyleImage
 import org.maplibre.compose.map.StyleImages
 import kotlin.math.roundToInt
@@ -101,18 +102,17 @@ class MarkerBitmapFactory(
     )
 
     /**
-     * The stock note pin: the marker-coloured teardrop with the note glyph, the
-     * temporary positioning pin the add-note screen previews. It keeps its own
-     * amber background rather than the user's marker colour, so a note reads as a
-     * note on the map and in the profile's banners.
+     * The note pin: the marker-coloured teardrop carrying [icon]'s glyph, drawn
+     * on the map per note and previewed by the add-note screen. It wears the
+     * user's marker background and glyph colours, like every other pin. An icon
+     * the font cannot draw falls back to the generic glyph [renderableGlyph]
+     * resolves.
      */
-    fun notePin(): ImageBitmap = render(
-        character = NOTE_ICON,
+    fun notePin(icon: String = DEFAULT_NOTE_ICON): ImageBitmap = render(
+        character = icon,
         outdated = false,
         boosted = false,
         comments = null,
-        backgroundColor = NOTE_MARKER_COLOR,
-        iconColor = NOTE_MARKER_ICON_COLOR,
     )
 
     /**
@@ -261,7 +261,6 @@ class MarkerBitmapFactory(
         const val BADGE_TEXT_DP = 11f
         const val BADGE_TOP_PADDING_DP = 10f
         const val FALLBACK_ICON = "storefront"
-        const val NOTE_ICON = "notes"
         const val SINGLE_GLYPH_MAX_WIDTH_RATIO = 1.5f
         const val PIN_VIEWPORT = 24f
         const val ICON_PADDING_PX = 4

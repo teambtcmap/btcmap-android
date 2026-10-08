@@ -3,6 +3,8 @@ package org.btcmap.ui
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -16,6 +18,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -60,11 +63,15 @@ const val ADD_NOTE_PRIVATE_TAG = "add-note-private"
 const val ADD_NOTE_PUBLIC_TAG = "add-note-public"
 const val ADD_NOTE_SUBMIT_TAG = "add-note-submit"
 
+/** Test tag prefix for an icon choice in the add-note picker, keyed by the icon. */
+const val ADD_NOTE_ICON_TAG_PREFIX = "add-note-icon-"
+
 /** The fields a new note is submitted with, positioned at the map centre. */
 data class AddNoteDraft(
     val lat: Double,
     val lon: Double,
     val text: String,
+    val icon: String,
     val public: Boolean,
 )
 
@@ -75,6 +82,8 @@ data class AddNoteLabels(
     val back: String,
     val text: String,
     val textPlaceholder: String,
+    /** The label over the icon picker. */
+    val icon: String,
     /** The private segment of the visibility control. */
     val private: String,
     /** The public segment of the visibility control. */
@@ -93,9 +102,10 @@ data class AddNoteLabels(
 
 /**
  * The whole add-note screen: a Material 3 top app bar, a positioning map with
- * its drag hint, a note body and a public/private switch. The location starts at
- * the map centre the host handed over and can be adjusted by panning under the
- * pin. Notes are private unless the switch is turned on.
+ * its drag hint, a note body, an icon picker and a public/private switch. The
+ * location starts at the map centre the host handed over and can be adjusted by
+ * panning under the pin, which previews the chosen icon. Notes are private unless
+ * the switch is turned on.
  *
  * It mirrors [AddPlaceScreen] and [AddEventScreen]: the screen owns everything it
  * renders, the hosts cannot drift apart, [submit] is injected so it can be driven
@@ -117,19 +127,22 @@ fun AddNoteScreen(
     palette: MarkerPalette,
     submit: suspend (AddNoteDraft) -> Unit,
     onBack: () -> Unit,
-    map: @Composable ((Double, Double) -> Unit) -> Unit = { onCenterChanged ->
-        LocationPickerMap(
-            lat = lat,
-            lon = lon,
-            styleUrl = styleUrl,
-            styleJson = styleJson,
-            palette = palette,
-            onCenterChanged = onCenterChanged,
-            pin = LocationPickerPin.Note,
-        )
-    },
+    map: @Composable (icon: String, onCenterChanged: (Double, Double) -> Unit) -> Unit =
+        { selectedIcon, onCenterChanged ->
+            LocationPickerMap(
+                lat = lat,
+                lon = lon,
+                styleUrl = styleUrl,
+                styleJson = styleJson,
+                palette = palette,
+                onCenterChanged = onCenterChanged,
+                pin = LocationPickerPin.Note,
+                noteIcon = selectedIcon,
+            )
+        },
 ) {
     var center by remember { mutableStateOf(lat to lon) }
+    var icon by rememberSaveable { mutableStateOf(DEFAULT_NOTE_ICON) }
     var busy by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<String?>(null) }
     var submitted by remember { mutableStateOf(false) }
@@ -182,7 +195,7 @@ fun AddNoteScreen(
                                 .height(240.dp)
                                 .clip(MaterialTheme.shapes.medium),
                         ) {
-                            map { newLat, newLon -> center = newLat to newLon }
+                            map(icon) { newLat, newLon -> center = newLat to newLon }
                             // The hint floats on the map so it reads as belonging to
                             // it, in the inverse-surface role M3 reserves for content
                             // over imagery.
@@ -206,12 +219,15 @@ fun AddNoteScreen(
                         busy = busy,
                         submitted = submitted,
                         labels = labels,
+                        icon = icon,
+                        onIconChange = { icon = it },
                         onSubmit = { text, public ->
                             busy = true
                             val draft = AddNoteDraft(
                                 lat = center.first,
                                 lon = center.second,
                                 text = text,
+                                icon = icon,
                                 public = public,
                             )
                             scope.launch {
@@ -243,12 +259,14 @@ fun AddNoteScreen(
  * visibility is a private/public segmented control, and the primary action shows
  * a spinner while the submission is in flight.
  */
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun AddNoteForm(
     busy: Boolean,
     submitted: Boolean,
     labels: AddNoteLabels,
+    icon: String,
+    onIconChange: (String) -> Unit,
     onSubmit: (text: String, public: Boolean) -> Unit,
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
@@ -291,6 +309,36 @@ fun AddNoteForm(
                 .fillMaxWidth()
                 .testTag(ADD_NOTE_TEXT_TAG),
         )
+        // The pin glyph: a wrapping group of the icons the app offers, of which
+        // exactly one is selected. The chosen icon is previewed on the map above
+        // and stored with the note.
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 16.dp),
+        ) {
+            Text(
+                text = labels.icon,
+                style = MaterialTheme.typography.labelLarge,
+            )
+            FlowRow(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 8.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                NOTE_ICONS.forEach { option ->
+                    FilterChip(
+                        selected = icon == option,
+                        onClick = { onIconChange(option) },
+                        enabled = !busy,
+                        label = { MaterialSymbol(glyph = option, contentDescription = option) },
+                        modifier = Modifier.testTag(ADD_NOTE_ICON_TAG_PREFIX + option),
+                    )
+                }
+            }
+        }
         // A two-segment control: the whole segment is the target, and the chosen
         // visibility is explained in the caption below.
         Column(

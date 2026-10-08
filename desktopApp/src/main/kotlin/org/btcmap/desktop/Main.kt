@@ -67,6 +67,7 @@ import org.btcmap.ui.map.AddLocationLabels
 import org.btcmap.ui.map.AreaPreviewMap
 import org.btcmap.ui.map.EventMiniMap
 import org.btcmap.ui.map.SearchActions
+import org.btcmap.ui.map.emptyGlyphRange
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withTimeoutOrNull
 import androidx.compose.material3.Text
@@ -191,7 +192,10 @@ import org.btcmap.i18n.getLocalizedDescription
 import org.btcmap.i18n.getLocalizedName
 import org.btcmap.map.toEventGeoJson
 import java.io.File
+import java.net.HttpURLConnection
+import java.net.URI
 import java.net.URLDecoder
+import java.util.concurrent.ConcurrentHashMap
 import okio.Source
 import okio.source
 
@@ -681,6 +685,7 @@ private fun runApp() = application {
                                     lat = draft.lat,
                                     lon = draft.lon,
                                     text = draft.text,
+                                    icon = draft.icon,
                                     public = draft.public,
                                 )
                             },
@@ -1438,16 +1443,82 @@ private const val ICON_FONT_RESOURCE = "material-symbols.ttf"
 
 private const val BUNDLED_MAP_SCHEME = "app"
 
-/** Serves `app://map-styles/...` (sprites and glyphs) from the app resources. */
-private fun bundledMapResources(): MapResourceProvider =
-    MapResourceProvider(scheme = BUNDLED_MAP_SCHEME) { request ->
+/** The glyph directory inside `map-styles/`, and the manifest the bundler writes next to it. */
+private const val GLYPH_PATH_PREFIX = "map-styles/glyphs/"
+private const val GLYPH_SOURCE_ASSET = "${GLYPH_PATH_PREFIX}source.json"
+
+/** OpenFreeMap's glyph host, used when the bundle carries no manifest. */
+private const val HOSTED_GLYPHS_URL = "https://tiles.openfreemap.org/fonts/"
+
+/** How long a single online glyph range fetch may take before it gives up. */
+private const val GLYPH_FETCH_TIMEOUT_MS = 10_000
+
+/**
+ * Serves `app://map-styles/...` (sprites and glyphs) from the app resources,
+ * mirroring the Android host (`org.btcmap.ui.map.configureBundledMapResources`).
+ *
+ * The glyph bundle omits the CJK ideograph and Hangul blocks (they are ~90 MB on
+ * their own), so a range the styles need there is fetched from the glyph host
+ * recorded in [GLYPH_SOURCE_ASSET]. When that fetch fails (offline), an empty
+ * range is served so the tile still renders: MapLibre Native drops a whole tile
+ * whose glyph request errors (maplibre-native#4430), which would otherwise blank
+ * the basemap over those regions even though the tile's roads and polygons
+ * loaded fine.
+ */
+private fun bundledMapResources(): MapResourceProvider {
+    val glyphBase = glyphSourceBase()
+    val glyphCache = ConcurrentHashMap<String, ByteArray>()
+
+    return MapResourceProvider(scheme = BUNDLED_MAP_SCHEME) { request ->
         // Glyph paths arrive percent-encoded ("Noto%20Sans%20Italic").
-        val path = URLDecoder.decode(
-            request.url.removePrefix("$BUNDLED_MAP_SCHEME://"),
-            Charsets.UTF_8.name(),
-        )
-        resourceBytes(path) ?: throw java.io.FileNotFoundException(path)
+        val encodedPath = request.url.removePrefix("$BUNDLED_MAP_SCHEME://")
+        val path = URLDecoder.decode(encodedPath, Charsets.UTF_8.name())
+        val bundled = resourceBytes(path)
+        when {
+            bundled != null -> bundled
+            !path.startsWith(GLYPH_PATH_PREFIX) -> throw java.io.FileNotFoundException(path)
+            else -> glyphCache.getOrPut(encodedPath) {
+                fetchGlyphRange(glyphBase, encodedPath) ?: emptyGlyphRange(
+                    fontstack = path.removePrefix(GLYPH_PATH_PREFIX).substringBeforeLast('/'),
+                    range = path.substringAfterLast('/').removeSuffix(".pbf"),
+                )
+            }
+        }
     }
+}
+
+/**
+ * The base URL the bundled glyph ranges were downloaded from, from the manifest
+ * the bundler writes. Missing or malformed, it falls back to [HOSTED_GLYPHS_URL].
+ */
+private fun glyphSourceBase(): String = runCatching {
+    val json = resourceBytes(GLYPH_SOURCE_ASSET)?.decodeToString() ?: return@runCatching null
+    Regex("\"base\"\\s*:\\s*\"([^\"]+)\"").find(json)?.groupValues?.get(1)
+}.getOrNull()?.takeIf { it.isNotBlank() } ?: HOSTED_GLYPHS_URL
+
+/**
+ * The glyph range in [encodedPath] (an encoded `map-styles/glyphs/<fontstack>/
+ * <range>.pbf`), fetched from [base], or null when it could not be fetched.
+ */
+private fun fetchGlyphRange(base: String, encodedPath: String): ByteArray? {
+    val relative = encodedPath.removePrefix(GLYPH_PATH_PREFIX)
+    return runCatching {
+        val url = URI(base).resolve(relative).toURL()
+        (url.openConnection() as HttpURLConnection).run {
+            connectTimeout = GLYPH_FETCH_TIMEOUT_MS
+            readTimeout = GLYPH_FETCH_TIMEOUT_MS
+            try {
+                if (responseCode == HttpURLConnection.HTTP_OK) {
+                    inputStream.use { it.readBytes() }
+                } else {
+                    null
+                }
+            } finally {
+                disconnect()
+            }
+        }
+    }.getOrNull()
+}
 
 /** The bundled style at [assetPath], with its sprite and glyph URLs rewritten. */
 private fun bundledStyleJson(assetPath: String): String {

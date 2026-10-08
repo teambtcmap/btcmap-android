@@ -233,6 +233,7 @@ internal val EN: Map<String, String> = mapOf(
         "no_saved_places" to "No saved places",
         "not_logged_in" to "Account",
         "not_verified" to "Not verified",
+        "note_icon" to "Icon",
         "note_private" to "Private",
         "note_private_description" to "Only you can see your private notes",
         "note_public" to "Public",

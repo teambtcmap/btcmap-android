@@ -60,6 +60,7 @@ private val NOTE_CARD_MAP_HEIGHT = 140.dp
 data class MyNoteUi(
     val id: Long,
     val text: String,
+    val icon: String,
     val public: Boolean,
     val lat: Double,
     val lon: Double,
@@ -235,12 +236,22 @@ private fun MyNoteCard(
             }
 
             Column(modifier = Modifier.padding(16.dp)) {
-                Text(
-                    text = note.text,
-                    style = MaterialTheme.typography.bodyLarge,
-                    maxLines = 5,
-                    overflow = TextOverflow.Ellipsis,
-                )
+                Row {
+                    // The note's icon, so its pin kind is recognisable before the
+                    // banner loads and while the banner is small.
+                    MaterialSymbol(
+                        glyph = note.icon,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(end = 12.dp),
+                    )
+                    Text(
+                        text = note.text,
+                        style = MaterialTheme.typography.bodyLarge,
+                        maxLines = 5,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                }
                 // Footer: a private/public segmented control on the start, the
                 // destructive delete on the end, so the two actions are separated
                 // instead of being crammed into one trailing slot.

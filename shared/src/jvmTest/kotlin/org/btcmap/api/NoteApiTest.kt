@@ -6,13 +6,14 @@ import org.junit.Test
 
 class NoteApiTest : ApiTestBase() {
 
-    private fun noteJson(id: Long = 7, public: Boolean = true): String =
+    private fun noteJson(id: Long = 7, public: Boolean = true, icon: String = "notes"): String =
         """
         {
             "id": $id,
             "lat": 53.55,
             "lon": 9.99,
             "text": "ATM is inside",
+            "icon": "$icon",
             "public": $public,
             "author": { "id": 17, "name": "satoshi" },
             "created_at": "2026-10-07T12:00:00Z",
@@ -21,19 +22,26 @@ class NoteApiTest : ApiTestBase() {
         """.trimIndent()
 
     @Test
-    fun createNote_postsCoordinatesTextAndVisibility() = runTest {
-        enqueueJson(noteJson())
+    fun createNote_postsCoordinatesTextIconAndVisibility() = runTest {
+        enqueueJson(noteJson(icon = "star"))
 
-        val note = api().createNote(lat = 53.55, lon = 9.99, text = "ATM is inside", public = true)
+        val note = api().createNote(
+            lat = 53.55,
+            lon = 9.99,
+            text = "ATM is inside",
+            icon = "star",
+            public = true,
+        )
 
         val request = takeRequest()
         Assert.assertEquals("POST", request.method)
         Assert.assertEquals("/v4/notes", request.url.encodedPath)
         Assert.assertEquals(
-            """{"lat":53.55,"lon":9.99,"text":"ATM is inside","public":true}""",
+            """{"lat":53.55,"lon":9.99,"text":"ATM is inside","icon":"star","public":true}""",
             request.jsonBody(),
         )
         Assert.assertEquals(7L, note.id)
+        Assert.assertEquals("star", note.icon)
         Assert.assertTrue(note.public)
         Assert.assertEquals(17L, note.authorId)
         Assert.assertEquals("satoshi", note.authorName)
@@ -41,7 +49,10 @@ class NoteApiTest : ApiTestBase() {
 
     @Test
     fun getMyNotes_getsTheOwnerScopedList() = runTest {
-        enqueueJson("[${noteJson(id = 1, public = false)},${noteJson(id = 2, public = true)}]")
+        enqueueJson(
+            "[${noteJson(id = 1, public = false, icon = "star")}," +
+                "${noteJson(id = 2, public = true)}]",
+        )
 
         val notes = api().getMyNotes()
 
@@ -49,6 +60,7 @@ class NoteApiTest : ApiTestBase() {
         Assert.assertEquals("GET", request.method)
         Assert.assertEquals("/v4/users/me/notes", request.url.encodedPath)
         Assert.assertEquals(listOf(1L, 2L), notes.map { it.id })
+        Assert.assertEquals(listOf("star", "notes"), notes.map { it.icon })
         Assert.assertFalse(notes.first().public)
         Assert.assertTrue(notes.last().public)
     }

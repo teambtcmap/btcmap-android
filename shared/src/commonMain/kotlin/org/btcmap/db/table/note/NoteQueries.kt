@@ -19,9 +19,9 @@ class NoteQueries(private val conn: SQLiteConnection) {
         conn.prepare(
             """
             INSERT OR REPLACE INTO $TABLE (
-                $ID, $LAT, $LON, $TEXT, $IS_PUBLIC, $CREATED_AT, $UPDATED_AT
+                $ID, $LAT, $LON, $TEXT, $ICON, $IS_PUBLIC, $CREATED_AT, $UPDATED_AT
             )
-            VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7);
+            VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8);
             """
         ).use {
             rows.forEach { row ->
@@ -29,9 +29,10 @@ class NoteQueries(private val conn: SQLiteConnection) {
                 it.bindDouble(2, row.lat)
                 it.bindDouble(3, row.lon)
                 it.bindText(4, row.text)
-                it.bindLong(5, if (row.public) 1L else 0L)
-                it.bindInstant(6, row.createdAt)
-                it.bindInstant(7, row.updatedAt)
+                it.bindText(5, row.icon)
+                it.bindLong(6, if (row.public) 1L else 0L)
+                it.bindInstant(7, row.createdAt)
+                it.bindInstant(8, row.updatedAt)
                 it.step()
                 it.reset()
             }
@@ -42,7 +43,7 @@ class NoteQueries(private val conn: SQLiteConnection) {
     suspend fun selectAll(): List<Note> {
         conn.prepare(
             """
-            SELECT $ID, $LAT, $LON, $TEXT, $IS_PUBLIC, $CREATED_AT, $UPDATED_AT
+            SELECT $ID, $LAT, $LON, $TEXT, $ICON, $IS_PUBLIC, $CREATED_AT, $UPDATED_AT
             FROM $TABLE
             ORDER BY julianday($CREATED_AT) DESC, $ID DESC;
             """
@@ -55,9 +56,10 @@ class NoteQueries(private val conn: SQLiteConnection) {
                         lat = it.getDouble(1),
                         lon = it.getDouble(2),
                         text = it.getText(3),
-                        public = it.getLong(4) != 0L,
-                        createdAt = it.getInstant(5),
-                        updatedAt = it.getInstant(6),
+                        icon = it.getText(4),
+                        public = it.getLong(5) != 0L,
+                        createdAt = it.getInstant(6),
+                        updatedAt = it.getInstant(7),
                     )
                 )
             }
@@ -73,7 +75,7 @@ class NoteQueries(private val conn: SQLiteConnection) {
     suspend fun selectById(id: Long): Note? {
         conn.prepare(
             """
-            SELECT $ID, $LAT, $LON, $TEXT, $IS_PUBLIC, $CREATED_AT, $UPDATED_AT
+            SELECT $ID, $LAT, $LON, $TEXT, $ICON, $IS_PUBLIC, $CREATED_AT, $UPDATED_AT
             FROM $TABLE
             WHERE $ID = ?1;
             """
@@ -85,9 +87,10 @@ class NoteQueries(private val conn: SQLiteConnection) {
                 lat = it.getDouble(1),
                 lon = it.getDouble(2),
                 text = it.getText(3),
-                public = it.getLong(4) != 0L,
-                createdAt = it.getInstant(5),
-                updatedAt = it.getInstant(6),
+                icon = it.getText(4),
+                public = it.getLong(5) != 0L,
+                createdAt = it.getInstant(6),
+                updatedAt = it.getInstant(7),
             )
         }
     }

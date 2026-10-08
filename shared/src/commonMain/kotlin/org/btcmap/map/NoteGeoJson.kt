@@ -4,8 +4,9 @@ import org.btcmap.db.table.note.Note
 
 /**
  * The signed-in user's notes as a GeoJSON FeatureCollection for the map's note
- * layer. Each feature is a point at the note's coordinate carrying its `id`, so
- * a tap can be resolved back to the cached note.
+ * layer. Each feature is a point at the note's coordinate carrying its `id` and
+ * `icon`, so a tap can be resolved back to the cached note and the layer can
+ * pick the matching pin.
  */
 fun Iterable<Note>.toNoteGeoJson(): String {
     val sizeHint = if (this is Collection<*>) size else 0
@@ -22,6 +23,8 @@ fun Iterable<Note>.toNoteGeoJson(): String {
         sb.append(note.lat)
         sb.append("]},\"properties\":{\"id\":")
         sb.append(note.id)
+        sb.append(",\"icon\":")
+        sb.appendJsonString(note.icon)
         sb.append("}}")
     }
 

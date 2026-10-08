@@ -52,6 +52,7 @@ import org.btcmap.comment.commentDateFormatter
 import org.btcmap.comment.toAdapterItem
 import org.btcmap.db.Database
 import org.btcmap.db.table.event.Event
+import org.btcmap.db.table.note.Note as DbNote
 import org.btcmap.db.table.place.Place
 import org.btcmap.map.EMPTY_GEOJSON
 import org.btcmap.map.EVENT_ICON
@@ -83,7 +84,7 @@ import org.btcmap.ui.map.MarkerKind
 import org.btcmap.ui.map.MarkerPalette
 import org.btcmap.ui.map.MerchantLayers
 import org.btcmap.ui.map.NoteLayers
-import org.btcmap.ui.map.NOTE_MARKER_IMAGE_NAME
+import org.btcmap.ui.map.noteMarkerImageName
 import org.btcmap.ui.map.SearchActions
 import org.btcmap.ui.map.SearchOverlay
 import org.btcmap.ui.map.platformMapUiOptions
@@ -358,15 +359,15 @@ fun MapScreen(
         }
     }
 
-    // Tapping a note pin opens a read-only dialog with its text.
-    var shownNoteText by remember { mutableStateOf<String?>(null) }
+    // Tapping a note pin opens a read-only dialog with its text and icon.
+    var shownNote by remember { mutableStateOf<DbNote?>(null) }
     val onNoteClick: MarkerClickHandler = { features ->
         val id = features.firstOrNull()?.properties?.get("id")?.jsonPrimitive?.longOrNull
         if (id == null) {
             ClickResult.Pass
         } else {
             scope.launch {
-                withContext(Dispatchers.Default) { db.note.selectById(id) }?.let { shownNoteText = it.text }
+                withContext(Dispatchers.Default) { db.note.selectById(id) }?.let { shownNote = it }
             }
             ClickResult.Consume
         }
@@ -392,11 +393,19 @@ fun MapScreen(
     val eventsGeoJson = remember { mutableStateOf(EMPTY_GEOJSON) }
     val noteGeoJson = remember { mutableStateOf(EMPTY_GEOJSON) }
 
+    // The distinct icons the cached notes carry, so the map registers one pin
+    // image per icon in use instead of one image for every note.
+    val noteIcons = remember { mutableStateOf(emptyList<String>()) }
+
     // The signed-in user's personal notes are always drawn, whatever marker kind
     // is selected. They are not viewport-bound, so every cached note is loaded;
     // the sync's NotesChanged event bumps reloadKey to refresh them.
     LaunchedEffect(reloadKey) {
-        noteGeoJson.value = withContext(Dispatchers.Default) { db.note.selectAll().toNoteGeoJson() }
+        withContext(Dispatchers.Default) {
+            val notes = db.note.selectAll()
+            noteGeoJson.value = notes.toNoteGeoJson()
+            noteIcons.value = notes.map { it.icon }.distinct()
+        }
     }
 
     // The platform's own location provider: the module resolves the Android
@@ -702,7 +711,7 @@ fun MapScreen(
     var imagesCachedFor by remember { mutableStateOf<Any?>(null) }
     var imagesCachedFactory by remember { mutableStateOf<MarkerBitmapFactory?>(null) }
 
-    LaunchedEffect(state, factory, markersByName, exchangeIcons, hasEvents, loadState) {
+    LaunchedEffect(state, factory, markersByName, exchangeIcons, hasEvents, loadState, noteIcons.value) {
         if (loadState !is StyleLoadState.Ready) return@LaunchedEffect
 
         // A reloaded style drops the registered images, and a new palette
@@ -716,7 +725,9 @@ fun MapScreen(
         // What the map currently needs, and how to draw each missing one.
         val wanted = LinkedHashMap<String, () -> ImageBitmap>()
         wanted[MARKER_PIN_IMAGE_ID] = { factory.pin(palette.markerBackground) }
-        wanted[NOTE_MARKER_IMAGE_NAME] = { factory.notePin() }
+        noteIcons.value.forEach { icon ->
+            wanted[noteMarkerImageName(icon)] = { factory.notePin(icon) }
+        }
         if (hasEvents) {
             wanted[EVENT_MARKER_ICON_NAME] = { factory.icon(EVENT_ICON, palette.markerIcon) }
         }
@@ -765,11 +776,12 @@ fun MapScreen(
                 // its own attribution line below, as the Views map did.
                 overlay = {},
             )
-            shownNoteText?.let { text ->
+            shownNote?.let { note ->
                 NoteDialog(
-                    text = text,
+                    text = note.text,
+                    icon = note.icon,
                     labels = noteDialogLabels,
-                    onDismiss = { shownNoteText = null },
+                    onDismiss = { shownNote = null },
                 )
             }
             if (showAttribution) {

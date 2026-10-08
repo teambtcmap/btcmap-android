@@ -212,6 +212,7 @@ fun ProfileScreen(
                     MyNoteUi(
                         id = note.id,
                         text = note.text,
+                        icon = note.icon,
                         public = note.public,
                         lat = note.lat,
                         lon = note.lon,
@@ -229,6 +230,7 @@ fun ProfileScreen(
                     styleJson = mapStyleJson,
                     palette = markerPalette(settings),
                     modifier = mapModifier,
+                    icon = note.icon,
                 )
             },
         )

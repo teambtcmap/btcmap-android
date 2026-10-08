@@ -14,7 +14,7 @@ package org.btcmap.ui.map
  * blanking the basemap. Serving a well-formed empty range instead lets the tile
  * render with its non-CJK labels. See `BundledMapResources.kt`.
  */
-internal fun emptyGlyphRange(fontstack: String, range: String): ByteArray {
+fun emptyGlyphRange(fontstack: String, range: String): ByteArray {
     val fontstackMessage = ProtoBuilder()
         .writeStringField(field = 1, fontstack)
         .writeStringField(field = 2, range)

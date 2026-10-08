@@ -8,6 +8,8 @@ data class Note(
     val lat: Double,
     val lon: Double,
     val text: String,
+    /** The pin discriminator, a Material Symbols name; the API defaults it to `notes`. */
+    val icon: String,
     val public: Boolean,
     val createdAt: Instant,
     val updatedAt: Instant,

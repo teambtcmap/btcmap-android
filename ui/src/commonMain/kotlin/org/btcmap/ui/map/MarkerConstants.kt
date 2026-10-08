@@ -1,23 +1,19 @@
 package org.btcmap.ui.map
 
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 
 /** The style image id the plain pin is registered under. */
 const val MARKER_PIN_IMAGE_ID = "btcmap-marker"
 
-/** The style image id a personal note's pin is registered under. */
-const val NOTE_MARKER_IMAGE_NAME = "btcmap-note-marker"
-
 /**
- * The background of a personal note's pin: a fixed amber, so notes stand out
- * from the merchant markers whatever marker colour the user has picked.
+ * The style image id a personal note's pin is registered under, one image per
+ * note icon: [noteMarkerImageName] appends the icon name.
  */
-val NOTE_MARKER_COLOR = Color(0xFFFFB300)
+const val NOTE_MARKER_IMAGE_PREFIX = "btcmap-note-marker-"
 
-/** The glyph colour on a note's pin. */
-val NOTE_MARKER_ICON_COLOR = Color.White
+/** The style image id a note's pin carrying [icon] is registered under. */
+fun noteMarkerImageName(icon: String): String = "$NOTE_MARKER_IMAGE_PREFIX$icon"
 
 /**
  * Opacity of an outdated marker's glyph, matching the alpha the Views marker

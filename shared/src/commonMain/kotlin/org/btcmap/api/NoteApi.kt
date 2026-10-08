@@ -21,6 +21,7 @@ data class Note(
     val lat: Double,
     val lon: Double,
     val text: String,
+    val icon: String,
     val public: Boolean,
     val authorId: Long,
     val authorName: String,
@@ -31,11 +32,14 @@ data class Note(
 /**
  * Creates a note owned by the authenticated user (`POST /v4/notes`). Any
  * signed-in user may create notes. The note is private unless [public] is true.
+ * [icon] is the pin discriminator the server stores verbatim (a Material Symbols
+ * name in this app); the API defaults it to `notes` when omitted.
  */
 suspend fun Api.createNote(
     lat: Double,
     lon: Double,
     text: String,
+    icon: String,
     public: Boolean,
 ): Note {
     val url = buildUrl("v4", "notes")
@@ -44,6 +48,7 @@ suspend fun Api.createNote(
         put("lat", lat)
         put("lon", lon)
         put("text", text)
+        put("icon", icon)
         put("public", public)
     }
 
@@ -93,6 +98,7 @@ internal fun JsonObject.toNote(): Note {
         lat = double("lat"),
         lon = double("lon"),
         text = string("text"),
+        icon = string("icon"),
         public = boolean("public"),
         authorId = author.long("id"),
         authorName = author.string("name"),
