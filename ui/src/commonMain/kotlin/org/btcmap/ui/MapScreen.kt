@@ -89,6 +89,7 @@ import org.btcmap.ui.map.SearchActions
 import org.btcmap.ui.map.SearchOverlay
 import org.btcmap.ui.map.platformMapUiOptions
 import org.btcmap.ui.map.rememberSearchResults
+import org.btcmap.ui.map.rememberLocationProvider
 import org.btcmap.ui.map.rememberMapAreas
 import org.btcmap.ui.map.rememberReloadedPlace
 import org.btcmap.ui.map.rememberViewportFeatures
@@ -408,10 +409,11 @@ fun MapScreen(
         }
     }
 
-    // The platform's own location provider: the module resolves the Android
-    // framework or fused provider and the desktop portal, and reports an
-    // unsupported backend through [locationState] rather than failing.
-    val locationState = rememberLocationState()
+    // The platform's own location provider: it resolves the Android framework or
+    // fused provider, or the desktop portal, and reports an unsupported backend
+    // through [locationState] rather than failing. Linux desktop's portal
+    // provider is wrapped so the button can actually obtain a fix.
+    val locationState = rememberLocationState(provider = rememberLocationProvider())
 
     // Set when the user asked for their location but no fix has arrived yet:
     // the tracking effect below moves the camera as soon as one does.
