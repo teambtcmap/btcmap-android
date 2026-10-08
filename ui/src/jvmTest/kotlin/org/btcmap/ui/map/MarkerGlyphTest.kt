@@ -11,6 +11,7 @@ import java.io.File
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
+import org.btcmap.ui.MATERIAL_SYMBOL_NAMES
 
 /**
  * The marker glyph resolution, ported from the app's instrumented `MarkerIconTest`
@@ -41,6 +42,16 @@ class MarkerGlyphTest {
     fun withoutAFontThereIsNoGlyph() {
         val factory = factory(null)
         assertNull(factory.renderableGlyph("storefront"))
+    }
+
+    @Test
+    fun everyIconNameTheSearchOffersIsRenderable() {
+        // A name the font has no ligature for measures as its literal letters
+        // and resolves to the fallback: exactly the broken icons the search
+        // must never offer.
+        val factory = factory(loadIconFont())
+        val broken = MATERIAL_SYMBOL_NAMES.filter { factory.renderableGlyph(it) != it }
+        assertEquals(emptyList(), broken)
     }
 
     private fun factory(iconFont: FontFamily?) = MarkerBitmapFactory(

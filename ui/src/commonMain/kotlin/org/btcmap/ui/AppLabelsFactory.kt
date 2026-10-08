@@ -120,6 +120,7 @@ fun appLabels(
         text = strings["note_text"],
         textPlaceholder = strings["note_text_placeholder"],
         icon = strings["note_icon"],
+        iconSearchHint = strings["note_icon_search"],
         private = strings["note_private"],
         public = strings["note_public"],
         privateDescription = strings["note_private_description"],

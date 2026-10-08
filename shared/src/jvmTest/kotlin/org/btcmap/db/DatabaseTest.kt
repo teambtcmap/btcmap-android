@@ -458,17 +458,50 @@ class DatabaseTest {
     }
 
     @Test
-    fun unreadableDatabase_isDiscardedAndRecreated() = runBlocking<Unit> {
+    fun unreadableDatabase_isKeptRatherThanDeleted() = runBlocking<Unit> {
         val path = existingPath()
-        File(path).writeBytes(byteArrayOf(1, 2, 3, 4))
+        val bytes = byteArrayOf(1, 2, 3, 4)
+        File(path).writeBytes(bytes)
 
-        val db = Database(BundledSQLiteDriver(), path).apply { connect() }
+        // The version cannot be read, so the file must not be mistaken for a
+        // foreign one and deleted; the open fails instead and the bytes survive.
+        runCatching { Database(BundledSQLiteDriver(), path).apply { connect() } }
 
+        Assert.assertArrayEquals(bytes, File(path).readBytes())
+    }
+
+    @Test
+    fun lockedDatabase_isKeptRatherThanDeleted() = runBlocking<Unit> {
+        val path = existingPath()
+
+        // A current database carrying a sentinel setting.
+        val original = Database(BundledSQLiteDriver(), path).apply { connect() }
         try {
-            Assert.assertTrue(hasTable(db.conn, "place"))
-            Assert.assertEquals(Database.VERSION, userVersion(db.conn))
+            original.preference.upsert("sentinel", "kept")
         } finally {
-            db.conn.close()
+            original.conn.close()
+        }
+
+        // Hold an exclusive lock the way a second process briefly would, so the
+        // version read fails while the lock is held. The open must throw rather
+        // than quietly recreating the file.
+        val lock = BundledSQLiteDriver().open(path)
+        try {
+            lock.execSQL("BEGIN EXCLUSIVE;")
+            Assert.assertThrows(Exception::class.java) {
+                runBlocking { Database(BundledSQLiteDriver(), path).connect() }
+            }
+        } finally {
+            runCatching { lock.execSQL("ROLLBACK;") }
+            lock.close()
+        }
+
+        // The database survived the failed open with its data intact.
+        val reopened = Database(BundledSQLiteDriver(), path).apply { connect() }
+        try {
+            Assert.assertEquals("kept", reopened.preference.select("sentinel"))
+        } finally {
+            reopened.conn.close()
         }
     }
 

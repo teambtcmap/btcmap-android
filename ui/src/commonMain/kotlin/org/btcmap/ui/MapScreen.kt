@@ -120,8 +120,9 @@ import org.maplibre.spatialk.geojson.Position
 import kotlin.time.Instant
 
 /**
- * The shared MapLibre Compose map: the app's base style, the merchant, event and
- * exchange layer pipelines, and the viewport-driven loading of their features.
+ * The shared MapLibre Compose map: the app's base style, the merchant, event,
+ * exchange and note layer pipelines, and the viewport-driven loading of their
+ * features.
  */
 @Composable
 fun MapScreen(
@@ -230,6 +231,12 @@ fun MapScreen(
      * a place that is not in the local cache or a note tapped in the profile.
      */
     openTarget: Pair<Double, Double>? = null,
+    /**
+     * The marker kind to select when moving to [openTarget], so a host that
+     * opens the map at a note shows the notes filter. Null leaves the current
+     * filter in place.
+     */
+    openTargetMarkerKind: MarkerKind? = null,
     /** Called once the move to [openTarget] has finished. */
     onOpenTargetConsumed: () -> Unit = {},
     /**
@@ -398,7 +405,7 @@ fun MapScreen(
     // image per icon in use instead of one image for every note.
     val noteIcons = remember { mutableStateOf(emptyList<String>()) }
 
-    // The signed-in user's personal notes are always drawn, whatever marker kind
+    // The signed-in user's personal notes are drawn when the notes marker kind
     // is selected. They are not viewport-bound, so every cached note is loaded;
     // the sync's NotesChanged event bumps reloadKey to refresh them.
     LaunchedEffect(reloadKey) {
@@ -465,15 +472,15 @@ fun MapScreen(
                 showMarkers = imagesReady,
                 onMarkerClick = onMarkerClick,
             )
-        }
 
-        // The signed-in user's own notes are always drawn, on top of whichever
-        // marker kind is selected, and never clustered.
-        NoteLayers(
-            geoJson = noteGeoJson.value,
-            showMarkers = imagesReady,
-            onClick = onNoteClick,
-        )
+            // The signed-in user's own notes, shown like any other kind and
+            // never clustered.
+            MarkerKind.Notes -> NoteLayers(
+                geoJson = noteGeoJson.value,
+                showMarkers = imagesReady,
+                onClick = onNoteClick,
+            )
+        }
 
         // The puck draws the last known position. The tracking effect is the
         // only thing that moves the camera, and only when the location button
@@ -522,6 +529,7 @@ fun MapScreen(
 
     LaunchedEffect(openTarget) {
         val target = openTarget ?: return@LaunchedEffect
+        openTargetMarkerKind?.let { markerKind = it }
         state.animateCamera(
             CameraUpdate(target = Position(target.second, target.first), zoom = OPEN_ZOOM),
         )

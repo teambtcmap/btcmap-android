@@ -51,17 +51,21 @@ class Database(driver: SQLiteDriver, val path: String) {
          * discarded, which is cheap.
          */
         suspend fun needsMigration(driver: SQLiteDriver, path: String): Boolean {
-            val version = readUserVersion(driver, path)
+            val version = readUserVersionOrNull(driver, path) ?: return false
             return version >= FIRST_OWN_VERSION && version < VERSION
         }
 
-        private suspend fun readUserVersion(driver: SQLiteDriver, path: String): Int {
+        /**
+         * The stored schema version, or null when the file cannot be read. The
+         * caller must not treat null as a foreign version: a transient lock or
+         * an I/O error is not proof the database belongs to someone else (see
+         * [initialize]).
+         */
+        private suspend fun readUserVersionOrNull(driver: SQLiteDriver, path: String): Int? {
             return try {
                 driver.open(path).use { readUserVersion(it) }
             } catch (_: Exception) {
-                // Treat an unreadable file as stale rather than letting it block
-                // every launch.
-                -1
+                null
             }
         }
 
@@ -152,19 +156,32 @@ class Database(driver: SQLiteDriver, val path: String) {
      *
      * The `btcmap.db` name was once used for a database with unrelated tables,
      * so rather than migrating it we discard any file whose user_version is
-     * below [FIRST_OWN_VERSION] (including a missing version, which reads as 0).
-     * Its sidecar files are removed too. An unreadable file cannot be one of
-     * ours either, so it is discarded as well. Databases at or above
+     * below [FIRST_OWN_VERSION] (including a version-less file, which reads as
+     * 0). Its sidecar files are removed too. Databases at or above
      * [FIRST_OWN_VERSION] and at or below [VERSION] are kept and migrated; a
      * database left by a newer app version cannot be read safely and is
      * discarded like a foreign one.
+     *
+     * A file whose version cannot be read is kept, not discarded: an unreadable
+     * file is not necessarily foreign. Reading it only takes a shared lock, so
+     * a transient lock held by another connection — an earlier instance still
+     * shutting down, or a second process opening the same home — makes the read
+     * fail, and deleting on that failure is how one such open wiped a live
+     * database. A genuinely unopenable file then surfaces as an error instead,
+     * which is safer than destroying data that may be recoverable.
      */
     private suspend fun initialize(driver: SQLiteDriver, path: String): SQLiteConnection {
         if (path != MEMORY_PATH) {
             val fileSystem = platformFileSystem
             if (fileSystem != null) {
                 val file = path.toPath()
-                if (fileSystem.exists(file) && isDiscardable(readUserVersion(driver, path))) {
+                // Only a version that was actually read may condemn the file.
+                val version = if (fileSystem.exists(file)) {
+                    readUserVersionOrNull(driver, path)
+                } else {
+                    null
+                }
+                if (version != null && isDiscardable(version)) {
                     fileSystem.delete(file)
                     SIDECAR_SUFFIXES.forEach { suffix ->
                         val sidecar = "$path$suffix".toPath()
@@ -178,8 +195,9 @@ class Database(driver: SQLiteDriver, val path: String) {
 
     /**
      * Whether a database at [version] belongs to another app or a newer build
-     * and must be recreated instead of migrated. An unreadable or version-less
-     * file reads as a version below [FIRST_OWN_VERSION].
+     * and must be recreated instead of migrated. A version-less file reads as 0,
+     * which is below [FIRST_OWN_VERSION]. [version] must have been read
+     * successfully: an unreadable file is not discardable (see [initialize]).
      */
     private fun isDiscardable(version: Int): Boolean =
         version < FIRST_OWN_VERSION || version > VERSION

@@ -95,6 +95,16 @@ tasks.register<JavaExec>("screenshot") {
         },
     )
     jvmArgs("--enable-native-access=ALL-UNNAMED")
+    // The render opens the app database. Never point it at the live
+    // `$BTCMAP_HOME`/`~/.btcmap` while the app is running: a second process
+    // opening the same file could once make Database.initialize mistake a locked
+    // database for a foreign one and delete it. Give the render its own home so
+    // it cannot touch the user's data; override with -PbtcmapHome=<dir>.
+    environment(
+        "BTCMAP_HOME",
+        project.findProperty("btcmapHome")?.toString()
+            ?: project.layout.buildDirectory.dir("screenshot-home").get().asFile.absolutePath,
+    )
     args = listOf(
         "--screenshot=" + (
             project.findProperty("screenshot")?.toString()

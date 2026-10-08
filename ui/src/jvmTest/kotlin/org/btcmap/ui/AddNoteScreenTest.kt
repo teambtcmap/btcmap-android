@@ -109,10 +109,36 @@ class AddNoteScreenTest {
                 )
             }
             onNodeWithTag(ADD_NOTE_TEXT_TAG).performTextInput("ATM is inside")
+            onNodeWithTag(ADD_NOTE_ICON_SEARCH_TAG).performTextInput("star")
             onNodeWithTag(ADD_NOTE_ICON_TAG_PREFIX + "star").performScrollTo().performClick()
             onNodeWithTag(ADD_NOTE_SUBMIT_TAG).performScrollTo().performClick()
         }
         assertEquals("star", drafts.single().icon)
+    }
+
+    @OptIn(ExperimentalTestApi::class)
+    @Test
+    fun iconSearch_offersNothingUntilTyped() {
+        runComposeUiTest {
+            setContent {
+                AddNoteScreen(
+                    lat = 1.0,
+                    lon = 2.0,
+                    styleUrl = "",
+                    styleJson = null,
+                    labels = labels,
+                    iconFont = null,
+                    palette = palette,
+                    submit = {},
+                    onBack = {},
+                    map = { _, _ -> },
+                )
+            }
+            onNodeWithTag(ADD_NOTE_ICON_TAG_PREFIX + "star").assertDoesNotExist()
+
+            onNodeWithTag(ADD_NOTE_ICON_SEARCH_TAG).performTextInput("star")
+            onNodeWithTag(ADD_NOTE_ICON_TAG_PREFIX + "star").assertExists()
+        }
     }
 
     @OptIn(ExperimentalTestApi::class)

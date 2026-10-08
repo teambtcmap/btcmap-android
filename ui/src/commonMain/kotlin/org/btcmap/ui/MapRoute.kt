@@ -44,6 +44,7 @@ import org.btcmap.settings.showAttribution
 import org.btcmap.settings.verifiedFilterMinVerifiedAt
 import org.btcmap.sync.SyncEvent
 import org.btcmap.sync.SyncState
+import org.btcmap.ui.map.MarkerKind
 import org.btcmap.ui.map.SearchActions
 import org.btcmap.util.rethrowIfCancellation
 
@@ -74,6 +75,9 @@ internal fun MapRoute(
 
     var currentOpenPlaceId by remember { mutableStateOf(openPlaceId) }
     var openTarget by remember { mutableStateOf<Pair<Double, Double>?>(null) }
+    // The filter to select when moving to [openTarget]. Only a note focus sets
+    // it; a place deep link keeps the current filter.
+    var openTargetMarkerKind by remember { mutableStateOf<MarkerKind?>(null) }
     var selectedPlaceId by remember { mutableStateOf<Long?>(null) }
     var photos by remember { mutableStateOf(emptyList<PlacePhoto>()) }
     var bookmarked by remember { mutableStateOf(false) }
@@ -139,11 +143,13 @@ internal fun MapRoute(
     }
 
     // A screen asked the map to centre on a coordinate (a note's banner, say):
-    // hand it to the same camera move the deep-link fallback uses, then tell the
-    // host it was consumed.
+    // hand it to the same camera move the deep-link fallback uses, and select
+    // the notes filter so the note is actually drawn, then tell the host it was
+    // consumed.
     LaunchedEffect(focusTarget) {
         val target = focusTarget ?: return@LaunchedEffect
         openTarget = target
+        openTargetMarkerKind = MarkerKind.Notes
         onFocusTargetConsumed()
     }
 
@@ -265,7 +271,11 @@ internal fun MapRoute(
         onFeaturesDrawn = { platform.reportFullyDrawn() },
         placeSheet = true,
         openTarget = openTarget,
-        onOpenTargetConsumed = { openTarget = null },
+        openTargetMarkerKind = openTargetMarkerKind,
+        onOpenTargetConsumed = {
+            openTarget = null
+            openTargetMarkerKind = null
+        },
         openPlaceId = currentOpenPlaceId,
         photos = photos,
         bookmarked = bookmarked,

@@ -66,6 +66,7 @@ import org.btcmap.ui.MaterialSymbol
 import org.btcmap.ui.map.AddLocationLabels
 import org.btcmap.ui.map.AreaPreviewMap
 import org.btcmap.ui.map.EventMiniMap
+import org.btcmap.ui.map.MarkerKind
 import org.btcmap.ui.map.SearchActions
 import org.btcmap.ui.map.emptyGlyphRange
 import kotlinx.coroutines.flow.first
@@ -151,6 +152,7 @@ import org.btcmap.ui.ColorsPage
 import org.btcmap.ui.ColorsPageLabels
 import org.btcmap.ui.CommentScreen
 import org.btcmap.ui.CommentScreenLabels
+import org.btcmap.ui.DEFAULT_NOTE_ICON
 import org.btcmap.ui.DbStatsPage
 import org.btcmap.ui.DbStatsPageLabels
 import org.btcmap.ui.EventReviewLabels
@@ -428,6 +430,9 @@ private fun runApp() = application {
                             db = db,
                             openPlaceId = feedPlaceId,
                             openTarget = mapFocus,
+                            // A focus target only ever comes from a note's
+                            // banner, so select the notes filter to show it.
+                            openTargetMarkerKind = if (mapFocus != null) MarkerKind.Notes else null,
                             onOpenTargetConsumed = { mapFocus = null },
                             styleUrl = HOSTED_STYLE_URL,
                             styleJson = styleJson,
@@ -1176,7 +1181,7 @@ private const val SCREENSHOT_ARG = "--screenshot="
  * real window and GPU context, so it is not one of the screens this can draw.
  *
  * Recognised screens: `settings`, `manageareas`, `colors`, `dbstats`, `report`,
- * `account`, `addplace`, `addevent`, `payment`, `infra`.
+ * `account`, `addplace`, `addevent`, `addnote`, `payment`, `infra`.
  */
 private fun renderScreen(spec: String) {
     val parts = spec.split(':')
@@ -1296,6 +1301,16 @@ private fun renderScreen(spec: String) {
                         submitted = false,
                         labels = ADD_EVENT_LABELS,
                         onSubmit = { _, _, _, _ -> },
+                        onBack = {},
+                    )
+
+                    "addnote" -> AddNoteForm(
+                        busy = false,
+                        submitted = false,
+                        labels = ADD_NOTE_LABELS,
+                        icon = DEFAULT_NOTE_ICON,
+                        onIconChange = {},
+                        onSubmit = { _, _ -> },
                         onBack = {},
                     )
 

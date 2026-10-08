@@ -17,9 +17,8 @@ const val NOTE_MARKER_LAYER_ID = "note_marker"
 /**
  * The signed-in user's personal notes, drawn as their own marker layer.
  *
- * The source is a plain GeoJSON source, never clustered, and the layer is
- * declared whatever marker kind the map is showing, so a note is always visible
- * and is never merged into a cluster circle. Each note's pin comes from
+ * The source is a plain GeoJSON source, never clustered, so a note is never
+ * merged into a cluster circle. Each note's pin comes from
  * [MarkerBitmapFactory.notePin] for the icon its feature carries, registered
  * under [noteMarkerImageName]; the map registers one image per icon in use.
  */

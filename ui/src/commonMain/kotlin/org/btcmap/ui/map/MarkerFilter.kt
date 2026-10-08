@@ -20,12 +20,14 @@ enum class MarkerKind {
     Merchants,
     Events,
     Exchanges,
+    Notes,
 }
 
 /** Test tags for the filter buttons. */
 const val MARKER_FILTER_MERCHANTS_TAG = "marker-filter-merchants"
 const val MARKER_FILTER_EVENTS_TAG = "marker-filter-events"
 const val MARKER_FILTER_EXCHANGES_TAG = "marker-filter-exchanges"
+const val MARKER_FILTER_NOTES_TAG = "marker-filter-notes"
 
 /**
  * The map's marker-kind filter: one button per kind, the active one ringed.
@@ -66,6 +68,14 @@ fun MarkerFilterButtons(
             kind = MarkerKind.Exchanges,
             glyph = "currency_exchange",
             tag = MARKER_FILTER_EXCHANGES_TAG,
+            selected = selected,
+            onSelect = onSelect,
+            palette = palette,
+        )
+        MarkerFilterButton(
+            kind = MarkerKind.Notes,
+            glyph = "notes",
+            tag = MARKER_FILTER_NOTES_TAG,
             selected = selected,
             onSelect = onSelect,
             palette = palette,

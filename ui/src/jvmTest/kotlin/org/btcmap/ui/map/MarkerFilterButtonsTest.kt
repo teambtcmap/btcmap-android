@@ -33,10 +33,14 @@ class MarkerFilterButtonsTest {
                 }
             }
             onNodeWithTag(MARKER_FILTER_MERCHANTS_TAG).assertExists()
+            onNodeWithTag(MARKER_FILTER_EVENTS_TAG).assertExists()
             onNodeWithTag(MARKER_FILTER_EXCHANGES_TAG).assertExists()
+            onNodeWithTag(MARKER_FILTER_NOTES_TAG).assertExists()
 
             onNodeWithTag(MARKER_FILTER_EVENTS_TAG).performClick()
+            assertEquals(MarkerKind.Events, selected)
+            onNodeWithTag(MARKER_FILTER_NOTES_TAG).performClick()
         }
-        assertEquals(MarkerKind.Events, selected)
+        assertEquals(MarkerKind.Notes, selected)
     }
 }
