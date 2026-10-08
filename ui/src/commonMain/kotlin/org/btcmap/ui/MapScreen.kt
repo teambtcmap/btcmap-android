@@ -25,8 +25,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.runtime.withFrameNanos
 import kotlinx.coroutines.flow.filterIsInstance
+import kotlinx.coroutines.flow.first
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -264,6 +266,12 @@ fun MapScreen(
      * link. The map selects it and moves to it, as a tap on its marker would.
      */
     openPlaceId: Long? = null,
+    /**
+     * A place whose sheet the host remembers was open when the map was last
+     * left, reopened on entry. One-shot: a later selection reports back through
+     * [onPlaceSelected] without this param changing, so it never re-triggers.
+     */
+    initialPlaceId: Long? = null,
     photos: List<PlacePhoto> = emptyList(),
     bookmarked: Boolean = false,
     /** Whether a photo upload is running for the shown place. */
@@ -561,6 +569,24 @@ fun MapScreen(
         // before moving to it, as the Views map did.
         onMarkerKindChange(if (place.isMerchant()) MarkerKind.Merchants else MarkerKind.Exchanges)
         onPlaceSelected(place)
+        state.animateCamera(placeCameraUpdate(place, state.cameraPosition?.zoom))
+    }
+
+    // Reopens the place a host remembered when the map was last left, so
+    // returning from a sub-screen — the report form, say — keeps the selection
+    // instead of dropping the sheet. A one-shot on entry: a later selection only
+    // reports back through [onPlaceSelected] and does not feed back in here.
+    LaunchedEffect(Unit) {
+        val id = initialPlaceId ?: return@LaunchedEffect
+        val place = withContext(Dispatchers.Default) { db.place.selectById(id) }
+            ?: return@LaunchedEffect
+        selectedPlace = place
+        onPlaceSelected(place)
+        // MapLibre keeps the sheet padding apart from the camera target, so the
+        // restored camera would leave the place at the viewport centre, behind
+        // the reopened sheet. Wait for the search bar and viewport to be
+        // measured, then apply the same padded camera a marker tap does.
+        snapshotFlow { searchBarBottomPx > 0f && viewportHeightPx > 0f }.first { it }
         state.animateCamera(placeCameraUpdate(place, state.cameraPosition?.zoom))
     }
 

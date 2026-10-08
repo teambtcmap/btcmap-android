@@ -73,6 +73,13 @@ internal fun MapRoute(
     /** The marker kind the map shows, hoisted so it survives leaving the map. */
     markerKind: MarkerKind,
     onMarkerKindChange: (MarkerKind) -> Unit,
+    /**
+     * The place whose sheet is open, hoisted so leaving the map for another
+     * screen and returning reopens it. [onSelectedPlaceIdChange] reports the
+     * map's selection, and a null reports that the sheet was dismissed.
+     */
+    selectedPlaceId: Long?,
+    onSelectedPlaceIdChange: (Long?) -> Unit,
     modifier: Modifier = Modifier,
     /** A coordinate a screen (e.g. a note's banner) wants the map centred on. */
     focusTarget: Pair<Double, Double>? = null,
@@ -87,7 +94,6 @@ internal fun MapRoute(
     // The filter to select when moving to [openTarget]. Only a note focus sets
     // it; a place deep link keeps the current filter.
     var openTargetMarkerKind by remember { mutableStateOf<MarkerKind?>(null) }
-    var selectedPlaceId by remember { mutableStateOf<Long?>(null) }
     // The event whose sheet is open over the map. Opening an event from a
     // marker or a search result shows this sheet instead of pushing a screen,
     // as a selected place shows the map's place sheet.
@@ -292,15 +298,16 @@ internal fun MapRoute(
             openTargetMarkerKind = null
         },
         openPlaceId = currentOpenPlaceId,
+        initialPlaceId = selectedPlaceId,
         photos = photos,
         bookmarked = bookmarked,
         addingPhoto = addingPhoto,
         onPlaceSelected = { place ->
-            selectedPlaceId = place.id
+            onSelectedPlaceIdChange(place.id)
             refreshSheet(place)
         },
         onPlaceDismissed = {
-            selectedPlaceId = null
+            onSelectedPlaceIdChange(null)
             currentOpenPlaceId = null
         },
         onPlaceAction = { place, action ->

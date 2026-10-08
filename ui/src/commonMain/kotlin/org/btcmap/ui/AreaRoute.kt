@@ -246,7 +246,7 @@ private fun AreaPlaceIssue.osmEditUrl(): String =
  * The area's bounding box as [OfflineBounds], or null when any side is missing:
  * an area without a bbox has no offline region to download.
  */
-private fun Area.offlineBounds(): OfflineBounds? {
+fun Area.offlineBounds(): OfflineBounds? {
     val west = bboxWest ?: return null
     val south = bboxSouth ?: return null
     val east = bboxEast ?: return null

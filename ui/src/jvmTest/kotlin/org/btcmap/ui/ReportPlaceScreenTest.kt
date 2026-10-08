@@ -62,6 +62,28 @@ class ReportPlaceScreenTest {
 
     @OptIn(ExperimentalTestApi::class)
     @Test
+    fun tappingAReasonLabel_selectsIt() {
+        runComposeUiTest {
+            setContent {
+                AppTheme {
+                    ReportPlaceScreen(
+                        initialType = null,
+                        labels = labels,
+                        submit = {},
+                        onBack = {},
+                    )
+                }
+            }
+            onNodeWithText("Submit").assertIsNotEnabled()
+            // The whole row is selectable, so its label picks the option rather
+            // than only the small radio circle doing so.
+            onNodeWithText(ReportType.RefusedSats.name).performClick()
+            onNodeWithText("Submit").assertIsEnabled()
+        }
+    }
+
+    @OptIn(ExperimentalTestApi::class)
+    @Test
     fun addedPhoto_showsThumbnailAndCanBeRemoved() {
         runComposeUiTest {
             setContent {

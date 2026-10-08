@@ -1,9 +1,9 @@
 package org.btcmap.ui
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -15,8 +15,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import org.btcmap.api.Api
 import org.btcmap.api.awaitPaidInvoice
 import org.btcmap.api.boostPlace
@@ -88,19 +91,22 @@ fun BoostScreen(
         }
     }
 
-    Column(
-        modifier = Modifier
-            .verticalScroll(rememberScrollState())
-            .padding(16.dp),
-    ) {
-        if (submitted) {
-            Text(labels.active)
-            Button(onClick = onBack, modifier = Modifier.padding(top = 16.dp)) {
-                Text(labels.backToMap)
-            }
-            return@Column
+    // The confirmation is a short, centred body rather than the form, so it is
+    // centred vertically in the available space.
+    if (submitted) {
+        ContentColumn(centerVertically = true, margin = true) {
+            BoostActive(labels = labels, onBack = onBack)
         }
+        return
+    }
 
+    // A form body, capped and centred so a tablet or desktop window does not
+    // stretch the invoice block edge to edge.
+    ContentColumn(
+        modifier = Modifier.padding(vertical = 16.dp),
+        scroll = true,
+        margin = true,
+    ) {
         val options = BoostPlan.entries.map { plan ->
             val price = state.quote?.let { formatSat(plan.priceSat(it)) }
             BoostOption(
@@ -148,6 +154,38 @@ fun BoostScreen(
                 onStartOver = flow::startOver,
                 modifier = Modifier.padding(top = 16.dp),
             )
+        }
+    }
+}
+
+/** The centred confirmation shown once a boost has been paid for. */
+@Composable
+private fun BoostActive(
+    labels: BoostScreenLabels,
+    onBack: () -> Unit,
+) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
+        modifier = Modifier.fillMaxWidth(),
+    ) {
+        MaterialSymbol(
+            glyph = "check_circle",
+            contentDescription = null,
+            size = 48.sp,
+            tint = MaterialTheme.colorScheme.primary,
+        )
+        Text(
+            text = labels.active,
+            style = MaterialTheme.typography.bodyLarge,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.padding(top = 16.dp),
+        )
+        Button(
+            onClick = onBack,
+            modifier = Modifier.padding(top = 24.dp),
+        ) {
+            Text(text = labels.backToMap)
         }
     }
 }

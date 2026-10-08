@@ -84,6 +84,38 @@ fun MapStyle.hostedStyleUrl(darkSystemTheme: Boolean): String = when (this) {
     MapStyle.Bright -> HOSTED_BRIGHT_STYLE_URL
 }
 
+/**
+ * The hosted style URL an offline pack is downloaded from for [this] style.
+ *
+ * A pack's tiles are matched by the source URLs both styles share, so this is
+ * the hosted style whose sources the app renders, not the bundled asset the map
+ * draws from. [MapStyle.DarkMatter] downloads through Liberty, as it did on
+ * Android before this moved here.
+ */
+fun MapStyle.offlineDownloadStyleUrl(darkSystemTheme: Boolean): String = when (this) {
+    MapStyle.Auto -> if (darkSystemTheme) HOSTED_DARK_STYLE_URL else HOSTED_LIGHT_STYLE_URL
+    MapStyle.Liberty -> HOSTED_LIBERTY_STYLE_URL
+    MapStyle.Positron -> HOSTED_POSITRON_STYLE_URL
+    MapStyle.Bright -> HOSTED_BRIGHT_STYLE_URL
+    MapStyle.Dark -> HOSTED_DARK_STYLE_URL
+    MapStyle.DarkMatter -> HOSTED_LIBERTY_STYLE_URL
+}
+
+/**
+ * Groups the hosted offline style URLs that render the same map.
+ *
+ * [MapStyle.Auto] resolves to the light or dark hosted style with the system
+ * theme, but both draw the same sources, so they share one family: a pack
+ * downloaded at noon must not read as "a different style" once dark mode turns
+ * on. Every other style keeps its own identity.
+ */
+fun offlineStyleFamily(styleUrl: String): String = when (styleUrl) {
+    HOSTED_LIGHT_STYLE_URL, HOSTED_DARK_STYLE_URL -> AUTO_STYLE_FAMILY
+    else -> styleUrl
+}
+
+private const val AUTO_STYLE_FAMILY = "auto"
+
 private const val HOSTED_LIGHT_STYLE_URL = "https://static.btcmap.org/map-styles/light.json"
 private const val HOSTED_DARK_STYLE_URL = "https://static.btcmap.org/map-styles/dark.json"
 private const val HOSTED_LIBERTY_STYLE_URL = "https://tiles.openfreemap.org/styles/liberty"

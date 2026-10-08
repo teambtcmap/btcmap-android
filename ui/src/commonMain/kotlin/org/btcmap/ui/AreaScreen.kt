@@ -10,6 +10,8 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -155,6 +157,11 @@ fun AreaScreen(
     Column(
         modifier = modifier
             .fillMaxWidth()
+            // Capped and centred so a tablet or desktop window does not stretch
+            // the cards and text edge to edge; a phone is unaffected. The host
+            // still owns the scroll, which [modifier] carries.
+            .wrapContentWidth(Alignment.CenterHorizontally)
+            .widthIn(max = CONTENT_MAX_WIDTH)
             // The image is the first child; an 8dp top matches the 8dp spacer
             // under it, so the header's spacing is symmetrical. The bottom keeps
             // the body's 16dp.

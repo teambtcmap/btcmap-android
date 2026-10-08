@@ -7,6 +7,7 @@ import androidx.compose.ui.pollSystemTheme
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.platform.Font
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.WindowPlacement
@@ -31,10 +32,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.material3.TextButton
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -69,11 +72,13 @@ import org.btcmap.ui.map.AddLocationLabels
 import org.btcmap.ui.map.AreaPreviewMap
 import org.btcmap.ui.map.EventMiniMap
 import org.btcmap.ui.map.MarkerKind
+import org.btcmap.ui.map.OfflinePacks
 import org.btcmap.ui.map.SearchActions
 import org.btcmap.ui.map.emptyGlyphRange
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withTimeoutOrNull
 import androidx.compose.material3.Text
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -114,6 +119,7 @@ import org.btcmap.sync.Sync
 import org.btcmap.sync.SyncEvent
 import org.btcmap.sync.SyncManager
 import org.btcmap.util.rethrowIfCancellation
+import org.btcmap.offline.OfflineAreaState
 import org.btcmap.settings.KEY_AUTH_TOKEN
 import org.btcmap.settings.MapColor
 import org.btcmap.settings.MapStyle
@@ -131,6 +137,8 @@ import org.btcmap.settings.mapStyle
 import org.btcmap.settings.mapTilt
 import org.btcmap.settings.mapTiltEnabled
 import org.btcmap.settings.mapZoom
+import org.btcmap.settings.offlineDownloadStyleUrl
+import org.btcmap.settings.offlineStyleFamily
 import org.maplibre.compose.resource.MapResourceProvider
 import org.btcmap.settings.showAttribution
 import org.btcmap.settings.verifiedFilterMinVerifiedAt
@@ -178,6 +186,9 @@ import org.btcmap.ui.StatsScreen
 import org.btcmap.ui.UserProfileLabels
 import org.btcmap.ui.AreaAdminPage
 import org.btcmap.ui.AreaScreen
+import org.btcmap.ui.AreaOfflineDialog
+import org.btcmap.ui.offlineBounds
+import org.btcmap.ui.styleNameKey
 import org.btcmap.ui.AreaStrings
 import org.btcmap.ui.EventScreen
 import org.btcmap.ui.EventScreenLabels
@@ -277,6 +288,11 @@ private fun runApp() = application {
         title = "BTC Map",
         state = rememberWindowState(placement = WindowPlacement.Maximized),
     ) {
+        // One offline manager per window, mirroring Android's app-scoped one: a
+        // download continues across screens and is torn down with the window.
+        val pixelRatio = LocalDensity.current.density
+        val offlinePacks = remember { OfflinePacks(pixelRatio) }
+        DisposableEffect(offlinePacks) { onDispose { offlinePacks.dispose() } }
         val mapHost = rememberAwtComposeMapPresentationHost(window)
         ProvideMapPresentationHost(mapHost) {
             AppTheme(iconFont = iconFont) {
@@ -442,6 +458,9 @@ private fun runApp() = application {
                         Route.Map -> MapScreen(
                             db = db,
                             openPlaceId = feedPlaceId,
+                            // Reopen the place that was selected before leaving
+                            // the map, so returning from the report form keeps it.
+                            initialPlaceId = selectedPlaceId,
                             openTarget = mapFocus,
                             // A focus target only ever comes from a note's
                             // banner, so select the notes filter to show it.
@@ -995,6 +1014,8 @@ private fun runApp() = application {
                                     areaId = areaId,
                                     db = db,
                                     api = api,
+                                    settings = settings,
+                                    offlinePacks = offlinePacks,
                                     boostedMarkerColor = markerPalette(settings).boostedMarkerBackground,
                                     onBack = { nav.pop() },
                                     onOpenPlace = { placeId ->
@@ -1128,6 +1149,8 @@ private fun DesktopAreaScreen(
     areaId: Long,
     db: Database,
     api: Api,
+    settings: Settings,
+    offlinePacks: OfflinePacks,
     boostedMarkerColor: Color,
     onBack: () -> Unit,
     onOpenPlace: (Long) -> Unit,
@@ -1138,6 +1161,9 @@ private fun DesktopAreaScreen(
     var boostedMerchants by remember(areaId) { mutableStateOf(emptyList<Place>()) }
     var events by remember(areaId) { mutableStateOf(emptyList<GetEventsItem>()) }
     var issues by remember(areaId) { mutableStateOf<AreaIssues?>(null) }
+    var packed by remember(areaId) { mutableStateOf<OfflineAreaState?>(null) }
+    var showOfflineDialog by remember(areaId) { mutableStateOf(false) }
+    var showDeleteConfirm by remember(areaId) { mutableStateOf(false) }
 
     LaunchedEffect(areaId) {
         val loaded = withContext(Dispatchers.IO) { db.area.selectById(areaId) }
@@ -1150,6 +1176,19 @@ private fun DesktopAreaScreen(
         events = loadSection { AreaSections.events(db, loaded) } ?: emptyList()
         issues = loadSection { AreaSections.placeIssues(api, db, areaId) }
     }
+
+    // The offline pack state for this area, tracked in the app-scoped manager so
+    // a download continues while the user is on another screen.
+    LaunchedEffect(areaId) {
+        offlinePacks.states.collect { states -> packed = states[areaId] }
+    }
+
+    val bounds = area?.offlineBounds()
+    // The hosted style the pack is downloaded from and matched against; the map
+    // itself draws the bundled asset, which shares the same tile sources.
+    val offlineStyleUrl = settings.mapStyle.offlineDownloadStyleUrl(
+        darkSystemTheme = androidx.compose.foundation.isSystemInDarkTheme(),
+    )
 
     Column(modifier = Modifier.fillMaxSize()) {
         Row(
@@ -1164,7 +1203,19 @@ private fun DesktopAreaScreen(
             Text(
                 text = area?.getLocalizedName() ?: "Area",
                 style = MaterialTheme.typography.titleLarge,
+                modifier = Modifier.weight(1f),
             )
+            if (bounds != null) {
+                IconButton(
+                    onClick = { showOfflineDialog = true },
+                    enabled = packed !is OfflineAreaState.Downloading,
+                ) {
+                    MaterialSymbol(
+                        glyph = "download",
+                        contentDescription = STRINGS["offline_map"],
+                    )
+                }
+            }
         }
 
         val loaded = area
@@ -1179,17 +1230,41 @@ private fun DesktopAreaScreen(
                 boostedMerchants = boostedMerchants,
                 events = events,
                 issues = issues,
-                offlineState = null,
-                offlineStyleMatches = { true },
+                offlineState = packed ?: OfflineAreaState.None,
+                offlineStyleMatches = { downloaded ->
+                    offlineStyleFamily(downloaded) == offlineStyleFamily(offlineStyleUrl)
+                },
                 strings = DESKTOP_AREA_STRINGS,
                 onOpenPlace = onOpenPlace,
                 onOpenEvent = { onOpenEvent(it.toEvent()) },
                 onOpenIssue = { openUrl(it.osmEditUrl()) },
                 onJoinUs = { openUrl(JOIN_US_URL) },
-                onDownload = {},
-                onDelete = {},
+                onDownload = { showOfflineDialog = true },
+                onDelete = { showDeleteConfirm = true },
                 boostedMarkerColor = boostedMarkerColor,
                 modifier = Modifier.verticalScroll(rememberScrollState()),
+                offlineDialog = if (showOfflineDialog && bounds != null) {
+                    AreaOfflineDialog(
+                        areaName = loaded.getLocalizedName(),
+                        styleName = STRINGS[settings.mapStyle.styleNameKey()],
+                        bounds = bounds,
+                    )
+                } else {
+                    null
+                },
+                onDismissOfflineDialog = { showOfflineDialog = false },
+                onConfirmOfflineDownload = { maxZoom ->
+                    showOfflineDialog = false
+                    bounds?.let { region ->
+                        offlinePacks.download(
+                            areaId = loaded.id,
+                            areaName = loaded.getLocalizedName(),
+                            bounds = region,
+                            styleUrl = offlineStyleUrl,
+                            maxZoom = maxZoom,
+                        )
+                    }
+                },
             )
 
             missing -> Text(
@@ -1204,6 +1279,29 @@ private fun DesktopAreaScreen(
                 CircularProgressIndicator()
             }
         }
+    }
+
+    if (showDeleteConfirm) {
+        AlertDialog(
+            onDismissRequest = { showDeleteConfirm = false },
+            title = { Text(LABELS.offlineDeleteTitle) },
+            text = { Text(LABELS.offlineDeleteMessage) },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        showDeleteConfirm = false
+                        offlinePacks.delete(areaId)
+                    },
+                ) {
+                    Text(DESKTOP_AREA_STRINGS.offlineDelete)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDeleteConfirm = false }) {
+                    Text(DESKTOP_AREA_STRINGS.cancel)
+                }
+            },
+        )
     }
 }
 

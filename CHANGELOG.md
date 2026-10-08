@@ -6,6 +6,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+- Keep the selected place open when leaving the map for the report/verify screen (or boost or add-comment) and coming back: the place sheet reopens and the map recentres the pin above it, instead of dropping the selection and leaving the pin behind the sheet
+- Make the desktop app's area screen offer offline map downloads like Android: a download action in its toolbar, the zoom/size dialog, the progress panel and delete, all backed by the same shared offline manager
+- Cap and centre the report/verify, boost, add-comment and area bodies at a readable width on tablets and desktop windows, so they no longer stretch edge to edge; the report form also gets full-row reason selection, an inline submit spinner and a centred confirmation, matching the other forms
 - Keep the map's marker filter when leaving the map and returning: the chosen kind (merchants, events, exchanges or notes) survives opening another screen and coming back, and only a fresh app start resets it to merchants
 - Open an event tapped on the map in a bottom sheet, as places do, instead of pushing a separate screen; the sheet reuses the event screen's body without a second map
 - Add a delete action to the event screen's toolbar for the event's submitter (while it is pending) or an event manager, admin or root: the privileged path soft-deletes any event through the `delete_event` RPC, the submitter's through `DELETE /v4/events/{id}`

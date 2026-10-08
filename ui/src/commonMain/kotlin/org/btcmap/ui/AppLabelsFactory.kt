@@ -226,7 +226,7 @@ fun appLabels(
         ok = strings["ok"],
     ),
     area = areaStrings(strings, formatBytes),
-    offlineStyleName = strings[currentStyle.offlineNameKey()],
+    offlineStyleName = strings[currentStyle.styleNameKey()],
     save = strings["save"],
     offlineDeleteTitle = strings["offline_map_delete_title"],
     offlineDeleteMessage = strings["offline_map_delete_message"],
@@ -239,7 +239,7 @@ fun appLabels(
         loggedInAs = { strings.format("logged_in_as", it) },
         openProfile = strings["click_to_see_your_profile"],
         mapStyle = strings["map_style"],
-        mapStyleValue = { strings[it.nameKey()] },
+        mapStyleValue = { strings[it.styleNameKey()] },
         customizeColors = strings["customize_colors"],
         customizeColorsSecondary = strings["customize_colors_secondary"],
         verifiedFilter = strings["verified_filter"],
@@ -454,7 +454,7 @@ private fun ActivityInterval.labelKey(): String = when (this) {
 }
 
 /** The string key for each map style's display name. */
-private fun MapStyle.nameKey(): String = when (this) {
+fun MapStyle.styleNameKey(): String = when (this) {
     MapStyle.Auto -> "style_auto"
     MapStyle.Liberty -> "style_liberty"
     MapStyle.Positron -> "style_positron"
@@ -462,9 +462,6 @@ private fun MapStyle.nameKey(): String = when (this) {
     MapStyle.Dark -> "style_dark"
     MapStyle.DarkMatter -> "style_dark_matter"
 }
-
-/** The string key for the offline download dialog's style name. */
-private fun MapStyle.offlineNameKey(): String = nameKey()
 
 /** The string key for a verification window. */
 private fun Int.verifiedFilterKey(): String = when (this) {

@@ -94,6 +94,11 @@ fun AppRoot(
         // across configuration changes but not persisted, so a fresh app start
         // begins on merchants.
         var markerKind by rememberSaveable { mutableStateOf(MarkerKind.Merchants) }
+        // The place whose sheet is open on the map, kept here so leaving the map
+        // for another screen — the report form, say — and returning reopens the
+        // sheet rather than dropping the selection. Saved across configuration
+        // changes but not persisted, so a fresh app start begins with none.
+        var selectedPlaceId by rememberSaveable { mutableStateOf<Long?>(null) }
         val back = {
             // At the start route there is nothing left on the stack to pop, so
             // the host closes the screen instead.
@@ -143,6 +148,8 @@ fun AppRoot(
                 onShowAuth = { showAuth = true },
                 markerKind = markerKind,
                 onMarkerKindChange = { markerKind = it },
+                selectedPlaceId = selectedPlaceId,
+                onSelectedPlaceIdChange = { selectedPlaceId = it },
                 modifier = modifier,
                 focusTarget = mapFocus,
                 onFocusTargetConsumed = { mapFocus = null },
@@ -417,6 +424,9 @@ fun AppRoot(
                     )
                 },
                 onOpenNoteOnMap = { note ->
+                    // Focusing a note supersedes any place selection, so the
+                    // remembered sheet does not reopen over the note's banner.
+                    selectedPlaceId = null
                     mapFocus = note.lat to note.lon
                     nav.reset(AppRoute.Map)
                 },
