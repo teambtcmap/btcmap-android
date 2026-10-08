@@ -61,7 +61,12 @@ fun <T : Any> rememberViewportFeatures(
         store.clear()
 
         suspend fun load() {
-            val viewport = state.viewport ?: return
+            // viewport is null until the map renders its first frame. Wait for
+            // it instead of bailing, so the features around the initial camera
+            // load without the user having to move the map: the events below
+            // are replay-less, so a move that already happened (or none at all)
+            // would otherwise leave the map empty.
+            val viewport = state.viewport ?: state.awaitViewport()
             val bounds = ViewportBounds.expand(viewport.visibleBounds)
             val fetched = withContext(Dispatchers.Default) { latestFetch(bounds) }
             // The store keeps everything seen so panning back does not refetch,
