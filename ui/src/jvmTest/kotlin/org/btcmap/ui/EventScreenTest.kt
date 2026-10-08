@@ -99,6 +99,32 @@ class EventScreenTest {
 
     @OptIn(ExperimentalTestApi::class)
     @Test
+    fun withoutMap_thePreviewAndZoomControlsAreHidden() {
+        runComposeUiTest {
+            setContent {
+                AppTheme {
+                    EventScreen(
+                        event = event,
+                        geoJson = "",
+                        styleUrl = "",
+                        styleJson = null,
+                        palette = palette,
+                        iconFont = null,
+                        usingOpenFreeMap = true,
+                        labels = TEST_EVENT_SCREEN_LABELS,
+                        showMap = false,
+                        map = { modifier, _ -> Box(modifier) },
+                    )
+                }
+            }
+            onNodeWithTag(EVENT_MAP_TAG).assertDoesNotExist()
+            onNodeWithContentDescription("Zoom in").assertDoesNotExist()
+            onNodeWithTag(EVENT_DATE_TAG).assertIsDisplayed()
+        }
+    }
+
+    @OptIn(ExperimentalTestApi::class)
+    @Test
     fun withoutCallback_theWebsiteIsStillShownAsText() {
         runComposeUiTest {
             setContent {

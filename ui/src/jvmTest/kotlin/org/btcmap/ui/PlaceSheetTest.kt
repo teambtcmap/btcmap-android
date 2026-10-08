@@ -3,12 +3,16 @@ package org.btcmap.ui
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertCountEquals
+import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.runComposeUiTest
 import kotlin.test.Test
+import kotlin.test.assertEquals
 import org.btcmap.db.table.place.Place
 import kotlin.time.Instant
 
@@ -110,6 +114,72 @@ class PlaceSheetTest {
                 onAllNodesWithTag(PLACE_PHOTO_TAG_PREFIX + 0).fetchSemanticsNodes().isNotEmpty()
             }
             onNodeWithTag(PLACE_PHOTO_PLACEHOLDER_TAG).assertDoesNotExist()
+        }
+    }
+
+    @Test
+    fun headerActions_offerDirectionsAndShare() {
+        val actions = mutableListOf<PlaceAction>()
+        runComposeUiTest {
+            setContent {
+                AppTheme {
+                    PlaceDetails(
+                        place = place(),
+                        comments = emptyList(),
+                        photos = emptyList(),
+                        bookmarked = false,
+                        strings = strings(),
+                        onAction = { actions += it },
+                    )
+                }
+            }
+            onNodeWithTag(PLACE_DIRECTIONS_TAG).performClick()
+            onNodeWithTag(PLACE_SHARE_TAG).performClick()
+        }
+        assertEquals(listOf(PlaceAction.Directions, PlaceAction.Share), actions)
+    }
+
+    @Test
+    fun inlineOverflow_revealsTheItemsUnderTheHeader() {
+        runComposeUiTest {
+            setContent {
+                AppTheme {
+                    PlaceDetails(
+                        place = place(),
+                        comments = emptyList(),
+                        photos = emptyList(),
+                        bookmarked = false,
+                        strings = strings(),
+                        onAction = {},
+                        overflowInline = true,
+                    )
+                }
+            }
+            onNodeWithText("View on BTC Map").assertDoesNotExist()
+            onNodeWithTag(PLACE_OVERFLOW_TAG).performClick()
+            onNodeWithText("View on BTC Map").assertIsDisplayed()
+        }
+    }
+
+    @Test
+    fun share_showsTheConfirmationUnderTheHeader() {
+        runComposeUiTest {
+            setContent {
+                AppTheme {
+                    PlaceDetails(
+                        place = place(),
+                        comments = emptyList(),
+                        photos = emptyList(),
+                        bookmarked = false,
+                        strings = strings(),
+                        onAction = {},
+                        shareConfirmation = "Place link copied to clipboard",
+                    )
+                }
+            }
+            onNodeWithTag(PLACE_SHARE_CONFIRMATION_TAG).assertDoesNotExist()
+            onNodeWithTag(PLACE_SHARE_TAG).performClick()
+            onNodeWithTag(PLACE_SHARE_CONFIRMATION_TAG).assertIsDisplayed()
         }
     }
 

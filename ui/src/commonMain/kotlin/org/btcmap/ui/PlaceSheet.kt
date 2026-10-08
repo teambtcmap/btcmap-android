@@ -1,5 +1,6 @@
 package org.btcmap.ui
 
+import kotlinx.coroutines.delay
 import kotlinx.datetime.minus
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.DateTimePeriod
@@ -38,6 +39,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -49,6 +51,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
@@ -75,6 +78,16 @@ const val PLACE_WATCH_TAG = "place-watch"
 const val PLACE_ADD_COMMENT_TAG = "place-add-comment"
 const val PLACE_ADD_PHOTO_TAG = "place-add-photo"
 
+/** The place sheet header's directions and share actions. */
+const val PLACE_DIRECTIONS_TAG = "place-directions"
+const val PLACE_SHARE_TAG = "place-share"
+
+/** The place sheet header's overflow action. */
+const val PLACE_OVERFLOW_TAG = "place-overflow"
+
+/** The transient share confirmation shown under the place sheet's header. */
+const val PLACE_SHARE_CONFIRMATION_TAG = "place-share-confirmation"
+
 /** Test tag prefix for a photo thumbnail in the strip; the suffix is its index. */
 const val PLACE_PHOTO_TAG_PREFIX = "place-photo-"
 
@@ -98,6 +111,14 @@ fun PlaceSheet(
     onDeletePhoto: ((PlacePhoto) -> Unit)? = null,
     previewMap: (@Composable () -> Unit)? = null,
     addingPhoto: Boolean = false,
+    /**
+     * A transient confirmation shown under the header after the share action
+     * fires (see [PlaceDetails]). Null shows nothing, as on Android, where share
+     * opens the chooser.
+     */
+    shareConfirmation: String? = null,
+    /** Whether the header's overflow actions are laid out inline (see [PlaceDetails]). */
+    overflowInline: Boolean = false,
 ) {
     // Open at the half-expanded height the Views sheet used, so the map stays
     // visible behind it; the user can drag it up to full screen.
@@ -120,6 +141,8 @@ fun PlaceSheet(
             previewMap = previewMap,
             showHeader = true,
             addingPhoto = addingPhoto,
+            shareConfirmation = shareConfirmation,
+            overflowInline = overflowInline,
         )
     }
 }
@@ -143,7 +166,31 @@ fun PlaceDetails(
     showHeader: Boolean = true,
     /** Whether a photo upload is running, so the add affordance is busy. */
     addingPhoto: Boolean = false,
+    /**
+     * A transient confirmation shown under the header right after the share
+     * action fires. The desktop copies the place link, so it confirms it; null
+     * shows nothing, as on Android, where share opens the chooser.
+     */
+    shareConfirmation: String? = null,
+    /**
+     * Whether the header lays its overflow actions out inline (below the header)
+     * instead of in a dropdown. The desktop needs this: a popup inside the
+     * sheet's dialog layer is positioned against the window, not the sheet, so a
+     * dropdown opens at the sheet's edge rather than under its button.
+     */
+    overflowInline: Boolean = false,
 ) {
+    var overflowExpanded by remember { mutableStateOf(false) }
+    var shareConfirmed by remember { mutableStateOf(false) }
+
+    // The confirmation is transient: show it, then drop it after a moment.
+    LaunchedEffect(shareConfirmed) {
+        if (shareConfirmed) {
+            delay(3_000)
+            shareConfirmed = false
+        }
+    }
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -162,10 +209,68 @@ fun PlaceDetails(
                     style = MaterialTheme.typography.headlineSmall,
                     modifier = Modifier.weight(1f),
                 )
-                PlaceOverflowMenu(
-                    place = place,
-                    strings = strings,
-                    onAction = onAction,
+                // Directions and share are the two actions worth a toolbar tap;
+                // the rest stay in the overflow menu.
+                IconButton(
+                    onClick = { onAction(PlaceAction.Directions) },
+                    modifier = Modifier.testTag(PLACE_DIRECTIONS_TAG),
+                ) {
+                    MaterialSymbol(
+                        glyph = "directions",
+                        contentDescription = strings.directions,
+                    )
+                }
+                IconButton(
+                    onClick = {
+                        onAction(PlaceAction.Share)
+                        if (shareConfirmation != null) shareConfirmed = true
+                    },
+                    modifier = Modifier.testTag(PLACE_SHARE_TAG),
+                ) {
+                    MaterialSymbol(glyph = "share", contentDescription = strings.share)
+                }
+                if (overflowInline) {
+                    IconButton(
+                        onClick = { overflowExpanded = !overflowExpanded },
+                        modifier = Modifier.testTag(PLACE_OVERFLOW_TAG),
+                    ) {
+                        MaterialSymbol(
+                            glyph = if (overflowExpanded) "expand_less" else "more_vert",
+                            contentDescription = null,
+                        )
+                    }
+                } else {
+                    PlaceOverflowMenu(
+                        place = place,
+                        strings = strings,
+                        onAction = onAction,
+                    )
+                }
+            }
+            // The desktop lays the overflow out inline: a dropdown inside the
+            // sheet's dialog layer opens at the sheet's edge, not under its
+            // button.
+            if (overflowInline && overflowExpanded) {
+                Column {
+                    PlaceOverflowItems(
+                        place = place,
+                        strings = strings,
+                        onAction = onAction,
+                        onDismiss = { overflowExpanded = false },
+                        alignEnd = true,
+                    )
+                }
+            }
+            if (shareConfirmed && shareConfirmation != null) {
+                Text(
+                    text = shareConfirmation,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.primary,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 8.dp)
+                        .testTag(PLACE_SHARE_CONFIRMATION_TAG),
                 )
             }
         }
@@ -400,22 +505,51 @@ private fun PlaceOverflowMenu(
     onAction: (PlaceAction) -> Unit,
 ) {
     var expanded by remember { mutableStateOf(false) }
-    val osmUrl = place.osmUrl()
-    val osmEditUrl = place.osmEditUrl()
 
-    IconButton(onClick = { expanded = true }) {
+    IconButton(
+        onClick = { expanded = true },
+        modifier = Modifier.testTag(PLACE_OVERFLOW_TAG),
+    ) {
         MaterialSymbol(glyph = "more_vert", contentDescription = null)
     }
 
     DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-        MenuItem(strings.directions) { expanded = false; onAction(PlaceAction.Directions) }
-        MenuItem(strings.share) { expanded = false; onAction(PlaceAction.Share) }
-        MenuItem(strings.viewOnBtcmap) { expanded = false; onAction(PlaceAction.ViewOnBtcmap) }
-        if (osmUrl != null) {
-            MenuItem(strings.viewOnOsm) { expanded = false; onAction(PlaceAction.ViewOnOsm) }
+        PlaceOverflowItems(
+            place = place,
+            strings = strings,
+            onAction = onAction,
+            onDismiss = { expanded = false },
+        )
+    }
+}
+
+/**
+ * The actions the header's overflow holds: the two site links and the OSM edit
+ * link. Shared by the dropdown menu and the desktop's inline expansion, which
+ * right-aligns its labels ([alignEnd]).
+ */
+@Composable
+private fun PlaceOverflowItems(
+    place: Place,
+    strings: PlaceSheetStrings,
+    onAction: (PlaceAction) -> Unit,
+    onDismiss: () -> Unit,
+    alignEnd: Boolean = false,
+) {
+    val osmUrl = place.osmUrl()
+    val osmEditUrl = place.osmEditUrl()
+
+    MenuItem(strings.viewOnBtcmap, alignEnd = alignEnd) {
+        onDismiss(); onAction(PlaceAction.ViewOnBtcmap)
+    }
+    if (osmUrl != null) {
+        MenuItem(strings.viewOnOsm, alignEnd = alignEnd) {
+            onDismiss(); onAction(PlaceAction.ViewOnOsm)
         }
-        if (osmEditUrl != null) {
-            MenuItem(strings.editOnOsm) { expanded = false; onAction(PlaceAction.EditOnOsm) }
+    }
+    if (osmEditUrl != null) {
+        MenuItem(strings.editOnOsm, alignEnd = alignEnd) {
+            onDismiss(); onAction(PlaceAction.EditOnOsm)
         }
     }
 }
@@ -423,11 +557,18 @@ private fun PlaceOverflowMenu(
 @Composable
 private fun MenuItem(
     label: String,
+    alignEnd: Boolean = false,
     glyph: String? = null,
     onClick: () -> Unit,
 ) {
     DropdownMenuItem(
-        text = { Text(text = label) },
+        text = {
+            Text(
+                text = label,
+                textAlign = if (alignEnd) TextAlign.End else TextAlign.Start,
+                modifier = if (alignEnd) Modifier.fillMaxWidth() else Modifier,
+            )
+        },
         leadingIcon = glyph?.let { { MaterialSymbol(glyph = it, contentDescription = null) } },
         onClick = onClick,
     )

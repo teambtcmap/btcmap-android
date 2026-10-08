@@ -53,6 +53,13 @@ fun <T : Any> rememberViewportFeatures(
     LaunchedEffect(state, state.style.loadState, reloadKey) {
         if (state.style.loadState !is StyleLoadState.Ready) return@LaunchedEffect
 
+        // A reload means the synced data behind these features changed, and a
+        // row may have been deleted (a tombstone). The store only ever merges
+        // fetched rows, so drop it and rebuild the viewport from the database;
+        // otherwise a deleted feature would linger in the store and stay drawn
+        // even though its row is gone.
+        store.clear()
+
         suspend fun load() {
             val viewport = state.viewport ?: return
             val bounds = ViewportBounds.expand(viewport.visibleBounds)

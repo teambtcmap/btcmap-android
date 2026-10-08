@@ -74,6 +74,12 @@ fun appLabels(
         },
         zoomIn = strings["zoom_in"],
         zoomOut = strings["zoom_out"],
+        directions = strings["directions"],
+        delete = strings["delete"],
+        deleteConfirmTitle = strings["event_delete_confirm_title"],
+        deleteConfirmMessage = strings["event_delete_confirm_message"],
+        deleteFailed = strings["event_delete_failed"],
+        cancel = strings["cancel"],
     ),
     directions = strings["directions"],
     addPlace = AddPlaceLabels(

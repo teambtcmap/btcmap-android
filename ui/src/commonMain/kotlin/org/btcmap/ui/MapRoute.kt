@@ -16,13 +16,17 @@ import kotlinx.coroutines.withContext
 import org.btcmap.account.canManageEvents
 import org.btcmap.account.isAdmin
 import org.btcmap.api.addPlaceImage
+import org.btcmap.api.deleteEvent
 import org.btcmap.api.deletePlaceImage
 import org.btcmap.api.getPendingEvents
 import org.btcmap.api.getPlaceCoordinates
 import org.btcmap.api.getPlaceImages
+import org.btcmap.api.revokeEvent
+import org.btcmap.db.table.event.Event
 import org.btcmap.db.table.place.Place
 import org.btcmap.i18n.getLocalizedName
 import org.btcmap.map.MapArea
+import org.btcmap.map.toEventGeoJson
 import org.btcmap.place.btcmapUrl
 import org.btcmap.place.canDeletePlaceImage
 import org.btcmap.place.osmEditUrl
@@ -50,10 +54,12 @@ import org.btcmap.util.rethrowIfCancellation
 
 /**
  * The map route, the app's root screen: the shared [MapScreen] wired to the
- * app services, the sync, the admin-only buttons and the place sheet's actions.
+ * app services, the sync, the admin-only buttons and the sheets' actions.
  *
  * A place deep link or a feed row sets [openPlaceId], which the map selects and
- * moves to (falling back to the coordinates when the row is not cached yet).
+ * moves to (falling back to the coordinates when the row is not cached yet). A
+ * selected marker opens the map's own sheet — the place sheet, or the event
+ * sheet — rather than pushing a screen.
  */
 @Composable
 internal fun MapRoute(
@@ -64,6 +70,9 @@ internal fun MapRoute(
     onOpenPlaceConsumed: () -> Unit,
     onNavigate: (AppRoute) -> Unit,
     onShowAuth: () -> Unit,
+    /** The marker kind the map shows, hoisted so it survives leaving the map. */
+    markerKind: MarkerKind,
+    onMarkerKindChange: (MarkerKind) -> Unit,
     modifier: Modifier = Modifier,
     /** A coordinate a screen (e.g. a note's banner) wants the map centred on. */
     focusTarget: Pair<Double, Double>? = null,
@@ -79,6 +88,10 @@ internal fun MapRoute(
     // it; a place deep link keeps the current filter.
     var openTargetMarkerKind by remember { mutableStateOf<MarkerKind?>(null) }
     var selectedPlaceId by remember { mutableStateOf<Long?>(null) }
+    // The event whose sheet is open over the map. Opening an event from a
+    // marker or a search result shows this sheet instead of pushing a screen,
+    // as a selected place shows the map's place sheet.
+    var sheetEvent by remember { mutableStateOf<Event?>(null) }
     var photos by remember { mutableStateOf(emptyList<PlacePhoto>()) }
     var bookmarked by remember { mutableStateOf(false) }
     var addingPhoto by remember { mutableStateOf(false) }
@@ -214,6 +227,8 @@ internal fun MapRoute(
         areaChipPalette = areaChipPalette(services.settings),
         apiUrl = services.settings.apiUrl.toString(),
         usingOpenFreeMap = services.usingOpenFreeMap,
+        markerKind = markerKind,
+        onMarkerKindChange = onMarkerKindChange,
         mapRotationEnabled = services.settings.mapRotationEnabled,
         mapTiltEnabled = services.settings.mapTiltEnabled,
         iconFont = services.iconFont,
@@ -341,11 +356,40 @@ internal fun MapRoute(
                 selectedPlaceId?.let { photos = loadPhotos(services, it) }
             }
         },
-        onSelectEvent = { event -> onNavigate(AppRoute.EventDetails(event)) },
+        onSelectEvent = { sheetEvent = it },
         onSelectArea = { areaId -> onNavigate(AppRoute.Area(areaId)) },
         formatDistance = labels.formatDistance,
         modifier = modifier,
     )
+
+    sheetEvent?.let { event ->
+        val delete = rememberEventDeleteState(services.db, services.api, event.id)
+        EventSheet(
+            event = event,
+            geoJson = listOf(event).toEventGeoJson(),
+            styleUrl = mapStyle.url,
+            styleJson = mapStyle.json,
+            palette = markerPalette(services.settings),
+            iconFont = services.iconFont,
+            usingOpenFreeMap = services.usingOpenFreeMap,
+            labels = labels.eventScreen,
+            onDismiss = { sheetEvent = null },
+            onOpenWebsite = event.website?.let { url -> { platform.openUrl(url.toString()) } },
+            onDirections = { platform.openDirections(event.lat, event.lon) },
+            onDelete = if (delete.canDelete) {
+                {
+                    if (delete.withRpc) {
+                        services.api.deleteEvent(event.id)
+                    } else {
+                        services.api.revokeEvent(event.id)
+                    }
+                }
+            } else {
+                null
+            },
+            onDeleted = { sheetEvent = null },
+        )
+    }
 }
 
 /** The feed route for the areas around the map. */

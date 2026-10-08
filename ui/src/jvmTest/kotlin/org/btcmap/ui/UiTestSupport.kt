@@ -186,4 +186,10 @@ internal val TEST_EVENT_SCREEN_LABELS = EventScreenLabels(
     dateRange = { date, start, end -> "$date, $start - $end" },
     zoomIn = "Zoom in",
     zoomOut = "Zoom out",
+    directions = "Directions",
+    delete = "Delete event",
+    deleteConfirmTitle = "Delete this event?",
+    deleteConfirmMessage = "This event will be removed for everyone.",
+    deleteFailed = "Couldn't delete the event",
+    cancel = "Cancel",
 )

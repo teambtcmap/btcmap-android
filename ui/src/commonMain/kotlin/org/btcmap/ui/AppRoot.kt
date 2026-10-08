@@ -13,13 +13,16 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.withContext
+import org.btcmap.api.deleteEvent
 import org.btcmap.api.getDashboard
 import org.btcmap.api.createNote
 import org.btcmap.api.getPendingEvents
+import org.btcmap.api.revokeEvent
 import org.btcmap.api.setEventStatus
 import org.btcmap.api.setAreaDescription
 import org.btcmap.api.setAreaName
@@ -38,6 +41,7 @@ import org.btcmap.settings.mapStyle
 import org.btcmap.sync.SyncState
 import org.btcmap.ui.map.AreaPreviewMap
 import org.btcmap.ui.map.EventMiniMap
+import org.btcmap.ui.map.MarkerKind
 
 /**
  * The shared application root: the app's navigation, owned by `:ui` so it no
@@ -85,6 +89,11 @@ fun AppRoot(
         // A coordinate a screen asked the map to centre on (a note's banner),
         // passed to the map and cleared once it has moved there.
         var mapFocus by remember { mutableStateOf<Pair<Double, Double>?>(null) }
+        // The marker kind the map shows, kept here so leaving the map for
+        // another screen and returning restores the user's choice. It is saved
+        // across configuration changes but not persisted, so a fresh app start
+        // begins on merchants.
+        var markerKind by rememberSaveable { mutableStateOf(MarkerKind.Merchants) }
         val back = {
             // At the start route there is nothing left on the stack to pop, so
             // the host closes the screen instead.
@@ -132,6 +141,8 @@ fun AppRoot(
                 onOpenPlaceConsumed = onOpenPlaceConsumed,
                 onNavigate = { nav.push(it) },
                 onShowAuth = { showAuth = true },
+                markerKind = markerKind,
+                onMarkerKindChange = { markerKind = it },
                 modifier = modifier,
                 focusTarget = mapFocus,
                 onFocusTargetConsumed = { mapFocus = null },
@@ -215,35 +226,14 @@ fun AppRoot(
                 )
             }
 
-            is AppRoute.EventDetails -> ScreenPage(
-                title = route.event.name,
+            is AppRoute.EventDetails -> EventDetailsRoute(
+                services = services,
+                platform = platform,
+                labels = labels,
+                route = route,
+                mapStyle = mapStyle,
                 onBack = back,
-                backContentDescription = labels.back,
-                actions = {
-                    IconButton(
-                        onClick = { platform.openDirections(route.event.lat, route.event.lon) },
-                    ) {
-                        MaterialSymbol(
-                            glyph = "directions",
-                            contentDescription = labels.directions,
-                        )
-                    }
-                },
-            ) {
-                EventScreen(
-                    event = route.event,
-                    geoJson = listOf(route.event).toEventGeoJson(),
-                    styleUrl = mapStyle.url,
-                    styleJson = mapStyle.json,
-                    palette = markerPalette(services.settings),
-                    iconFont = services.iconFont,
-                    usingOpenFreeMap = services.usingOpenFreeMap,
-                    labels = labels.eventScreen,
-                    onOpenWebsite = route.event.website?.let { url ->
-                        { platform.openUrl(url.toString()) }
-                    },
-                )
-            }
+            )
 
             is AppRoute.AddPlace -> AddPlaceScreen(
                 lat = route.lat,
@@ -458,6 +448,73 @@ fun AppRoot(
                 },
             )
         }
+    }
+}
+
+/**
+ * The event route: the shared [EventScreen] under a bar with the event's name,
+ * the directions action and a back affordance. The delete action is offered only
+ * when the signed-in user may remove the event — an event manager, admin or root
+ * through the `delete_event` RPC, or the submitter of a still-pending event
+ * through the REST revoke — so anyone else sees no delete affordance at all.
+ */
+@Composable
+private fun EventDetailsRoute(
+    services: AppServices,
+    platform: AppPlatform,
+    labels: AppLabels,
+    route: AppRoute.EventDetails,
+    mapStyle: MapStyleSpec,
+    onBack: () -> Unit,
+) {
+    // Whether the current user may delete this event, and whether they do so
+    // with the privileged RPC (any event) or the submitter's own revoke (their
+    // pending event only).
+    val delete = rememberEventDeleteState(services.db, services.api, route.event.id)
+
+    ScreenPage(
+        title = route.event.name,
+        onBack = onBack,
+        backContentDescription = labels.back,
+        actions = {
+            IconButton(
+                onClick = { platform.openDirections(route.event.lat, route.event.lon) },
+            ) {
+                MaterialSymbol(
+                    glyph = "directions",
+                    contentDescription = labels.directions,
+                )
+            }
+            EventDeleteAction(
+                labels = labels.eventScreen,
+                onDelete = if (delete.canDelete) {
+                    {
+                        if (delete.withRpc) {
+                            services.api.deleteEvent(route.event.id)
+                        } else {
+                            services.api.revokeEvent(route.event.id)
+                        }
+                    }
+                } else {
+                    null
+                },
+                onDeleted = onBack,
+            )
+        },
+    ) {
+        EventScreen(
+            event = route.event,
+            geoJson = listOf(route.event).toEventGeoJson(),
+            styleUrl = mapStyle.url,
+            styleJson = mapStyle.json,
+            palette = markerPalette(services.settings),
+            iconFont = services.iconFont,
+            usingOpenFreeMap = services.usingOpenFreeMap,
+            labels = labels.eventScreen,
+            onOpenWebsite = route.event.website?.let { url ->
+                { platform.openUrl(url.toString()) }
+            },
+        )
     }
 }
 

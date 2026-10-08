@@ -37,13 +37,13 @@ class PlaceExtTest {
     }
 
     @Test
-    fun osmMapUrl_centresOnThePlace() {
+    fun osmDirectionsUrl_routesToThePlace() {
         val place = place(boostedUntil = null).copy(lat = 52.2333742, lon = 21.0711489)
 
         Assert.assertEquals(
-            "https://www.openstreetmap.org/?mlat=52.2333742&mlon=21.0711489" +
-                "#map=17/52.2333742/21.0711489",
-            place.osmMapUrl(),
+            "https://www.openstreetmap.org/directions?engine=fossgis_osrm_car" +
+                "&route=;52.2333742,21.0711489",
+            place.osmDirectionsUrl(),
         )
     }
 

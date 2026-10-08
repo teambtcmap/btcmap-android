@@ -5,7 +5,11 @@ import io.ktor.http.Url
 import kotlin.time.Instant
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.put
+import kotlinx.serialization.json.putJsonObject
+import org.btcmap.json.parseJson
 import org.btcmap.util.toInstant
 import org.btcmap.util.toJsonArray
 import org.btcmap.util.toJsonObject
@@ -148,6 +152,35 @@ suspend fun Api.revokeEvent(id: Long) {
     val url = buildUrl("v4", "events", "$id")
 
     call(HttpMethod.Delete, url) { }
+}
+
+/**
+ * Soft-deletes any event (`POST /rpc`, method `delete_event`). This is the
+ * privileged path: it requires an event manager, admin or root role, and the
+ * event must fall inside the caller's geofence when one is set. The submitter's
+ * self-service path for their own pending event is [revokeEvent].
+ */
+suspend fun Api.deleteEvent(id: Long) {
+    val url = buildUrl("rpc")
+
+    val body = buildJsonObject {
+        put("jsonrpc", "2.0")
+        put("method", "delete_event")
+        putJsonObject("params") { put("id", id) }
+        put("id", 1)
+    }
+
+    call(HttpMethod.Post, url, body = body) { response -> response.throwIfRpcError() }
+}
+
+/** JSON-RPC reports a failure under `error`, even on a 200 response. */
+private fun String.throwIfRpcError() {
+    val root = parseJson(this).jsonObject
+    val error = root["error"] ?: return
+    val message = runCatching {
+        error.jsonObject["message"]?.jsonPrimitive?.content
+    }.getOrNull()
+    throw ApiException(code = 200, message = message ?: "RPC request failed")
 }
 
 /**

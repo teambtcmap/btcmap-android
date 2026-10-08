@@ -268,6 +268,35 @@ class EventApiTest : ApiTestBase() {
     }
 
     @Test
+    fun deleteEvent_postsDeleteEventRpc() = runTest {
+        enqueueJson("""{"jsonrpc":"2.0","result":{"id":174},"id":1}""")
+
+        api().deleteEvent(174L)
+
+        val request = takeRequest()
+        Assert.assertEquals("POST", request.method)
+        Assert.assertEquals("/rpc", request.url.encodedPath)
+        Assert.assertEquals(
+            """{"jsonrpc":"2.0","method":"delete_event","params":{"id":174},"id":1}""",
+            request.jsonBody(),
+        )
+    }
+
+    @Test
+    fun deleteEvent_rpcErrorIsReported() = runTest {
+        enqueueJson(
+            """{"jsonrpc":"2.0","error":{"code":-32000,"message":"Forbidden"},"id":1}"""
+        )
+
+        try {
+            api().deleteEvent(174L)
+            Assert.fail("Expected ApiException")
+        } catch (e: ApiException) {
+            Assert.assertTrue(e.message!!.contains("Forbidden"))
+        }
+    }
+
+    @Test
     fun getPendingEvents_requestsThePendingStatus() = runTest {
         enqueueJson(
             """

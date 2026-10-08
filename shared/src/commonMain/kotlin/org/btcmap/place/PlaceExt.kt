@@ -34,11 +34,12 @@ fun Place.isWithin(geometry: AreaGeometry): Boolean = geometry.contains(lat, lon
 fun Place.btcmapUrl(): String = "https://btcmap.org/merchant/$id"
 
 /**
- * OpenStreetMap centred on the place. The Android app's directions action uses a
- * `geo:` URI instead, which a desktop browser cannot act on.
+ * OpenStreetMap directions to the place, from the browser's location when it is
+ * shared: the origin waypoint is left empty. The Android app's directions action
+ * uses a `geo:` URI instead, which a desktop browser cannot act on.
  */
-fun Place.osmMapUrl(): String =
-    "https://www.openstreetmap.org/?mlat=$lat&mlon=$lon#map=17/$lat/$lon"
+fun Place.osmDirectionsUrl(): String =
+    "https://www.openstreetmap.org/directions?engine=fossgis_osrm_car&route=;$lat,$lon"
 
 /**
  * The place's OpenStreetMap page, e.g. "https://www.openstreetmap.org/node/123".

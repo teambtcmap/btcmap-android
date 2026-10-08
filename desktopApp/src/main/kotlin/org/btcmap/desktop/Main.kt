@@ -46,6 +46,8 @@ import org.btcmap.api.ActivityFeedItem
 import org.btcmap.api.getActivity
 import org.btcmap.api.getDashboard
 import org.btcmap.api.getPendingEvents
+import org.btcmap.api.revokeEvent
+import org.btcmap.api.deleteEvent
 import org.btcmap.api.setEventStatus
 import org.btcmap.api.addPlaceImage
 import org.btcmap.api.deletePlaceImage
@@ -179,6 +181,9 @@ import org.btcmap.ui.AreaScreen
 import org.btcmap.ui.AreaStrings
 import org.btcmap.ui.EventScreen
 import org.btcmap.ui.EventScreenLabels
+import org.btcmap.ui.EventDeleteAction
+import org.btcmap.ui.EventSheet
+import org.btcmap.ui.rememberEventDeleteState
 import org.btcmap.ui.areaChipPalette
 import org.btcmap.ui.markerPalette
 import org.btcmap.ui.rememberNavController
@@ -332,6 +337,10 @@ private fun runApp() = application {
                     // A coordinate a screen asked the map to centre on (a note's
                     // banner), cleared once the map has moved there.
                     var mapFocus by remember { mutableStateOf<Pair<Double, Double>?>(null) }
+                    // The marker kind the map shows, kept here so leaving the map
+                    // for another page and returning restores the user's choice.
+                    // A plain remember, so a fresh app start begins on merchants.
+                    var markerKind by remember { mutableStateOf(MarkerKind.Merchants) }
                     // Where the map is looking, tracked so the feed lists the
                     // areas the user is actually around rather than a fixed
                     // point. Starts where the map was last left.
@@ -354,6 +363,10 @@ private fun runApp() = application {
                     // it and the map both return correctly.
                     var selectedAreaId by remember { mutableStateOf<Long?>(null) }
                     var selectedEvent by remember { mutableStateOf<Event?>(null) }
+                    // The event whose sheet is open over the map. A selected
+                    // event marker or search result shows this sheet instead of
+                    // pushing a screen, as the map's place sheet does.
+                    var mapSheetEvent by remember { mutableStateOf<Event?>(null) }
 
                     var isAdmin by remember { mutableStateOf(false) }
                     var canManageEvents by remember { mutableStateOf(false) }
@@ -450,6 +463,8 @@ private fun runApp() = application {
                             areaChipPalette = areaChipPalette(settings),
                             apiUrl = API_URL,
                             usingOpenFreeMap = true,
+                            markerKind = markerKind,
+                            onMarkerKindChange = { markerKind = it },
                             mapRotationEnabled = settings.mapRotationEnabled,
                             mapTiltEnabled = settings.mapTiltEnabled,
                             showAttribution = settings.showAttribution,
@@ -457,6 +472,12 @@ private fun runApp() = application {
                             reloadKey = reloadKey,
                             iconFont = iconFont,
                             placeSheetStrings = PLACE_SHEET_STRINGS,
+                            // The sheet is a dialog on the desktop: its overflow
+                            // is laid out inline rather than as a mispositioned
+                            // dropdown, and the share action confirms the copy
+                            // under the header (a snackbar would sit behind it).
+                            placeShareConfirmation = STRINGS["place_link_copied"],
+                            placeOverflowInline = true,
                             noteDialogLabels = LABELS.noteDialog,
                             attributionText = "© OpenStreetMap contributors",
                             attributionTextColor = attributionColor,
@@ -587,8 +608,7 @@ private fun runApp() = application {
                                 }
                             },
                             onSelectEvent = { event ->
-                                selectedEvent = event
-                                nav.push(Route.Event)
+                                mapSheetEvent = event
                             },
                             onSelectArea = { areaId ->
                                 selectedAreaId = areaId
@@ -996,9 +1016,28 @@ private fun runApp() = application {
                             if (event == null) {
                                 LaunchedEffect(Unit) { nav.pop() }
                             } else {
+                                val delete = rememberEventDeleteState(db, api, event.id)
+
                                 ScreenPage(
                                     title = event.name,
                                     onBack = { nav.pop() },
+                                    actions = {
+                                        EventDeleteAction(
+                                            labels = EVENT_SCREEN_LABELS,
+                                            onDelete = if (delete.canDelete) {
+                                                {
+                                                    if (delete.withRpc) {
+                                                        api.deleteEvent(event.id)
+                                                    } else {
+                                                        api.revokeEvent(event.id)
+                                                    }
+                                                }
+                                            } else {
+                                                null
+                                            },
+                                            onDeleted = { nav.pop() },
+                                        )
+                                    },
                                 ) {
                                     EventScreen(
                                         event = event,
@@ -1030,6 +1069,46 @@ private fun runApp() = application {
                                 feedPlaceId = placeId
                                 nav.reset(Route.Map)
                             }
+                        }
+                    }
+
+                    // The event sheet overlays the map, so it is rendered after
+                    // the route switch and only while the map is current.
+                    if (route == Route.Map) {
+                        mapSheetEvent?.let { event ->
+                            val delete = rememberEventDeleteState(db, api, event.id)
+                            EventSheet(
+                                event = event,
+                                geoJson = listOf(event).toEventGeoJson(),
+                                styleUrl = HOSTED_STYLE_URL,
+                                styleJson = styleJson,
+                                palette = markerPalette(settings),
+                                iconFont = iconFont,
+                                usingOpenFreeMap = true,
+                                labels = EVENT_SCREEN_LABELS,
+                                onDismiss = { mapSheetEvent = null },
+                                onOpenWebsite = event.website?.let { url ->
+                                    { openUrl(url.toString()) }
+                                },
+                                onDirections = {
+                                    openUrl(
+                                        "https://www.openstreetmap.org/?mlat=${event.lat}" +
+                                            "&mlon=${event.lon}#map=17/${event.lat}/${event.lon}",
+                                    )
+                                },
+                                onDelete = if (delete.canDelete) {
+                                    {
+                                        if (delete.withRpc) {
+                                            api.deleteEvent(event.id)
+                                        } else {
+                                            api.revokeEvent(event.id)
+                                        }
+                                    }
+                                } else {
+                                    null
+                                },
+                                onDeleted = { mapSheetEvent = null },
+                            )
                         }
                     }
                 }

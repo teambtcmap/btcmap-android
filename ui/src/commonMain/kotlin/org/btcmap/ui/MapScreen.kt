@@ -24,7 +24,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.withFrameNanos
 import kotlinx.coroutines.flow.filterIsInstance
@@ -142,6 +141,13 @@ fun MapScreen(
     apiUrl: String,
     usingOpenFreeMap: Boolean,
     /**
+     * Which marker kind the map shows, one at a time. Hoisted so a host can keep
+     * the user's choice while it leaves and returns to the map; [onMarkerKindChange]
+     * reports a choice made on the map. Merchants are the default.
+     */
+    markerKind: MarkerKind = MarkerKind.Merchants,
+    onMarkerKindChange: (MarkerKind) -> Unit = {},
+    /**
      * Whether user input may change the map's bearing. Programmatic camera
      * moves are unaffected, so the map can still be pointed at a place.
      */
@@ -226,6 +232,20 @@ fun MapScreen(
      * its own says no and handles [onPlaceSelected] itself.
      */
     placeSheet: Boolean = true,
+    /**
+     * A transient confirmation shown under the place sheet's header right after
+     * the share action fires (the desktop copies the link, so it confirms it).
+     * Null shows nothing, which is the case on Android, where share opens the
+     * chooser instead.
+     */
+    placeShareConfirmation: String? = null,
+    /**
+     * Whether the place sheet lays its overflow actions out inline instead of in
+     * a dropdown. The desktop needs this because a popup inside the sheet's
+     * dialog layer is positioned against the window, not the sheet, so the menu
+     * opens at the sheet's edge.
+     */
+    placeOverflowInline: Boolean = false,
     /**
      * A point the host wants the map to move to, as latitude to longitude, for
      * a place that is not in the local cache or a note tapped in the profile.
@@ -426,10 +446,6 @@ fun MapScreen(
     // the tracking effect below moves the camera as soon as one does.
     var recenterToLocation by remember { mutableStateOf(false) }
 
-    // Which marker kind the map shows. One at a time, as the Views button group
-    // was; merchants are the default.
-    var markerKind by rememberSaveable { mutableStateOf(MarkerKind.Merchants) }
-
     val state = rememberMapState(
         // The bundled styles are handed over as JSON: the Compose map cannot
         // read the asset:// style the Android SDK uses.
@@ -529,7 +545,7 @@ fun MapScreen(
 
     LaunchedEffect(openTarget) {
         val target = openTarget ?: return@LaunchedEffect
-        openTargetMarkerKind?.let { markerKind = it }
+        openTargetMarkerKind?.let(onMarkerKindChange)
         state.animateCamera(
             CameraUpdate(target = Position(target.second, target.first), zoom = OPEN_ZOOM),
         )
@@ -543,7 +559,7 @@ fun MapScreen(
         selectedPlace = place
         // The place may be of the kind the filter is hiding, so show its kind
         // before moving to it, as the Views map did.
-        markerKind = if (place.isMerchant()) MarkerKind.Merchants else MarkerKind.Exchanges
+        onMarkerKindChange(if (place.isMerchant()) MarkerKind.Merchants else MarkerKind.Exchanges)
         onPlaceSelected(place)
         state.animateCamera(placeCameraUpdate(place, state.cameraPosition?.zoom))
     }
@@ -598,7 +614,9 @@ fun MapScreen(
             is SearchAdapterItem.Place -> scope.launch {
                 withContext(Dispatchers.Default) { db.place.selectById(result.placeId) }?.let { place ->
                     selectedPlace = place
-                    markerKind = if (place.isMerchant()) MarkerKind.Merchants else MarkerKind.Exchanges
+                    onMarkerKindChange(
+                        if (place.isMerchant()) MarkerKind.Merchants else MarkerKind.Exchanges,
+                    )
                     onPlaceSelected(place)
                     // A search result can be anywhere, so the map jumps straight
                     // to it rather than only opening its sheet; the current
@@ -928,6 +946,8 @@ fun MapScreen(
                     onAction = { onPlaceAction(place, it) },
                     onDeletePhoto = onDeletePhoto,
                     addingPhoto = addingPhoto,
+                    shareConfirmation = placeShareConfirmation,
+                    overflowInline = placeOverflowInline,
                     onDismiss = {
                         selectedPlace = null
                         onPlaceDismissed()
@@ -987,7 +1007,7 @@ fun MapScreen(
                 }
                 MarkerFilterButtons(
                     selected = markerKind,
-                    onSelect = { markerKind = it },
+                    onSelect = onMarkerKindChange,
                     palette = areaChipPalette,
                 )
             }

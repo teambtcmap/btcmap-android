@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+- Keep the map's marker filter when leaving the map and returning: the chosen kind (merchants, events, exchanges or notes) survives opening another screen and coming back, and only a fresh app start resets it to merchants
+- Open an event tapped on the map in a bottom sheet, as places do, instead of pushing a separate screen; the sheet reuses the event screen's body without a second map
+- Add a delete action to the event screen's toolbar for the event's submitter (while it is pending) or an event manager, admin or root: the privileged path soft-deletes any event through the `delete_event` RPC, the submitter's through `DELETE /v4/events/{id}`
+- Fix a deleted event staying drawn on the map (and no longer clickable): the map's viewport cache now drops its features when a sync reloads them, so tombstones disappear
+- Move the merchant sheet's directions and share actions into the header toolbar, leaving the BTC Map and OSM links in the overflow; on the desktop the overflow lays out inline rather than as a mispositioned dropdown, directions opens OpenStreetMap directions, and sharing confirms the copied link under the header
 - Fix the app deleting its database when its schema version could not be read, for example while another process briefly held it locked: an unreadable database is now kept and the open fails instead, so a transient lock can no longer wipe the session, settings and cached notes
 - Let the map search accept coordinates: typing a latitude/longitude pair (including a URL-encoded comma, as copied from a map link) offers a result that moves the map there
 - Fix the desktop map's "find my location" button: on Linux the XDG portal's separate permission probe consumed GeoClue's single fix, so the tracking session that followed never received a location and the map never recentred; the app now grants the permission itself and lets the tracking session do the authorization, so the button finds the user

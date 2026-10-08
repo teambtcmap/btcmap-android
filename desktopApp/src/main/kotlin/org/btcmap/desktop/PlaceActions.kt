@@ -6,8 +6,8 @@ import java.awt.datatransfer.StringSelection
 import java.net.URI
 import org.btcmap.db.table.place.Place
 import org.btcmap.place.btcmapUrl
+import org.btcmap.place.osmDirectionsUrl
 import org.btcmap.place.osmEditUrl
-import org.btcmap.place.osmMapUrl
 import org.btcmap.place.osmUrl
 import org.btcmap.ui.PlaceAction
 
@@ -21,7 +21,7 @@ import org.btcmap.ui.PlaceAction
  */
 fun handlePlaceAction(place: Place, action: PlaceAction) {
     when (action) {
-        PlaceAction.Directions -> openUrl(place.osmMapUrl())
+        PlaceAction.Directions -> openUrl(place.osmDirectionsUrl())
         PlaceAction.Share -> copyToClipboard(place.btcmapUrl())
         PlaceAction.ViewOnBtcmap -> openUrl(place.btcmapUrl())
         PlaceAction.ViewOnOsm -> place.osmUrl()?.let(::openUrl)
