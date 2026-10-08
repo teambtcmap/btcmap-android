@@ -9,11 +9,20 @@ import java.util.Locale
 
 actual val ioDispatcher: CoroutineDispatcher = Dispatchers.IO
 
-actual fun currentLanguage(): String = Locale.getDefault().language
+@Volatile
+actual var languageOverride: String? = null
 
-actual fun currentLocale(): String = Locale.getDefault().toLanguageTag()
+actual fun currentLanguage(): String =
+    languageOverride?.substringBefore('-') ?: Locale.getDefault().language
 
-actual fun formatInteger(value: Long): String = NumberFormat.getIntegerInstance().format(value)
+actual fun currentLocale(): String =
+    languageOverride ?: Locale.getDefault().toLanguageTag()
+
+actual fun formatInteger(value: Long): String =
+    NumberFormat.getIntegerInstance(localeForFormatting()).format(value)
+
+private fun localeForFormatting(): Locale =
+    languageOverride?.let(Locale::forLanguageTag) ?: Locale.getDefault()
 
 actual fun weekdayName(isoDayNumber: Int, language: String): String =
     DayOfWeek.of(isoDayNumber).getDisplayName(TextStyle.FULL, Locale.forLanguageTag(language))

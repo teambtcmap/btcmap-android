@@ -13,7 +13,9 @@ import androidx.compose.ui.test.performScrollToNode
 import androidx.compose.ui.test.runComposeUiTest
 import kotlinx.coroutines.runBlocking
 import org.btcmap.db.table.user.User
+import org.btcmap.platform.languageOverride
 import org.btcmap.settings.MapStyle
+import org.btcmap.settings.language
 import org.btcmap.settings.mapBearing
 import org.btcmap.settings.mapStyle
 import org.btcmap.settings.mapTilt
@@ -21,6 +23,7 @@ import org.btcmap.settings.showAttribution
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 /**
@@ -156,11 +159,14 @@ class SettingsPageTest {
         signIn(roles = listOf("area_admin"))
         runComposeUiTest {
             setContent { SettingsPage(settings, db, TEST_SETTINGS_PAGE_LABELS, onOpenAccount = {}, onOpenColors = {}, onOpenDbStats = {}) }
+            // The account row names the signed-in user once the page has read
+            // the cached account, which is also when the admin row is included.
+            waitUntil(timeoutMillis = 5_000) {
+                onAllNodesWithText("Click to see your profile").fetchSemanticsNodes().isNotEmpty()
+            }
             // The list is lazy, so the admin-only rows at the bottom are only
             // composed once scrolled into view.
-            waitUntil(timeoutMillis = 5_000) {
-                onAllNodesWithText("Image cache").fetchSemanticsNodes().isNotEmpty()
-            }
+            onNode(hasScrollAction()).performScrollToNode(hasText("Image cache"))
             onNode(hasScrollAction()).performScrollToNode(hasText("Manage areas"))
         }
     }
@@ -172,12 +178,56 @@ class SettingsPageTest {
         runComposeUiTest {
             setContent { SettingsPage(settings, db, TEST_SETTINGS_PAGE_LABELS, onOpenAccount = {}, onOpenColors = {}, onOpenDbStats = {}) }
             waitUntil(timeoutMillis = 5_000) {
-                onAllNodesWithText("Image cache").fetchSemanticsNodes().isNotEmpty()
+                onAllNodesWithText("Click to see your profile").fetchSemanticsNodes().isNotEmpty()
             }
             // Scroll to the last row a regular user has, so an absent admin row
             // is proven absent rather than merely uncomposed.
             onNode(hasScrollAction()).performScrollToNode(hasText("Image cache"))
             onAllNodesWithText("Manage areas").assertCountEquals(0)
+        }
+    }
+
+    @OptIn(ExperimentalTestApi::class)
+    @Test
+    fun languageRow_picksALanguageAndStoresIt() {
+        var changed = false
+        try {
+            runComposeUiTest {
+                setContent {
+                    SettingsPage(
+                        settings,
+                        db,
+                        TEST_SETTINGS_PAGE_LABELS,
+                        onOpenAccount = {},
+                        onOpenColors = {},
+                        onOpenDbStats = {},
+                        onLanguageChanged = { changed = true },
+                    )
+                }
+                onNodeWithText("Language").performClick()
+                onNodeWithText("Deutsch").performClick()
+            }
+            assertEquals("de", settings.language)
+            assertTrue(changed)
+        } finally {
+            languageOverride = null
+        }
+    }
+
+    @OptIn(ExperimentalTestApi::class)
+    @Test
+    fun languageRow_canFollowTheSystemAgain() {
+        settings.language = "de"
+        try {
+            runComposeUiTest {
+                setContent { SettingsPage(settings, db, TEST_SETTINGS_PAGE_LABELS, onOpenAccount = {}, onOpenColors = {}, onOpenDbStats = {}) }
+                // The row shows the stored language, so this opens the picker.
+                onNodeWithText("Deutsch").performClick()
+                onNodeWithText("System default").performClick()
+            }
+            assertNull(settings.language)
+        } finally {
+            languageOverride = null
         }
     }
 

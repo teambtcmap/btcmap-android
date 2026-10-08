@@ -67,6 +67,12 @@ fun AppRoot(
     onEventConsumed: () -> Unit = {},
     /** Gives the host a way to pop the root's stack for a system back press. */
     registerBack: ((() -> Boolean)) -> Unit = {},
+    /**
+     * Called when the settings screen changes the UI language, so the host can
+     * rebuild its [labels] against the new one and the whole root re-renders in
+     * it without a restart.
+     */
+    onLanguageChanged: () -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     AppTheme(iconFont = services.iconFont) {
@@ -380,6 +386,7 @@ fun AppRoot(
                     onOpenDbStats = { nav.push(AppRoute.DbStats) },
                     onOpenImageStats = { nav.push(AppRoute.ImageStats) },
                     onOpenManageAreas = { nav.push(AppRoute.ManageAreas) },
+                    onLanguageChanged = onLanguageChanged,
                     reloadKey = authReload,
                 )
             }

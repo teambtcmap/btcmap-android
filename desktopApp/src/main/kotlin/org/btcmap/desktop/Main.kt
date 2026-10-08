@@ -55,6 +55,7 @@ import org.btcmap.feed.iconGlyph
 import org.btcmap.map.MapAreasController
 import org.btcmap.place.canDeletePlaceImage
 import org.btcmap.i18n.Strings
+import org.btcmap.platform.currentLocale
 import org.btcmap.ui.ActivityFeedRow
 import org.btcmap.ui.AppLabels
 import org.btcmap.ui.activityFeedRow
@@ -114,6 +115,7 @@ import org.btcmap.settings.MapColor
 import org.btcmap.settings.MapStyle
 import org.btcmap.settings.Settings
 import org.btcmap.settings.apiUrl
+import org.btcmap.settings.applyLanguage
 import org.btcmap.settings.authorized
 import org.btcmap.settings.bundledStyleAsset
 import org.btcmap.settings.isDark
@@ -221,6 +223,9 @@ private fun runApp() = application {
     val home = DesktopHome()
     val db = home.database()
     val settings = runBlocking { home.settings(db).apply { preload() } }
+    // Resolve the shared strings against the user's chosen language: the label
+    // values below are built lazily, so they pick this up on first use.
+    settings.applyLanguage()
 
     // The bundled snapshots are on the classpath (see the build file), so the
     // desktop seeds offline like Android and the first sync only fetches the
@@ -1461,58 +1466,63 @@ private fun resourceBytes(path: String): ByteArray? =
 private fun bundledSnapshot(fileName: String): Source? =
     Thread.currentThread().contextClassLoader.getResourceAsStream(fileName)?.source()
 
-/** The device locale's string catalog, shared with Android. */
-private val STRINGS = Strings.current()
+/**
+ * The string catalog, shared with Android. Built lazily so it is created after
+ * the host applies the stored language override, not at class initialization.
+ */
+private val STRINGS: Strings by lazy { Strings.current() }
 
 /**
  * The shared labels, built from the cross-platform catalog so the desktop and
  * Android render the same text. Only formatting (byte sizes, distances, dates)
- * stays platform-specific.
+ * stays platform-specific. Lazy for the same reason as [STRINGS].
  */
-private val LABELS: AppLabels = appLabels(
-    strings = STRINGS,
-    currentStyle = MapStyle.Auto,
-    formatNumber = { value, digits ->
-        java.text.NumberFormat.getNumberInstance().apply {
-            maximumFractionDigits = digits
-        }.format(value)
-    },
-    formatBytes = ::formatBytes,
-    formatFeedDate = ::desktopFeedDate,
-)
+private val LABELS: AppLabels by lazy {
+    appLabels(
+        strings = STRINGS,
+        currentStyle = MapStyle.Auto,
+        formatNumber = { value, digits ->
+            java.text.NumberFormat.getNumberInstance(java.util.Locale.forLanguageTag(currentLocale())).apply {
+                maximumFractionDigits = digits
+            }.format(value)
+        },
+        formatBytes = ::formatBytes,
+        formatFeedDate = ::desktopFeedDate,
+    )
+}
 
 // The shared labels, named as the desktop screens already expect them.
-private val INVOICE_LABELS = LABELS.boost.invoice.invoice
-private val INVOICE_SECTION_LABELS = LABELS.boost.invoice
-private val BOOST_LABELS = LABELS.boost
-private val COMMENT_LABELS = LABELS.addComment
-private val VERIFIED_FILTER_YEARS = LABELS.settings.verifiedFilterYears
-private val DESKTOP_DB_STATS_LABELS = LABELS.dbStats.dbStats
-private val SETTINGS_PAGE_LABELS = LABELS.settings
-private val COLORS_PAGE_LABELS = LABELS.colors
-private val DB_STATS_PAGE_LABELS = LABELS.dbStats
-private val PROFILE_LABELS = LABELS.userProfile
-private val UPLOADED_IMAGES_LABELS = LABELS.uploadedImages
-private val MY_EVENTS_LABELS = LABELS.myEvents
-private val EVENT_REVIEW_LABELS = LABELS.eventReview
-private val PROFILE_FORM_LABELS = LABELS.profileForm
-private val ACCOUNT_LABELS = LABELS.account
-private val REPORT_LABELS = LABELS.report
-private val ADD_PLACE_LABELS = LABELS.addPlace
-private val ADD_EVENT_LABELS = LABELS.addEvent
-private val ADD_NOTE_LABELS = LABELS.addNote
-private val MY_NOTES_LABELS = LABELS.myNotes
-private val ADD_LOCATION_LABELS = LABELS.addLocation
-private val PLACE_SHEET_STRINGS = LABELS.placeStrings
-private val DESKTOP_AREA_STRINGS = LABELS.area
-private val EVENT_SCREEN_LABELS = LABELS.eventScreen
+private val INVOICE_LABELS get() = LABELS.boost.invoice.invoice
+private val INVOICE_SECTION_LABELS get() = LABELS.boost.invoice
+private val BOOST_LABELS get() = LABELS.boost
+private val COMMENT_LABELS get() = LABELS.addComment
+private val VERIFIED_FILTER_YEARS get() = LABELS.settings.verifiedFilterYears
+private val DESKTOP_DB_STATS_LABELS get() = LABELS.dbStats.dbStats
+private val SETTINGS_PAGE_LABELS get() = LABELS.settings
+private val COLORS_PAGE_LABELS get() = LABELS.colors
+private val DB_STATS_PAGE_LABELS get() = LABELS.dbStats
+private val PROFILE_LABELS get() = LABELS.userProfile
+private val UPLOADED_IMAGES_LABELS get() = LABELS.uploadedImages
+private val MY_EVENTS_LABELS get() = LABELS.myEvents
+private val EVENT_REVIEW_LABELS get() = LABELS.eventReview
+private val PROFILE_FORM_LABELS get() = LABELS.profileForm
+private val ACCOUNT_LABELS get() = LABELS.account
+private val REPORT_LABELS get() = LABELS.report
+private val ADD_PLACE_LABELS get() = LABELS.addPlace
+private val ADD_EVENT_LABELS get() = LABELS.addEvent
+private val ADD_NOTE_LABELS get() = LABELS.addNote
+private val MY_NOTES_LABELS get() = LABELS.myNotes
+private val ADD_LOCATION_LABELS get() = LABELS.addLocation
+private val PLACE_SHEET_STRINGS get() = LABELS.placeStrings
+private val DESKTOP_AREA_STRINGS get() = LABELS.area
+private val EVENT_SCREEN_LABELS get() = LABELS.eventScreen
 
 private const val DESKTOP_TOKEN_LABEL = "BTC Map desktop"
 
 /** A medium date for feed rows older than a week. */
 private fun desktopFeedDate(iso: String): String = runCatching {
     java.time.format.DateTimeFormatter.ofLocalizedDate(java.time.format.FormatStyle.MEDIUM)
-        .withLocale(java.util.Locale.getDefault())
+        .withLocale(java.util.Locale.forLanguageTag(currentLocale()))
         .format(java.time.ZonedDateTime.parse(iso))
 }.getOrDefault(iso)
 

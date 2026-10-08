@@ -28,6 +28,8 @@ class SettingsModelTest {
         assertEquals(
             listOf(
                 "account",
+                "headerGeneral",
+                "language",
                 "headerMap",
                 "mapStyle",
                 "customizeColors",
@@ -78,6 +80,8 @@ class SettingsModelTest {
         assertEquals(
             listOf(
                 "account",
+                "headerGeneral",
+                "language",
                 "headerMap",
                 "mapStyle",
                 "customizeColors",
@@ -122,6 +126,8 @@ class SettingsModelTest {
     private fun strings() = SettingsStrings(
         accountTitle = "account",
         accountSecondary = "account-secondary",
+        language = "language",
+        languageValue = "language-value",
         mapStyle = "map-style",
         mapStyleValue = "map-style-value",
         customizeColors = "customize-colors",
@@ -143,5 +149,6 @@ class SettingsModelTest {
         sectionMap = "section-map",
         sectionData = "section-data",
         sectionAdmin = "section-admin",
+        sectionGeneral = "section-general",
     )
 }

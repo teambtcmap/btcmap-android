@@ -29,6 +29,9 @@ class AppRootComposeView @JvmOverloads constructor(
 
     var labels: AppLabels? by mutableStateOf(null)
 
+    /** Called when a screen changes the UI language, so the host can rebuild [labels]. */
+    var onLanguageChanged: () -> Unit = {}
+
     /** The route the root opens first. Set before the view is attached. */
     var startRoute: AppRoute = AppRoute.Map
 
@@ -63,6 +66,7 @@ class AppRootComposeView @JvmOverloads constructor(
             pendingEvent = pendingEvent,
             onEventConsumed = { pendingEvent = null },
             registerBack = { navBack = it },
+            onLanguageChanged = onLanguageChanged,
         )
     }
 }

@@ -11,6 +11,8 @@ package org.btcmap.ui
 data class SettingsStrings(
     val accountTitle: String,
     val accountSecondary: String,
+    val language: String,
+    val languageValue: String,
     val mapStyle: String,
     val mapStyleValue: String,
     val customizeColors: String,
@@ -29,6 +31,7 @@ data class SettingsStrings(
     val imageStatsSecondary: String,
     val manageAreas: String,
     val manageAreasSecondary: String,
+    val sectionGeneral: String,
     val sectionMap: String,
     val sectionData: String,
     val sectionAdmin: String,
@@ -62,6 +65,15 @@ fun settingsItems(
             strings.accountTitle,
             strings.accountSecondary,
             icon = "account_circle",
+        )
+    )
+    add(SettingsItem.Header("headerGeneral", strings.sectionGeneral))
+    add(
+        SettingsItem.Action(
+            "language",
+            strings.language,
+            strings.languageValue,
+            icon = "language",
         )
     )
     add(SettingsItem.Header("headerMap", strings.sectionMap))

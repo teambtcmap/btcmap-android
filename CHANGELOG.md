@@ -6,6 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+- Add a Language setting that overrides the system language: it offers all 36 app languages plus "System default", applying immediately in Android and at the next launch on the desktop, and drives the whole UI including the string catalog, localized place and area names, opening hours, the API's language parameter and number formatting; the new strings are translated into every app language
 - Add notes: choose "Add a note" from the map's add-location action to drop a note (public or private) at the map centre, and manage your notes — flip a note between public and private, or delete it — from a new "My notes" screen in the profile; the notes are cached locally and refreshed by the app's sync, are drawn on the map as their own amber, never-clustered pins that open the note's text when tapped, and tapping a note's map banner in the profile returns to the main map centred on that note
 - Refresh the signed-in profile as the last step of the app-scoped sync, so a role granted or revoked on btcmap.org (event manager, area admin, admin) reaches the app's admin and manage-areas affordances without signing out and back in
 - Add an "Allow map tilt" setting below "Allow map rotation", with both translated into every app language, and reset the saved rotation or tilt whenever the rotation or tilt setting is toggled, so a map left at an angle cannot stay stuck there once that movement is blocked

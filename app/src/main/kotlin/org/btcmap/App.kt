@@ -31,6 +31,7 @@ import org.btcmap.note.Notes
 import org.btcmap.ui.ImageStatsEventListener
 import org.btcmap.ui.map.OfflinePacks
 import org.btcmap.settings.apiUrl
+import org.btcmap.settings.applyLanguage
 import org.btcmap.settings.authToken
 import org.btcmap.settings.prefs
 import org.btcmap.sync.Sync
@@ -240,6 +241,9 @@ class App : Application(), SingletonImageLoader.Factory {
         try {
             db.connect()
             prefs.preload()
+            // Apply the stored UI language before the first screen builds its
+            // labels, so the app opens in the user's chosen language.
+            prefs.applyLanguage()
         } catch (t: Throwable) {
             t.rethrowIfCancellation()
         }

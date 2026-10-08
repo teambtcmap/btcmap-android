@@ -33,13 +33,16 @@ import org.btcmap.dbstats.DatabaseFile
 import org.btcmap.dbstats.DbStatsLabels
 import org.btcmap.dbstats.DbStatsReader
 import org.btcmap.dbstats.dbStatsSections
+import org.btcmap.i18n.appLanguages
 import org.btcmap.map.DEFAULT_MAP_BEARING
 import org.btcmap.map.DEFAULT_MAP_TILT
 import org.btcmap.settings.MapColor
 import org.btcmap.settings.MapStyle
 import org.btcmap.settings.Settings
 import org.btcmap.settings.apiUrl
+import org.btcmap.settings.applyLanguage
 import org.btcmap.settings.authorized
+import org.btcmap.settings.language
 import org.btcmap.settings.mapBearing
 import org.btcmap.settings.mapColor
 import org.btcmap.settings.mapRotationEnabled
@@ -102,13 +105,28 @@ data class SettingsPageLabels(
     val sectionMap: String,
     val sectionData: String,
     val sectionAdmin: String,
+    val sectionGeneral: String,
+    val language: String,
+    val languageDialogTitle: String,
+    val languageSystemDefault: String,
     val mapStyleDialogTitle: String,
     val verifiedFilterDialogTitle: String,
     val close: String,
 )
 
 /** The dialog the settings list can raise. */
-private enum class SettingsDialog { MapStyle, VerifiedFilter }
+private enum class SettingsDialog { Language, MapStyle, VerifiedFilter }
+
+/** The picker key for "follow the device"; no language tag looks like it. */
+private const val LANGUAGE_SYSTEM_KEY = "__system__"
+
+/**
+ * The name shown for [tag], or [systemDefault] when it is null. An unknown tag
+ * (one a future build stored) falls back to the tag itself rather than hiding
+ * the row's value.
+ */
+private fun languageLabel(tag: String?, systemDefault: String): String =
+    if (tag == null) systemDefault else appLanguages.firstOrNull { it.tag == tag }?.name ?: tag
 
 /**
  * The settings page: the shared [settingsItems] rows, the account row read from
@@ -126,6 +144,7 @@ fun SettingsPage(
     onOpenDbStats: () -> Unit,
     onOpenImageStats: () -> Unit = {},
     onOpenManageAreas: () -> Unit = {},
+    onLanguageChanged: () -> Unit = {},
     reloadKey: Int = 0,
 ) {
     var attribution by remember { mutableStateOf(settings.showAttribution) }
@@ -133,6 +152,7 @@ fun SettingsPage(
     var tilt by remember { mutableStateOf(settings.mapTiltEnabled) }
     var mapStyle by remember { mutableStateOf(settings.mapStyle) }
     var verifiedYears by remember { mutableStateOf(settings.verifiedFilterYears) }
+    var language by remember { mutableStateOf(settings.language) }
 
     // The account row names the cached user, which is read off the main thread.
     // [reloadKey] lets a host re-read it after a sign-in, which the page cannot
@@ -168,6 +188,8 @@ fun SettingsPage(
             strings = SettingsStrings(
                 accountTitle = accountTitle,
                 accountSecondary = accountSecondary,
+                language = labels.language,
+                languageValue = languageLabel(language, labels.languageSystemDefault),
                 mapStyle = labels.mapStyle,
                 mapStyleValue = labels.mapStyleValue(mapStyle),
                 customizeColors = labels.customizeColors,
@@ -189,6 +211,7 @@ fun SettingsPage(
                 sectionMap = labels.sectionMap,
                 sectionData = labels.sectionData,
                 sectionAdmin = labels.sectionAdmin,
+                sectionGeneral = labels.sectionGeneral,
             ),
             showAttribution = attribution,
             mapRotationEnabled = rotation,
@@ -199,6 +222,7 @@ fun SettingsPage(
         onItemClick = { key ->
             when (key) {
                 "account" -> onOpenAccount()
+                "language" -> dialog = SettingsDialog.Language
                 "mapStyle" -> dialog = SettingsDialog.MapStyle
                 "customizeColors" -> onOpenColors()
                 "verifiedFilter" -> dialog = SettingsDialog.VerifiedFilter
@@ -236,6 +260,27 @@ fun SettingsPage(
     )
 
     when (dialog) {
+        SettingsDialog.Language -> RadioPickerDialog(
+            title = labels.languageDialogTitle,
+            options = buildList {
+                add(RadioOption(LANGUAGE_SYSTEM_KEY, labels.languageSystemDefault))
+                appLanguages.forEach { add(RadioOption(it.tag, it.name)) }
+            },
+            selectedKey = language ?: LANGUAGE_SYSTEM_KEY,
+            close = labels.close,
+            onSelect = { key ->
+                val tag = key.takeIf { it != LANGUAGE_SYSTEM_KEY }
+                language = tag
+                settings.language = tag
+                // Push the choice to the platform before the host rebuilds its
+                // labels, so the new text resolves against it.
+                settings.applyLanguage()
+                onLanguageChanged()
+                dialog = null
+            },
+            onDismiss = { dialog = null },
+        )
+
         SettingsDialog.MapStyle -> RadioPickerDialog(
             title = labels.mapStyleDialogTitle,
             options = MapStyle.entries.map { RadioOption(it.name, labels.mapStyleValue(it)) },

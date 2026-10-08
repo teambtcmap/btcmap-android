@@ -135,6 +135,9 @@ class AppRootFragment : Fragment() {
                 },
             )
             labels = context.androidAppLabels()
+            // Rebuilding the labels against the new language override re-renders
+            // the whole root in it, without recreating the activity.
+            onLanguageChanged = { labels = context.androidAppLabels() }
             startRoute = routeFromArgs(arguments)
             onExit = { requireActivity().finish() }
         }

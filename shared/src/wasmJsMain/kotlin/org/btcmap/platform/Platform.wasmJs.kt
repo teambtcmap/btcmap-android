@@ -7,9 +7,12 @@ import kotlinx.datetime.isoDayNumber
 
 actual val ioDispatcher: CoroutineDispatcher = Dispatchers.Default
 
-actual fun currentLanguage(): String = "en"
+/** The single-threaded browser host keeps a plain override; null follows English. */
+actual var languageOverride: String? = null
 
-actual fun currentLocale(): String = "en"
+actual fun currentLanguage(): String = languageOverride?.substringBefore('-') ?: "en"
+
+actual fun currentLocale(): String = languageOverride ?: "en"
 
 /**
  * Simple thousands grouping. The browser's `Intl.NumberFormat` is the proper
