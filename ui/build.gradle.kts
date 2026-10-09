@@ -54,11 +54,15 @@ kotlin {
             // WindowCompat, for the system-bar icon appearance over the map.
             implementation(libs.androidx.core)
             runtimeOnly(libs.maplibre.compose.runtime.opengl.android)
+            // Pinyin for the basemap POI sheet's Chinese names.
+            implementation(libs.jpinyin)
         }
 
         jvmMain.dependencies {
             implementation(compose.desktop.currentOs)
             runtimeOnly(libs.maplibre.compose.runtime.opengl.linux.x64)
+            // Pinyin for the basemap POI sheet's Chinese names.
+            implementation(libs.jpinyin)
         }
 
         jvmTest.dependencies {

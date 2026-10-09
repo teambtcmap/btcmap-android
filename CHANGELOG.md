@@ -6,6 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+- Tap a place the basemap draws — a bar, hotel or other OpenStreetMap point of interest that is not a BTC Map merchant — to open a small info sheet with its name in the app's language, its original-language name (Han names drawn with pinyin ruby over each character), its category and its coordinates; tapping either name copies it to the clipboard
 - Add a "Manage place images" settings screen, shown in the Admin section to admins and roots: it lists the newest place uploads across every place, each with its thumbnail, its place, its uploader and its date, tapping a row opens the image full screen (swiping through the rest), and a moderator can delete spam
 - Fix dates in the app following the device locale instead of the chosen language — a note's creation date rendered in the device language on an English app; every date now uses the Language setting
 - Add edit and delete actions to the note sheet: a pencil beside the note's text edits its body, and a toolbar delete confirms first, then removes the note from the server, the cache and the map

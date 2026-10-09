@@ -62,6 +62,8 @@ data class AppLabels(
     val ok: String,
     /** The strings of the sheet a note pin opens (see `NoteSheet`). */
     val noteSheet: NoteSheetLabels,
+    /** The strings of the sheet a tapped basemap POI opens (see `PoiSheet`). */
+    val poiSheet: PoiSheetLabels,
     val area: AreaStrings,
     /** The current map style's display name, for the offline download dialog. */
     val offlineStyleName: String,

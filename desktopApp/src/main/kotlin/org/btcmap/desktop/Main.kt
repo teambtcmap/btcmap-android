@@ -504,6 +504,7 @@ private fun runApp() = application {
                             placeShareConfirmation = STRINGS["place_link_copied"],
                             placeOverflowInline = true,
                             noteSheetLabels = LABELS.noteSheet,
+                            poiSheetLabels = LABELS.poiSheet,
                             onEditNote = { id, text ->
                                 Notes.updateText(api, db, id, text)
                             },

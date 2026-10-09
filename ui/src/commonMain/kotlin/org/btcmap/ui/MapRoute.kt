@@ -264,6 +264,7 @@ internal fun MapRoute(
         },
         addLocationLabels = labels.addLocation,
         noteSheetLabels = labels.noteSheet,
+        poiSheetLabels = labels.poiSheet,
         onEditNote = { id, text ->
             Notes.updateText(services.api, services.db, id, text)
         },

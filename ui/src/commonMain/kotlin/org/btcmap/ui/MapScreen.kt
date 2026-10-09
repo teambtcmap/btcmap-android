@@ -42,6 +42,7 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.DpRect
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -52,6 +53,7 @@ import org.btcmap.comment.CommentsAdapterItem
 import org.btcmap.comment.commentDateFormatter
 import org.btcmap.comment.toAdapterItem
 import org.btcmap.db.Database
+import org.btcmap.platform.currentLanguage
 import org.btcmap.db.table.event.Event
 import org.btcmap.db.table.note.Note as DbNote
 import org.btcmap.db.table.place.Place
@@ -86,6 +88,9 @@ import org.btcmap.ui.map.MarkerPalette
 import org.btcmap.ui.map.MerchantLayers
 import org.btcmap.ui.map.NoteLayers
 import org.btcmap.ui.map.noteMarkerImageName
+import org.btcmap.ui.map.POI_LAYER_IDS
+import org.btcmap.ui.map.PoiInfo
+import org.btcmap.ui.map.toPoiInfo
 import org.btcmap.ui.map.SearchActions
 import org.btcmap.ui.map.SearchOverlay
 import org.btcmap.ui.map.platformMapUiOptions
@@ -193,6 +198,8 @@ fun MapScreen(
         deleteFailed = "Couldn't delete the note",
         cancel = "Cancel",
     ),
+    /** The strings of the sheet a tapped basemap POI opens. */
+    poiSheetLabels: PoiSheetLabels = PoiSheetLabels(copied = "Copied to clipboard"),
     /**
      * Edits the body of the note the sheet is showing, given its id. Null hides
      * the sheet's edit action, as when the host cannot edit notes.
@@ -350,38 +357,16 @@ fun MapScreen(
 
     val scope = rememberCoroutineScope()
     var selectedPlace by remember { mutableStateOf<Place?>(null) }
+    // A non-BTC-Map OpenStreetMap feature the user tapped on the basemap (a POI
+    // the style draws), shown in its own sheet. Independent of the place sheet,
+    // which only the app's own marker layers open.
+    var shownPoi by remember { mutableStateOf<PoiInfo?>(null) }
     // Bumped on every marker tap, even for the place already selected, so the
     // recentring effect below runs again.
     var recenterKey by remember { mutableStateOf(0) }
     // The sheet shows the current row: a sync rewrites rows in place, so the
     // selected copy is re-read whenever the host bumps the reload key.
     val shownPlace = rememberReloadedPlace(selectedPlace, db, reloadKey)
-    // A tap that no marker layer consumed (empty map) dismisses the sheet, as
-    // the Views map did. The handler reads the live selection, so it is built
-    // once instead of on every recomposition; the dismissal callback goes
-    // through a live state so a changed host lambda is still the one called.
-    val currentOnPlaceDismissed by rememberUpdatedState(onPlaceDismissed)
-    val mapInteractions = remember(mapRotationEnabled, mapTiltEnabled) {
-        MapInteractions {
-            camera {
-                // Bearing permission. A gesture binding cannot re-enable a
-                // movement the camera disallows, so this alone stops user
-                // rotation (two-finger twist, drag, keys).
-                rotate { enabled = mapRotationEnabled }
-                // Pitch permission, on the same terms as rotation.
-                tilt { enabled = mapTiltEnabled }
-            }
-            callbacks {
-                click {
-                    onUnhandled {
-                        selectedPlace = null
-                        currentOnPlaceDismissed()
-                        ClickResult.Consume
-                    }
-                }
-            }
-        }
-    }
     var selectedComments by remember { mutableStateOf<List<CommentsAdapterItem>>(emptyList()) }
 
     LaunchedEffect(shownPlace) {
@@ -405,6 +390,8 @@ fun MapScreen(
             // Event features carry no iconId; place features do.
             val isEvent = properties["iconId"] == null
             scope.launch {
+                // A place or event selection replaces any basemap POI sheet.
+                shownPoi = null
                 if (isEvent) {
                     withContext(Dispatchers.Default) { db.event.selectById(id) }?.let(onSelectEvent)
                 } else {
@@ -427,6 +414,7 @@ fun MapScreen(
             ClickResult.Pass
         } else {
             scope.launch {
+                shownPoi = null
                 withContext(Dispatchers.Default) { db.note.selectById(id) }?.let { shownNote = it }
             }
             ClickResult.Consume
@@ -548,6 +536,54 @@ fun MapScreen(
         }
     }
 
+    // A tap that no marker layer consumed is either on a basemap POI the style
+    // draws or on empty map. Query the style's POI layers at the tap so a bar or
+    // hotel opens its own sheet; anything else dismisses the place sheet, as the
+    // Views map did. The query is suspending, so the handler returns at once and
+    // the result arrives on the map scope. The dismissal callback goes through a
+    // live state so a changed host lambda is still the one called.
+    val currentOnPlaceDismissed by rememberUpdatedState(onPlaceDismissed)
+    val mapInteractions = remember(mapRotationEnabled, mapTiltEnabled) {
+        MapInteractions {
+            camera {
+                // Bearing permission. A gesture binding cannot re-enable a
+                // movement the camera disallows, so this alone stops user
+                // rotation (two-finger twist, drag, keys).
+                rotate { enabled = mapRotationEnabled }
+                // Pitch permission, on the same terms as rotation.
+                tilt { enabled = mapTiltEnabled }
+            }
+            callbacks {
+                click {
+                    onUnhandled { event ->
+                        // A small box around the tap, so it need not land exactly
+                        // on the icon; the front-most POI under it wins.
+                        val offset = event.screenOffset
+                        val hitBox = DpRect(
+                            offset.x - POI_HIT_PADDING,
+                            offset.y - POI_HIT_PADDING,
+                            offset.x + POI_HIT_PADDING,
+                            offset.y + POI_HIT_PADDING,
+                        )
+                        scope.launch {
+                            val poi = state.queryRenderedFeatures(
+                                rect = hitBox,
+                                layerIds = POI_LAYER_IDS,
+                            ).firstNotNullOfOrNull { it.toPoiInfo(currentLanguage()) }
+                            if (poi != null) {
+                                shownPoi = poi
+                            } else {
+                                selectedPlace = null
+                                currentOnPlaceDismissed()
+                            }
+                        }
+                        ClickResult.Consume
+                    }
+                }
+            }
+        }
+    }
+
     val areas = rememberMapAreas(state, db, reloadKey)
 
     // A marker tap centres the place between the search bar and the sheet. The
@@ -593,6 +629,8 @@ fun MapScreen(
         val id = openPlaceId ?: return@LaunchedEffect
         val place = withContext(Dispatchers.Default) { db.place.selectById(id) }
             ?: return@LaunchedEffect
+        // A deep link replaces any basemap POI sheet the map was showing.
+        shownPoi = null
         selectedPlace = place
         // The place may be of the kind the filter is hiding, so show its kind
         // before moving to it, as the Views map did.
@@ -609,6 +647,7 @@ fun MapScreen(
         val id = initialPlaceId ?: return@LaunchedEffect
         val place = withContext(Dispatchers.Default) { db.place.selectById(id) }
             ?: return@LaunchedEffect
+        shownPoi = null
         selectedPlace = place
         onPlaceSelected(place)
         // MapLibre keeps the sheet padding apart from the camera target, so the
@@ -668,6 +707,7 @@ fun MapScreen(
         when (result) {
             is SearchAdapterItem.Place -> scope.launch {
                 withContext(Dispatchers.Default) { db.place.selectById(result.placeId) }?.let { place ->
+                    shownPoi = null
                     selectedPlace = place
                     onMarkerKindChange(
                         if (place.isMerchant()) MarkerKind.Merchants else MarkerKind.Exchanges,
@@ -886,6 +926,13 @@ fun MapScreen(
                     },
                     onDelete = onDeleteNote?.let { delete -> { delete(note.id) } },
                     onDeleted = { shownNote = null },
+                )
+            }
+            shownPoi?.let { poi ->
+                PoiSheet(
+                    poi = poi,
+                    labels = poiSheetLabels,
+                    onDismiss = { shownPoi = null },
                 )
             }
             if (showAttribution) {
@@ -1117,6 +1164,12 @@ private val MAP_CONTROLS_BOTTOM = ATTRIBUTION_BOTTOM + 20.dp
 
 /** The zoom a host-supplied map target is shown at. */
 private const val OPEN_ZOOM = 16.0
+
+/**
+ * How far around a map tap a basemap POI is looked for, so a touch need not land
+ * exactly on the icon the style draws.
+ */
+private val POI_HIT_PADDING = 16.dp
 
 /**
  * The zoom at which markers stop clustering: the map sources cap clustering at

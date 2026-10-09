@@ -236,6 +236,7 @@ fun appLabels(
         deleteFailed = strings["note_delete_failed"],
         cancel = strings["cancel"],
     ),
+    poiSheet = PoiSheetLabels(copied = strings["copied_to_clipboard"]),
     area = areaStrings(strings, formatBytes),
     offlineStyleName = strings[currentStyle.styleNameKey()],
     save = strings["save"],
