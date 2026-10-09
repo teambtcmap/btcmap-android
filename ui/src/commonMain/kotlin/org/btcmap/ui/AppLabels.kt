@@ -76,6 +76,9 @@ data class AppLabels(
     val settings: SettingsPageLabels,
     val manageAreasTitle: String,
     val manageAreas: ManageAreasLabels,
+    /** The manage-place-images screen's title, shared by both hosts. */
+    val managePlaceImagesTitle: String,
+    val managePlaceImages: ManagePlaceImagesLabels,
     /** The area admin screen's verify action. */
     val verifyArea: String,
     /** The area admin screen's name edit action and dialog title. */

@@ -68,6 +68,48 @@ class SettingsModelTest {
     }
 
     @Test
+    fun settingsItems_includeManagePlaceImagesOnlyWhenAsked() {
+        val items = settingsItems(
+            strings(),
+            showAttribution = true,
+            mapRotationEnabled = false,
+            mapTiltEnabled = false,
+            includeManagePlaceImages = true,
+        )
+
+        assertEquals("managePlaceImages", items.last().key)
+        assertEquals(
+            "manage-place-images",
+            (items.last() as SettingsItem.Action).title,
+        )
+        // The shared Admin header appears with the row.
+        assertTrue(items.any { it.key == "headerAdmin" })
+
+        assertTrue(
+            settingsItems(strings(), showAttribution = true, mapRotationEnabled = false, mapTiltEnabled = false)
+                .none { it.key == "managePlaceImages" },
+        )
+    }
+
+    @Test
+    fun settingsItems_addTheAdminHeaderOnceForBothAdminRows() {
+        val items = settingsItems(
+            strings(),
+            showAttribution = true,
+            mapRotationEnabled = false,
+            mapTiltEnabled = false,
+            includeManageAreas = true,
+            includeManagePlaceImages = true,
+        )
+
+        assertEquals(1, items.count { it.key == "headerAdmin" })
+        assertEquals(
+            listOf("manageAreas", "managePlaceImages"),
+            items.takeLast(2).map { it.key },
+        )
+    }
+
+    @Test
     fun settingsItems_omitImageStatsForTheDesktop() {
         val items = settingsItems(
             strings(),
@@ -146,6 +188,8 @@ class SettingsModelTest {
         imageStatsSecondary = "image-stats-secondary",
         manageAreas = "manage-areas",
         manageAreasSecondary = "manage-areas-secondary",
+        managePlaceImages = "manage-place-images",
+        managePlaceImagesSecondary = "manage-place-images-secondary",
         sectionMap = "section-map",
         sectionData = "section-data",
         sectionAdmin = "section-admin",

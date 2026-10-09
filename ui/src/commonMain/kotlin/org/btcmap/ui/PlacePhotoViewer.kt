@@ -46,6 +46,8 @@ fun PlacePhotoViewer(
     deleteDescription: String,
     onDelete: ((PlacePhoto) -> Unit)? = null,
     onDismiss: () -> Unit,
+    /** The accessibility label for the paged image; null when it is decorative. */
+    imageContentDescription: String? = null,
 ) {
     Dialog(
         onDismissRequest = onDismiss,
@@ -61,7 +63,7 @@ fun PlacePhotoViewer(
             HorizontalPager(state = pagerState, modifier = Modifier.fillMaxSize()) { page ->
                 AsyncImage(
                     model = photos[page].fullUrl,
-                    contentDescription = null,
+                    contentDescription = imageContentDescription,
                     contentScale = ContentScale.Fit,
                     modifier = Modifier.fillMaxSize(),
                 )

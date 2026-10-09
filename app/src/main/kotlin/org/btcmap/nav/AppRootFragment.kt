@@ -318,6 +318,7 @@ private fun routeFromArgs(args: Bundle?): AppRoute = when (args?.getString(ARG_K
 
     "settings" -> AppRoute.Settings
     "manage-areas" -> AppRoute.ManageAreas
+    "manage-place-images" -> AppRoute.ManagePlaceImages
     "user-profile" -> AppRoute.UserProfile
     "place" -> AppRoute.Place(placeId = args.getLong(ARG_PLACE_ID))
 

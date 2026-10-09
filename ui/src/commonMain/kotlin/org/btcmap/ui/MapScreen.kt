@@ -183,7 +183,26 @@ fun MapScreen(
         public = "Public",
         private = "Private",
         created = { "Created $it" },
+        edit = "Edit note",
+        editTitle = "Edit note",
+        editFailed = "Couldn't save the note",
+        save = "Save",
+        delete = "Delete",
+        deleteConfirmTitle = "Delete this note?",
+        deleteConfirmMessage = "This note will be permanently removed.",
+        deleteFailed = "Couldn't delete the note",
+        cancel = "Cancel",
     ),
+    /**
+     * Edits the body of the note the sheet is showing, given its id. Null hides
+     * the sheet's edit action, as when the host cannot edit notes.
+     */
+    onEditNote: (suspend (Long, String) -> Unit)? = null,
+    /**
+     * Deletes the note the sheet is showing, given its id. Null hides the sheet's
+     * delete action, as when the host cannot delete notes.
+     */
+    onDeleteNote: (suspend (Long) -> Unit)? = null,
     /** The labels of the add-location chooser. */
     addLocationLabels: AddLocationLabels = AddLocationLabels(
         addPlace = "Add a place",
@@ -856,6 +875,17 @@ fun MapScreen(
                     createdAt = note.createdAt,
                     labels = noteSheetLabels,
                     onDismiss = { shownNote = null },
+                    onEditText = onEditNote?.let { edit ->
+                        { text ->
+                            edit(note.id, text)
+                            // The sheet reads its text from the selection, so
+                            // carry the edit into it rather than leaving the old
+                            // body on screen.
+                            shownNote = note.copy(text = text)
+                        }
+                    },
+                    onDelete = onDeleteNote?.let { delete -> { delete(note.id) } },
+                    onDeleted = { shownNote = null },
                 )
             }
             if (showAttribution) {

@@ -61,6 +61,21 @@ suspend fun Api.getMyPlaceImages(): List<PlaceImage> {
 }
 
 /**
+ * Lists the most recently added place images across every place, newest first,
+ * for moderation. Restricted to `admin` and `root` users; the server rejects
+ * anyone else with 403. Defaults to the API's maximum of 100 images.
+ */
+suspend fun Api.getRecentPlaceImages(limit: Int = 100): List<PlaceImage> {
+    val url = buildUrl("v4", "place-images") {
+        parameters.append("limit", "$limit")
+    }
+
+    return call(HttpMethod.Get, url) { body ->
+        body.toJsonArray().map { it.toPlaceImage() }
+    }
+}
+
+/**
  * Deletes an image from a place. A regular user may only delete their own
  * uploads; the server rejects anyone else's with 403.
  */

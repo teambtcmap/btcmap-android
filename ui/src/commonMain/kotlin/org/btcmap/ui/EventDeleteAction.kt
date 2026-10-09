@@ -1,26 +1,12 @@
 package org.btcmap.ui
 
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.unit.dp
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.btcmap.account.canManageEvents
 import org.btcmap.api.Api
@@ -103,84 +89,19 @@ fun EventDeleteAction(
     onDeleted: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val delete = onDelete ?: return
-
-    var confirming by remember { mutableStateOf(false) }
-    var deleting by remember { mutableStateOf(false) }
-    var failed by remember { mutableStateOf(false) }
-    val scope = rememberCoroutineScope()
-
-    IconButton(
-        onClick = {
-            failed = false
-            confirming = true
-        },
-        enabled = !deleting,
-        modifier = modifier.testTag(EVENT_DELETE_TAG),
-    ) {
-        MaterialSymbol(glyph = "delete", contentDescription = labels.delete)
-    }
-
-    if (confirming) {
-        AlertDialog(
-            onDismissRequest = { if (!deleting) confirming = false },
-            title = { Text(labels.deleteConfirmTitle) },
-            text = {
-                Column {
-                    Text(labels.deleteConfirmMessage)
-                    if (failed) {
-                        Text(
-                            text = labels.deleteFailed,
-                            color = MaterialTheme.colorScheme.error,
-                            modifier = Modifier
-                                .padding(top = 8.dp)
-                                .testTag(EVENT_DELETE_ERROR_TAG),
-                        )
-                    }
-                }
-            },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        scope.launch {
-                            deleting = true
-                            failed = false
-                            try {
-                                delete()
-                                confirming = false
-                                onDeleted()
-                            } catch (t: Throwable) {
-                                t.rethrowIfCancellation()
-                                failed = true
-                            } finally {
-                                deleting = false
-                            }
-                        }
-                    },
-                    enabled = !deleting,
-                    colors = ButtonDefaults.textButtonColors(
-                        contentColor = MaterialTheme.colorScheme.error,
-                    ),
-                    modifier = Modifier.testTag(EVENT_DELETE_CONFIRM_TAG),
-                ) {
-                    if (deleting) {
-                        CircularProgressIndicator(
-                            strokeWidth = 2.dp,
-                            modifier = Modifier.size(16.dp),
-                        )
-                    } else {
-                        Text(labels.delete)
-                    }
-                }
-            },
-            dismissButton = {
-                TextButton(
-                    onClick = { confirming = false },
-                    enabled = !deleting,
-                ) {
-                    Text(labels.cancel)
-                }
-            },
-        )
-    }
+    DeleteAction(
+        labels = DeleteActionLabels(
+            delete = labels.delete,
+            title = labels.deleteConfirmTitle,
+            message = labels.deleteConfirmMessage,
+            failed = labels.deleteFailed,
+            cancel = labels.cancel,
+        ),
+        onDelete = onDelete,
+        onDeleted = onDeleted,
+        modifier = modifier,
+        deleteTag = EVENT_DELETE_TAG,
+        confirmTag = EVENT_DELETE_CONFIRM_TAG,
+        errorTag = EVENT_DELETE_ERROR_TAG,
+    )
 }

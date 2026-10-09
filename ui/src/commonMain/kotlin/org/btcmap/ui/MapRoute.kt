@@ -27,6 +27,7 @@ import org.btcmap.db.table.place.Place
 import org.btcmap.i18n.getLocalizedName
 import org.btcmap.map.MapArea
 import org.btcmap.map.toEventGeoJson
+import org.btcmap.note.Notes
 import org.btcmap.place.btcmapUrl
 import org.btcmap.place.canDeletePlaceImage
 import org.btcmap.place.osmEditUrl
@@ -263,6 +264,13 @@ internal fun MapRoute(
         },
         addLocationLabels = labels.addLocation,
         noteSheetLabels = labels.noteSheet,
+        onEditNote = { id, text ->
+            Notes.updateText(services.api, services.db, id, text)
+        },
+        onDeleteNote = { id ->
+            Notes.delete(services.api, services.db, id)
+            reloadKey++
+        },
         onOpenFeed = { areas -> onNavigate(areas.toFeedRoute()) },
         onOpenInfra = if (isAdmin) {
             { onNavigate(AppRoute.InfraDashboard) }

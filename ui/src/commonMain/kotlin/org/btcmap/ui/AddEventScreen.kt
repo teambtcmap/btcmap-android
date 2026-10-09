@@ -528,7 +528,7 @@ private fun DateTimeField(
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
                 Text(
-                    text = value?.format(EVENT_DISPLAY_FORMATTER) ?: placeholder,
+                    text = value?.format(EVENT_DISPLAY_FORMATTER.withAppLocale()) ?: placeholder,
                     style = MaterialTheme.typography.bodyLarge,
                     textAlign = TextAlign.Start,
                 )

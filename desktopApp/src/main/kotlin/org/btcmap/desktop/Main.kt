@@ -55,6 +55,8 @@ import org.btcmap.api.setEventStatus
 import org.btcmap.api.addPlaceImage
 import org.btcmap.api.deletePlaceImage
 import org.btcmap.api.getPlaceImages
+import org.btcmap.api.getRecentPlaceImages
+import org.btcmap.api.placeImageUrl
 import org.btcmap.feed.feedKey
 import org.btcmap.feed.iconGlyph
 import org.btcmap.map.MapAreasController
@@ -99,6 +101,8 @@ import org.btcmap.api.createNote
 import org.btcmap.note.Notes
 import org.btcmap.api.verifyArea
 import org.btcmap.ui.PlaceAction
+import org.btcmap.ui.PLACE_PHOTO_FULL_SIZE
+import org.btcmap.ui.PLACE_PHOTO_THUMBNAIL_SIZE
 import org.btcmap.ui.PendingEventUi
 import org.btcmap.ui.PlacePhoto
 import org.btcmap.ui.toPlacePhoto
@@ -173,6 +177,8 @@ import org.btcmap.ui.InvoicePaymentSection
 import org.btcmap.ui.InvoicePaymentSectionLabels
 import org.btcmap.ui.MapScreen
 import org.btcmap.ui.ManageAreasScreen
+import org.btcmap.ui.ManagePlaceImageUi
+import org.btcmap.ui.ManagePlaceImagesScreen
 import org.btcmap.ui.ProfileFormLabels
 import org.btcmap.ui.MyEventsLabels
 import org.btcmap.ui.ProfileScreen
@@ -498,6 +504,13 @@ private fun runApp() = application {
                             placeShareConfirmation = STRINGS["place_link_copied"],
                             placeOverflowInline = true,
                             noteSheetLabels = LABELS.noteSheet,
+                            onEditNote = { id, text ->
+                                Notes.updateText(api, db, id, text)
+                            },
+                            onDeleteNote = { id ->
+                                Notes.delete(api, db, id)
+                                reloadKey++
+                            },
                             attributionText = "© OpenStreetMap contributors",
                             attributionTextColor = attributionColor,
                             searchActions = SearchActions(onSettings = { nav.push(Route.Settings) }),
@@ -836,6 +849,7 @@ private fun runApp() = application {
                                 onOpenColors = { nav.push(Route.Colors) },
                                 onOpenDbStats = { nav.push(Route.DbStats) },
                                 onOpenManageAreas = { nav.push(Route.ManageAreas) },
+                                onOpenManagePlaceImages = { nav.push(Route.ManagePlaceImages) },
                             )
                         }
 
@@ -851,6 +865,45 @@ private fun runApp() = application {
                                 onAreaClick = { area ->
                                     selectedAreaId = area.id
                                     nav.push(Route.AreaAdmin)
+                                },
+                            )
+                        }
+
+                        Route.ManagePlaceImages -> ScreenPage(
+                            title = LABELS.managePlaceImagesTitle,
+                            onBack = { nav.pop() },
+                        ) {
+                            ManagePlaceImagesScreen(
+                                labels = LABELS.managePlaceImages,
+                                load = {
+                                    withContext(ioDispatcher) {
+                                        api.getRecentPlaceImages().map { image ->
+                                            ManagePlaceImageUi(
+                                                placeId = image.placeId,
+                                                imageId = image.id,
+                                                thumbnailUrl = api.placeImageUrl(
+                                                    placeId = image.placeId,
+                                                    imageId = image.id,
+                                                    width = PLACE_PHOTO_THUMBNAIL_SIZE,
+                                                    height = PLACE_PHOTO_THUMBNAIL_SIZE,
+                                                ),
+                                                fullUrl = api.placeImageUrl(
+                                                    placeId = image.placeId,
+                                                    imageId = image.id,
+                                                    width = PLACE_PHOTO_FULL_SIZE,
+                                                    height = PLACE_PHOTO_FULL_SIZE,
+                                                ),
+                                                placeName = db.place.selectById(image.placeId)
+                                                    ?.getLocalizedName()
+                                                    ?: LABELS.managePlaceImages.unknownPlace(image.placeId),
+                                                uploaderName = image.authorName,
+                                                createdAt = image.createdAt,
+                                            )
+                                        }
+                                    }
+                                },
+                                delete = { image ->
+                                    api.deletePlaceImage(image.placeId, image.imageId)
                                 },
                             )
                         }
@@ -1330,7 +1383,7 @@ private fun AreaPlaceIssue.osmEditUrl(): String =
 private const val JOIN_US_URL = "https://btcmap.org/join-us"
 
 /** The desktop app's full-window pages. */
-private enum class Route { Map, Area, AreaAdmin, Event, Feed, Settings, Colors, DbStats, ManageAreas, Account, Report, AddPlace, AddEvent, AddNote, AddComment, Boost, Infra, EventReview }
+private enum class Route { Map, Area, AreaAdmin, Event, Feed, Settings, Colors, DbStats, ManageAreas, ManagePlaceImages, Account, Report, AddPlace, AddEvent, AddNote, AddComment, Boost, Infra, EventReview }
 
 /**
  * What the add-event screen opens with. From the map it is just the centre; from
@@ -1357,8 +1410,9 @@ private const val SCREENSHOT_ARG = "--screenshot="
  * checked from a headless/CI run: `--screenshot=<screen>:<path>`. The map needs a
  * real window and GPU context, so it is not one of the screens this can draw.
  *
- * Recognised screens: `settings`, `manageareas`, `colors`, `dbstats`, `report`,
- * `account`, `addplace`, `addevent`, `addnote`, `payment`, `infra`.
+ * Recognised screens: `settings`, `manageareas`, `manageplaceimages`, `colors`,
+ * `dbstats`, `report`, `account`, `addplace`, `addevent`, `addnote`, `payment`,
+ * `infra`.
  */
 private fun renderScreen(spec: String) {
     val parts = spec.split(':')
@@ -1397,6 +1451,12 @@ private fun renderScreen(spec: String) {
                     "manageareas" -> ManageAreasScreen(
                         labels = LABELS.manageAreas,
                         load = { runBlocking { db.area.selectAll() } },
+                    )
+
+                    "manageplaceimages" -> ManagePlaceImagesScreen(
+                        labels = LABELS.managePlaceImages,
+                        load = { emptyList() },
+                        delete = {},
                     )
 
                     "colors" -> ColorsPage(settings = settings, labels = COLORS_PAGE_LABELS)

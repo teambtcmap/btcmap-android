@@ -189,6 +189,48 @@ class SettingsPageTest {
 
     @OptIn(ExperimentalTestApi::class)
     @Test
+    fun managePlaceImagesRow_isShownToAdminsAndOpensTheScreen() {
+        signIn(roles = listOf("admin"))
+        var opened = false
+        runComposeUiTest {
+            setContent {
+                SettingsPage(
+                    settings,
+                    db,
+                    TEST_SETTINGS_PAGE_LABELS,
+                    onOpenAccount = {},
+                    onOpenColors = {},
+                    onOpenDbStats = {},
+                    onOpenManagePlaceImages = { opened = true },
+                )
+            }
+            waitUntil(timeoutMillis = 5_000) {
+                onAllNodesWithText("Click to see your profile").fetchSemanticsNodes().isNotEmpty()
+            }
+            onNode(hasScrollAction()).performScrollToNode(hasText("Manage place images"))
+            onNodeWithText("Manage place images").performClick()
+        }
+        assertTrue(opened)
+    }
+
+    @OptIn(ExperimentalTestApi::class)
+    @Test
+    fun managePlaceImagesRow_isHiddenFromAreaAdminsWithoutAnAdminRole() {
+        signIn(roles = listOf("area_admin"))
+        runComposeUiTest {
+            setContent { SettingsPage(settings, db, TEST_SETTINGS_PAGE_LABELS, onOpenAccount = {}, onOpenColors = {}, onOpenDbStats = {}) }
+            waitUntil(timeoutMillis = 5_000) {
+                onAllNodesWithText("Click to see your profile").fetchSemanticsNodes().isNotEmpty()
+            }
+            // Scroll to the last row this user has, so the absent admin row is
+            // proven absent rather than merely uncomposed.
+            onNode(hasScrollAction()).performScrollToNode(hasText("Manage areas"))
+            onAllNodesWithText("Manage place images").assertCountEquals(0)
+        }
+    }
+
+    @OptIn(ExperimentalTestApi::class)
+    @Test
     fun languageRow_picksALanguageAndStoresIt() {
         var changed = false
         try {

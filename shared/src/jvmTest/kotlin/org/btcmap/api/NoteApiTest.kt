@@ -79,6 +79,19 @@ class NoteApiTest : ApiTestBase() {
     }
 
     @Test
+    fun updateNoteText_patchesTheBody() = runTest {
+        enqueueJson(noteJson())
+
+        val note = api().updateNoteText(7L, text = "ATM moved to the back")
+
+        val request = takeRequest()
+        Assert.assertEquals("PATCH", request.method)
+        Assert.assertEquals("/v4/notes/7", request.url.encodedPath)
+        Assert.assertEquals("""{"text":"ATM moved to the back"}""", request.jsonBody())
+        Assert.assertEquals(7L, note.id)
+    }
+
+    @Test
     fun deleteNote_deletesById() = runTest {
         enqueueJson(noteJson())
 

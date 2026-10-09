@@ -87,6 +87,13 @@ sealed interface AppRoute {
     data object ManageAreas : AppRoute
 
     /**
+     * The admin-only recent place-image moderation list (see
+     * `ManagePlaceImagesScreen`), reached from the settings row shown to admins
+     * and roots.
+     */
+    data object ManagePlaceImages : AppRoute
+
+    /**
      * One area's cached fields, read-only, opened from the manage-areas list
      * (see `AreaAdminScreen`).
      */
@@ -120,6 +127,7 @@ fun AppRoute.key(): String = when (this) {
     is AppRoute.Area -> "area"
     is AppRoute.Settings -> "settings"
     is AppRoute.ManageAreas -> "manage-areas"
+    is AppRoute.ManagePlaceImages -> "manage-place-images"
     is AppRoute.AreaAdmin -> "area-admin"
     is AppRoute.UserProfile -> "user-profile"
     is AppRoute.Place -> "place"

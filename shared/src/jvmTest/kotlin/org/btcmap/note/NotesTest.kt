@@ -136,6 +136,19 @@ class NotesTest {
     }
 
     @Test
+    fun updateText_updatesTheServerAndTheCache() = runTest {
+        val db = org.btcmap.db.testDatabase()
+        db.note.insert(listOf(cached(id = 7, text = "old")))
+
+        enqueue(noteJson(id = 7, text = "new"))
+
+        Notes.updateText(api(), db, id = 7L, text = "new")
+
+        Assert.assertEquals("new", db.note.selectAll().single().text)
+        Assert.assertEquals(1, serverRule.server.requestCount)
+    }
+
+    @Test
     fun delete_removesTheCachedNote() = runTest {
         val db = org.btcmap.db.testDatabase()
         db.note.insert(listOf(cached(id = 7)))

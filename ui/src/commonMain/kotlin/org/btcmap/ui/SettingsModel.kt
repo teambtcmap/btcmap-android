@@ -31,6 +31,8 @@ data class SettingsStrings(
     val imageStatsSecondary: String,
     val manageAreas: String,
     val manageAreasSecondary: String,
+    val managePlaceImages: String,
+    val managePlaceImagesSecondary: String,
     val sectionGeneral: String,
     val sectionMap: String,
     val sectionData: String,
@@ -48,8 +50,9 @@ data class SettingsStrings(
  * cached user, which is read off the main thread.
  *
  * [includeImageStats] is false on the desktop, which has no image-cache
- * telemetry to show. [includeManageAreas] is true only for the area-admins the
- * page resolves the cached user to; its header is added only alongside the row.
+ * telemetry to show. [includeManageAreas] and [includeManagePlaceImages] are set
+ * by the page from the cached user's roles; the shared "Admin" header is added
+ * only when at least one of their rows is.
  */
 fun settingsItems(
     strings: SettingsStrings,
@@ -58,6 +61,7 @@ fun settingsItems(
     mapTiltEnabled: Boolean,
     includeImageStats: Boolean = true,
     includeManageAreas: Boolean = false,
+    includeManagePlaceImages: Boolean = false,
 ): List<SettingsItem> = buildList {
     add(
         SettingsItem.Action(
@@ -147,15 +151,27 @@ fun settingsItems(
             )
         )
     }
-    if (includeManageAreas) {
+    if (includeManageAreas || includeManagePlaceImages) {
         add(SettingsItem.Header("headerAdmin", strings.sectionAdmin))
-        add(
-            SettingsItem.Action(
-                "manageAreas",
-                strings.manageAreas,
-                strings.manageAreasSecondary,
-                icon = "travel_explore",
+        if (includeManageAreas) {
+            add(
+                SettingsItem.Action(
+                    "manageAreas",
+                    strings.manageAreas,
+                    strings.manageAreasSecondary,
+                    icon = "travel_explore",
+                )
             )
-        )
+        }
+        if (includeManagePlaceImages) {
+            add(
+                SettingsItem.Action(
+                    "managePlaceImages",
+                    strings.managePlaceImages,
+                    strings.managePlaceImagesSecondary,
+                    icon = "photo_library",
+                )
+            )
+        }
     }
 }

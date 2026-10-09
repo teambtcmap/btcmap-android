@@ -103,6 +103,15 @@ class NoteQueries(private val conn: SQLiteConnection) {
         }
     }
 
+    /** Replaces a cached note's body with [text]. */
+    suspend fun updateText(id: Long, text: String) {
+        conn.prepare("UPDATE $TABLE SET $TEXT = ?2 WHERE $ID = ?1;").use {
+            it.bindLong(1, id)
+            it.bindText(2, text)
+            it.step()
+        }
+    }
+
     suspend fun delete(id: Long) {
         conn.prepare("DELETE FROM $TABLE WHERE $ID = ?1;").use {
             it.bindLong(1, id)

@@ -27,6 +27,7 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.btcmap.account.canManageAreas
+import org.btcmap.account.isAdmin
 import org.btcmap.db.Database
 import org.btcmap.dbstats.BundleStats
 import org.btcmap.dbstats.DatabaseFile
@@ -102,6 +103,8 @@ data class SettingsPageLabels(
     val imageStatsSecondary: String,
     val manageAreas: String,
     val manageAreasSecondary: String,
+    val managePlaceImages: String,
+    val managePlaceImagesSecondary: String,
     val sectionMap: String,
     val sectionData: String,
     val sectionAdmin: String,
@@ -144,6 +147,7 @@ fun SettingsPage(
     onOpenDbStats: () -> Unit,
     onOpenImageStats: () -> Unit = {},
     onOpenManageAreas: () -> Unit = {},
+    onOpenManagePlaceImages: () -> Unit = {},
     onLanguageChanged: () -> Unit = {},
     reloadKey: Int = 0,
 ) {
@@ -159,9 +163,10 @@ fun SettingsPage(
     // observe on its own.
     var accountTitle by remember { mutableStateOf(labels.account) }
     var accountSecondary by remember { mutableStateOf(labels.logIn) }
-    // The manage-areas row is only shown to area admins, resolved from the same
-    // cached user as the account row.
+    // The manage-areas and manage-place-images rows are only shown to the roles
+    // that may use them, resolved from the same cached user as the account row.
     var canManageAreas by remember { mutableStateOf(false) }
+    var canManagePlaceImages by remember { mutableStateOf(false) }
     LaunchedEffect(reloadKey) {
         val user = withContext(Dispatchers.IO) {
             if (!settings.authorized) {
@@ -179,6 +184,7 @@ fun SettingsPage(
         accountTitle = if (user != null) labels.loggedInAs(user.name) else labels.account
         accountSecondary = if (user != null) labels.openProfile else labels.logIn
         canManageAreas = user?.canManageAreas() == true
+        canManagePlaceImages = user?.isAdmin() == true
     }
 
     var dialog by remember { mutableStateOf<SettingsDialog?>(null) }
@@ -208,6 +214,8 @@ fun SettingsPage(
                 imageStatsSecondary = labels.imageStatsSecondary,
                 manageAreas = labels.manageAreas,
                 manageAreasSecondary = labels.manageAreasSecondary,
+                managePlaceImages = labels.managePlaceImages,
+                managePlaceImagesSecondary = labels.managePlaceImagesSecondary,
                 sectionMap = labels.sectionMap,
                 sectionData = labels.sectionData,
                 sectionAdmin = labels.sectionAdmin,
@@ -218,6 +226,7 @@ fun SettingsPage(
             mapTiltEnabled = tilt,
             includeImageStats = includeImageStats,
             includeManageAreas = canManageAreas,
+            includeManagePlaceImages = canManagePlaceImages,
         ),
         onItemClick = { key ->
             when (key) {
@@ -229,6 +238,7 @@ fun SettingsPage(
                 "dbStats" -> onOpenDbStats()
                 "imageStats" -> onOpenImageStats()
                 "manageAreas" -> onOpenManageAreas()
+                "managePlaceImages" -> onOpenManagePlaceImages()
             }
         },
         onItemCheckedChange = { key, checked ->

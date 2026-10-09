@@ -6,6 +6,7 @@ import org.btcmap.api.Api
 import org.btcmap.api.deleteNote
 import org.btcmap.api.getMyNotes
 import org.btcmap.api.updateNote
+import org.btcmap.api.updateNoteText
 import org.btcmap.db.Database
 import org.btcmap.db.table.note.Note
 import org.btcmap.settings.Settings
@@ -56,6 +57,12 @@ object Notes {
     suspend fun updateVisibility(api: Api, db: Database, id: Long, public: Boolean) {
         api.updateNote(id, public)
         withContext(ioDispatcher) { db.note.updateVisibility(id, public) }
+    }
+
+    /** Edits a cached note's body, updating the server and the cache. */
+    suspend fun updateText(api: Api, db: Database, id: Long, text: String) {
+        api.updateNoteText(id, text)
+        withContext(ioDispatcher) { db.note.updateText(id, text) }
     }
 
     /** Deletes a cached note, removing it from the server and the cache. */

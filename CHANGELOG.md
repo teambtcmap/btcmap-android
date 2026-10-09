@@ -6,6 +6,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+- Add a "Manage place images" settings screen, shown in the Admin section to admins and roots: it lists the newest place uploads across every place, each with its thumbnail, its place, its uploader and its date, tapping a row opens the image full screen (swiping through the rest), and a moderator can delete spam
+- Fix dates in the app following the device locale instead of the chosen language — a note's creation date rendered in the device language on an English app; every date now uses the Language setting
+- Add edit and delete actions to the note sheet: a pencil beside the note's text edits its body, and a toolbar delete confirms first, then removes the note from the server, the cache and the map
 - Fix the map opening with no merchants, events or exchanges drawn until the user first moved it: the initial viewport query ran before the map had rendered its first frame and bailed when the viewport was not ready yet, so it now waits for the first viewport
 - Open a note tapped on the map in a bottom sheet, as places and events do, showing its text, its public/private visibility and its creation date instead of a plain dialog
 - Fix the map sometimes reopening at an older camera on restart: the camera-change listener was restarted on every recomposition, and because MapLibre's event flow does not replay, the final change was dropped and never saved; the listener now stays subscribed

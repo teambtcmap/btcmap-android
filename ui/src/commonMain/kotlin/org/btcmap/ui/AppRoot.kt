@@ -19,9 +19,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.withContext
 import org.btcmap.api.deleteEvent
+import org.btcmap.api.deletePlaceImage
 import org.btcmap.api.getDashboard
 import org.btcmap.api.createNote
 import org.btcmap.api.getPendingEvents
+import org.btcmap.api.getRecentPlaceImages
+import org.btcmap.api.placeImageUrl
 import org.btcmap.api.revokeEvent
 import org.btcmap.api.setEventStatus
 import org.btcmap.api.setAreaDescription
@@ -32,6 +35,7 @@ import org.btcmap.api.verifyArea
 import org.btcmap.db.table.area.Area
 import org.btcmap.db.table.event.Event
 import org.btcmap.dbstats.BundleStats
+import org.btcmap.i18n.getLocalizedName
 import org.btcmap.map.toEventGeoJson
 import org.btcmap.place.submitReport
 import org.btcmap.platform.ioDispatcher
@@ -387,6 +391,7 @@ fun AppRoot(
                     onOpenDbStats = { nav.push(AppRoute.DbStats) },
                     onOpenImageStats = { nav.push(AppRoute.ImageStats) },
                     onOpenManageAreas = { nav.push(AppRoute.ManageAreas) },
+                    onOpenManagePlaceImages = { nav.push(AppRoute.ManagePlaceImages) },
                     onLanguageChanged = onLanguageChanged,
                     reloadKey = authReload,
                 )
@@ -397,6 +402,12 @@ fun AppRoot(
                 labels = labels,
                 onBack = back,
                 onOpenArea = { area -> nav.push(AppRoute.AreaAdmin(area.id)) },
+            )
+
+            AppRoute.ManagePlaceImages -> ManagePlaceImagesRoute(
+                services = services,
+                labels = labels,
+                onBack = back,
             )
 
             is AppRoute.AreaAdmin -> AreaAdminRoute(
@@ -659,6 +670,60 @@ private fun ManageAreasRoute(
             labels = labels.manageAreas,
             load = { withContext(ioDispatcher) { services.db.area.selectAll() } },
             onAreaClick = onOpenArea,
+        )
+    }
+}
+
+/**
+ * The manage-place-images route: the shared [ManagePlaceImagesScreen] under the
+ * standard top bar, listing the newest uploads across every place for
+ * moderation. Only the settings row (itself hidden from non-admins) opens it.
+ */
+@Composable
+private fun ManagePlaceImagesRoute(
+    services: AppServices,
+    labels: AppLabels,
+    onBack: () -> Unit,
+) {
+    val imagesLabels = labels.managePlaceImages
+
+    ScreenPage(
+        title = labels.managePlaceImagesTitle,
+        onBack = onBack,
+        backContentDescription = labels.back,
+    ) {
+        ManagePlaceImagesScreen(
+            labels = imagesLabels,
+            load = {
+                withContext(ioDispatcher) {
+                    services.api.getRecentPlaceImages().map { image ->
+                        ManagePlaceImageUi(
+                            placeId = image.placeId,
+                            imageId = image.id,
+                            thumbnailUrl = services.api.placeImageUrl(
+                                placeId = image.placeId,
+                                imageId = image.id,
+                                width = PLACE_PHOTO_THUMBNAIL_SIZE,
+                                height = PLACE_PHOTO_THUMBNAIL_SIZE,
+                            ),
+                            fullUrl = services.api.placeImageUrl(
+                                placeId = image.placeId,
+                                imageId = image.id,
+                                width = PLACE_PHOTO_FULL_SIZE,
+                                height = PLACE_PHOTO_FULL_SIZE,
+                            ),
+                            placeName = services.db.place.selectById(image.placeId)
+                                ?.getLocalizedName()
+                                ?: imagesLabels.unknownPlace(image.placeId),
+                            uploaderName = image.authorName,
+                            createdAt = image.createdAt,
+                        )
+                    }
+                }
+            },
+            delete = { image ->
+                services.api.deletePlaceImage(image.placeId, image.imageId)
+            },
         )
     }
 }

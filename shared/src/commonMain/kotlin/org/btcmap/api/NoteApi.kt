@@ -81,6 +81,20 @@ suspend fun Api.updateNote(id: Long, public: Boolean): Note {
 }
 
 /**
+ * Edits a note's body (`PATCH /v4/notes/{id}`). Only the author may update their
+ * note; the response is the updated note.
+ */
+suspend fun Api.updateNoteText(id: Long, text: String): Note {
+    val url = buildUrl("v4", "notes", "$id")
+
+    val req = buildJsonObject {
+        put("text", text)
+    }
+
+    return call(HttpMethod.Patch, url, body = req) { body -> body.toJsonObject().toNote() }
+}
+
+/**
  * Soft-deletes the author's own note (`DELETE /v4/notes/{id}`): the row is kept
  * with `deleted_at` set so owner clients can sync the removal, and it never
  * appears in search again. Only the author may delete their note.

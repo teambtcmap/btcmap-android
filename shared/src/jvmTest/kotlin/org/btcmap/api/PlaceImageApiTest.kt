@@ -163,6 +163,49 @@ class PlaceImageApiTest : ApiTestBase() {
     }
 
     @Test
+    fun getRecentPlaceImages_listsAcrossEveryPlaceAndPassesTheLimit() = runTest {
+        enqueueJson(
+            """
+            [
+                {
+                    "id": 4,
+                    "place_id": 42,
+                    "type": "user",
+                    "width": 1024,
+                    "height": 768,
+                    "size_bytes": 184320,
+                    "created_at": "2026-10-01T04:22:53.706Z",
+                    "created_by": 17,
+                    "author": { "id": 17, "name": "satoshi" }
+                }
+            ]
+            """.trimIndent()
+        )
+
+        val images = api().getRecentPlaceImages(limit = 20)
+
+        val request = takeRequest()
+        Assert.assertEquals("GET", request.method)
+        Assert.assertEquals("/v4/place-images", request.url.encodedPath)
+        Assert.assertEquals("20", request.url.queryParameter("limit"))
+
+        val image = images.single()
+        Assert.assertEquals(4L, image.id)
+        Assert.assertEquals(42L, image.placeId)
+        Assert.assertEquals("satoshi", image.authorName)
+    }
+
+    @Test
+    fun getRecentPlaceImages_defaultsToTheApiMaximum() = runTest {
+        enqueueJson("[]")
+
+        api().getRecentPlaceImages()
+
+        val request = takeRequest()
+        Assert.assertEquals("100", request.url.queryParameter("limit"))
+    }
+
+    @Test
     fun placeImageUrl_buildsPublicImageUrlWithDimensions() {
         val client = api()
 
