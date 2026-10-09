@@ -216,6 +216,7 @@ import org.btcmap.db.table.place.Place
 import org.btcmap.i18n.getLocalizedDescription
 import org.btcmap.i18n.getLocalizedName
 import org.btcmap.map.toEventGeoJson
+import org.btcmap.search.NominatimSearch
 import java.io.File
 import java.net.HttpURLConnection
 import java.net.URI
@@ -265,6 +266,10 @@ private fun runApp() = application {
         token = { settings.getString(KEY_AUTH_TOKEN, null) },
         userAgent = USER_AGENT,
     )
+    // The OpenStreetMap search service the map's search offers as a second
+    // group, paced to Nominatim's one request per second. Remembered so a
+    // recomposition does not rebuild it (and reset its throttle).
+    val nominatimSearch = remember { NominatimSearch.create("$USER_AGENT (https://btcmap.org)") }
     val syncManager = SyncManager(
         sync = { Sync(api, db) },
         refreshUser = { AccountSession.refresh(api, db, settings) },
@@ -682,6 +687,8 @@ private fun runApp() = application {
                                 // Beyond 10 km the fraction is noise.
                                 if (km > 10) "%.0f km".format(km) else "%.1f km".format(km)
                             },
+                            nominatimSearch = nominatimSearch,
+                            nominatimHeader = STRINGS["search_openstreetmap"],
                         )
 
                         Route.Report -> ScreenPage(

@@ -105,6 +105,8 @@ data class AppLabels(
     val account: AccountLabels,
     val placeStrings: PlaceSheetStrings,
     val addLocation: org.btcmap.ui.map.AddLocationLabels,
+    /** The heading above the map search's OpenStreetMap results group. */
+    val searchOpenStreetMap: String,
     /** The map's OpenStreetMap attribution line. */
     val osmAttribution: String,
     /** Formats a distance in metres for the map's search results. */

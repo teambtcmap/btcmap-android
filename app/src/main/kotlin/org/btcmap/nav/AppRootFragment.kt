@@ -128,6 +128,7 @@ class AppRootFragment : Fragment() {
                     }
                 },
                 iconFont = iconTypeface?.let { FontFamily(it) },
+                nominatimSearch = app.nominatimSearch,
             )
             platform = AndroidAppPlatform(
                 activity = requireActivity() as org.btcmap.Activity,

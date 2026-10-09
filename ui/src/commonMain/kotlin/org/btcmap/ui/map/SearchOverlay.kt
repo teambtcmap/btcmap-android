@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
@@ -72,6 +73,17 @@ fun SearchOverlay(
     emptyMessage: String = "No results",
     /** The boosted marker colour from settings, tinting boosted results. */
     boostedMarkerColor: Color? = null,
+    /** The rows of the OpenStreetMap group, shown under the local [results]. */
+    nominatimResults: List<SearchAdapterItem> = emptyList(),
+    /** Whether the OpenStreetMap group is still being fetched. */
+    nominatimLoading: Boolean = false,
+    /** The heading above the OpenStreetMap group. */
+    nominatimHeader: String = "OpenStreetMap",
+    /**
+     * The heading above the local group, shown only when the OpenStreetMap
+     * group sits under it. The app's own name, so it is not translated.
+     */
+    localHeader: String = "BTC Map",
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val isFocused by interactionSource.collectIsFocusedAsState()
@@ -154,25 +166,50 @@ fun SearchOverlay(
                 tonalElevation = 3.dp,
                 modifier = Modifier.fillMaxWidth(),
             ) {
+                val hasResults = results.isNotEmpty() || nominatimResults.isNotEmpty()
                 when {
-                    loading -> CenteredRow {
+                    // The local search runs first and is quick; until it has
+                    // anything, only the spinner is worth showing.
+                    loading && !hasResults -> CenteredRow {
                         CircularProgressIndicator(modifier = Modifier.size(24.dp))
                     }
 
-                    results.isEmpty() -> CenteredRow {
+                    // "No results" waits for the OpenStreetMap group too: a
+                    // local miss with that group still loading is not final.
+                    !hasResults && !nominatimLoading -> CenteredRow {
                         Text(
                             text = emptyMessage,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                     }
 
-                    else -> LazyColumn(modifier = Modifier.heightIn(max = 320.dp)) {
+                    else -> LazyColumn(modifier = Modifier.heightIn(max = SEARCH_RESULTS_MAX_HEIGHT)) {
+                        // The local hits get their own heading only when the
+                        // OpenStreetMap group sits under them, so a search with
+                        // a single group stays unlabelled as before.
+                        if (results.isNotEmpty() && nominatimResults.isNotEmpty()) {
+                            item(key = LOCAL_HEADER_KEY) { SearchSectionHeader(localHeader) }
+                        }
                         items(results) { result ->
                             SearchResultRow(
                                 result = result,
                                 boostedMarkerColor = boostedMarkerColor,
                                 onClick = onResultClick,
                             )
+                        }
+                        if (nominatimResults.isNotEmpty()) {
+                            item(key = NOMINATIM_HEADER_KEY) {
+                                SearchSectionHeader(nominatimHeader)
+                            }
+                            items(nominatimResults) { result ->
+                                SearchResultRow(
+                                    result = result,
+                                    boostedMarkerColor = boostedMarkerColor,
+                                    onClick = onResultClick,
+                                )
+                            }
+                        } else if (nominatimLoading) {
+                            item(key = NOMINATIM_LOADING_KEY) { SearchGroupLoading() }
                         }
                     }
                 }
@@ -196,6 +233,47 @@ private fun CenteredRow(content: @Composable () -> Unit) {
         content()
     }
 }
+
+/** The heading that separates the OpenStreetMap group from the local results. */
+@Composable
+private fun SearchSectionHeader(text: String) {
+    Text(
+        text = text,
+        style = MaterialTheme.typography.labelLarge,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 4.dp),
+    )
+}
+
+/** A short, centred spinner shown in place of a group that is still loading. */
+@Composable
+private fun SearchGroupLoading() {
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(SEARCH_GROUP_LOADING_HEIGHT),
+    ) {
+        CircularProgressIndicator(modifier = Modifier.size(20.dp))
+    }
+}
+
+/** Stable keys for the groups' header and placeholder rows. */
+private const val LOCAL_HEADER_KEY = "local-header"
+private const val NOMINATIM_HEADER_KEY = "nominatim-header"
+private const val NOMINATIM_LOADING_KEY = "nominatim-loading"
+
+/**
+ * How tall the results panel may grow before it scrolls. Enough for the local
+ * hits plus the OpenStreetMap group's heading and first rows to be visible
+ * together, without covering the whole map.
+ */
+private val SEARCH_RESULTS_MAX_HEIGHT = 480.dp
+
+/** The height of the placeholder shown while the OpenStreetMap group loads. */
+private val SEARCH_GROUP_LOADING_HEIGHT = 48.dp
 
 @Composable
 private fun SearchResultRow(

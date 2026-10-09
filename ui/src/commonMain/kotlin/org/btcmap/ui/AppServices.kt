@@ -6,6 +6,7 @@ import androidx.compose.ui.text.font.FontFamily
 import coil3.ImageLoader
 import org.btcmap.api.Api
 import org.btcmap.db.Database
+import org.btcmap.search.NominatimSearch
 import org.btcmap.settings.MapStyle
 import org.btcmap.settings.Settings
 import org.btcmap.settings.mapStyle
@@ -58,6 +59,11 @@ class AppServices(
     val usingOpenFreeMap: Boolean,
     /** The Material Symbols typeface, or null when it is not loaded yet. */
     val iconFont: FontFamily?,
+    /**
+     * The OpenStreetMap search service the map's search offers as a second
+     * group. Null when the host has no network client, leaving local results.
+     */
+    val nominatimSearch: NominatimSearch? = null,
 )
 
 /**

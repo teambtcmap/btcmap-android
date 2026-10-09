@@ -64,6 +64,7 @@ import org.btcmap.map.exchangeMarkerIconImageName
 import org.btcmap.util.isUpcoming
 import org.btcmap.map.MapArea
 import org.btcmap.map.markerImageName
+import org.btcmap.search.NominatimSearch
 import org.btcmap.search.SearchAdapterItem
 import org.btcmap.map.toEventGeoJson
 import org.btcmap.map.toMarkerGeoJson
@@ -345,6 +346,14 @@ fun MapScreen(
     onSelectEvent: (Event) -> Unit,
     onSelectArea: (Long) -> Unit,
     formatDistance: (Double) -> String,
+    /**
+     * The OpenStreetMap search service, whose hits are shown as a second group
+     * under the local results. Null leaves the local results on their own, as
+     * when the host has no network client.
+     */
+    nominatimSearch: NominatimSearch? = null,
+    /** The heading above the OpenStreetMap group. */
+    nominatimHeader: String = "OpenStreetMap",
     modifier: Modifier = Modifier,
 ) {
     val textMeasurer = rememberTextMeasurer()
@@ -721,6 +730,7 @@ fun MapScreen(
         state = state,
         query = searchQuery,
         formatDistance = formatDistance,
+        nominatimSearch = nominatimSearch,
     )
     val onSearchResultClick: (SearchAdapterItem) -> Unit = { result ->
         searchQuery = ""
@@ -760,6 +770,14 @@ fun MapScreen(
             // A typed coordinate has no row behind it: the map simply moves to
             // the point, as a host-supplied target would.
             is SearchAdapterItem.Coordinate -> scope.launch {
+                state.animateCamera(
+                    CameraUpdate(target = Position(result.lon, result.lat), zoom = OPEN_ZOOM),
+                )
+            }
+
+            // An OpenStreetMap hit has no row behind it either, so the map
+            // simply moves to its coordinates.
+            is SearchAdapterItem.Nominatim -> scope.launch {
                 state.animateCamera(
                     CameraUpdate(target = Position(result.lon, result.lat), zoom = OPEN_ZOOM),
                 )
@@ -1172,6 +1190,9 @@ fun MapScreen(
                 onResultClick = onSearchResultClick,
                 actions = mapSearchActions,
                 addLocationLabels = addLocationLabels,
+                nominatimResults = searchResults.nominatim,
+                nominatimLoading = searchResults.nominatimLoading,
+                nominatimHeader = nominatimHeader,
                 modifier = Modifier
                     .align(Alignment.TopCenter)
                     // The Views SearchBar sat below the status bar with its own

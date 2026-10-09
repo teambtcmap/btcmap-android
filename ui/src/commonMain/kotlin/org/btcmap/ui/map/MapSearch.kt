@@ -18,9 +18,11 @@ import org.btcmap.i18n.getLocalizedName
 import org.btcmap.i18n.getSearchableNames
 import org.btcmap.map.EVENT_ICON
 import org.btcmap.place.isBoosted
+import org.btcmap.search.NominatimSearch
 import org.btcmap.search.SearchAdapterItem
 import org.btcmap.search.nameMatchRank
 import org.btcmap.util.isUpcoming
+import org.btcmap.util.rethrowIfCancellation
 import org.maplibre.compose.map.MapState
 import kotlin.time.Instant
 import kotlin.math.PI
@@ -35,10 +37,14 @@ private const val SEARCH_DEBOUNCE_MS = 300L
 
 /** The search results, whether a search is running, and whether the query is
  * long enough that one has been run (so "no results" can be told apart from
- * "not searching"). */
+ * "not searching"). The local [items] come from the cache; [nominatim] holds
+ * the separate OpenStreetMap group shown below them, and [nominatimLoading]
+ * reports whether that group is still being fetched. */
 data class SearchResults(
     val items: List<SearchAdapterItem> = emptyList(),
+    val nominatim: List<SearchAdapterItem> = emptyList(),
     val loading: Boolean = false,
+    val nominatimLoading: Boolean = false,
     val active: Boolean = false,
 )
 
@@ -49,6 +55,11 @@ data class SearchResults(
  * the server: boosted places first, then exact, prefix and substring name
  * matches, with proximity breaking ties. A query that is a `lat,lon` pair is
  * offered as a single coordinate result instead.
+ *
+ * When [nominatimSearch] is given, the same query is also sent to OpenStreetMap
+ * through Nominatim and shown as a second group under the local hits. That call
+ * is best-effort and paced by the searcher, so it never blocks or fails the
+ * local results, which are set as soon as the cache has answered.
  */
 @Composable
 fun rememberSearchResults(
@@ -56,11 +67,12 @@ fun rememberSearchResults(
     state: MapState,
     query: String,
     formatDistance: (Double) -> String,
+    nominatimSearch: NominatimSearch? = null,
 ): SearchResults {
     val latestFormatDistance by rememberUpdatedState(formatDistance)
     var results by remember { mutableStateOf(SearchResults()) }
 
-    LaunchedEffect(db, state, query) {
+    LaunchedEffect(db, state, query, nominatimSearch) {
         val trimmed = query.trim()
         if (trimmed.length < MIN_QUERY_LENGTH) {
             results = SearchResults()
@@ -77,20 +89,69 @@ fun rememberSearchResults(
         results = SearchResults(loading = true, active = true)
         delay(SEARCH_DEBOUNCE_MS)
         val camera = state.cameraPosition
+        val referenceLat = camera?.target?.latitude ?: 0.0
+        val referenceLon = camera?.target?.longitude ?: 0.0
+
         val items = withContext(Dispatchers.IO) {
             search(
                 db = db,
                 query = trimmed,
-                referenceLat = camera?.target?.latitude ?: 0.0,
-                referenceLon = camera?.target?.longitude ?: 0.0,
+                referenceLat = referenceLat,
+                referenceLon = referenceLon,
                 formatDistance = latestFormatDistance,
             )
         }
-        results = SearchResults(items = items, active = true)
+
+        if (nominatimSearch == null) {
+            results = SearchResults(items = items, active = true)
+            return@LaunchedEffect
+        }
+
+        // The local results are already shown; the OpenStreetMap group loads
+        // into the same panel once its paced request completes.
+        results = SearchResults(items = items, active = true, nominatimLoading = true)
+        val nominatim = nominatimResults(
+            searcher = nominatimSearch,
+            query = trimmed,
+            referenceLat = referenceLat,
+            referenceLon = referenceLon,
+            formatDistance = latestFormatDistance,
+        )
+        results = SearchResults(items = items, nominatim = nominatim, active = true)
     }
 
     return results
 }
+
+/**
+ * Runs [searcher] for [query] and maps its hits to search rows, measuring each
+ * one from the map centre. The remote service only ever adds to the local
+ * results, so any failure is swallowed and an empty group is returned.
+ */
+private suspend fun nominatimResults(
+    searcher: NominatimSearch,
+    query: String,
+    referenceLat: Double,
+    referenceLon: Double,
+    formatDistance: (Double) -> String,
+): List<SearchAdapterItem> = try {
+    searcher.search(query).map { place ->
+        val distance = distanceMeters(referenceLat, referenceLon, place.lat, place.lon)
+        SearchAdapterItem.Nominatim(
+            lat = place.lat,
+            lon = place.lon,
+            icon = NOMINATIM_ICON,
+            name = place.name,
+            distanceToUser = formatDistance(distance),
+        )
+    }
+} catch (t: Throwable) {
+    t.rethrowIfCancellation()
+    emptyList()
+}
+
+/** The glyph on an OpenStreetMap group row. */
+private const val NOMINATIM_ICON = "travel_explore"
 
 private fun AreaSearchProjection.searchBbox(): List<Double>? {
     val west = bboxWest ?: return null

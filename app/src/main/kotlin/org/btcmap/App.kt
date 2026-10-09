@@ -28,6 +28,7 @@ import org.btcmap.db.Database
 import org.btcmap.db.LegacyDatabases
 import org.btcmap.io.platformFileSystem
 import org.btcmap.note.Notes
+import org.btcmap.search.NominatimSearch
 import org.btcmap.ui.ImageStatsEventListener
 import org.btcmap.ui.map.OfflinePacks
 import org.btcmap.settings.apiUrl
@@ -123,6 +124,15 @@ class App : Application(), SingletonImageLoader.Factory {
             onUnauthorized = { handleUnauthorized(it) },
             userAgent = userAgent,
         )
+    }
+
+    /**
+     * The OpenStreetMap search service, app-scoped so its one-request-per-second
+     * throttle and its client are shared wherever the map's search runs. Its
+     * user agent identifies the app and links back, as Nominatim's policy asks.
+     */
+    internal val nominatimSearch: NominatimSearch by lazy {
+        NominatimSearch.create("$userAgent (https://btcmap.org)")
     }
 
     /**

@@ -409,6 +409,7 @@ fun appLabels(
         addEvent = strings["add_event"],
         addNote = strings["add_note"],
     ),
+    searchOpenStreetMap = strings["search_openstreetmap"],
     osmAttribution = strings["osm_attribution"],
     formatDistance = { meters ->
         // Beyond 10 km the fraction is noise.

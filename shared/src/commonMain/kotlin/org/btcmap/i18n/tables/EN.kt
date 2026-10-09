@@ -326,6 +326,7 @@ internal val EN: Map<String, String> = mapOf(
         "saved_areas" to "Saved areas",
         "saved_places" to "Saved places",
         "search_hint" to "Places, events, communities",
+        "search_openstreetmap" to "OpenStreetMap",
         "settings" to "Settings",
         "settings_section_admin" to "Admin",
         "settings_section_data" to "Data",

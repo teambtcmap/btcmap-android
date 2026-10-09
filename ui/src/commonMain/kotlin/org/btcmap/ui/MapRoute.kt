@@ -398,6 +398,8 @@ internal fun MapRoute(
         onSelectEvent = { sheetEvent = it },
         onSelectArea = { areaId -> onNavigate(AppRoute.Area(areaId)) },
         formatDistance = labels.formatDistance,
+        nominatimSearch = services.nominatimSearch,
+        nominatimHeader = labels.searchOpenStreetMap,
         modifier = modifier,
     )
 

@@ -42,4 +42,17 @@ sealed class SearchAdapterItem {
         override val name: String,
         override val distanceToUser: String?,
     ) : SearchAdapterItem()
+
+    /**
+     * A named place found by the OpenStreetMap Nominatim search service, shown
+     * as its own group under the local results. Like a [Coordinate] it has no
+     * cached row behind it, so tapping it only moves the map.
+     */
+    data class Nominatim(
+        val lat: Double,
+        val lon: Double,
+        override val icon: String,
+        override val name: String,
+        override val distanceToUser: String?,
+    ) : SearchAdapterItem()
 }
