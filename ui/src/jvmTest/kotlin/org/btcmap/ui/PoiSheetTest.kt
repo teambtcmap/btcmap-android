@@ -17,7 +17,13 @@ import org.btcmap.ui.map.PoiInfo
 @OptIn(ExperimentalTestApi::class)
 class PoiSheetTest {
 
-    private val labels = PoiSheetLabels(copied = "Copied to clipboard")
+    private val labels = PoiSheetLabels(
+        copied = "Copied to clipboard",
+        addAsMerchant = "It accepts bitcoins",
+        addAsNote = "Save as note",
+        viewOnOsm = "View on openstreetmap.org",
+        editOnOsm = "Edit on openstreetmap.org",
+    )
 
     @Test
     fun showsTheNameCategoryAndCoordinates() {
@@ -176,5 +182,136 @@ class PoiSheetTest {
             waitForIdle()
         }
         assertEquals("屈臣氏", copied)
+    }
+
+    @Test
+    fun hidesTheActionsWhenTheHostOffersNone() {
+        runComposeUiTest {
+            setContent {
+                AppTheme {
+                    PoiSheet(
+                        poi = PoiInfo(
+                            name = "Harry's Bar",
+                            classId = "bar",
+                            subclass = "bar",
+                            lat = 39.9,
+                            lon = 116.4,
+                        ),
+                        labels = labels,
+                        onDismiss = {},
+                    )
+                }
+            }
+            onNodeWithTag(POI_SHEET_ADD_MERCHANT_TAG).assertDoesNotExist()
+            onNodeWithTag(POI_SHEET_ADD_NOTE_TAG).assertDoesNotExist()
+        }
+    }
+
+    @Test
+    fun addingAsMerchantInvokesTheAction() {
+        var added = 0
+        runComposeUiTest {
+            setContent {
+                AppTheme {
+                    PoiSheet(
+                        poi = PoiInfo(
+                            name = "Harry's Bar",
+                            classId = "bar",
+                            subclass = "bar",
+                            lat = 39.9,
+                            lon = 116.4,
+                        ),
+                        labels = labels,
+                        onDismiss = {},
+                        onAddAsMerchant = { added++ },
+                    )
+                }
+            }
+            onNodeWithTag(POI_SHEET_ADD_MERCHANT_TAG).performClick()
+            waitForIdle()
+        }
+        assertEquals(1, added)
+    }
+
+    @Test
+    fun addingAsNoteInvokesTheAction() {
+        var added = 0
+        runComposeUiTest {
+            setContent {
+                AppTheme {
+                    PoiSheet(
+                        poi = PoiInfo(
+                            name = "Harry's Bar",
+                            classId = "bar",
+                            subclass = "bar",
+                            lat = 39.9,
+                            lon = 116.4,
+                        ),
+                        labels = labels,
+                        onDismiss = {},
+                        onAddAsNote = { added++ },
+                    )
+                }
+            }
+            onNodeWithTag(POI_SHEET_ADD_NOTE_TAG).performClick()
+            waitForIdle()
+        }
+        assertEquals(1, added)
+    }
+
+    @Test
+    fun hidesTheOsmLinksWhenTheHostOffersNoBrowser() {
+        runComposeUiTest {
+            setContent {
+                AppTheme {
+                    PoiSheet(
+                        poi = PoiInfo(
+                            name = "Harry's Bar",
+                            classId = "bar",
+                            subclass = "bar",
+                            lat = 39.9,
+                            lon = 116.4,
+                        ),
+                        labels = labels,
+                        onDismiss = {},
+                    )
+                }
+            }
+            onNodeWithTag(POI_SHEET_VIEW_OSM_TAG).assertDoesNotExist()
+            onNodeWithTag(POI_SHEET_EDIT_OSM_TAG).assertDoesNotExist()
+        }
+    }
+
+    @Test
+    fun openingOnOsmUsesTheFeatureCoordinates() {
+        val opened = mutableListOf<String>()
+        runComposeUiTest {
+            setContent {
+                AppTheme {
+                    PoiSheet(
+                        poi = PoiInfo(
+                            name = "Harry's Bar",
+                            classId = "bar",
+                            subclass = "bar",
+                            lat = 39.9,
+                            lon = 116.4,
+                        ),
+                        labels = labels,
+                        onDismiss = {},
+                        onOpenUrl = { opened += it },
+                    )
+                }
+            }
+            onNodeWithTag(POI_SHEET_VIEW_OSM_TAG).performClick()
+            onNodeWithTag(POI_SHEET_EDIT_OSM_TAG).performClick()
+            waitForIdle()
+        }
+        assertEquals(
+            listOf(
+                "https://www.openstreetmap.org/?mlat=39.9&mlon=116.4#map=19/39.9/116.4",
+                "https://www.openstreetmap.org/edit#map=19/39.9/116.4",
+            ),
+            opened,
+        )
     }
 }

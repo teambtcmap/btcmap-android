@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.relocation.BringIntoViewRequester
 import androidx.compose.foundation.relocation.bringIntoViewRequester
 import androidx.compose.foundation.rememberScrollState
@@ -37,6 +38,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.testTag
@@ -103,6 +105,14 @@ data class AddPlaceLabels(
  * marker colour, so the positioning pin is the same merchant pin the map draws.
  * [submit] is injected so the screen can be driven without a server, and [map] so
  * a test can render the form without a GPU.
+ *
+ * The optional initial values pre-fill the form for a place submitted from a
+ * basemap POI: [initialName] and [initialCategory] seed the fields, so the user
+ * only has to confirm the details of a feature the map already draws.
+ *
+ * The body is capped at [CONTENT_MAX_WIDTH] and centred, so a wide desktop or
+ * tablet window neither stretches the map and the fields edge to edge nor breaks
+ * a phone.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -116,6 +126,9 @@ fun AddPlaceScreen(
     palette: MarkerPalette,
     submit: suspend (AddPlaceDraft) -> Unit,
     onBack: () -> Unit,
+    /** Pre-fills the form when the place is submitted from a basemap POI. */
+    initialName: String = "",
+    initialCategory: String = "",
     map: @Composable ((Double, Double) -> Unit) -> Unit = { onCenterChanged ->
         LocationPickerMap(
             lat = lat,
@@ -156,64 +169,82 @@ fun AddPlaceScreen(
             },
             snackbarHost = { SnackbarHost(snackbarHostState) },
         ) { innerPadding ->
-            Column(
+            Box(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(innerPadding),
+                contentAlignment = Alignment.TopCenter,
             ) {
-                // The positioning map is a terminal confirmation's backdrop only
-                // while the form is still being filled in.
-                if (!submitted) {
-                    Box(modifier = Modifier.fillMaxWidth().height(240.dp)) {
-                        map { newLat, newLon -> center = newLat to newLon }
-                        // The hint floats on the map so it reads as belonging to
-                        // it, in the inverse-surface role M3 reserves for content
-                        // over imagery.
-                        Surface(
-                            color = MaterialTheme.colorScheme.inverseSurface.copy(alpha = 0.5f),
-                            contentColor = MaterialTheme.colorScheme.inverseOnSurface,
-                            shape = RoundedCornerShape(percent = 50),
+                Column(
+                    modifier = Modifier
+                        .widthIn(max = CONTENT_MAX_WIDTH)
+                        .fillMaxSize(),
+                ) {
+                    // The positioning map is a terminal confirmation's backdrop
+                    // only while the form is still being filled in. It is inset
+                    // to the form's margin and clipped to the theme's medium
+                    // shape, so it reads as a contained M3 media block rather
+                    // than a bare rectangle wider than the fields below it.
+                    if (!submitted) {
+                        Box(
                             modifier = Modifier
-                                .align(Alignment.BottomCenter)
-                                .padding(bottom = 12.dp),
+                                .fillMaxWidth()
+                                .padding(start = 16.dp, end = 16.dp, top = 16.dp)
+                                .height(240.dp)
+                                .clip(MaterialTheme.shapes.medium),
                         ) {
-                            Text(
-                                text = labels.dragMap,
-                                style = MaterialTheme.typography.labelMedium,
-                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
-                            )
-                        }
-                    }
-                }
-                AddPlaceForm(
-                    busy = busy,
-                    submitted = submitted,
-                    labels = labels,
-                    onSubmit = { name, category, address, website, description ->
-                        busy = true
-                        val draft = AddPlaceDraft(
-                            lat = center.first,
-                            lon = center.second,
-                            name = name,
-                            category = category,
-                            address = address,
-                            website = website,
-                            description = description,
-                        )
-                        scope.launch {
-                            try {
-                                submit(draft)
-                                submitted = true
-                            } catch (t: Throwable) {
-                                error = t.message ?: t.toString()
-                            } finally {
-                                busy = false
+                            map { newLat, newLon -> center = newLat to newLon }
+                            // The hint floats on the map so it reads as
+                            // belonging to it, in the inverse-surface role M3
+                            // reserves for content over imagery.
+                            Surface(
+                                color = MaterialTheme.colorScheme.inverseSurface.copy(alpha = 0.5f),
+                                contentColor = MaterialTheme.colorScheme.inverseOnSurface,
+                                shape = RoundedCornerShape(percent = 50),
+                                modifier = Modifier
+                                    .align(Alignment.BottomCenter)
+                                    .padding(bottom = 12.dp),
+                            ) {
+                                Text(
+                                    text = labels.dragMap,
+                                    style = MaterialTheme.typography.labelMedium,
+                                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                                )
                             }
                         }
-                    },
-                    onBack = onBack,
-                    modifier = Modifier.weight(1f),
-                )
+                    }
+                    AddPlaceForm(
+                        busy = busy,
+                        submitted = submitted,
+                        labels = labels,
+                        initialName = initialName,
+                        initialCategory = initialCategory,
+                        onSubmit = { name, category, address, website, description ->
+                            busy = true
+                            val draft = AddPlaceDraft(
+                                lat = center.first,
+                                lon = center.second,
+                                name = name,
+                                category = category,
+                                address = address,
+                                website = website,
+                                description = description,
+                            )
+                            scope.launch {
+                                try {
+                                    submit(draft)
+                                    submitted = true
+                                } catch (t: Throwable) {
+                                    error = t.message ?: t.toString()
+                                } finally {
+                                    busy = false
+                                }
+                            }
+                        },
+                        onBack = onBack,
+                        modifier = Modifier.weight(1f),
+                    )
+                }
             }
         }
     }
@@ -235,9 +266,11 @@ fun AddPlaceForm(
     onSubmit: (name: String, category: String, address: String, website: String, description: String) -> Unit,
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
+    initialName: String = "",
+    initialCategory: String = "",
 ) {
-    var name by rememberSaveable { mutableStateOf("") }
-    var category by rememberSaveable { mutableStateOf("") }
+    var name by rememberSaveable { mutableStateOf(initialName) }
+    var category by rememberSaveable { mutableStateOf(initialCategory) }
     var address by rememberSaveable { mutableStateOf("") }
     var website by rememberSaveable { mutableStateOf("") }
     var description by rememberSaveable { mutableStateOf("") }

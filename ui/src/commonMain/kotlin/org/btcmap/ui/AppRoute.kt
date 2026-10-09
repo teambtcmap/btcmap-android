@@ -29,11 +29,28 @@ sealed interface AppRoute {
     /** A single event, with its map, dates and website (see `EventScreen`). */
     data class EventDetails(val event: Event) : AppRoute
 
-    /** Adding a place at a map position (see `AddPlaceScreen`). */
-    data class AddPlace(val lat: Double, val lon: Double) : AppRoute
+    /**
+     * Adding a place at a map position (see `AddPlaceScreen`). The optional
+     * pre-fill seeds the form when the place is submitted from a basemap POI,
+     * which already knows the feature's name and OSM category.
+     */
+    data class AddPlace(
+        val lat: Double,
+        val lon: Double,
+        val name: String = "",
+        val category: String = "",
+    ) : AppRoute
 
-    /** Adding a note at a map position (see `AddNoteScreen`). */
-    data class AddNote(val lat: Double, val lon: Double) : AppRoute
+    /**
+     * Adding a note at a map position (see `AddNoteScreen`). The optional
+     * pre-fill seeds the note body when it is added from a basemap POI, which
+     * already knows the feature's name.
+     */
+    data class AddNote(
+        val lat: Double,
+        val lon: Double,
+        val text: String = "",
+    ) : AppRoute
 
     /**
      * Adding an event at a map position (see `AddEventScreen`). The optional

@@ -182,6 +182,23 @@ fun MapScreen(
      * [onAddPlace] and [onAddEvent] in the add-location chooser.
      */
     onAddNote: ((Double, Double) -> Unit)? = null,
+    /**
+     * Creates a place from a tapped basemap POI, pre-filled with the feature's
+     * name, category and position, if the host can. Null hides the POI sheet's
+     * add-as-merchant action, as when the host cannot create places.
+     */
+    onAddPlaceFromPoi: ((PoiInfo) -> Unit)? = null,
+    /**
+     * Creates a note from a tapped basemap POI, pre-filled with the feature's
+     * name and position, if the host can. Null hides the POI sheet's add-as-note
+     * action, as when the host cannot create notes.
+     */
+    onAddNoteFromPoi: ((PoiInfo) -> Unit)? = null,
+    /**
+     * Opens a URL, so the POI sheet can link to the feature on openstreetmap.org.
+     * Null hides those links, as when the host has no browser.
+     */
+    onOpenUrl: ((String) -> Unit)? = null,
     /** The strings of the sheet a note pin opens. */
     noteSheetLabels: NoteSheetLabels = NoteSheetLabels(
         title = "Note",
@@ -199,7 +216,13 @@ fun MapScreen(
         cancel = "Cancel",
     ),
     /** The strings of the sheet a tapped basemap POI opens. */
-    poiSheetLabels: PoiSheetLabels = PoiSheetLabels(copied = "Copied to clipboard"),
+    poiSheetLabels: PoiSheetLabels = PoiSheetLabels(
+        copied = "Copied to clipboard",
+        addAsMerchant = "It accepts bitcoins",
+        addAsNote = "Save as note",
+        viewOnOsm = "View on openstreetmap.org",
+        editOnOsm = "Edit on openstreetmap.org",
+    ),
     /**
      * Edits the body of the note the sheet is showing, given its id. Null hides
      * the sheet's edit action, as when the host cannot edit notes.
@@ -933,6 +956,19 @@ fun MapScreen(
                     poi = poi,
                     labels = poiSheetLabels,
                     onDismiss = { shownPoi = null },
+                    onAddAsMerchant = onAddPlaceFromPoi?.let { add ->
+                        {
+                            shownPoi = null
+                            add(poi)
+                        }
+                    },
+                    onAddAsNote = onAddNoteFromPoi?.let { add ->
+                        {
+                            shownPoi = null
+                            add(poi)
+                        }
+                    },
+                    onOpenUrl = onOpenUrl,
                 )
             }
             if (showAttribution) {

@@ -76,6 +76,7 @@ import org.btcmap.ui.map.EventMiniMap
 import org.btcmap.ui.map.MarkerKind
 import org.btcmap.ui.map.OfflinePacks
 import org.btcmap.ui.map.SearchActions
+import org.btcmap.ui.map.categoryToken
 import org.btcmap.ui.map.emptyGlyphRange
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withTimeoutOrNull
@@ -368,10 +369,14 @@ private fun runApp() = application {
                     // point. Starts where the map was last left.
                     var mapCenterLat by remember { mutableStateOf(settings.mapCenterLat) }
                     var mapCenterLon by remember { mutableStateOf(settings.mapCenterLon) }
-                    // Where the add-place screen was opened from the map.
-                    var addPlace by remember { mutableStateOf<Pair<Double, Double>?>(null) }
-                    // Where the add-note screen was opened from the map.
-                    var addNote by remember { mutableStateOf<Pair<Double, Double>?>(null) }
+                    // Where the add-place screen was opened from, and what it is
+                    // pre-filled with: blank from the map, a basemap POI's name
+                    // and category when added as a merchant.
+                    var addPlace by remember { mutableStateOf<AddPlacePrefill?>(null) }
+                    // Where the add-note screen was opened from, and what it is
+                    // pre-filled with: blank from the map, a basemap POI's name
+                    // when added as a note.
+                    var addNote by remember { mutableStateOf<AddNotePrefill?>(null) }
                     // Where the add-event screen was opened from, and what it is
                     // pre-filled with: blank from the map, an event to duplicate
                     // from the profile. Its back target is the stack entry below
@@ -516,7 +521,7 @@ private fun runApp() = application {
                             attributionTextColor = attributionColor,
                             searchActions = SearchActions(onSettings = { nav.push(Route.Settings) }),
                             onAddPlace = { lat, lon ->
-                                addPlace = lat to lon
+                                addPlace = AddPlacePrefill(lat = lat, lon = lon)
                                 nav.push(if (settings.authorized) Route.AddPlace else Route.Account)
                             },
                             onAddEvent = { lat, lon ->
@@ -524,9 +529,23 @@ private fun runApp() = application {
                                 nav.push(if (settings.authorized) Route.AddEvent else Route.Account)
                             },
                             onAddNote = { lat, lon ->
-                                addNote = lat to lon
+                                addNote = AddNotePrefill(lat = lat, lon = lon)
                                 nav.push(if (settings.authorized) Route.AddNote else Route.Account)
                             },
+                            onAddPlaceFromPoi = { poi ->
+                                addPlace = AddPlacePrefill(
+                                    lat = poi.lat,
+                                    lon = poi.lon,
+                                    name = poi.name,
+                                    category = poi.categoryToken().orEmpty(),
+                                )
+                                nav.push(if (settings.authorized) Route.AddPlace else Route.Account)
+                            },
+                            onAddNoteFromPoi = { poi ->
+                                addNote = AddNotePrefill(lat = poi.lat, lon = poi.lon, text = poi.name)
+                                nav.push(if (settings.authorized) Route.AddNote else Route.Account)
+                            },
+                            onOpenUrl = { openUrl(it) },
                             addLocationLabels = ADD_LOCATION_LABELS,
                             onOpenFeed = { nav.push(Route.Feed) },
                             onOpenInfra = if (isAdmin) {
@@ -684,8 +703,8 @@ private fun runApp() = application {
                         // affordance, so the route is the screen itself, not a
                         // ScreenPage wrapping it.
                         Route.AddPlace -> AddPlaceScreen(
-                            lat = addPlace?.first ?: 0.0,
-                            lon = addPlace?.second ?: 0.0,
+                            lat = addPlace?.lat ?: 0.0,
+                            lon = addPlace?.lon ?: 0.0,
                             styleUrl = HOSTED_STYLE_URL,
                             styleJson = styleJson,
                             labels = ADD_PLACE_LABELS,
@@ -703,6 +722,8 @@ private fun runApp() = application {
                                 )
                             },
                             onBack = { nav.pop() },
+                            initialName = addPlace?.name.orEmpty(),
+                            initialCategory = addPlace?.category.orEmpty(),
                         )
 
                         Route.AddEvent -> AddEventScreen(
@@ -731,8 +752,8 @@ private fun runApp() = application {
                         )
 
                         Route.AddNote -> AddNoteScreen(
-                            lat = addNote?.first ?: 0.0,
-                            lon = addNote?.second ?: 0.0,
+                            lat = addNote?.lat ?: 0.0,
+                            lon = addNote?.lon ?: 0.0,
                             styleUrl = HOSTED_STYLE_URL,
                             styleJson = styleJson,
                             labels = ADD_NOTE_LABELS,
@@ -748,6 +769,7 @@ private fun runApp() = application {
                                 )
                             },
                             onBack = { nav.pop() },
+                            initialText = addNote?.text.orEmpty(),
                         )
 
                         Route.AddComment -> ScreenPage(
@@ -1398,6 +1420,29 @@ private data class AddEventPrefill(
     val website: String = "",
     val startsAt: String? = null,
     val endsAt: String? = null,
+)
+
+/**
+ * What the add-place screen opens with. From the map it is just the centre; from
+ * a basemap POI it carries the feature's name and OSM category, so the user only
+ * has to confirm the details of a place the map already draws.
+ */
+private data class AddPlacePrefill(
+    val lat: Double,
+    val lon: Double,
+    val name: String = "",
+    val category: String = "",
+)
+
+/**
+ * What the add-note screen opens with. From the map it is just the centre; from a
+ * basemap POI it carries the feature's name as the note body, so the user only
+ * has to add the detail the note is about.
+ */
+private data class AddNotePrefill(
+    val lat: Double,
+    val lon: Double,
+    val text: String = "",
 )
 
 /** Parses a floating local date-time pre-fill, or null when absent/malformed. */

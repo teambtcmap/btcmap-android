@@ -24,6 +24,8 @@ internal val EN: Map<String, String> = mapOf(
         "activity_tab_saved" to "Saved",
         "activity_updated_by" to "Updated by %1\$s",
         "add" to "Add",
+        "add_as_bitcoin_merchant" to "It accepts bitcoins",
+        "add_as_note" to "Save as note",
         "add_comment" to "Add comment",
         "add_element_comment_disclosure_1" to "All comments are anonymous but we collect a small fee in sats as a spam protection measure",
         "add_event" to "Add an event",

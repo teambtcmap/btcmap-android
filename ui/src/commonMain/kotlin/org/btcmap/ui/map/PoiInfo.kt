@@ -122,6 +122,19 @@ internal fun PoiInfo.categoryLabel(): String? {
     }
 }
 
+/**
+ * The feature's OSM category token to pre-fill a place submission with, e.g.
+ * `cafe` or `hotel`, or null when the feature carries neither token.
+ *
+ * The basemap's `subclass` is the specific value (the tiles carry a hotel as
+ * `class=lodging, subclass=hotel`) and matches the API's OSM-style categories, so
+ * it is preferred; the broader `class` is the fallback, with a `subclass` that is
+ * generic (`yes`) or merely repeats the class dropped.
+ */
+fun PoiInfo.categoryToken(): String? =
+    subclass?.takeIf { it.isNotBlank() && it != "yes" && it != classId }
+        ?: classId?.takeIf { it.isNotBlank() }
+
 /** A Material Symbols glyph matching the feature's OSM class, or a generic pin. */
 internal fun PoiInfo.categoryGlyph(): String = when (classId) {
     "bar", "pub", "nightclub", "biergarten" -> "local_bar"
@@ -142,5 +155,19 @@ internal fun PoiInfo.categoryGlyph(): String = when (classId) {
 
 /** The point as `lat, lon`, rounded to five decimals, which is about a metre. */
 internal fun PoiInfo.coordinatesLabel(): String = "${round(lat)}, ${round(lon)}"
+
+/**
+ * The feature's position on openstreetmap.org. The basemap's tiles carry no OSM
+ * element id (the `poi` layer has only `class`, `subclass`, `name` and `rank`), so
+ * the map knows where the feature is but not which element it is; the link points
+ * at the position rather than at a specific element.
+ */
+fun PoiInfo.osmUrl(): String =
+    "https://www.openstreetmap.org/?mlat=${round(lat)}&mlon=${round(lon)}" +
+        "#map=19/${round(lat)}/${round(lon)}"
+
+/** The openstreetmap.org iD editor opened at the feature's position (see [osmUrl]). */
+fun PoiInfo.osmEditUrl(): String =
+    "https://www.openstreetmap.org/edit#map=19/${round(lat)}/${round(lon)}"
 
 private fun round(value: Double): String = ((value * 100_000).roundToLong() / 100_000.0).toString()

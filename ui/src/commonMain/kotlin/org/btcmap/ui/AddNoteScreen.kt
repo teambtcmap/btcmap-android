@@ -122,6 +122,9 @@ data class AddNoteLabels(
  * The body is capped at [CONTENT_MAX_WIDTH] and centred, so a wide desktop or
  * tablet window neither stretches the map and the fields edge to edge nor breaks
  * a phone.
+ *
+ * [initialText] pre-fills the note body for a note added from a basemap POI,
+ * which already knows the feature's name.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -135,6 +138,8 @@ fun AddNoteScreen(
     palette: MarkerPalette,
     submit: suspend (AddNoteDraft) -> Unit,
     onBack: () -> Unit,
+    /** Pre-fills the note body when the note is added from a basemap POI. */
+    initialText: String = "",
     map: @Composable (icon: String, onCenterChanged: (Double, Double) -> Unit) -> Unit =
         { selectedIcon, onCenterChanged ->
             LocationPickerMap(
@@ -229,6 +234,7 @@ fun AddNoteScreen(
                         labels = labels,
                         icon = icon,
                         onIconChange = { icon = it },
+                        initialText = initialText,
                         onSubmit = { text, public ->
                             busy = true
                             val draft = AddNoteDraft(
@@ -278,8 +284,9 @@ fun AddNoteForm(
     onSubmit: (text: String, public: Boolean) -> Unit,
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
+    initialText: String = "",
 ) {
-    var text by rememberSaveable { mutableStateOf("") }
+    var text by rememberSaveable { mutableStateOf(initialText) }
     var public by rememberSaveable { mutableStateOf(false) }
     var attempted by rememberSaveable { mutableStateOf(false) }
     var iconQuery by rememberSaveable { mutableStateOf("") }

@@ -109,4 +109,38 @@ class AddPlaceScreenTest {
         assertEquals(1.5, draft.lat)
         assertEquals(2.5, draft.lon)
     }
+
+    @OptIn(ExperimentalTestApi::class)
+    @Test
+    fun prefilledFromABasemapPoi_keepsTheSeededNameAndCategory() {
+        val drafts = mutableListOf<AddPlaceDraft>()
+        runComposeUiTest {
+            setContent {
+                AddPlaceScreen(
+                    lat = 39.9,
+                    lon = 116.4,
+                    styleUrl = "",
+                    styleJson = null,
+                    labels = labels,
+                    iconFont = null,
+                    palette = palette,
+                    submit = { drafts += it },
+                    onBack = {},
+                    initialName = "Beijing Cafe",
+                    initialCategory = "cafe",
+                    map = {},
+                )
+            }
+            onNodeWithText("Beijing Cafe").assertIsDisplayed()
+            onNodeWithText("cafe").assertIsDisplayed()
+            // The seeded fields still leave the required address to fill in.
+            onNodeWithTag(ADD_PLACE_ADDRESS_TAG).performTextInput("1 Main St")
+            onNodeWithTag(ADD_PLACE_SUBMIT_TAG).performScrollTo().performClick()
+        }
+        val draft = drafts.single()
+        assertEquals("Beijing Cafe", draft.name)
+        assertEquals("cafe", draft.category)
+        assertEquals(39.9, draft.lat)
+        assertEquals(116.4, draft.lon)
+    }
 }

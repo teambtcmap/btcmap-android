@@ -167,4 +167,33 @@ class AddNoteScreenTest {
             onNodeWithText("Public notes can be seen by anyone").assertExists()
         }
     }
+
+    @OptIn(ExperimentalTestApi::class)
+    @Test
+    fun prefilledFromABasemapPoi_keepsTheSeededText() {
+        val drafts = mutableListOf<AddNoteDraft>()
+        runComposeUiTest {
+            setContent {
+                AddNoteScreen(
+                    lat = 39.9,
+                    lon = 116.4,
+                    styleUrl = "",
+                    styleJson = null,
+                    labels = labels,
+                    iconFont = null,
+                    palette = palette,
+                    submit = { drafts += it },
+                    onBack = {},
+                    initialText = "Beijing Cafe",
+                    map = { _, _ -> },
+                )
+            }
+            onNodeWithText("Beijing Cafe").assertIsDisplayed()
+            onNodeWithTag(ADD_NOTE_SUBMIT_TAG).performScrollTo().performClick()
+        }
+        val draft = drafts.single()
+        assertEquals("Beijing Cafe", draft.text)
+        assertEquals(39.9, draft.lat)
+        assertEquals(116.4, draft.lon)
+    }
 }

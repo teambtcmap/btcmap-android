@@ -266,6 +266,8 @@ fun AppRoot(
                     )
                 },
                 onBack = back,
+                initialName = route.name,
+                initialCategory = route.category,
             )
 
             is AppRoute.AddNote -> AddNoteScreen(
@@ -286,6 +288,7 @@ fun AppRoot(
                     )
                 },
                 onBack = back,
+                initialText = route.text,
             )
 
             is AppRoute.AddEvent -> AddEventScreen(

@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+- Add actions to the basemap POI sheet for a feature BTC Map does not know: "It accepts bitcoins" opens the add-place flow and "Save as note" the note form, each pre-filled from the feature with its name, OSM category and position, and the sheet also links to that position on openstreetmap.org and to the iD editor there, since the basemap tiles carry no OSM element id; the sheet's field icons now share one colour and even spacing
+- Cap and centre the add-place screen at a readable width on tablets and desktop windows, as the other forms are, and inset and round its positioning map to match the fields below it
 - Tap a place the basemap draws — a bar, hotel or other OpenStreetMap point of interest that is not a BTC Map merchant — to open a small info sheet with its name in the app's language, its original-language name (Han names drawn with pinyin ruby over each character), its category and its coordinates; tapping either name copies it to the clipboard
 - Add a "Manage place images" settings screen, shown in the Admin section to admins and roots: it lists the newest place uploads across every place, each with its thumbnail, its place, its uploader and its date, tapping a row opens the image full screen (swiping through the rest), and a moderator can delete spam
 - Fix dates in the app following the device locale instead of the chosen language — a note's creation date rendered in the device language on an English app; every date now uses the Language setting

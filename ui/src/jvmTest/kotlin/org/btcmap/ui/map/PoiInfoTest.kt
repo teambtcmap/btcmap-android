@@ -200,6 +200,21 @@ class PoiInfoTest {
     }
 
     @Test
+    fun categoryTokenPrefersTheSpecificSubclassThenTheClass() {
+        val hotel = PoiInfo("X", classId = "lodging", subclass = "hotel", lat = 0.0, lon = 0.0)
+        assertEquals("hotel", hotel.categoryToken())
+
+        val repeated = PoiInfo("X", classId = "bar", subclass = "bar", lat = 0.0, lon = 0.0)
+        assertEquals("bar", repeated.categoryToken())
+
+        val generic = PoiInfo("X", classId = "shop", subclass = "yes", lat = 0.0, lon = 0.0)
+        assertEquals("shop", generic.categoryToken())
+
+        val none = PoiInfo("X", classId = null, subclass = null, lat = 0.0, lon = 0.0)
+        assertNull(none.categoryToken())
+    }
+
+    @Test
     fun categoryGlyphFollowsTheOsmClass() {
         assertEquals("local_bar", PoiInfo("X", "bar", null, 0.0, 0.0).categoryGlyph())
         assertEquals("hotel", PoiInfo("X", "lodging", null, 0.0, 0.0).categoryGlyph())
@@ -210,5 +225,20 @@ class PoiInfoTest {
     fun coordinatesLabelRoundsToAboutAMetre() {
         val poi = PoiInfo("X", null, null, lat = 39.934123, lon = 116.442349)
         assertEquals("39.93412, 116.44235", poi.coordinatesLabel())
+    }
+
+    @Test
+    fun osmLinksPointAtTheFeatureCoordinates() {
+        // The basemap tiles carry no OSM element id, so the links target the
+        // point, rounded to the same ~1 m as the coordinate label.
+        val poi = PoiInfo("X", "bar", "bar", lat = 39.934123, lon = 116.442349)
+        assertEquals(
+            "https://www.openstreetmap.org/?mlat=39.93412&mlon=116.44235#map=19/39.93412/116.44235",
+            poi.osmUrl(),
+        )
+        assertEquals(
+            "https://www.openstreetmap.org/edit#map=19/39.93412/116.44235",
+            poi.osmEditUrl(),
+        )
     }
 }

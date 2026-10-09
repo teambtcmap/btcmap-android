@@ -51,6 +51,7 @@ import org.btcmap.sync.SyncEvent
 import org.btcmap.sync.SyncState
 import org.btcmap.ui.map.MarkerKind
 import org.btcmap.ui.map.SearchActions
+import org.btcmap.ui.map.categoryToken
 import org.btcmap.util.rethrowIfCancellation
 
 /**
@@ -262,6 +263,28 @@ internal fun MapRoute(
                 onShowAuth()
             }
         },
+        onAddPlaceFromPoi = { poi ->
+            if (services.settings.authorized) {
+                onNavigate(
+                    AppRoute.AddPlace(
+                        lat = poi.lat,
+                        lon = poi.lon,
+                        name = poi.name,
+                        category = poi.categoryToken().orEmpty(),
+                    ),
+                )
+            } else {
+                onShowAuth()
+            }
+        },
+        onAddNoteFromPoi = { poi ->
+            if (services.settings.authorized) {
+                onNavigate(AppRoute.AddNote(lat = poi.lat, lon = poi.lon, text = poi.name))
+            } else {
+                onShowAuth()
+            }
+        },
+        onOpenUrl = { platform.openUrl(it) },
         addLocationLabels = labels.addLocation,
         noteSheetLabels = labels.noteSheet,
         poiSheetLabels = labels.poiSheet,

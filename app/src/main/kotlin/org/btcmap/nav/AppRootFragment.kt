@@ -48,6 +48,8 @@ private const val ARG_EVENT_ENDS_AT = "app_event_ends_at"
 private const val ARG_LAT = "app_lat"
 private const val ARG_LON = "app_lon"
 private const val ARG_NAME = "app_name"
+private const val ARG_CATEGORY = "app_category"
+private const val ARG_NOTE_TEXT = "app_note_text"
 private const val ARG_WEBSITE = "app_website"
 private const val ARG_STARTS_AT = "app_starts_at"
 private const val ARG_ENDS_AT = "app_ends_at"
@@ -214,11 +216,14 @@ private fun AppRoute.toArgs(): Bundle = Bundle().apply {
         is AppRoute.AddPlace -> {
             putDouble(ARG_LAT, lat)
             putDouble(ARG_LON, lon)
+            putString(ARG_NAME, name)
+            putString(ARG_CATEGORY, category)
         }
 
         is AppRoute.AddNote -> {
             putDouble(ARG_LAT, lat)
             putDouble(ARG_LON, lon)
+            putString(ARG_NOTE_TEXT, text)
         }
 
         is AppRoute.AddEvent -> {
@@ -281,11 +286,14 @@ private fun routeFromArgs(args: Bundle?): AppRoute = when (args?.getString(ARG_K
     "add-place" -> AppRoute.AddPlace(
         lat = args.getDouble(ARG_LAT),
         lon = args.getDouble(ARG_LON),
+        name = args.getString(ARG_NAME).orEmpty(),
+        category = args.getString(ARG_CATEGORY).orEmpty(),
     )
 
     "add-note" -> AppRoute.AddNote(
         lat = args.getDouble(ARG_LAT),
         lon = args.getDouble(ARG_LON),
+        text = args.getString(ARG_NOTE_TEXT).orEmpty(),
     )
 
     "add-event" -> AppRoute.AddEvent(
