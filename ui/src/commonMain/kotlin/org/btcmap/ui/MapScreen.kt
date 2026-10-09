@@ -120,6 +120,8 @@ import org.maplibre.compose.map.MapEvent
 import org.maplibre.compose.map.MaplibreMap
 import org.maplibre.compose.map.StyleLoadState
 import org.maplibre.compose.map.rememberMapState
+import org.maplibre.compose.overlay.CompassButtonStyle
+import org.maplibre.compose.overlay.DisappearingCompassButton
 import org.maplibre.compose.style.BaseStyle
 import org.maplibre.compose.util.DpPadding
 import org.maplibre.spatialk.geojson.BoundingBox
@@ -945,8 +947,37 @@ fun MapScreen(
                 uiOptions = platformMapUiOptions(),
                 // The map would otherwise include MapOverlay.Default, its
                 // MapLibre logo and expanding attribution pill. The app draws
-                // its own attribution line below, as the Views map did.
-                overlay = {},
+                // its own attribution line below, as the Views map did. The
+                // compass is kept from that default overlay, drawn by itself so
+                // the logo and attribution are left out.
+                overlay = {
+                    // Both pixels are measured against the root, so their
+                    // difference is the search bar's bottom within the map: the
+                    // compass sits centred just under the search bar. It is only
+                    // drawn once the bar has been measured, so a map reopened
+                    // already rotated does not flash the compass at the top edge
+                    // for a frame.
+                    if (searchBarBottomPx > 0f) {
+                        val compassTop = with(density) {
+                            (searchBarBottomPx - viewportTopPx).toDp()
+                        } + MAP_CONTROLS_GAP
+                        DisappearingCompassButton(
+                            modifier = Modifier
+                                .align(Alignment.TopCenter)
+                                .padding(top = compassTop),
+                            style = CompassButtonStyle(
+                                containerColor = areaChipPalette.buttonBackground,
+                            ),
+                            // The compass points north, so only the bearing
+                            // defines home: a tap straightens the map without
+                            // flattening a tilt the user chose. It appears
+                            // whenever the camera is turned off north, even with
+                            // rotation disabled, since a stored bearing can
+                            // reopen the map rotated.
+                            getHomeUpdate = { CameraUpdate(bearing = 0.0) },
+                        )
+                    }
+                },
             )
             shownNote?.let { note ->
                 NoteSheet(
