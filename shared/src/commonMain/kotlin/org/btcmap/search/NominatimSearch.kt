@@ -27,6 +27,17 @@ data class NominatimPlace(
 )
 
 /**
+ * A west/south/east/north box, in degrees, sent to Nominatim as its `viewbox`
+ * parameter to focus results on the map the user is looking at.
+ */
+data class NominatimViewbox(
+    val west: Double,
+    val south: Double,
+    val east: Double,
+    val north: Double,
+)
+
+/**
  * Searches the public OpenStreetMap Nominatim service by name.
  *
  * Nominatim's usage policy allows at most one request per second, so calls are
@@ -34,6 +45,12 @@ data class NominatimPlace(
  * the search field changes, never exceeds the limit. The service only ever adds
  * to the local results, so a failure or a malformed response yields an empty
  * list rather than an error, and the caller keeps whatever it already found.
+ *
+ * [viewbox] focuses the search on an area. On its own it is only a ranking
+ * boost, which a generic term ignores in favour of globally-named features, so
+ * pass [bounded] true to restrict the results to the box: that is what turns a
+ * search for `cafe` into the cafes around the map rather than the features
+ * literally named "Cafe" anywhere in the world.
  *
  * The caller is expected to pass a client whose user agent identifies the app,
  * which the policy requires; [create] builds one.
@@ -48,7 +65,12 @@ class NominatimSearch(
     /** When the last request was issued, for pacing the next one. */
     private var lastRequest: TimeMark? = null
 
-    suspend fun search(query: String, limit: Int = DEFAULT_LIMIT): List<NominatimPlace> =
+    suspend fun search(
+        query: String,
+        limit: Int = DEFAULT_LIMIT,
+        viewbox: NominatimViewbox? = null,
+        bounded: Boolean = false,
+    ): List<NominatimPlace> =
         // The lock is held for the whole request, so requests are strictly
         // serialised and the gap between two starts is never below [minInterval].
         throttle.withLock {
@@ -65,6 +87,10 @@ class NominatimSearch(
                 // The result rows show only a name and a distance, so the
                 // address breakdown would be parsed and thrown away.
                 parameters.append("addressdetails", "0")
+                viewbox?.let {
+                    parameters.append("viewbox", "${it.west},${it.south},${it.east},${it.north}")
+                    if (bounded) parameters.append("bounded", "1")
+                }
             }.build()
 
             try {

@@ -123,6 +123,34 @@ internal fun PoiInfo.categoryLabel(): String? {
 }
 
 /**
+ * Whether the feature's name matches [query] leniently: case, spaces and
+ * punctuation are ignored and a substring on either side counts, so a Nominatim
+ * hit matches the shortened or localized label the tile carries. A
+ * comma-separated [query] also matches on any of its segments, because a
+ * Nominatim `display_name` ("Foo Bar, City, Country") reorders the name so the
+ * whole string is not a substring of the feature's own name.
+ */
+internal fun PoiInfo.matchesName(query: String): Boolean {
+    val haystacks = listOfNotNull(name, localName).map { it.matchKey() }.filter { it.isNotEmpty() }
+    if (haystacks.isEmpty()) return false
+
+    val needle = query.matchKey()
+    if (needle.isEmpty()) return false
+    if (haystacks.any { it.contains(needle) || needle.contains(it) }) return true
+
+    return query.split(',')
+        .map { it.matchKey() }
+        .filter { it.length >= MIN_MATCH_SEGMENT }
+        .any { segment -> haystacks.any { it.contains(segment) || segment.contains(it) } }
+}
+
+/** The shortest query segment that may match on its own, so a stray word does not. */
+private const val MIN_MATCH_SEGMENT = 2
+
+/** [this] reduced to its letters and digits, lowercased, for lenient comparison. */
+private fun String.matchKey(): String = filter { it.isLetterOrDigit() }.lowercase()
+
+/**
  * The feature's OSM category token to pre-fill a place submission with, e.g.
  * `cafe` or `hotel`, or null when the feature carries neither token.
  *

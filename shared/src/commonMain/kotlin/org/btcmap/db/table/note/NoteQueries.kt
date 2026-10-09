@@ -112,6 +112,15 @@ class NoteQueries(private val conn: SQLiteConnection) {
         }
     }
 
+    /** Replaces a cached note's icon with [icon]. */
+    suspend fun updateIcon(id: Long, icon: String) {
+        conn.prepare("UPDATE $TABLE SET $ICON = ?2 WHERE $ID = ?1;").use {
+            it.bindLong(1, id)
+            it.bindText(2, icon)
+            it.step()
+        }
+    }
+
     suspend fun delete(id: Long) {
         conn.prepare("DELETE FROM $TABLE WHERE $ID = ?1;").use {
             it.bindLong(1, id)

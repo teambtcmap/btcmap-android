@@ -518,6 +518,10 @@ private fun runApp() = application {
                             onEditNote = { id, text ->
                                 Notes.updateText(api, db, id, text)
                             },
+                            onEditNoteIcon = { id, icon ->
+                                Notes.updateIcon(api, db, id, icon)
+                                reloadKey++
+                            },
                             onDeleteNote = { id ->
                                 Notes.delete(api, db, id)
                                 reloadKey++

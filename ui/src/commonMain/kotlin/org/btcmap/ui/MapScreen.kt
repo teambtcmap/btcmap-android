@@ -47,6 +47,7 @@ import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.longOrNull
 import org.btcmap.comment.CommentsAdapterItem
@@ -91,6 +92,7 @@ import org.btcmap.ui.map.NoteLayers
 import org.btcmap.ui.map.noteMarkerImageName
 import org.btcmap.ui.map.POI_LAYER_IDS
 import org.btcmap.ui.map.PoiInfo
+import org.btcmap.ui.map.matchesName
 import org.btcmap.ui.map.toPoiInfo
 import org.btcmap.ui.map.SearchActions
 import org.btcmap.ui.map.SearchOverlay
@@ -117,6 +119,7 @@ import org.maplibre.compose.location.LocationTrackingEffect
 import org.maplibre.compose.location.rememberLocationState
 import org.maplibre.compose.map.LocalMapState
 import org.maplibre.compose.map.MapEvent
+import org.maplibre.compose.map.MapState
 import org.maplibre.compose.map.MaplibreMap
 import org.maplibre.compose.map.StyleLoadState
 import org.maplibre.compose.map.rememberMapState
@@ -212,6 +215,9 @@ fun MapScreen(
         editTitle = "Edit note",
         editFailed = "Couldn't save the note",
         save = "Save",
+        changeIcon = "Change icon",
+        iconSearchHint = "Search icons",
+        iconFailed = "Couldn't change the icon",
         delete = "Delete",
         deleteConfirmTitle = "Delete this note?",
         deleteConfirmMessage = "This note will be permanently removed.",
@@ -231,6 +237,11 @@ fun MapScreen(
      * the sheet's edit action, as when the host cannot edit notes.
      */
     onEditNote: (suspend (Long, String) -> Unit)? = null,
+    /**
+     * Changes the icon of the note the sheet is showing, given its id. Null
+     * makes the sheet's header glyph inert, as when the host cannot edit notes.
+     */
+    onEditNoteIcon: (suspend (Long, String) -> Unit)? = null,
     /**
      * Deletes the note the sheet is showing, given its id. Null hides the sheet's
      * delete action, as when the host cannot delete notes.
@@ -778,11 +789,30 @@ fun MapScreen(
             }
 
             // An OpenStreetMap hit has no row behind it either, so the map
-            // simply moves to its coordinates.
+            // simply moves to its coordinates. The user picked this feature by
+            // name, so once the destination's tiles have rendered, the basemap
+            // POI matching that name opens its own sheet: otherwise a hotel
+            // would need a second tap on the icon the map just drew.
             is SearchAdapterItem.Nominatim -> scope.launch {
                 state.animateCamera(
-                    CameraUpdate(target = Position(result.lon, result.lat), zoom = OPEN_ZOOM),
+                    CameraUpdate(target = Position(result.lon, result.lat), zoom = OSM_RESULT_ZOOM),
                 )
+                val language = currentLanguage()
+                var poi = state.poiMatchingName(result.lat, result.lon, result.name, language)
+                if (poi == null) {
+                    // The POIs render a frame or two after the camera stops; wait
+                    // for the map to go idle, then look again. (The timeout covers
+                    // an idle that fired before this subscription.)
+                    withTimeoutOrNull(POI_LOOKUP_TIMEOUT_MS) {
+                        state.events.filterIsInstance<MapEvent.Idle>().first()
+                    }
+                    poi = state.poiMatchingName(result.lat, result.lon, result.name, language)
+                }
+                if (poi != null) {
+                    selectedPlace = null
+                    currentOnPlaceDismissed()
+                    shownPoi = poi
+                }
             }
 
             // A search result frames the area on the map, as the Views map did;
@@ -994,6 +1024,15 @@ fun MapScreen(
                             // carry the edit into it rather than leaving the old
                             // body on screen.
                             shownNote = note.copy(text = text)
+                        }
+                    },
+                    onEditIcon = onEditNoteIcon?.let { edit ->
+                        { icon ->
+                            edit(note.id, icon)
+                            // The map draws one pin image per icon, so an icon
+                            // change also has to reach the selection the sheet
+                            // reads (and the host's reload refreshes the pin).
+                            shownNote = note.copy(icon = icon)
                         }
                     },
                     onDelete = onDeleteNote?.let { delete -> { delete(note.id) } },
@@ -1254,10 +1293,46 @@ private val MAP_CONTROLS_BOTTOM = ATTRIBUTION_BOTTOM + 20.dp
 private const val OPEN_ZOOM = 16.0
 
 /**
+ * The zoom an OpenStreetMap search hit is shown at: closer than [OPEN_ZOOM],
+ * because the user picked a specific feature from the results list.
+ */
+private const val OSM_RESULT_ZOOM = 18.0
+
+/**
  * How far around a map tap a basemap POI is looked for, so a touch need not land
  * exactly on the icon the style draws.
  */
 private val POI_HIT_PADDING = 16.dp
+
+/**
+ * How long to wait for the destination's POIs to render after an OpenStreetMap
+ * search jump before giving up on auto-opening one.
+ */
+private const val POI_LOOKUP_TIMEOUT_MS = 1_500L
+
+/**
+ * Finds the basemap POI drawn at (or within [POI_HIT_PADDING] of) [lat]/[lon]
+ * whose name matches [name], or null. Used after an OpenStreetMap search jump,
+ * so the feature the user picked by name opens its own sheet without a second
+ * tap on the icon the map just drew.
+ */
+private suspend fun MapState.poiMatchingName(
+    lat: Double,
+    lon: Double,
+    name: String,
+    language: String,
+): PoiInfo? {
+    val point = screenLocationFromPosition(Position(lon, lat)) ?: return null
+    val hitBox = DpRect(
+        point.x - POI_HIT_PADDING,
+        point.y - POI_HIT_PADDING,
+        point.x + POI_HIT_PADDING,
+        point.y + POI_HIT_PADDING,
+    )
+    return queryRenderedFeatures(rect = hitBox, layerIds = POI_LAYER_IDS)
+        .mapNotNull { it.toPoiInfo(language) }
+        .firstOrNull { it.matchesName(name) }
+}
 
 /**
  * The zoom at which markers stop clustering: the map sources cap clustering at

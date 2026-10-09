@@ -5,6 +5,7 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.performTextReplacement
 import androidx.compose.ui.test.runComposeUiTest
 import kotlin.test.Test
@@ -28,6 +29,9 @@ class NoteSheetTest {
         editTitle = "Edit note",
         editFailed = "Couldn't save the note",
         save = "Save",
+        changeIcon = "Change icon",
+        iconSearchHint = "Search icons",
+        iconFailed = "Couldn't change the icon",
         delete = "Delete",
         deleteConfirmTitle = "Delete this note?",
         deleteConfirmMessage = "This note will be permanently removed.",
@@ -175,5 +179,52 @@ class NoteSheetTest {
         }
         assertEquals(1, deleted)
         assertEquals(1, dismissed)
+    }
+
+    @Test
+    fun withoutEditIconCallback_theHeaderGlyphIsInert() {
+        runComposeUiTest {
+            setContent {
+                AppTheme {
+                    NoteSheet(
+                        text = "ATM is inside",
+                        icon = "local_atm",
+                        public = true,
+                        createdAt = Instant.parse("2026-01-02T10:00:00Z"),
+                        labels = labels,
+                        onDismiss = {},
+                        onEditIcon = null,
+                    )
+                }
+            }
+            onNodeWithTag(NOTE_CHANGE_ICON_TAG).assertDoesNotExist()
+        }
+    }
+
+    @Test
+    fun changeIcon_savesTheNewIcon() {
+        var saved: String? = null
+        runComposeUiTest {
+            setContent {
+                AppTheme {
+                    NoteSheet(
+                        text = "ATM is inside",
+                        icon = "local_atm",
+                        public = true,
+                        createdAt = Instant.parse("2026-01-02T10:00:00Z"),
+                        labels = labels,
+                        onDismiss = {},
+                        onEditIcon = { saved = it },
+                    )
+                }
+            }
+            onNodeWithTag(NOTE_CHANGE_ICON_TAG).performClick()
+            onNodeWithText("Change icon").assertIsDisplayed()
+            onNodeWithTag(NOTE_ICON_SEARCH_TAG).performTextInput("star")
+            onNodeWithTag(NOTE_ICON_TAG_PREFIX + "star").performClick()
+            onNodeWithTag(NOTE_ICON_SAVE_TAG).performClick()
+            waitForIdle()
+        }
+        assertEquals("star", saved)
     }
 }

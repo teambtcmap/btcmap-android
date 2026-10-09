@@ -15,6 +15,8 @@ import org.btcmap.db.table.event.Event
 import org.btcmap.db.table.place.Place
 import org.btcmap.util.toUrl
 import org.btcmap.map.EVENT_ICON
+import org.btcmap.search.NominatimPlace
+import org.btcmap.search.NominatimViewbox
 import org.btcmap.search.SearchAdapterItem
 
 /**
@@ -173,6 +175,63 @@ class MapSearchTest {
     fun name_isNotACoordinate() {
         assertNull(parseCoordinates("bitcoin cafe"))
         assertNull(parseCoordinates("Holiday Inn Express"))
+    }
+
+    @Test
+    fun nominatimResults_ordersNearestFirst() = runBlocking<Unit> {
+        val box = NominatimViewbox(1.0, 2.0, 3.0, 4.0)
+        val calls = mutableListOf<Pair<NominatimViewbox?, Boolean>>()
+        val results = nominatimResults(
+            search = { viewbox, bounded ->
+                calls += viewbox to bounded
+                listOf(
+                    NominatimPlace(48.90, 2.3522, "Far"),
+                    NominatimPlace(48.8567, 2.3522, "Near"),
+                )
+            },
+            referenceLat = 48.8566,
+            referenceLon = 2.3522,
+            formatDistance = { "$it m" },
+            viewbox = box,
+        )
+
+        // A non-empty bounded result is used as-is, and sorted nearest first.
+        assertEquals(1, calls.size)
+        assertEquals(box, calls[0].first)
+        assertTrue(calls[0].second)
+        assertEquals(listOf("Near", "Far"), results.map { it.name })
+    }
+
+    @Test
+    fun nominatimResults_fallsBackToAGlobalSearchWhenTheBoundedOneFindsNothing() = runBlocking<Unit> {
+        val box = NominatimViewbox(1.0, 2.0, 3.0, 4.0)
+        val boundedValues = mutableListOf<Boolean>()
+        val results = nominatimResults(
+            search = { _, bounded ->
+                boundedValues += bounded
+                if (bounded) emptyList<NominatimPlace>() else listOf(NominatimPlace(39.94, 116.37, "孔乙己酒家"))
+            },
+            referenceLat = 39.9042,
+            referenceLon = 116.4074,
+            formatDistance = { "$it m" },
+            viewbox = box,
+        )
+
+        assertEquals(listOf(true, false), boundedValues)
+        assertEquals(listOf("孔乙己酒家"), results.map { it.name })
+    }
+
+    @Test
+    fun nominatimResults_swallowsFailures() = runBlocking<Unit> {
+        val results = nominatimResults(
+            search = { _, _ -> throw IllegalStateException("boom") },
+            referenceLat = 0.0,
+            referenceLon = 0.0,
+            formatDistance = { it.toString() },
+            viewbox = null,
+        )
+
+        assertTrue(results.isEmpty())
     }
 
     private fun search(db: Database, query: String) = search(

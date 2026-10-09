@@ -291,6 +291,12 @@ internal fun MapRoute(
         onEditNote = { id, text ->
             Notes.updateText(services.api, services.db, id, text)
         },
+        onEditNoteIcon = { id, icon ->
+            Notes.updateIcon(services.api, services.db, id, icon)
+            // The map draws one pin image per icon, so the notes (and their
+            // icons) have to be reloaded for the new pin to appear.
+            reloadKey++
+        },
         onDeleteNote = { id ->
             Notes.delete(services.api, services.db, id)
             reloadKey++

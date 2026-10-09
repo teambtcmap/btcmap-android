@@ -149,6 +149,19 @@ class NotesTest {
     }
 
     @Test
+    fun updateIcon_updatesTheServerAndTheCache() = runTest {
+        val db = org.btcmap.db.testDatabase()
+        db.note.insert(listOf(cached(id = 7, icon = "notes")))
+
+        enqueue(noteJson(id = 7, text = "cached", icon = "star"))
+
+        Notes.updateIcon(api(), db, id = 7L, icon = "star")
+
+        Assert.assertEquals("star", db.note.selectAll().single().icon)
+        Assert.assertEquals(1, serverRule.server.requestCount)
+    }
+
+    @Test
     fun delete_removesTheCachedNote() = runTest {
         val db = org.btcmap.db.testDatabase()
         db.note.insert(listOf(cached(id = 7)))

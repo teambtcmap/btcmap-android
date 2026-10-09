@@ -95,6 +95,20 @@ suspend fun Api.updateNoteText(id: Long, text: String): Note {
 }
 
 /**
+ * Changes a note's icon (`PATCH /v4/notes/{id}`). Only the author may update
+ * their note; the response is the updated note.
+ */
+suspend fun Api.updateNoteIcon(id: Long, icon: String): Note {
+    val url = buildUrl("v4", "notes", "$id")
+
+    val req = buildJsonObject {
+        put("icon", icon)
+    }
+
+    return call(HttpMethod.Patch, url, body = req) { body -> body.toJsonObject().toNote() }
+}
+
+/**
  * Soft-deletes the author's own note (`DELETE /v4/notes/{id}`): the row is kept
  * with `deleted_at` set so owner clients can sync the removal, and it never
  * appears in search again. Only the author may delete their note.

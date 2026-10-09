@@ -6,6 +6,7 @@ import org.btcmap.api.Api
 import org.btcmap.api.deleteNote
 import org.btcmap.api.getMyNotes
 import org.btcmap.api.updateNote
+import org.btcmap.api.updateNoteIcon
 import org.btcmap.api.updateNoteText
 import org.btcmap.db.Database
 import org.btcmap.db.table.note.Note
@@ -63,6 +64,12 @@ object Notes {
     suspend fun updateText(api: Api, db: Database, id: Long, text: String) {
         api.updateNoteText(id, text)
         withContext(ioDispatcher) { db.note.updateText(id, text) }
+    }
+
+    /** Changes a cached note's icon, updating the server and the cache. */
+    suspend fun updateIcon(api: Api, db: Database, id: Long, icon: String) {
+        api.updateNoteIcon(id, icon)
+        withContext(ioDispatcher) { db.note.updateIcon(id, icon) }
     }
 
     /** Deletes a cached note, removing it from the server and the cache. */

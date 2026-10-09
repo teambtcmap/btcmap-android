@@ -241,4 +241,43 @@ class PoiInfoTest {
             poi.osmEditUrl(),
         )
     }
+
+    @Test
+    fun matchesName_ignoresCaseSpacesAndPunctuation() {
+        val poi = PoiInfo("Harry's Bar", null, null, 0.0, 0.0)
+        assertEquals(true, poi.matchesName("harrys bar"))
+        assertEquals(true, poi.matchesName("HARRY'S"))
+        assertEquals(true, poi.matchesName("harry"))
+    }
+
+    @Test
+    fun matchesName_matchesTheLocalNameWhenTheLabelIsLatin() {
+        val poi = PoiInfo(
+            name = "Holiday Inn Express",
+            classId = "lodging",
+            subclass = "hotel",
+            lat = 0.0,
+            lon = 0.0,
+            localName = "东直门智选假日酒店",
+        )
+        assertEquals(true, poi.matchesName("东直门智选假日酒店"))
+        assertEquals(true, poi.matchesName("holiday inn"))
+    }
+
+    @Test
+    fun matchesName_matchesAnySegmentOfACommaSeparatedDisplayName() {
+        // Nominatim falls back to `display_name`, which reorders the feature's
+        // name ("Name, District, City"), so the whole string is not a substring
+        // of the feature's own name.
+        val poi = PoiInfo("东直门智选假日酒店", "lodging", "hotel", 0.0, 0.0)
+        assertEquals(true, poi.matchesName("智选假日酒店, 东直门, 北京市, 中国"))
+    }
+
+    @Test
+    fun matchesName_rejectsAnUnrelatedOrEmptyQuery() {
+        val poi = PoiInfo("Harry's Bar", null, null, 0.0, 0.0)
+        assertEquals(false, poi.matchesName("Beijing Hotel"))
+        assertEquals(false, poi.matchesName(""))
+        assertEquals(false, poi.matchesName("   "))
+    }
 }

@@ -92,6 +92,19 @@ class NoteApiTest : ApiTestBase() {
     }
 
     @Test
+    fun updateNoteIcon_patchesTheIcon() = runTest {
+        enqueueJson(noteJson(icon = "star"))
+
+        val note = api().updateNoteIcon(7L, icon = "star")
+
+        val request = takeRequest()
+        Assert.assertEquals("PATCH", request.method)
+        Assert.assertEquals("/v4/notes/7", request.url.encodedPath)
+        Assert.assertEquals("""{"icon":"star"}""", request.jsonBody())
+        Assert.assertEquals("star", note.icon)
+    }
+
+    @Test
     fun deleteNote_deletesById() = runTest {
         enqueueJson(noteJson())
 

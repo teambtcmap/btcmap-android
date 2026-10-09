@@ -79,6 +79,48 @@ class NominatimSearchTest {
     }
 
     @Test
+    fun search_sendsTheViewboxWhenGiven() = runTest {
+        enqueue("[]")
+
+        searcher().search(
+            "q",
+            viewbox = NominatimViewbox(west = 116.3, south = 39.8, east = 116.5, north = 40.0),
+        )
+
+        val request = serverRule.server.takeRequest()
+        Assert.assertEquals("116.3,39.8,116.5,40.0", request.url.queryParameter("viewbox"))
+        // A bare viewbox is a soft boost; it must not bound the search unless asked.
+        Assert.assertNull(request.url.queryParameter("bounded"))
+    }
+
+    @Test
+    fun search_boundsTheViewboxWhenBounded() = runTest {
+        enqueue("[]")
+
+        searcher().search(
+            "q",
+            viewbox = NominatimViewbox(west = 116.3, south = 39.8, east = 116.5, north = 40.0),
+            bounded = true,
+        )
+
+        val request = serverRule.server.takeRequest()
+        Assert.assertEquals("116.3,39.8,116.5,40.0", request.url.queryParameter("viewbox"))
+        Assert.assertEquals("1", request.url.queryParameter("bounded"))
+    }
+
+    @Test
+    fun search_omitsTheViewboxAndBoundedWhenNeitherApplies() = runTest {
+        enqueue("[]")
+
+        // bounded only makes sense with a box, so it is not sent on its own.
+        searcher().search("q", bounded = true)
+
+        val request = serverRule.server.takeRequest()
+        Assert.assertNull(request.url.queryParameter("viewbox"))
+        Assert.assertNull(request.url.queryParameter("bounded"))
+    }
+
+    @Test
     fun search_returnsEmptyOnAMalformedBody() = runTest {
         enqueue("not json at all")
 

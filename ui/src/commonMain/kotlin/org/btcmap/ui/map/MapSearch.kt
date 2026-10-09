@@ -18,7 +18,9 @@ import org.btcmap.i18n.getLocalizedName
 import org.btcmap.i18n.getSearchableNames
 import org.btcmap.map.EVENT_ICON
 import org.btcmap.place.isBoosted
+import org.btcmap.search.NominatimPlace
 import org.btcmap.search.NominatimSearch
+import org.btcmap.search.NominatimViewbox
 import org.btcmap.search.SearchAdapterItem
 import org.btcmap.search.nameMatchRank
 import org.btcmap.util.isUpcoming
@@ -59,7 +61,11 @@ data class SearchResults(
  * When [nominatimSearch] is given, the same query is also sent to OpenStreetMap
  * through Nominatim and shown as a second group under the local hits. That call
  * is best-effort and paced by the searcher, so it never blocks or fails the
- * local results, which are set as soon as the cache has answered.
+ * local results, which are set as soon as the cache has answered. The request is
+ * restricted to the visible map and its rows sorted by distance, so the group
+ * holds the OpenStreetMap features around the map, nearest first; when nothing
+ * is found in view it falls back to a global search, so a named feature just
+ * outside the viewport is still offered.
  */
 @Composable
 fun rememberSearchResults(
@@ -110,12 +116,27 @@ fun rememberSearchResults(
         // The local results are already shown; the OpenStreetMap group loads
         // into the same panel once its paced request completes.
         results = SearchResults(items = items, active = true, nominatimLoading = true)
+        // Restrict the remote search to what the user can see. A bare viewbox is
+        // only a ranking boost, which a generic term ignores in favour of
+        // globally-named features, so the request is bounded to turn "cafe" into
+        // the cafes around the map rather than any feature named "Cafe".
+        val viewbox = state.viewport?.visibleBounds?.let { visible ->
+            val bounds = ViewportBounds.expand(visible, scaleFactor = 1.0)
+            NominatimViewbox(
+                west = bounds.west,
+                south = bounds.south,
+                east = bounds.east,
+                north = bounds.north,
+            )
+        }
         val nominatim = nominatimResults(
-            searcher = nominatimSearch,
-            query = trimmed,
+            search = { box, bounded ->
+                nominatimSearch.search(trimmed, viewbox = box, bounded = bounded)
+            },
             referenceLat = referenceLat,
             referenceLon = referenceLon,
             formatDistance = latestFormatDistance,
+            viewbox = viewbox,
         )
         results = SearchResults(items = items, nominatim = nominatim, active = true)
     }
@@ -124,27 +145,38 @@ fun rememberSearchResults(
 }
 
 /**
- * Runs [searcher] for [query] and maps its hits to search rows, measuring each
- * one from the map centre. The remote service only ever adds to the local
- * results, so any failure is swallowed and an empty group is returned.
+ * Runs [search] and maps its hits to search rows, measuring each one from the
+ * map centre and ordering them nearest first. [search] is called bounded to the
+ * viewbox first; when that finds nothing the view is empty of matches, so it is
+ * called again with the viewbox only as a soft bias, so a named feature just
+ * outside the viewport (or elsewhere) is still offered. The remote service only
+ * ever adds to the local results, so any failure is swallowed and an empty group
+ * is returned.
  */
-private suspend fun nominatimResults(
-    searcher: NominatimSearch,
-    query: String,
+internal suspend fun nominatimResults(
+    search: suspend (viewbox: NominatimViewbox?, bounded: Boolean) -> List<NominatimPlace>,
     referenceLat: Double,
     referenceLon: Double,
     formatDistance: (Double) -> String,
+    viewbox: NominatimViewbox?,
 ): List<SearchAdapterItem> = try {
-    searcher.search(query).map { place ->
-        val distance = distanceMeters(referenceLat, referenceLon, place.lat, place.lon)
-        SearchAdapterItem.Nominatim(
-            lat = place.lat,
-            lon = place.lon,
-            icon = NOMINATIM_ICON,
-            name = place.name,
-            distanceToUser = formatDistance(distance),
-        )
-    }
+    val local = search(viewbox, viewbox != null)
+    val places = if (local.isEmpty() && viewbox != null) search(viewbox, false) else local
+
+    places
+        .map { place -> place to distanceMeters(referenceLat, referenceLon, place.lat, place.lon) }
+        // Nominatim's order is not by distance, so sort explicitly to guarantee
+        // nearest-first, matching the local group's proximity order.
+        .sortedBy { (_, distance) -> distance }
+        .map { (place, distance) ->
+            SearchAdapterItem.Nominatim(
+                lat = place.lat,
+                lon = place.lon,
+                icon = NOMINATIM_ICON,
+                name = place.name,
+                distanceToUser = formatDistance(distance),
+            )
+        }
 } catch (t: Throwable) {
     t.rethrowIfCancellation()
     emptyList()

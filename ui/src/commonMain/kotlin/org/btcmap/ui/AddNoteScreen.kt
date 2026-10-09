@@ -1,7 +1,5 @@
 package org.btcmap.ui
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -11,11 +9,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
@@ -289,18 +283,6 @@ fun AddNoteForm(
     var text by rememberSaveable { mutableStateOf(initialText) }
     var public by rememberSaveable { mutableStateOf(false) }
     var attempted by rememberSaveable { mutableStateOf(false) }
-    var iconQuery by rememberSaveable { mutableStateOf("") }
-
-    // The icons matching what the user typed, searched across every glyph the
-    // bundled font defines. Nothing is offered until a query narrows the set.
-    val iconMatches = remember(iconQuery) {
-        val query = iconQuery.trim()
-        if (query.isEmpty()) {
-            emptyList()
-        } else {
-            MATERIAL_SYMBOL_NAMES.filter { it.contains(query, ignoreCase = true) }
-        }
-    }
 
     val focusManager = LocalFocusManager.current
     val blank = attempted && text.isBlank()
@@ -355,39 +337,15 @@ fun AddNoteForm(
                 text = labels.icon,
                 style = MaterialTheme.typography.labelLarge,
             )
-            OutlinedTextField(
-                value = iconQuery,
-                onValueChange = { iconQuery = it },
-                placeholder = { Text(labels.iconSearchHint) },
-                singleLine = true,
-                leadingIcon = { MaterialSymbol(glyph = "search", contentDescription = null) },
+            NoteIconPicker(
+                selectedIcon = icon,
+                onSelectIcon = onIconChange,
+                searchHint = labels.iconSearchHint,
                 enabled = !busy,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 8.dp)
-                    .testTag(ADD_NOTE_ICON_SEARCH_TAG),
+                searchTag = ADD_NOTE_ICON_SEARCH_TAG,
+                iconTagPrefix = ADD_NOTE_ICON_TAG_PREFIX,
+                modifier = Modifier.padding(top = 8.dp),
             )
-            if (iconMatches.isNotEmpty()) {
-                LazyVerticalGrid(
-                    columns = GridCells.Adaptive(minSize = ICON_CHOICE_SIZE),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 8.dp)
-                        .height(ICON_RESULTS_HEIGHT),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
-                ) {
-                    items(iconMatches, key = { it }) { option ->
-                        IconChoice(
-                            icon = option,
-                            selected = icon == option,
-                            enabled = !busy,
-                            onClick = { onIconChange(option) },
-                            modifier = Modifier.testTag(ADD_NOTE_ICON_TAG_PREFIX + option),
-                        )
-                    }
-                }
-            }
         }
         // A two-segment control: the whole segment is the target, and the chosen
         // visibility is explained in the caption below.
@@ -478,50 +436,6 @@ private fun AddNoteSubmitted(
         Button(onClick = onBack, modifier = Modifier.padding(top = 24.dp)) {
             Text(labels.backToMap)
         }
-    }
-}
-
-/** The diameter of one icon choice in the add-note search results. */
-private val ICON_CHOICE_SIZE = 48.dp
-
-/** How tall the icon search results scroll before giving way to the form. */
-private val ICON_RESULTS_HEIGHT = 200.dp
-
-/**
- * One icon in the add-note search results: a round, tappable glyph that is
- * tinted with the secondary container while it is the chosen one.
- */
-@Composable
-private fun IconChoice(
-    icon: String,
-    selected: Boolean,
-    enabled: Boolean,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    val background = if (selected) {
-        MaterialTheme.colorScheme.secondaryContainer
-    } else {
-        MaterialTheme.colorScheme.surfaceVariant
-    }
-    val content = if (selected) {
-        MaterialTheme.colorScheme.onSecondaryContainer
-    } else {
-        MaterialTheme.colorScheme.onSurfaceVariant
-    }
-    Box(
-        contentAlignment = Alignment.Center,
-        modifier = modifier
-            .size(ICON_CHOICE_SIZE)
-            .clip(CircleShape)
-            .background(background)
-            .clickable(enabled = enabled, onClick = onClick),
-    ) {
-        MaterialSymbol(
-            glyph = icon,
-            contentDescription = icon,
-            tint = content,
-        )
     }
 }
 
