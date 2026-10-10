@@ -5,7 +5,7 @@
 agp = "9.4.1"
 # This project is Kotlin-only
 # https://github.com/JetBrains/kotlin/releases
-kotlin = "2.4.20"
+kotlin = "2.4.21"
 # Compose Multiplatform
 # https://github.com/JetBrains/compose-multiplatform/releases
 compose-plugin = "1.12.1"
@@ -28,10 +28,10 @@ androidx-activity = "1.13.0"
 androidx-appcompat = "1.8.0"
 # Common Kotlin extensions for platform APIs
 # https://developer.android.com/jetpack/androidx/releases/core
-androidx-core = "1.19.0"
+androidx-core = "1.19.1"
 # Enables simplified fragment transactions
 # https://developer.android.com/jetpack/androidx/releases/fragment
-androidx-fragment = "1.9.0"
+androidx-fragment = "1.9.1"
 # Lifecycle-aware components and coroutine scopes
 # https://developer.android.com/jetpack/androidx/releases/lifecycle
 androidx-lifecycle = "2.11.0"
@@ -73,7 +73,7 @@ atomicfu = "0.33.0"
 maplibre-compose = "0.20.0"
 # QR encoding for Lightning invoices, shared by every host.
 # https://github.com/zxing/zxing/releases
-zxing = "3.5.0"
+zxing = "3.5.4"
 # Pinyin for Han characters, drawn as ruby over a POI's Chinese name (sheet
 # only). jpinyin is pure Java with no runtime dependencies, so it serves both the
 # Android and JVM hosts. (TinyPinyin is not on Maven Central.)
