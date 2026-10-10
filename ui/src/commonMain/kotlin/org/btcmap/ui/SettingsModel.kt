@@ -29,6 +29,8 @@ data class SettingsStrings(
     val dbStatsSecondary: String,
     val imageStats: String,
     val imageStatsSecondary: String,
+    val manageUsers: String,
+    val manageUsersSecondary: String,
     val manageAreas: String,
     val manageAreasSecondary: String,
     val managePlaceImages: String,
@@ -50,9 +52,9 @@ data class SettingsStrings(
  * cached user, which is read off the main thread.
  *
  * [includeImageStats] is false on the desktop, which has no image-cache
- * telemetry to show. [includeManageAreas] and [includeManagePlaceImages] are set
- * by the page from the cached user's roles; the shared "Admin" header is added
- * only when at least one of their rows is.
+ * telemetry to show. [includeManageUsers], [includeManageAreas] and
+ * [includeManagePlaceImages] are set by the page from the cached user's roles;
+ * the shared "Admin" header is added only when at least one of their rows is.
  */
 fun settingsItems(
     strings: SettingsStrings,
@@ -60,6 +62,7 @@ fun settingsItems(
     mapRotationEnabled: Boolean,
     mapTiltEnabled: Boolean,
     includeImageStats: Boolean = true,
+    includeManageUsers: Boolean = false,
     includeManageAreas: Boolean = false,
     includeManagePlaceImages: Boolean = false,
 ): List<SettingsItem> = buildList {
@@ -151,8 +154,18 @@ fun settingsItems(
             )
         )
     }
-    if (includeManageAreas || includeManagePlaceImages) {
+    if (includeManageUsers || includeManageAreas || includeManagePlaceImages) {
         add(SettingsItem.Header("headerAdmin", strings.sectionAdmin))
+        if (includeManageUsers) {
+            add(
+                SettingsItem.Action(
+                    "manageUsers",
+                    strings.manageUsers,
+                    strings.manageUsersSecondary,
+                    icon = "manage_accounts",
+                )
+            )
+        }
         if (includeManageAreas) {
             add(
                 SettingsItem.Action(

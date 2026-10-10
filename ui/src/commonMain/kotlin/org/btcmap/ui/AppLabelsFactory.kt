@@ -100,6 +100,7 @@ fun appLabels(
         submit = strings["submit_place"],
         submitted = strings["place_submitted"],
         backToMap = strings["back_to_map"],
+        error = errorDialogLabels(strings),
     ),
     addEvent = AddEventLabels(
         title = strings["add_event_title"],
@@ -119,6 +120,7 @@ fun appLabels(
         backToMap = strings["back_to_map"],
         ok = strings["ok"],
         cancel = strings["cancel"],
+        error = errorDialogLabels(strings),
     ),
     addNote = AddNoteLabels(
         title = strings["add_note_title"],
@@ -136,6 +138,7 @@ fun appLabels(
         submit = strings["submit_note"],
         submitted = strings["note_submitted"],
         backToMap = strings["back_to_map"],
+        error = errorDialogLabels(strings),
     ),
     report = ReportPlaceLabels(
         intro = strings["verify_or_report_description"],
@@ -276,6 +279,8 @@ fun appLabels(
         dbStatsSecondary = strings["database_stats_secondary"],
         imageStats = strings["image_stats"],
         imageStatsSecondary = strings["image_stats_secondary"],
+        manageUsers = strings["manage_users"],
+        manageUsersSecondary = strings["manage_users_secondary"],
         manageAreas = strings["manage_areas"],
         manageAreasSecondary = strings["manage_areas_secondary"],
         managePlaceImages = strings["manage_place_images"],
@@ -290,6 +295,16 @@ fun appLabels(
         mapStyleDialogTitle = strings["map_style"],
         verifiedFilterDialogTitle = strings["verified_filter"],
         close = strings["close"],
+    ),
+    manageUsersTitle = strings["manage_users"],
+    manageUsers = ManageUsersLabels(
+        search = strings["manage_users_search"],
+        clear = strings["manage_users_clear"],
+        prompt = strings["manage_users_prompt"],
+        noMatches = strings["manage_users_no_matches"],
+        failed = strings["manage_users_failed"],
+        retry = strings["retry"],
+        created = { strings.format("manage_users_created", formatFeedDate(it)) },
     ),
     manageAreasTitle = strings["manage_areas"],
     manageAreas = ManageAreasLabels(
@@ -319,6 +334,11 @@ fun appLabels(
             cancel = strings["cancel"],
         ),
     ),
+    editRoles = strings["edit_roles"],
+    roleName = { role -> strings[roleNameKey(role)] },
+    editGeofence = strings["edit_geofence"],
+    geofenceSearch = strings["geofence_search"],
+    geofenceNoMatches = strings["geofence_no_matches"],
     verifyArea = strings["btn_verify"],
     editName = strings["edit_name"],
     nameField = strings["name"],
@@ -438,6 +458,20 @@ private fun invoiceLabels(strings: Strings): InvoicePaymentSectionLabels =
         discard = strings["start_over"],
         cancel = strings["cancel"],
     )
+
+/** The strings shared by every failure dialog. */
+private fun errorDialogLabels(strings: Strings): ErrorDialogLabels =
+    ErrorDialogLabels(title = strings["error"], ok = strings["ok"])
+
+/** The string key for each user role, falling back to the id itself. */
+private fun roleNameKey(role: String): String = when (role) {
+    "user" -> "role_user"
+    "event_manager" -> "role_event_manager"
+    "area_manager" -> "role_area_manager"
+    "admin" -> "role_admin"
+    "root" -> "role_root"
+    else -> role
+}
 
 /** The string key for each shared boost plan. */
 private fun BoostPlan.labelKey(): String = when (this) {

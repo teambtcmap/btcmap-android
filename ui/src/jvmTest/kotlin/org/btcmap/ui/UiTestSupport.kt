@@ -91,6 +91,8 @@ internal val TEST_SETTINGS_PAGE_LABELS = SettingsPageLabels(
     dbStatsSecondary = "Database metadata and table management",
     imageStats = "Image cache",
     imageStatsSecondary = "Memory and disk caches metadata plus load stats",
+    manageUsers = "Manage users",
+    manageUsersSecondary = "Look up accounts by name",
     manageAreas = "Manage areas",
     manageAreasSecondary = "View and edit area data",
     managePlaceImages = "Manage place images",
@@ -171,6 +173,7 @@ internal val TEST_ADD_NOTE_LABELS = AddNoteLabels(
     submit = "Add note",
     submitted = "Note added",
     backToMap = "Back to the map",
+    error = ErrorDialogLabels(title = "Error", ok = "OK"),
 )
 
 internal val TEST_EVENT_REVIEW_LABELS = EventReviewLabels(

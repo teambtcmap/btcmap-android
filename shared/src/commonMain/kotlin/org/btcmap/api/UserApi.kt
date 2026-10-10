@@ -2,10 +2,14 @@ package org.btcmap.api
 
 import io.ktor.http.HttpMethod
 import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.buildJsonArray
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
+import kotlinx.serialization.json.long
 import kotlinx.serialization.json.put
+import org.btcmap.util.toJsonArray
 import org.btcmap.util.toJsonObject
 
 data class User(
@@ -14,6 +18,16 @@ data class User(
     val roles: List<String>,
     val savedPlaces: List<SavedItem>,
     val savedAreas: List<SavedItem>,
+)
+
+/** One user returned by the admin/root user search. */
+data class UserSearchResult(
+    val id: Long,
+    val name: String,
+    val roles: List<String>,
+    val createdAt: String,
+    val geofence: List<Long>,
+    val npub: String?,
 )
 
 data class CreateTokenResponse(
@@ -38,6 +52,50 @@ suspend fun Api.getUser(): User {
     val url = buildUrl("v4", "users", "me")
 
     return call(HttpMethod.Get, url) { body -> body.toJsonObject().toUser() }
+}
+
+/**
+ * Searches users by a case-insensitive substring of their name, ordered by
+ * name. Restricted to `admin` and `root` users; the server rejects anyone else
+ * with 403. An empty [query] lists users up to [limit]; soft-deleted users are
+ * excluded and `%`/`_` in [query] are matched literally.
+ */
+suspend fun Api.searchUsers(query: String, limit: Int = 100): List<UserSearchResult> {
+    val url = buildUrl("v4", "users") {
+        parameters.append("query", query)
+        parameters.append("limit", "$limit")
+    }
+
+    return call(HttpMethod.Get, url) { body ->
+        body.toJsonArray().map { it.toUserSearchResult() }
+    }
+}
+
+/**
+ * Partially updates a user (`PATCH /v4/users/{id}`): a replacement role set
+ * and/or geofence, leaving an omitted field untouched. Restricted to admins and
+ * roots; the server enforces the exact policy and rejects anything else with
+ * 403. Returns the updated user.
+ */
+suspend fun Api.updateUser(
+    userId: Long,
+    roles: List<String>? = null,
+    geofence: List<Long>? = null,
+): UserSearchResult {
+    val url = buildUrl("v4", "users", "$userId")
+
+    val req = buildJsonObject {
+        roles?.let { list ->
+            put("roles", buildJsonArray { list.forEach { add(JsonPrimitive(it)) } })
+        }
+        geofence?.let { ids ->
+            put("geofence", buildJsonArray { ids.forEach { add(JsonPrimitive(it)) } })
+        }
+    }
+
+    return call(HttpMethod.Patch, url, body = req) { body ->
+        body.toJsonObject().toUserSearchResult()
+    }
 }
 
 suspend fun Api.updateUsername(username: String): User {
@@ -125,5 +183,16 @@ private fun JsonObject.toSavedItem(): SavedItem {
     return SavedItem(
         id = long("id"),
         name = string("name"),
+    )
+}
+
+private fun JsonObject.toUserSearchResult(): UserSearchResult {
+    return UserSearchResult(
+        id = long("id"),
+        name = string("name"),
+        roles = arrayOrNull("roles")?.map { it.jsonPrimitive.content } ?: emptyList(),
+        createdAt = string("created_at"),
+        geofence = arrayOrNull("geofence")?.map { it.jsonPrimitive.long } ?: emptyList(),
+        npub = stringOrNull("npub"),
     )
 }

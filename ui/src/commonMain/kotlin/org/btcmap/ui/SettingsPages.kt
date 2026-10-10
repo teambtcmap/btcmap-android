@@ -101,6 +101,8 @@ data class SettingsPageLabels(
     val dbStatsSecondary: String,
     val imageStats: String,
     val imageStatsSecondary: String,
+    val manageUsers: String,
+    val manageUsersSecondary: String,
     val manageAreas: String,
     val manageAreasSecondary: String,
     val managePlaceImages: String,
@@ -146,6 +148,7 @@ fun SettingsPage(
     onOpenColors: () -> Unit,
     onOpenDbStats: () -> Unit,
     onOpenImageStats: () -> Unit = {},
+    onOpenManageUsers: () -> Unit = {},
     onOpenManageAreas: () -> Unit = {},
     onOpenManagePlaceImages: () -> Unit = {},
     onLanguageChanged: () -> Unit = {},
@@ -163,8 +166,10 @@ fun SettingsPage(
     // observe on its own.
     var accountTitle by remember { mutableStateOf(labels.account) }
     var accountSecondary by remember { mutableStateOf(labels.logIn) }
-    // The manage-areas and manage-place-images rows are only shown to the roles
-    // that may use them, resolved from the same cached user as the account row.
+    // The manage-users, manage-areas and manage-place-images rows are only shown
+    // to the roles that may use them, resolved from the same cached user as the
+    // account row.
+    var canManageUsers by remember { mutableStateOf(false) }
     var canManageAreas by remember { mutableStateOf(false) }
     var canManagePlaceImages by remember { mutableStateOf(false) }
     LaunchedEffect(reloadKey) {
@@ -183,6 +188,7 @@ fun SettingsPage(
         }
         accountTitle = if (user != null) labels.loggedInAs(user.name) else labels.account
         accountSecondary = if (user != null) labels.openProfile else labels.logIn
+        canManageUsers = user?.isAdmin() == true
         canManageAreas = user?.canManageAreas() == true
         canManagePlaceImages = user?.isAdmin() == true
     }
@@ -212,6 +218,8 @@ fun SettingsPage(
                 dbStatsSecondary = labels.dbStatsSecondary,
                 imageStats = labels.imageStats,
                 imageStatsSecondary = labels.imageStatsSecondary,
+                manageUsers = labels.manageUsers,
+                manageUsersSecondary = labels.manageUsersSecondary,
                 manageAreas = labels.manageAreas,
                 manageAreasSecondary = labels.manageAreasSecondary,
                 managePlaceImages = labels.managePlaceImages,
@@ -225,6 +233,7 @@ fun SettingsPage(
             mapRotationEnabled = rotation,
             mapTiltEnabled = tilt,
             includeImageStats = includeImageStats,
+            includeManageUsers = canManageUsers,
             includeManageAreas = canManageAreas,
             includeManagePlaceImages = canManagePlaceImages,
         ),
@@ -237,6 +246,7 @@ fun SettingsPage(
                 "verifiedFilter" -> dialog = SettingsDialog.VerifiedFilter
                 "dbStats" -> onOpenDbStats()
                 "imageStats" -> onOpenImageStats()
+                "manageUsers" -> onOpenManageUsers()
                 "manageAreas" -> onOpenManageAreas()
                 "managePlaceImages" -> onOpenManagePlaceImages()
             }

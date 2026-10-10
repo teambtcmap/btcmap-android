@@ -64,6 +64,98 @@ class UserApiTest : ApiTestBase() {
     }
 
     @Test
+    fun searchUsers_sendsQueryAndLimitAndParsesResults() = runTest {
+        enqueueJson(
+            """
+            [
+                {
+                    "id": 124,
+                    "name": "natinfosec",
+                    "roles": ["user"],
+                    "created_at": "2024-01-01T00:00:00Z",
+                    "geofence": [3, 7],
+                    "npub": "npub1..."
+                }
+            ]
+            """.trimIndent()
+        )
+
+        val users = api().searchUsers("na", limit = 50)
+
+        val request = takeRequest()
+        Assert.assertEquals("GET", request.method)
+        Assert.assertEquals("/v4/users", request.url.encodedPath)
+        Assert.assertEquals("na", request.url.queryParameter("query"))
+        Assert.assertEquals("50", request.url.queryParameter("limit"))
+        Assert.assertEquals(1, users.size)
+        Assert.assertEquals(124L, users.single().id)
+        Assert.assertEquals("natinfosec", users.single().name)
+        Assert.assertEquals(listOf("user"), users.single().roles)
+        Assert.assertEquals("2024-01-01T00:00:00Z", users.single().createdAt)
+        Assert.assertEquals(listOf(3L, 7L), users.single().geofence)
+        Assert.assertEquals("npub1...", users.single().npub)
+    }
+
+    @Test
+    fun searchUsers_toleratesMissingNpubAndEmptyGeofence() = runTest {
+        enqueueJson(
+            """[{"id":1,"name":"a","roles":[],"created_at":"2024-01-01T00:00:00Z","geofence":[]}]"""
+        )
+
+        val users = api().searchUsers("a")
+
+        Assert.assertNull(users.single().npub)
+        Assert.assertTrue(users.single().roles.isEmpty())
+        Assert.assertTrue(users.single().geofence.isEmpty())
+    }
+
+    @Test
+    fun updateUser_patchesRoles() = runTest {
+        enqueueJson(
+            """
+            {
+                "id": 124,
+                "name": "natinfosec",
+                "roles": ["user", "area_manager"],
+                "created_at": "2024-01-01T00:00:00Z",
+                "geofence": []
+            }
+            """.trimIndent()
+        )
+
+        val user = api().updateUser(124, roles = listOf("user", "area_manager"))
+
+        val request = takeRequest()
+        Assert.assertEquals("PATCH", request.method)
+        Assert.assertEquals("/v4/users/124", request.url.encodedPath)
+        Assert.assertEquals("""{"roles":["user","area_manager"]}""", request.jsonBody())
+        Assert.assertEquals(listOf("user", "area_manager"), user.roles)
+    }
+
+    @Test
+    fun updateUser_patchesGeofence() = runTest {
+        enqueueJson(
+            """
+            {
+                "id": 124,
+                "name": "natinfosec",
+                "roles": ["user"],
+                "created_at": "2024-01-01T00:00:00Z",
+                "geofence": [3, 7]
+            }
+            """.trimIndent()
+        )
+
+        val user = api().updateUser(124, geofence = listOf(3, 7))
+
+        val request = takeRequest()
+        Assert.assertEquals("PATCH", request.method)
+        Assert.assertEquals("/v4/users/124", request.url.encodedPath)
+        Assert.assertEquals("""{"geofence":[3,7]}""", request.jsonBody())
+        Assert.assertEquals(listOf(3L, 7L), user.geofence)
+    }
+
+    @Test
     fun updateUsername_putsAndParsesUser() = runTest {
         enqueueJson(
             """

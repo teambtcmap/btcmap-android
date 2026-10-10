@@ -189,6 +189,46 @@ class SettingsPageTest {
 
     @OptIn(ExperimentalTestApi::class)
     @Test
+    fun manageUsersRow_isShownToAdminsAndOpensTheScreen() {
+        signIn(roles = listOf("admin"))
+        var opened = false
+        runComposeUiTest {
+            setContent {
+                SettingsPage(
+                    settings,
+                    db,
+                    TEST_SETTINGS_PAGE_LABELS,
+                    onOpenAccount = {},
+                    onOpenColors = {},
+                    onOpenDbStats = {},
+                    onOpenManageUsers = { opened = true },
+                )
+            }
+            waitUntil(timeoutMillis = 5_000) {
+                onAllNodesWithText("Click to see your profile").fetchSemanticsNodes().isNotEmpty()
+            }
+            onNode(hasScrollAction()).performScrollToNode(hasText("Manage users"))
+            onNodeWithText("Manage users").performClick()
+        }
+        assertTrue(opened)
+    }
+
+    @OptIn(ExperimentalTestApi::class)
+    @Test
+    fun manageUsersRow_isHiddenFromRegularUsers() {
+        signIn(roles = listOf("user"))
+        runComposeUiTest {
+            setContent { SettingsPage(settings, db, TEST_SETTINGS_PAGE_LABELS, onOpenAccount = {}, onOpenColors = {}, onOpenDbStats = {}) }
+            waitUntil(timeoutMillis = 5_000) {
+                onAllNodesWithText("Click to see your profile").fetchSemanticsNodes().isNotEmpty()
+            }
+            onNode(hasScrollAction()).performScrollToNode(hasText("Image cache"))
+            onAllNodesWithText("Manage users").assertCountEquals(0)
+        }
+    }
+
+    @OptIn(ExperimentalTestApi::class)
+    @Test
     fun managePlaceImagesRow_isShownToAdminsAndOpensTheScreen() {
         signIn(roles = listOf("admin"))
         var opened = false

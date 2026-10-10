@@ -57,6 +57,8 @@ import org.btcmap.api.deletePlaceImage
 import org.btcmap.api.getPlaceImages
 import org.btcmap.api.getRecentPlaceImages
 import org.btcmap.api.placeImageUrl
+import org.btcmap.api.searchUsers
+import org.btcmap.api.updateUser
 import org.btcmap.feed.feedKey
 import org.btcmap.feed.iconGlyph
 import org.btcmap.map.MapAreasController
@@ -180,6 +182,13 @@ import org.btcmap.ui.MapScreen
 import org.btcmap.ui.ManageAreasScreen
 import org.btcmap.ui.ManagePlaceImageUi
 import org.btcmap.ui.ManagePlaceImagesScreen
+import org.btcmap.ui.CallerRoles
+import org.btcmap.ui.EARTH_NAME
+import org.btcmap.ui.GeofenceAreaUi
+import org.btcmap.ui.ManageUserUi
+import org.btcmap.ui.ManageUsersScreen
+import org.btcmap.ui.UserAdminPage
+import org.btcmap.ui.toManageUserUi
 import org.btcmap.ui.ProfileFormLabels
 import org.btcmap.ui.MyEventsLabels
 import org.btcmap.ui.ProfileScreen
@@ -395,6 +404,9 @@ private fun runApp() = application {
                     // it and the map both return correctly.
                     var selectedAreaId by remember { mutableStateOf<Long?>(null) }
                     var selectedEvent by remember { mutableStateOf<Event?>(null) }
+                    // The user record the manage-users search opened. Carried in
+                    // state because the search result is not reloadable by id.
+                    var selectedUser by remember { mutableStateOf<ManageUserUi?>(null) }
                     // The event whose sheet is open over the map. A selected
                     // event marker or search result shows this sheet instead of
                     // pushing a screen, as the map's place sheet does.
@@ -882,9 +894,73 @@ private fun runApp() = application {
                                 onOpenAccount = { nav.push(Route.Account) },
                                 onOpenColors = { nav.push(Route.Colors) },
                                 onOpenDbStats = { nav.push(Route.DbStats) },
+                                onOpenManageUsers = { nav.push(Route.ManageUsers) },
                                 onOpenManageAreas = { nav.push(Route.ManageAreas) },
                                 onOpenManagePlaceImages = { nav.push(Route.ManagePlaceImages) },
                             )
+                        }
+
+                        Route.ManageUsers -> ScreenPage(
+                            title = LABELS.manageUsersTitle,
+                            onBack = { nav.pop() },
+                        ) {
+                            ManageUsersScreen(
+                                labels = LABELS.manageUsers,
+                                search = { query ->
+                                    withContext(ioDispatcher) {
+                                        api.searchUsers(query).map { it.toManageUserUi() }
+                                    }
+                                },
+                                onUserClick = { user ->
+                                    selectedUser = user
+                                    nav.push(Route.UserAdmin)
+                                },
+                            )
+                        }
+
+                        Route.UserAdmin -> {
+                            val user = selectedUser
+                            if (user == null) {
+                                LaunchedEffect(Unit) { nav.pop() }
+                            } else {
+                                UserAdminPage(
+                                    user = user,
+                                    labels = LABELS,
+                                    loadCaller = {
+                                        withContext(ioDispatcher) {
+                                            db.user.select()?.let { CallerRoles(it.id, it.roles) }
+                                                ?: CallerRoles(id = -1L, roles = emptyList())
+                                        }
+                                    },
+                                    loadAreaName = { id ->
+                                        withContext(ioDispatcher) {
+                                            db.area.selectById(id)?.getLocalizedName()?.ifBlank { null }
+                                        }
+                                    },
+                                    loadAreas = {
+                                        withContext(ioDispatcher) {
+                                            db.area.selectAll().map {
+                                                GeofenceAreaUi(
+                                                    id = it.id,
+                                                    name = it.getLocalizedName().ifBlank { EARTH_NAME },
+                                                    type = it.type,
+                                                )
+                                            }
+                                        }
+                                    },
+                                    updateRoles = { userId, roles ->
+                                        withContext(ioDispatcher) {
+                                            api.updateUser(userId, roles = roles).toManageUserUi()
+                                        }
+                                    },
+                                    updateGeofence = { userId, geofence ->
+                                        withContext(ioDispatcher) {
+                                            api.updateUser(userId, geofence = geofence).toManageUserUi()
+                                        }
+                                    },
+                                    onBack = { nav.pop() },
+                                )
+                            }
                         }
 
                         Route.ManageAreas -> ScreenPage(
@@ -1417,7 +1493,7 @@ private fun AreaPlaceIssue.osmEditUrl(): String =
 private const val JOIN_US_URL = "https://btcmap.org/join-us"
 
 /** The desktop app's full-window pages. */
-private enum class Route { Map, Area, AreaAdmin, Event, Feed, Settings, Colors, DbStats, ManageAreas, ManagePlaceImages, Account, Report, AddPlace, AddEvent, AddNote, AddComment, Boost, Infra, EventReview }
+private enum class Route { Map, Area, AreaAdmin, Event, Feed, Settings, Colors, DbStats, ManageUsers, UserAdmin, ManageAreas, ManagePlaceImages, Account, Report, AddPlace, AddEvent, AddNote, AddComment, Boost, Infra, EventReview }
 
 /**
  * What the add-event screen opens with. From the map it is just the centre; from

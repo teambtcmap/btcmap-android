@@ -27,8 +27,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -37,7 +35,6 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -117,6 +114,8 @@ data class AddEventLabels(
     val backToMap: String,
     val ok: String,
     val cancel: String,
+    /** The dialog a submission failure is shown in. */
+    val error: ErrorDialogLabels,
 )
 
 /**
@@ -209,16 +208,8 @@ fun AddEventScreen(
     var error by remember { mutableStateOf<String?>(null) }
     var submitted by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
-    val snackbarHostState = remember { SnackbarHostState() }
 
-    // Submit failures surface through a snackbar; the field errors stay inline.
-    LaunchedEffect(error) {
-        error?.let {
-            snackbarHostState.showSnackbar(it)
-            error = null
-        }
-    }
-
+    // Submit failures surface through a dialog; the field errors stay inline.
     AppTheme(iconFont = iconFont) {
         Scaffold(
             topBar = {
@@ -231,7 +222,6 @@ fun AddEventScreen(
                     },
                 )
             },
-            snackbarHost = { SnackbarHost(snackbarHostState) },
         ) { innerPadding ->
             Column(
                 modifier = Modifier
@@ -296,6 +286,10 @@ fun AddEventScreen(
                     modifier = Modifier.weight(1f),
                 )
             }
+        }
+
+        error?.let {
+            ErrorDialog(labels = labels.error, message = it) { error = null }
         }
     }
 }

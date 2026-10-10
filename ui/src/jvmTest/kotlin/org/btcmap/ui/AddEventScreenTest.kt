@@ -46,6 +46,7 @@ class AddEventScreenTest {
         backToMap = "Back to the map",
         ok = "OK",
         cancel = "Cancel",
+        error = ErrorDialogLabels(title = "Error", ok = "OK"),
     )
 
     private val palette = MarkerPalette(
@@ -81,6 +82,46 @@ class AddEventScreenTest {
             onAllNodesWithText("Required").assertCountEquals(2)
         }
         assertTrue(drafts.isEmpty())
+    }
+
+    @OptIn(ExperimentalTestApi::class)
+    @Test
+    fun failedSubmit_showsTheErrorDialog() {
+        runComposeUiTest {
+            setContent {
+                AddEventScreen(
+                    lat = 1.0,
+                    lon = 2.0,
+                    styleUrl = "",
+                    styleJson = null,
+                    labels = labels,
+                    iconFont = null,
+                    palette = palette,
+                    submit = { error("Location (1.0, 2.0) is outside your geofence") },
+                    onBack = {},
+                    map = {},
+                    dateTimePicker = { _, _, onConfirm, _ ->
+                        Button(onClick = { onConfirm(LocalDateTime.of(2026, 9, 25, 19, 0)) }) {
+                            Text("confirm")
+                        }
+                    },
+                )
+            }
+            onNodeWithTag(ADD_EVENT_NAME_TAG).performTextInput("Meetup")
+            onNodeWithTag(ADD_EVENT_WEBSITE_TAG).performTextInput("https://example.com")
+            onNodeWithTag(ADD_EVENT_STARTS_TAG).performClick()
+            onNodeWithText("confirm").performClick()
+            onNodeWithTag(ADD_EVENT_SUBMIT_TAG).performScrollTo().performClick()
+
+            // The message stays up in a dialog until dismissed, not a snackbar.
+            waitUntil(timeoutMillis = 5_000) {
+                onAllNodesWithText("Location (1.0, 2.0) is outside your geofence")
+                    .fetchSemanticsNodes()
+                    .isNotEmpty()
+            }
+            onNodeWithText("OK").performClick()
+            onAllNodesWithText("Location (1.0, 2.0) is outside your geofence").assertCountEquals(0)
+        }
     }
 
     @OptIn(ExperimentalTestApi::class)

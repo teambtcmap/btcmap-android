@@ -41,6 +41,7 @@ class AddPlaceScreenTest {
         submit = "Submit place",
         submitted = "Place submitted for review.",
         backToMap = "Back to the map",
+        error = ErrorDialogLabels(title = "Error", ok = "OK"),
     )
 
     private val palette = MarkerPalette(

@@ -76,11 +76,24 @@ data class AppLabels(
     val errorMessage: String,
     val settingsTitle: String,
     val settings: SettingsPageLabels,
+    /** The manage-users screen's title, shared by both hosts. */
+    val manageUsersTitle: String,
+    val manageUsers: ManageUsersLabels,
     val manageAreasTitle: String,
     val manageAreas: ManageAreasLabels,
     /** The manage-place-images screen's title, shared by both hosts. */
     val managePlaceImagesTitle: String,
     val managePlaceImages: ManagePlaceImagesLabels,
+    /** The user admin screen's edit-roles action and dialog title. */
+    val editRoles: String,
+    /** Formats a role id (e.g. "event_manager") for the roles dialog. */
+    val roleName: (String) -> String,
+    /** The user admin screen's edit-geofence action and dialog title. */
+    val editGeofence: String,
+    /** The geofence editor's search field placeholder. */
+    val geofenceSearch: String,
+    /** Shown when the geofence search matches no area. */
+    val geofenceNoMatches: String,
     /** The area admin screen's verify action. */
     val verifyArea: String,
     /** The area admin screen's name edit action and dialog title. */

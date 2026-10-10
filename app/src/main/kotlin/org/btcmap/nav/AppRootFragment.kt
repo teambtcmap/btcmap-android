@@ -326,6 +326,7 @@ private fun routeFromArgs(args: Bundle?): AppRoute = when (args?.getString(ARG_K
     "area-admin" -> AppRoute.AreaAdmin(areaId = args.getLong(ARG_AREA_ID))
 
     "settings" -> AppRoute.Settings
+    "manage-users" -> AppRoute.ManageUsers
     "manage-areas" -> AppRoute.ManageAreas
     "manage-place-images" -> AppRoute.ManagePlaceImages
     "user-profile" -> AppRoute.UserProfile

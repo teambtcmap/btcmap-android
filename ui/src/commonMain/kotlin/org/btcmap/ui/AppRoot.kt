@@ -26,7 +26,9 @@ import org.btcmap.api.getPendingEvents
 import org.btcmap.api.getRecentPlaceImages
 import org.btcmap.api.placeImageUrl
 import org.btcmap.api.revokeEvent
+import org.btcmap.api.searchUsers
 import org.btcmap.api.setEventStatus
+import org.btcmap.api.updateUser
 import org.btcmap.api.setAreaDescription
 import org.btcmap.api.setAreaName
 import org.btcmap.api.submitEvent
@@ -393,12 +395,27 @@ fun AppRoot(
                     onOpenColors = { nav.push(AppRoute.Colors) },
                     onOpenDbStats = { nav.push(AppRoute.DbStats) },
                     onOpenImageStats = { nav.push(AppRoute.ImageStats) },
+                    onOpenManageUsers = { nav.push(AppRoute.ManageUsers) },
                     onOpenManageAreas = { nav.push(AppRoute.ManageAreas) },
                     onOpenManagePlaceImages = { nav.push(AppRoute.ManagePlaceImages) },
                     onLanguageChanged = onLanguageChanged,
                     reloadKey = authReload,
                 )
             }
+
+            AppRoute.ManageUsers -> ManageUsersRoute(
+                services = services,
+                labels = labels,
+                onBack = back,
+                onOpenUser = { user -> nav.push(AppRoute.UserAdmin(user)) },
+            )
+
+            is AppRoute.UserAdmin -> UserAdminRoute(
+                services = services,
+                labels = labels,
+                route = route,
+                onBack = back,
+            )
 
             AppRoute.ManageAreas -> ManageAreasRoute(
                 services = services,
@@ -650,6 +667,86 @@ private fun DbStatsRoute(
             showSyncButton = false,
         )
     }
+}
+
+/**
+ * The manage-users route: the shared [ManageUsersScreen] under the standard top
+ * bar, searching the server for users by name. Only the settings row (itself
+ * hidden from non-admins) opens it, and the server enforces the role.
+ */
+@Composable
+private fun ManageUsersRoute(
+    services: AppServices,
+    labels: AppLabels,
+    onBack: () -> Unit,
+    onOpenUser: (ManageUserUi) -> Unit,
+) {
+    ScreenPage(
+        title = labels.manageUsersTitle,
+        onBack = onBack,
+        backContentDescription = labels.back,
+    ) {
+        ManageUsersScreen(
+            labels = labels.manageUsers,
+            search = { query ->
+                withContext(ioDispatcher) {
+                    services.api.searchUsers(query).map { it.toManageUserUi() }
+                }
+            },
+            onUserClick = onOpenUser,
+        )
+    }
+}
+
+/**
+ * The user admin route: the shared [UserAdminPage] under the standard top bar,
+ * showing one user's record with its edit-roles action. Opened from the
+ * manage-users search.
+ */
+@Composable
+private fun UserAdminRoute(
+    services: AppServices,
+    labels: AppLabels,
+    route: AppRoute.UserAdmin,
+    onBack: () -> Unit,
+) {
+    UserAdminPage(
+        user = route.user,
+        labels = labels,
+        loadCaller = {
+            withContext(ioDispatcher) {
+                services.db.user.select()?.let { CallerRoles(it.id, it.roles) }
+                    ?: CallerRoles(id = -1L, roles = emptyList())
+            }
+        },
+        loadAreaName = { id ->
+            withContext(ioDispatcher) {
+                services.db.area.selectById(id)?.getLocalizedName()?.ifBlank { null }
+            }
+        },
+        loadAreas = {
+            withContext(ioDispatcher) {
+                services.db.area.selectAll().map {
+                    GeofenceAreaUi(
+                        id = it.id,
+                        name = it.getLocalizedName().ifBlank { EARTH_NAME },
+                        type = it.type,
+                    )
+                }
+            }
+        },
+        updateRoles = { userId, roles ->
+            withContext(ioDispatcher) {
+                services.api.updateUser(userId, roles = roles).toManageUserUi()
+            }
+        },
+        updateGeofence = { userId, geofence ->
+            withContext(ioDispatcher) {
+                services.api.updateUser(userId, geofence = geofence).toManageUserUi()
+            }
+        },
+        onBack = onBack,
+    )
 }
 
 /**

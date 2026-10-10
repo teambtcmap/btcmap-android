@@ -6,6 +6,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+- Add a "Manage users" item to the Admin settings section, shown only to admins and roots: it searches the server for users by name and opens a read-only record holding the id, name, roles, creation date, geofence (resolved to area names) and linked Nostr npub
+- Edit a user's roles and geofence from their record: the roles dialog greys out the roles the caller may not change and the geofence dialog picks the areas by name, both following the server's permission policy — root may edit any non-root user (never assigning root) but not its own roles, and admin may only add or remove the event- and area-manager roles for a non-admin, non-root user and may edit its own or such a user's geofence
+- Show a failed add-event, add-place or add-note submission in a dismissable dialog instead of a transient snackbar, so a message such as a geofence refusal can be read and screenshotted before it is dismissed
 - Make a note's text selectable, so part of a long note can be selected and copied straight from the sheet
 - Search for short queries in dense scripts: a CJK ideograph, a kana or a Hangul syllable now counts double toward the map search's minimum query length, so a two-character term like "肉饼" searches while "ab" stays too broad
 - Add a change-icon action to the note sheet: tapping the note's icon opens the same icon search the add-note form uses, with the note's current icon selected, and saving it updates the note on the server, in the cache and on the map pin

@@ -98,6 +98,19 @@ sealed interface AppRoute {
     data object Settings : AppRoute
 
     /**
+     * The admin-only user search (see `ManageUsersScreen`), reached from the
+     * settings row shown to admins and roots.
+     */
+    data object ManageUsers : AppRoute
+
+    /**
+     * One user's record, read-only, opened from the manage-users search
+     * (see `UserAdminScreen`). The record travels with the route because the
+     * API has no lookup-by-id endpoint to reload it from.
+     */
+    data class UserAdmin(val user: ManageUserUi) : AppRoute
+
+    /**
      * The admin-only area management list (see `ManageAreasScreen`), reached from
      * the settings row shown to area admins.
      */
@@ -143,6 +156,8 @@ fun AppRoute.key(): String = when (this) {
     is AppRoute.Feed -> "feed"
     is AppRoute.Area -> "area"
     is AppRoute.Settings -> "settings"
+    is AppRoute.ManageUsers -> "manage-users"
+    is AppRoute.UserAdmin -> "user-admin"
     is AppRoute.ManageAreas -> "manage-areas"
     is AppRoute.ManagePlaceImages -> "manage-place-images"
     is AppRoute.AreaAdmin -> "area-admin"

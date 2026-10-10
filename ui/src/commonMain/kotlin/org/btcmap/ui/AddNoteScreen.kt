@@ -23,13 +23,10 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -100,6 +97,8 @@ data class AddNoteLabels(
     val submit: String,
     val submitted: String,
     val backToMap: String,
+    /** The dialog a submission failure is shown in. */
+    val error: ErrorDialogLabels,
 )
 
 /**
@@ -154,16 +153,8 @@ fun AddNoteScreen(
     var error by remember { mutableStateOf<String?>(null) }
     var submitted by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
-    val snackbarHostState = remember { SnackbarHostState() }
 
-    // Submit failures surface through a snackbar; the field errors stay inline.
-    LaunchedEffect(error) {
-        error?.let {
-            snackbarHostState.showSnackbar(it)
-            error = null
-        }
-    }
-
+    // Submit failures surface through a dialog; the field errors stay inline.
     AppTheme(iconFont = iconFont) {
         Scaffold(
             topBar = {
@@ -176,7 +167,6 @@ fun AddNoteScreen(
                     },
                 )
             },
-            snackbarHost = { SnackbarHost(snackbarHostState) },
         ) { innerPadding ->
             Box(
                 modifier = Modifier
@@ -254,6 +244,10 @@ fun AddNoteScreen(
                     )
                 }
             }
+        }
+
+        error?.let {
+            ErrorDialog(labels = labels.error, message = it) { error = null }
         }
     }
 }
