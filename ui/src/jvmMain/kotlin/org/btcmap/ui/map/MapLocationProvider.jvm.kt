@@ -5,7 +5,6 @@ import androidx.compose.runtime.remember
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import org.maplibre.compose.location.LocationAccuracyAuthorization
 import org.maplibre.compose.location.LocationBackendAvailability
 import org.maplibre.compose.location.LocationEvent
 import org.maplibre.compose.location.LocationPermission
@@ -58,7 +57,7 @@ private class LinuxLocationProvider(
      * not consumed by a throwaway session first.
      */
     override fun requestPermission() {
-        permissionState.value = LocationPermission.Granted(LocationAccuracyAuthorization.Unknown)
+        permissionState.value = LocationPermission.Granted(accuracy = null)
     }
 
     override fun updates(request: LocationRequest): Flow<LocationEvent> = delegate.updates(request)

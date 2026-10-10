@@ -27,7 +27,6 @@ import org.maplibre.compose.layers.CircleLayer
 import org.maplibre.compose.layers.LayerDefaults
 import org.maplibre.compose.layers.SymbolLayer
 import org.maplibre.compose.sources.GeoJsonData
-import org.maplibre.compose.sources.GeoJsonOptions
 import org.maplibre.compose.sources.rememberGeoJsonSource
 
 const val EXCHANGE_CLUSTER_BACKGROUND_LAYER_ID = "exchange_cluster_background"
@@ -54,10 +53,11 @@ fun ExchangeLayers(
     showMarkers: Boolean,
     onMarkerClick: MarkerClickHandler,
 ) {
-    val source = rememberGeoJsonSource(
-        data = GeoJsonData.JsonString(geoJson),
-        options = GeoJsonOptions(cluster = true, clusterMaxZoom = 14, clusterRadius = 50),
-    )
+    val source = rememberGeoJsonSource(data = GeoJsonData.JsonString(geoJson)) {
+        cluster = true
+        clusterMaxZoom = 14
+        clusterRadius = 50
+    }
 
     CircleLayer(
         id = EXCHANGE_CLUSTER_BACKGROUND_LAYER_ID,

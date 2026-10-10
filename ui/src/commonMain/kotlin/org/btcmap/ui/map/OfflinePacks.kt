@@ -19,9 +19,10 @@ import org.btcmap.offline.toBytes
 import org.maplibre.compose.map.DefaultMapRuntime
 import org.maplibre.compose.offline.DownloadProgress
 import org.maplibre.compose.offline.DownloadStatus
-import org.maplibre.compose.offline.OfflineManagerState
 import org.maplibre.compose.offline.OfflinePack
 import org.maplibre.compose.offline.OfflinePackDefinition
+import org.maplibre.compose.offline.OfflineStorageState
+import org.maplibre.compose.offline.offlineStorage
 import org.maplibre.spatialk.geojson.BoundingBox
 
 /**
@@ -31,7 +32,7 @@ import org.maplibre.spatialk.geojson.BoundingBox
  */
 class OfflinePacks(private val pixelRatio: Float) {
 
-    private val manager = DefaultMapRuntime.instance.offlineManager
+    private val manager = DefaultMapRuntime.instance.offlineStorage
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
 
     /** The observation running per area, and the pack it belongs to. */
@@ -72,8 +73,9 @@ class OfflinePacks(private val pixelRatio: Float) {
 
     init {
         scope.launch {
-            // 0.19 publishes Loading/Ready/Failed; only the ready packs hold the
-            // regions, and a not-ready manager has none to show yet.
+            // Offline storage publishes Loading/Ready/Failed; only the ready
+            // packs hold the regions, and a not-ready storage has none to show
+            // yet.
             manager.state.collect { syncPacks(it.packsOrEmpty()) }
         }
     }
@@ -102,8 +104,8 @@ class OfflinePacks(private val pixelRatio: Float) {
                         styleUrl = styleUrl,
                         bounds = bounds.toBoundingBox(),
                         pixelRatio = pixelRatio,
-                        minZoom = OfflineRegionEstimates.MIN_ZOOM,
-                        maxZoom = maxZoom,
+                        minZoom = OfflineRegionEstimates.MIN_ZOOM.toDouble(),
+                        maxZoom = maxZoom.toDouble(),
                     ),
                     metadata = metadata.toBytes(),
                 )
@@ -199,17 +201,19 @@ private fun DownloadProgress.toAreaState(metadata: OfflineRegionMetadata): Offli
             completedResourceCount = completedResourceCount,
         )
 
-        is DownloadProgress.Error -> OfflineAreaState.Failed(message.ifBlank { reason })
+        is DownloadProgress.Error -> OfflineAreaState.Failed(message.ifBlank { reason.value })
 
         is DownloadProgress.TileLimitExceeded ->
             OfflineAreaState.Failed("Tile limit exceeded: $limit")
 
-        DownloadProgress.Unknown -> OfflineAreaState.Downloading(completedBytes = 0L, progress = null)
+        // NotReported before the first status, and any later value: keep showing
+        // the in-progress placeholder.
+        else -> OfflineAreaState.Downloading(completedBytes = 0L, progress = null)
     }
 
 /** The packs the manager holds, or none while it is still loading or failed. */
-private fun OfflineManagerState.packsOrEmpty(): Set<OfflinePack> =
-    (this as? OfflineManagerState.Ready)?.packs ?: emptySet()
+private fun OfflineStorageState.packsOrEmpty(): Set<OfflinePack> =
+    (this as? OfflineStorageState.Ready)?.packs ?: emptySet()
 
 private fun OfflineBounds.toBoundingBox(): BoundingBox = BoundingBox(
     west = west,

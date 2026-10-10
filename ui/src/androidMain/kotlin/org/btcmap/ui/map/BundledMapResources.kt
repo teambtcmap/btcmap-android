@@ -9,7 +9,6 @@ import java.net.URLDecoder
 import java.util.concurrent.ConcurrentHashMap
 import org.json.JSONObject
 import org.maplibre.compose.map.DefaultMapRuntime
-import org.maplibre.compose.map.MapRuntimeOptions
 import org.maplibre.compose.resource.MapResourceProvider
 
 /**
@@ -66,7 +65,7 @@ fun configureBundledMapResources(context: Context) {
             }
         }
     }
-    DefaultMapRuntime.configure(MapRuntimeOptions(resourceProvider = provider))
+    DefaultMapRuntime.configure { resourceProvider = provider }
 }
 
 /**

@@ -34,8 +34,8 @@ fun rememberMapAreas(state: MapState, db: Database, reloadKey: Int = 0): List<Ma
         if (loadState !is StyleLoadState.Ready) return@LaunchedEffect
 
         fun load() {
-            val camera = state.cameraPosition ?: return
-            controller.load(camera.target.latitude, camera.target.longitude)
+            val camera = state.cameraPosition
+            controller.load(camera.center.latitude, camera.center.longitude)
         }
 
         load()

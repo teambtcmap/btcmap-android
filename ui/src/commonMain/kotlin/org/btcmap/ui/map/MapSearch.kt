@@ -127,8 +127,8 @@ fun rememberSearchResults(
         results = SearchResults(loading = true, active = true)
         delay(SEARCH_DEBOUNCE_MS)
         val camera = state.cameraPosition
-        val referenceLat = camera?.target?.latitude ?: 0.0
-        val referenceLon = camera?.target?.longitude ?: 0.0
+        val referenceLat = camera.center.latitude
+        val referenceLon = camera.center.longitude
 
         val items = withContext(Dispatchers.IO) {
             search(
@@ -153,7 +153,7 @@ fun rememberSearchResults(
         // globally-named features, so the request is bounded to turn "cafe" into
         // the cafes around the map rather than any feature named "Cafe".
         val viewbox = state.viewport?.visibleBounds?.let { visible ->
-            val bounds = ViewportBounds.expand(visible, scaleFactor = 1.0)
+            val bounds = ViewportBounds.expand(ViewportBounds(visible), scaleFactor = 1.0)
             NominatimViewbox(
                 west = bounds.west,
                 south = bounds.south,

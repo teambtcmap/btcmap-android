@@ -9,7 +9,6 @@ import org.maplibre.compose.expressions.dsl.plus
 import org.maplibre.compose.expressions.value.SymbolAnchor
 import org.maplibre.compose.layers.SymbolLayer
 import org.maplibre.compose.sources.GeoJsonData
-import org.maplibre.compose.sources.GeoJsonOptions
 import org.maplibre.compose.sources.rememberGeoJsonSource
 
 const val NOTE_MARKER_LAYER_ID = "note_marker"
@@ -28,10 +27,9 @@ fun NoteLayers(
     showMarkers: Boolean,
     onClick: MarkerClickHandler,
 ) {
-    val source = rememberGeoJsonSource(
-        data = GeoJsonData.JsonString(geoJson),
-        options = GeoJsonOptions(cluster = false),
-    )
+    val source = rememberGeoJsonSource(data = GeoJsonData.JsonString(geoJson)) {
+        cluster = false
+    }
 
     if (showMarkers) {
         SymbolLayer(

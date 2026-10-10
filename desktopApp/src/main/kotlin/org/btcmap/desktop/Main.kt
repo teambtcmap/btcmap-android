@@ -17,7 +17,7 @@ import kotlinx.io.files.Path
 import org.maplibre.compose.desktop.rememberAwtComposeMapPresentationHost
 import org.maplibre.compose.desktop.ProvideMapPresentationHost
 import org.maplibre.compose.map.DefaultMapRuntime
-import org.maplibre.compose.map.MapRuntimeOptions
+import org.maplibre.compose.util.ExperimentalMaplibreComposeApi
 import java.awt.Color as AwtColor
 import androidx.compose.ui.graphics.Color
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
@@ -249,7 +249,7 @@ fun main(args: Array<String>) {
     runApp()
 }
 
-@OptIn(ExperimentalComposeUiApi::class)
+@OptIn(ExperimentalComposeUiApi::class, ExperimentalMaplibreComposeApi::class)
 private fun runApp() = application {
     // Compose Desktop only polls the OS theme for changes on Windows and macOS;
     // on Linux the poll is off by default, so the window would keep its
@@ -297,12 +297,10 @@ private fun runApp() = application {
 
     // The map needs an app-wide cache directory, its bundled resources and, per
     // window, its GPU context, before any map is created.
-    DefaultMapRuntime.configure(
-        MapRuntimeOptions(
-            cacheFile = Path(home.cacheFile().absolutePath),
-            resourceProvider = bundledMapResources(),
-        ),
-    )
+    DefaultMapRuntime.configure {
+        cacheFile = Path(home.cacheFile().absolutePath)
+        resourceProvider = bundledMapResources()
+    }
 
     Window(
         onCloseRequest = ::exitApplication,

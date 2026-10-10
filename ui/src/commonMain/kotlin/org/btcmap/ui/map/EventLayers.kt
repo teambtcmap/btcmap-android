@@ -17,7 +17,6 @@ import org.maplibre.compose.layers.CircleLayer
 import org.maplibre.compose.layers.LayerDefaults
 import org.maplibre.compose.layers.SymbolLayer
 import org.maplibre.compose.sources.GeoJsonData
-import org.maplibre.compose.sources.GeoJsonOptions
 import org.maplibre.compose.sources.rememberGeoJsonSource
 
 const val EVENT_CLUSTER_BACKGROUND_LAYER_ID = "event_cluster_background"
@@ -39,10 +38,11 @@ fun EventLayers(
     showMarkers: Boolean,
     onMarkerClick: MarkerClickHandler,
 ) {
-    val source = rememberGeoJsonSource(
-        data = GeoJsonData.JsonString(geoJson),
-        options = GeoJsonOptions(cluster = true, clusterMaxZoom = 14, clusterRadius = 30),
-    )
+    val source = rememberGeoJsonSource(data = GeoJsonData.JsonString(geoJson)) {
+        cluster = true
+        clusterMaxZoom = 14
+        clusterRadius = 30
+    }
 
     CircleLayer(
         id = EVENT_CLUSTER_BACKGROUND_LAYER_ID,

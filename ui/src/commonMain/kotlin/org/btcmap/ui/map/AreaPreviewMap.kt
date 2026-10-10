@@ -8,6 +8,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import org.btcmap.db.table.area.Area
 import org.btcmap.map.toRenderGeoJson
+import org.maplibre.compose.camera.CameraFit
 import org.maplibre.compose.camera.CameraPosition
 import org.maplibre.compose.expressions.dsl.const
 import org.maplibre.compose.interaction.MapInteractions
@@ -60,7 +61,7 @@ fun AreaPreviewMap(
     val state = rememberMapState(
         baseStyle = if (styleJson != null) BaseStyle.Json(styleJson) else BaseStyle.Uri(styleUrl),
         initialCameraPosition = CameraPosition(
-            target = bounds?.center() ?: Position(0.0, 0.0),
+            center = bounds?.center() ?: Position(0.0, 0.0),
             zoom = AREA_PREVIEW_ZOOM,
         ),
     ) {
@@ -86,11 +87,13 @@ fun AreaPreviewMap(
         bounds?.let {
             state.fitCameraToBounds(
                 it,
-                fitPadding = DpPadding(
-                    left = AREA_PREVIEW_FIT_PADDING,
-                    top = AREA_PREVIEW_FIT_PADDING,
-                    right = AREA_PREVIEW_FIT_PADDING,
-                    bottom = AREA_PREVIEW_FIT_PADDING,
+                CameraFit(
+                    fitPadding = DpPadding(
+                        left = AREA_PREVIEW_FIT_PADDING,
+                        top = AREA_PREVIEW_FIT_PADDING,
+                        right = AREA_PREVIEW_FIT_PADDING,
+                        bottom = AREA_PREVIEW_FIT_PADDING,
+                    ),
                 ),
             )
         }

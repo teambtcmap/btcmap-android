@@ -25,7 +25,6 @@ import org.maplibre.compose.layers.CircleLayer
 import org.maplibre.compose.layers.LayerDefaults
 import org.maplibre.compose.layers.SymbolLayer
 import org.maplibre.compose.sources.GeoJsonData
-import org.maplibre.compose.sources.GeoJsonOptions
 import org.maplibre.compose.sources.rememberGeoJsonSource
 
 const val MERCHANT_CLUSTER_BACKGROUND_LAYER_ID = "merchant_cluster_background"
@@ -48,10 +47,11 @@ fun MerchantLayers(
     showMarkers: Boolean,
     onMarkerClick: MarkerClickHandler,
 ) {
-    val source = rememberGeoJsonSource(
-        data = GeoJsonData.JsonString(geoJson),
-        options = GeoJsonOptions(cluster = true, clusterMaxZoom = 14, clusterRadius = 50),
-    )
+    val source = rememberGeoJsonSource(data = GeoJsonData.JsonString(geoJson)) {
+        cluster = true
+        clusterMaxZoom = 14
+        clusterRadius = 50
+    }
 
     CircleLayer(
         id = MERCHANT_CLUSTER_BACKGROUND_LAYER_ID,

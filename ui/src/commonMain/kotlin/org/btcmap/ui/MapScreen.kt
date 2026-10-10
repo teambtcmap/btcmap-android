@@ -398,7 +398,7 @@ fun MapScreen(
     // it is already close enough (15+, where the cluster layers stop clustering),
     // otherwise the map zooms in to 15 so the place is not lost inside a cluster.
     fun placeCameraUpdate(place: Place, currentZoom: Double?): CameraUpdate = CameraUpdate(
-        target = Position(place.lon, place.lat),
+        center = Position(place.lon, place.lat),
         zoom = if (currentZoom != null && currentZoom < PLACE_MIN_ZOOM) PLACE_MIN_ZOOM else null,
         padding = placeSheetPadding(),
     )
@@ -519,10 +519,10 @@ fun MapScreen(
         // read the asset:// style the Android SDK uses.
         baseStyle = if (styleJson != null) BaseStyle.Json(styleJson) else BaseStyle.Uri(styleUrl),
         initialCameraPosition = CameraPosition(
-            target = Position(initialLon, initialLat),
+            center = Position(initialLon, initialLat),
             zoom = initialZoom,
             bearing = initialBearing,
-            tilt = initialTilt,
+            pitch = initialTilt,
         ),
     ) {
         // Only the selected kind is declared: 0.19.0 fixed the 0.18.0 quirk that
@@ -578,7 +578,7 @@ fun MapScreen(
             if (recenterToLocation) {
                 recenterToLocation = false
                 mapState.animateCamera(
-                    CameraUpdate(target = currentLocation.position, zoom = LOCATION_ZOOM),
+                    CameraUpdate(center = currentLocation.position, zoom = LOCATION_ZOOM),
                 )
             }
         }
@@ -599,7 +599,7 @@ fun MapScreen(
                 // rotation (two-finger twist, drag, keys).
                 rotate { enabled = mapRotationEnabled }
                 // Pitch permission, on the same terms as rotation.
-                tilt { enabled = mapTiltEnabled }
+                pitch { enabled = mapTiltEnabled }
             }
             callbacks {
                 click {
@@ -639,7 +639,7 @@ fun MapScreen(
     // map back.
     LaunchedEffect(recenterKey) {
         if (recenterKey == 0) return@LaunchedEffect
-        selectedPlace?.let { state.animateCamera(placeCameraUpdate(it, state.cameraPosition?.zoom)) }
+        selectedPlace?.let { state.animateCamera(placeCameraUpdate(it, state.cameraPosition.zoom)) }
     }
 
     // The host may want to remember where the user left the map. The callback is
@@ -651,14 +651,14 @@ fun MapScreen(
     LaunchedEffect(state) {
         state.events.filterIsInstance<MapEvent.CameraMoveEnded>().collect {
             val callback = currentOnCameraIdle ?: return@collect
-            val camera = state.cameraPosition ?: return@collect
+            val camera = state.cameraPosition
             callback(
                 MapCameraState(
-                    lat = camera.target.latitude,
-                    lon = camera.target.longitude,
+                    lat = camera.center.latitude,
+                    lon = camera.center.longitude,
                     zoom = camera.zoom,
                     bearing = camera.bearing,
-                    tilt = camera.tilt,
+                    tilt = camera.pitch,
                 ),
             )
         }
@@ -668,7 +668,7 @@ fun MapScreen(
         val target = openTarget ?: return@LaunchedEffect
         openTargetMarkerKind?.let(onMarkerKindChange)
         state.animateCamera(
-            CameraUpdate(target = Position(target.second, target.first), zoom = OPEN_ZOOM),
+            CameraUpdate(center = Position(target.second, target.first), zoom = OPEN_ZOOM),
         )
         onOpenTargetConsumed()
     }
@@ -684,7 +684,7 @@ fun MapScreen(
         // before moving to it, as the Views map did.
         onMarkerKindChange(if (place.isMerchant()) MarkerKind.Merchants else MarkerKind.Exchanges)
         onPlaceSelected(place)
-        state.animateCamera(placeCameraUpdate(place, state.cameraPosition?.zoom))
+        state.animateCamera(placeCameraUpdate(place, state.cameraPosition.zoom))
     }
 
     // Reopens the place a host remembered when the map was last left, so
@@ -703,7 +703,7 @@ fun MapScreen(
         // the reopened sheet. Wait for the search bar and viewport to be
         // measured, then apply the same padded camera a marker tap does.
         snapshotFlow { searchBarBottomPx > 0f && viewportHeightPx > 0f }.first { it }
-        state.animateCamera(placeCameraUpdate(place, state.cameraPosition?.zoom))
+        state.animateCamera(placeCameraUpdate(place, state.cameraPosition.zoom))
     }
 
     // The host supplies what it can do, but only the map knows where it is
@@ -716,21 +716,21 @@ fun MapScreen(
         SearchActions(
             onAddPlace = onAddPlace?.let { createPlace ->
                 {
-                    state.cameraPosition?.target?.let { centre ->
+                    state.cameraPosition.center.let { centre ->
                         createPlace(centre.latitude, centre.longitude)
                     }
                 }
             },
             onAddEvent = onAddEvent?.let { createEvent ->
                 {
-                    state.cameraPosition?.target?.let { centre ->
+                    state.cameraPosition.center.let { centre ->
                         createEvent(centre.latitude, centre.longitude)
                     }
                 }
             },
             onAddNote = onAddNote?.let { createNote ->
                 {
-                    state.cameraPosition?.target?.let { centre ->
+                    state.cameraPosition.center.let { centre ->
                         createNote(centre.latitude, centre.longitude)
                     }
                 }
@@ -766,10 +766,10 @@ fun MapScreen(
                     // to it rather than only opening its sheet; the current
                     // bearing and tilt are kept, and the zoom only moves when it
                     // is below the un-clustering threshold.
-                    state.cameraPosition?.let { current ->
+                    state.cameraPosition.let { current ->
                         state.setCameraPosition(
                             current.copy(
-                                target = Position(place.lon, place.lat),
+                                center = Position(place.lon, place.lat),
                                 zoom = maxOf(current.zoom, PLACE_MIN_ZOOM),
                                 padding = placeSheetPadding() ?: DpPadding.Zero,
                             ),
@@ -787,7 +787,7 @@ fun MapScreen(
             // the point, as a host-supplied target would.
             is SearchAdapterItem.Coordinate -> scope.launch {
                 state.animateCamera(
-                    CameraUpdate(target = Position(result.lon, result.lat), zoom = OPEN_ZOOM),
+                    CameraUpdate(center = Position(result.lon, result.lat), zoom = OPEN_ZOOM),
                 )
             }
 
@@ -798,7 +798,7 @@ fun MapScreen(
             // would need a second tap on the icon the map just drew.
             is SearchAdapterItem.Nominatim -> scope.launch {
                 state.animateCamera(
-                    CameraUpdate(target = Position(result.lon, result.lat), zoom = OSM_RESULT_ZOOM),
+                    CameraUpdate(center = Position(result.lon, result.lat), zoom = OSM_RESULT_ZOOM),
                 )
                 val language = currentLanguage()
                 var poi = state.poiMatchingName(result.lat, result.lon, result.name, language)
@@ -1161,7 +1161,7 @@ fun MapScreen(
                                 scope.launch {
                                     state.animateCamera(
                                         CameraUpdate(
-                                            target = last.position,
+                                            center = last.position,
                                             zoom = LOCATION_ZOOM,
                                         ),
                                     )

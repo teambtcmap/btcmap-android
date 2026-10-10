@@ -3,8 +3,6 @@ package org.btcmap.ui.map
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
-import org.maplibre.compose.util.VisibleBounds
-import org.maplibre.spatialk.geojson.Position
 
 /**
  * The viewport arithmetic the map queries its features with, moved here from the
@@ -84,7 +82,7 @@ class ViewportBoundsTest {
         north: Double,
         west: Double,
         east: Double,
-    ): VisibleBounds = VisibleBounds(Position(west, south), Position(east, north))
+    ): ViewportBounds = ViewportBounds(south = south, north = north, west = west, east = east)
 
     private companion object {
         const val EPSILON = 1e-6

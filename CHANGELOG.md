@@ -6,6 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+- Upgrade to MapLibre Compose 0.20.0: right-to-left and Arabic labels render correctly, an icon whose image arrives after its tile now appears, line patterns match the browser, locale-aware number formatting and feature queries are more accurate, and map interactions run more smoothly off the UI thread
 - Mark the map marker filter's selected kind by tinting its icon with the new "Button accent" colour instead of ringing it with a border; the accent defaults to the boosted marker colour and is overridable in Customize colors, where the old "Button border" row is renamed
 - Hide the map's event-review button while no submissions are waiting, and refresh its count after a sync reports the events changed, so an emptied or filled queue appears without leaving the map
 - Fix area managers never seeing the "Manage areas" settings row: the app checked a nonexistent `area_admin` role instead of the server's `area_manager`, so the row was hidden from exactly the users it is meant for

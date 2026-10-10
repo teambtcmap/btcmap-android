@@ -67,7 +67,7 @@ fun <T : Any> rememberViewportFeatures(
             // are replay-less, so a move that already happened (or none at all)
             // would otherwise leave the map empty.
             val viewport = state.viewport ?: state.awaitViewport()
-            val bounds = ViewportBounds.expand(viewport.visibleBounds)
+            val bounds = ViewportBounds.expand(ViewportBounds(viewport.visibleBounds))
             val fetched = withContext(Dispatchers.Default) { latestFetch(bounds) }
             // The store keeps everything seen so panning back does not refetch,
             // but only the features around the current viewport are handed to the

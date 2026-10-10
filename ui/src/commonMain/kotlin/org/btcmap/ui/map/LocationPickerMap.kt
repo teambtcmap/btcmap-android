@@ -51,12 +51,12 @@ fun LocationPickerMap(
 ) {
     val state = rememberMapState(
         baseStyle = if (styleJson != null) BaseStyle.Json(styleJson) else BaseStyle.Uri(styleUrl),
-        initialCameraPosition = CameraPosition(target = Position(lon, lat), zoom = LOCATION_PICKER_ZOOM),
+        initialCameraPosition = CameraPosition(center = Position(lon, lat), zoom = LOCATION_PICKER_ZOOM),
     ) { }
 
     LaunchedEffect(state, onCenterChanged) {
         state.events.filterIsInstance<MapEvent.CameraMoveEnded>().collect {
-            state.cameraPosition?.target?.let { onCenterChanged(it.latitude, it.longitude) }
+            state.cameraPosition.center.let { onCenterChanged(it.latitude, it.longitude) }
         }
     }
 

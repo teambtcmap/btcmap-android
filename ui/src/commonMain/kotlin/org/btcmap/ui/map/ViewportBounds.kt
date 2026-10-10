@@ -17,20 +17,32 @@ data class ViewportBounds(
     val east: Double,
 ) {
 
+    /**
+     * The bounds of a rendered map viewport. MapLibre repeats the world
+     * horizontally, so [VisibleBounds] carries continuous longitudes that may
+     * fall outside [-180, 180]; [expand] and [longitudeRanges] handle them.
+     */
+    constructor(visible: VisibleBounds) : this(
+        south = visible.south,
+        north = visible.north,
+        west = visible.west,
+        east = visible.east,
+    )
+
     companion object {
 
-        fun expand(visible: VisibleBounds, scaleFactor: Double = 2.0): ViewportBounds {
-            val latitudeCenter = (visible.south + visible.north) / 2
-            val latitudeSpan = (visible.north - visible.south) * scaleFactor
+        fun expand(bounds: ViewportBounds, scaleFactor: Double = 2.0): ViewportBounds {
+            val latitudeCenter = (bounds.south + bounds.north) / 2
+            val latitudeSpan = (bounds.north - bounds.south) * scaleFactor
 
-            val spansAntimeridian = visible.east < visible.west
-            val wrapSpan = visible.east + 360.0 - visible.west
+            val spansAntimeridian = bounds.east < bounds.west
+            val wrapSpan = bounds.east + 360.0 - bounds.west
             val longitudeSpan =
-                (if (spansAntimeridian) wrapSpan else visible.east - visible.west) * scaleFactor
+                (if (spansAntimeridian) wrapSpan else bounds.east - bounds.west) * scaleFactor
             val longitudeCenter = if (spansAntimeridian) {
-                normalizeLongitude(visible.west + wrapSpan / 2)
+                normalizeLongitude(bounds.west + wrapSpan / 2)
             } else {
-                (visible.west + visible.east) / 2
+                (bounds.west + bounds.east) / 2
             }
 
             val south = (latitudeCenter - latitudeSpan / 2).coerceAtLeast(-90.0)

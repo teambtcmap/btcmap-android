@@ -49,7 +49,7 @@ internal fun MiniMap(
 ) {
     val state = rememberMapState(
         baseStyle = if (styleJson != null) BaseStyle.Json(styleJson) else BaseStyle.Uri(styleUrl),
-        initialCameraPosition = CameraPosition(target = Position(lon, lat), zoom = MINI_MAP_ZOOM),
+        initialCameraPosition = CameraPosition(center = Position(lon, lat), zoom = MINI_MAP_ZOOM),
     ) { }
 
     val textMeasurer = rememberTextMeasurer()

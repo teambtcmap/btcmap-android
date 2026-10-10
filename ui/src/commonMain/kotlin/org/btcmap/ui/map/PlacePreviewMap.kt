@@ -64,7 +64,7 @@ fun PlacePreviewMap(
     val state = rememberMapState(
         baseStyle = if (styleJson != null) BaseStyle.Json(styleJson) else BaseStyle.Uri(styleUrl),
         initialCameraPosition = CameraPosition(
-            target = Position(lon, lat),
+            center = Position(lon, lat),
             zoom = PREVIEW_ZOOM,
         ),
     ) {
