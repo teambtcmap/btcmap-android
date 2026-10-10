@@ -23,7 +23,7 @@ class InfraDashboardScreenTest {
 
     @OptIn(ExperimentalTestApi::class)
     @Test
-    fun importsCardOpensTheSourcesDialog() {
+    fun importsCardExpandsTheSources() {
         val dashboard = Dashboard(
             imports = listOf(
                 DashboardImport(
@@ -39,15 +39,16 @@ class InfraDashboardScreenTest {
             }
 
             onNodeWithText("Unique clients (24h)").assertIsDisplayed()
-            onNodeWithText("Imports").performClick()
-            onNodeWithText("Import sources").assertIsDisplayed()
+            // The source is hidden until its summed row is tapped.
+            onNodeWithText("square").assertDoesNotExist()
+            onNodeWithText("Total (1d / 7d / 30d)").performClick()
             onNodeWithText("square").assertIsDisplayed()
         }
     }
 
     @OptIn(ExperimentalTestApi::class)
     @Test
-    fun apiCallsCardOpensTheDialog() {
+    fun apiCallsCardExpandsTheLists() {
         val dashboard = Dashboard(
             logs = DashboardLogs(
                 topRpcs = listOf(DashboardMethodCount("get_area", 5)),
@@ -62,16 +63,16 @@ class InfraDashboardScreenTest {
                 InfraDashboardScreen(load = { dashboard })
             }
 
-            onNodeWithText("API calls (24h)").performClick()
-            onNodeWithText("Top API calls (24h)").assertIsDisplayed()
+            onNodeWithText("RPC (top 10)").performClick()
             onNodeWithText("get_area").assertIsDisplayed()
+            onNodeWithText("REST (top 10)").performClick()
             onNodeWithText("GET /v4/places").assertIsDisplayed()
         }
     }
 
     @OptIn(ExperimentalTestApi::class)
     @Test
-    fun lightningCardOpensTheDialog() {
+    fun lightningCardExpandsTheSplits() {
         val dashboard = Dashboard(
             lnd = DashboardLnd(
                 outboundLiquiditySat = 1,
@@ -87,15 +88,15 @@ class InfraDashboardScreenTest {
 
             onNodeWithText("Outbound liquidity").assertIsDisplayed()
             onNodeWithText("Inbound liquidity").assertIsDisplayed()
-            onNodeWithText("Lightning node").performClick()
-            onNodeWithText("On-chain total").assertIsDisplayed()
             onNodeWithText("Total balance").assertIsDisplayed()
+            onNodeWithText("On-chain total").performClick()
+            onNodeWithText("Confirmed").assertIsDisplayed()
         }
     }
 
     @OptIn(ExperimentalTestApi::class)
     @Test
-    fun walletsCardOpensTheDialog() {
+    fun walletRowExpandsItsTransactions() {
         val dashboard = Dashboard(
             wallets = DashboardWallets(
                 wallets = listOf(
@@ -110,15 +111,15 @@ class InfraDashboardScreenTest {
             }
 
             onNodeWithText("Spending").assertIsDisplayed()
-            onNodeWithText("Wallets").performClick()
-            onNodeWithText("Balance").assertIsDisplayed()
+            onNodeWithText("Cached").assertDoesNotExist()
+            onNodeWithText("Spending").performClick()
             onNodeWithText("Cached").assertIsDisplayed()
         }
     }
 
     @OptIn(ExperimentalTestApi::class)
     @Test
-    fun syncRunsCardOpensTheDialog() {
+    fun syncRunsRowExpandsTheRuns() {
         val dashboard = Dashboard(
             syncRuns = listOf(
                 DashboardSyncRun(
@@ -137,7 +138,8 @@ class InfraDashboardScreenTest {
             }
 
             onNodeWithText("1/1").assertIsDisplayed()
-            onNodeWithText("OSM syncs").performClick()
+            onNodeWithText("10.0s · +3 ~4 -5").assertDoesNotExist()
+            onNodeWithText("Success rate").performClick()
             onNodeWithText("10.0s · +3 ~4 -5").assertIsDisplayed()
         }
     }

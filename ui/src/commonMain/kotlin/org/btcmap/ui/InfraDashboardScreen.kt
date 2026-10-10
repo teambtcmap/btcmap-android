@@ -6,16 +6,9 @@ import kotlin.time.Instant
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -33,12 +26,8 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import org.btcmap.api.Dashboard
-import org.btcmap.api.DashboardEndpointCount
 import org.btcmap.api.DashboardImport
-import org.btcmap.api.DashboardLnd
-import org.btcmap.api.DashboardMethodCount
 import org.btcmap.api.DashboardSyncRun
-import org.btcmap.api.DashboardWallet
 import org.btcmap.api.DashboardWindow
 import org.btcmap.platform.formatInteger
 import org.btcmap.stats.StatsEntry
@@ -67,7 +56,6 @@ fun InfraDashboardScreen(
     var dashboard by remember { mutableStateOf<Dashboard?>(null) }
     var error by remember { mutableStateOf<String?>(null) }
     var retryKey by remember { mutableIntStateOf(0) }
-    var dialog by remember { mutableStateOf<DashboardDialog?>(null) }
     val currentOnLoadingChange by rememberUpdatedState(onLoadingChange)
 
     LaunchedEffect(retryKey, refreshKey) {
@@ -127,267 +115,20 @@ fun InfraDashboardScreen(
         }
 
         else -> StatsGrid(
-            sections = infraDashboardSections(
-                d = current,
-                onShowImportSources = { dialog = DashboardDialog.ImportSources },
-                onShowApiCalls = { dialog = DashboardDialog.ApiCalls },
-                onShowLightning = { dialog = DashboardDialog.Lightning },
-                onShowWallets = { dialog = DashboardDialog.Wallets },
-                onShowSyncRuns = { dialog = DashboardDialog.SyncRuns },
-            ),
+            sections = infraDashboardSections(current),
             modifier = modifier,
         )
     }
-
-    when (dialog) {
-        DashboardDialog.ImportSources -> ImportSourcesDialog(
-            imports = current?.imports.orEmpty(),
-            onDismiss = { dialog = null },
-        )
-
-        DashboardDialog.ApiCalls -> ApiCallsDialog(
-            rpc = current?.logs?.topRpcs.orEmpty(),
-            rest = current?.logs?.topRestApiCalls.orEmpty(),
-            onDismiss = { dialog = null },
-        )
-
-        DashboardDialog.Lightning -> LightningDialog(
-            lnd = current?.lnd,
-            onDismiss = { dialog = null },
-        )
-
-        DashboardDialog.Wallets -> WalletsDialog(
-            wallets = current?.wallets?.wallets.orEmpty(),
-            onDismiss = { dialog = null },
-        )
-
-        DashboardDialog.SyncRuns -> SyncRunsDialog(
-            runs = current?.syncRuns.orEmpty(),
-            onDismiss = { dialog = null },
-        )
-
-        null -> {}
-    }
 }
 
-/** The dashboard's tap-to-open detail dialogs. */
-private enum class DashboardDialog { ImportSources, ApiCalls, Lightning, Wallets, SyncRuns }
-
-@Composable
-private fun ImportSourcesDialog(
-    imports: List<DashboardImport>,
-    onDismiss: () -> Unit,
-) {
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text("Import sources") },
-        text = {
-            Column(
-                modifier = Modifier
-                    .heightIn(max = 420.dp)
-                    .verticalScroll(rememberScrollState()),
-            ) {
-                imports.forEachIndexed { index, import ->
-                    if (index > 0) {
-                        HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp))
-                    }
-                    Text(
-                        text = import.origin,
-                        style = MaterialTheme.typography.titleSmall,
-                        modifier = Modifier.padding(bottom = 4.dp),
-                    )
-                    DashboardDetailRow("Total", formatWindow(import.total))
-                    DashboardDetailRow("Pending", formatWindow(import.pending))
-                    DashboardDetailRow("Revoked", formatWindow(import.revoked))
-                }
-            }
-        },
-        confirmButton = {
-            TextButton(onClick = onDismiss) { Text("Close") }
-        },
-    )
-}
-
-@Composable
-private fun ApiCallsDialog(
-    rpc: List<DashboardMethodCount>,
-    rest: List<DashboardEndpointCount>,
-    onDismiss: () -> Unit,
-) {
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text("Top API calls (24h)") },
-        text = {
-            Column(
-                modifier = Modifier
-                    .heightIn(max = 420.dp)
-                    .verticalScroll(rememberScrollState()),
-            ) {
-                if (rpc.isNotEmpty()) {
-                    Text(
-                        text = "RPC methods",
-                        style = MaterialTheme.typography.titleSmall,
-                        modifier = Modifier.padding(bottom = 4.dp),
-                    )
-                    rpc.forEach { DashboardDetailRow(it.method, formatInteger(it.count)) }
-                }
-                if (rest.isNotEmpty()) {
-                    if (rpc.isNotEmpty()) {
-                        HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp))
-                    }
-                    Text(
-                        text = "REST endpoints",
-                        style = MaterialTheme.typography.titleSmall,
-                        modifier = Modifier.padding(bottom = 4.dp),
-                    )
-                    rest.forEach {
-                        DashboardDetailRow(
-                            "${it.method} ${it.path}".trim(),
-                            formatInteger(it.count),
-                        )
-                    }
-                }
-            }
-        },
-        confirmButton = {
-            TextButton(onClick = onDismiss) { Text("Close") }
-        },
-    )
-}
-
-@Composable
-private fun LightningDialog(
-    lnd: DashboardLnd?,
-    onDismiss: () -> Unit,
-) {
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text("Lightning node") },
-        text = {
-            if (lnd != null) {
-                Column(
-                    modifier = Modifier
-                        .heightIn(max = 420.dp)
-                        .verticalScroll(rememberScrollState()),
-                ) {
-                    DashboardDetailRow("On-chain total", formatSats(lnd.onchainTotalSat))
-                    DashboardDetailRow("On-chain confirmed", formatSats(lnd.onchainConfirmedSat))
-                    DashboardDetailRow("On-chain unconfirmed", formatSats(lnd.onchainUnconfirmedSat))
-                    DashboardDetailRow("Inbound liquidity", formatSats(lnd.inboundLiquiditySat))
-                    DashboardDetailRow("Outbound liquidity", formatSats(lnd.outboundLiquiditySat))
-                    DashboardDetailRow("Pending outbound", formatSats(lnd.pendingOutboundLiquiditySat))
-                    DashboardDetailRow("Pending inbound", formatSats(lnd.pendingInboundLiquiditySat))
-                    DashboardDetailRow("Total balance", formatSats(lnd.totalBalanceSat))
-                }
-            }
-        },
-        confirmButton = {
-            TextButton(onClick = onDismiss) { Text("Close") }
-        },
-    )
-}
-
-@Composable
-private fun WalletsDialog(
-    wallets: List<DashboardWallet>,
-    onDismiss: () -> Unit,
-) {
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text("Wallets") },
-        text = {
-            Column(
-                modifier = Modifier
-                    .heightIn(max = 420.dp)
-                    .verticalScroll(rememberScrollState()),
-            ) {
-                wallets.forEachIndexed { index, wallet ->
-                    if (index > 0) {
-                        HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp))
-                    }
-                    Text(
-                        text = wallet.name,
-                        style = MaterialTheme.typography.titleSmall,
-                        modifier = Modifier.padding(bottom = 4.dp),
-                    )
-                    DashboardDetailRow("Balance", formatSats(wallet.cachedBalanceSats))
-                    DashboardDetailRow("Cached", formatTime(wallet.cachedAt))
-                    wallet.cachedTx.forEach { tx ->
-                        DashboardDetailRow(tx.id.take(12) + "…", signedSats(tx.delta))
-                    }
-                }
-            }
-        },
-        confirmButton = {
-            TextButton(onClick = onDismiss) { Text("Close") }
-        },
-    )
-}
-
-@Composable
-private fun SyncRunsDialog(
-    runs: List<DashboardSyncRun>,
-    onDismiss: () -> Unit,
-) {
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text("OSM syncs") },
-        text = {
-            Column(
-                modifier = Modifier
-                    .heightIn(max = 420.dp)
-                    .verticalScroll(rememberScrollState()),
-            ) {
-                runs.forEach { run ->
-                    DashboardDetailRow(
-                        label = "#${run.id} · ${formatTime(run.startedAt)}",
-                        value = syncRunValue(run),
-                    )
-                }
-            }
-        },
-        confirmButton = {
-            TextButton(onClick = onDismiss) { Text("Close") }
-        },
-    )
-}
-
-private fun syncRunValue(run: DashboardSyncRun): String =
-    if (run.failedAt != null) {
-        "Failed: ${run.failReason ?: "unknown"}"
-    } else {
-        "${formatDuration(run.durationS)} · " +
-            "+${formatInteger(run.elementsCreated)} " +
-            "~${formatInteger(run.elementsUpdated)} " +
-            "-${formatInteger(run.elementsDeleted)}"
-    }
-
-@Composable
-private fun DashboardDetailRow(label: String, value: String) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 2.dp),
-    ) {
-        Text(
-            text = label,
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.weight(1f),
-        )
-        Text(text = value, style = MaterialTheme.typography.bodyMedium)
-    }
-}
-
-/** Maps a dashboard snapshot to the label/value cards [StatsGrid] renders. */
-internal fun infraDashboardSections(
-    d: Dashboard,
-    onShowImportSources: () -> Unit = {},
-    onShowApiCalls: () -> Unit = {},
-    onShowLightning: () -> Unit = {},
-    onShowWallets: () -> Unit = {},
-    onShowSyncRuns: () -> Unit = {},
-): List<StatsSection> = buildList {
+/**
+ * Maps a dashboard snapshot to the label/value cards [StatsGrid] renders.
+ *
+ * A card keeps its summary rows on the card and reveals the fuller breakdown
+ * when a row is tapped, so a card that would otherwise open a dialog instead
+ * expands in place.
+ */
+internal fun infraDashboardSections(d: Dashboard): List<StatsSection> = buildList {
     add(
         StatsSection(
             key = "unique-ips",
@@ -396,7 +137,7 @@ internal fun infraDashboardSections(
             entries = listOf(
                 StatsEntry("Web", formatInteger(d.uniqueIps24h.web), icon = "public"),
                 StatsEntry("Android", formatInteger(d.uniqueIps24h.android), icon = "android"),
-                StatsEntry("iOS", formatInteger(d.uniqueIps24h.ios), icon = "phone_iphone"),
+                StatsEntry("iOS", formatInteger(d.uniqueIps24h.ios), icon = "ios"),
                 StatsEntry(
                     "Other humans",
                     formatInteger(d.uniqueIps24h.otherHumans),
@@ -430,24 +171,30 @@ internal fun infraDashboardSections(
             )
         )
     } else {
-        // One card for every source; the per-source breakdown opens on tap.
+        // One card for every source; each summed row expands to its per-source
+        // breakdown.
         add(
             StatsSection(
                 key = "imports",
                 title = "Imports",
                 icon = "download",
                 entries = listOf(
-                    StatsEntry("Total (1d / 7d / 30d)", formatWindow(d.imports.sumWindows { it.total })),
+                    StatsEntry(
+                        "Total (1d / 7d / 30d)",
+                        formatWindow(d.imports.sumWindows { it.total }),
+                        details = d.imports.map { StatsEntry(it.origin, formatWindow(it.total)) },
+                    ),
                     StatsEntry(
                         "Pending (1d / 7d / 30d)",
                         formatWindow(d.imports.sumWindows { it.pending }),
+                        details = d.imports.map { StatsEntry(it.origin, formatWindow(it.pending)) },
                     ),
                     StatsEntry(
                         "Revoked (1d / 7d / 30d)",
                         formatWindow(d.imports.sumWindows { it.revoked }),
+                        details = d.imports.map { StatsEntry(it.origin, formatWindow(it.revoked)) },
                     ),
                 ),
-                onClick = onShowImportSources,
             )
         )
     }
@@ -466,18 +213,27 @@ internal fun infraDashboardSections(
 
     val rpcCalls = d.logs.topRpcs
     val restCalls = d.logs.topRestApiCalls
-    val hasApiCalls = rpcCalls.isNotEmpty() || restCalls.isNotEmpty()
-    // One card for both kinds; the top-10 lists open on tap.
+    // Both kinds of API call share one card; each kind's top-10 list expands
+    // under its total.
     add(
         StatsSection(
             key = "api-calls",
             title = "API calls (24h)",
             icon = "api",
             entries = listOf(
-                StatsEntry("RPC (top 10)", formatInteger(rpcCalls.sumOf { it.count })),
-                StatsEntry("REST (top 10)", formatInteger(restCalls.sumOf { it.count })),
+                StatsEntry(
+                    "RPC (top 10)",
+                    formatInteger(rpcCalls.sumOf { it.count }),
+                    details = rpcCalls.map { StatsEntry(it.method, formatInteger(it.count)) },
+                ),
+                StatsEntry(
+                    "REST (top 10)",
+                    formatInteger(restCalls.sumOf { it.count }),
+                    details = restCalls.map {
+                        StatsEntry("${it.method} ${it.path}".trim(), formatInteger(it.count))
+                    },
+                ),
             ),
-            onClick = if (hasApiCalls) onShowApiCalls else null,
         )
     )
 
@@ -492,17 +248,38 @@ internal fun infraDashboardSections(
             )
         )
     } else {
-        // Only the liquidity split is shown; the full node detail opens on tap.
+        // The node's balance and liquidity on the card, each expanding to its
+        // pending or confirmation split.
         add(
             StatsSection(
                 key = "lnd",
                 title = "Lightning node",
                 icon = "bolt",
                 entries = listOf(
-                    StatsEntry("Inbound liquidity", formatSats(lnd.inboundLiquiditySat)),
-                    StatsEntry("Outbound liquidity", formatSats(lnd.outboundLiquiditySat)),
+                    StatsEntry(
+                        "On-chain total",
+                        formatSats(lnd.onchainTotalSat),
+                        details = listOf(
+                            StatsEntry("Confirmed", formatSats(lnd.onchainConfirmedSat)),
+                            StatsEntry("Unconfirmed", formatSats(lnd.onchainUnconfirmedSat)),
+                        ),
+                    ),
+                    StatsEntry(
+                        "Inbound liquidity",
+                        formatSats(lnd.inboundLiquiditySat),
+                        details = listOf(
+                            StatsEntry("Pending inbound", formatSats(lnd.pendingInboundLiquiditySat)),
+                        ),
+                    ),
+                    StatsEntry(
+                        "Outbound liquidity",
+                        formatSats(lnd.outboundLiquiditySat),
+                        details = listOf(
+                            StatsEntry("Pending outbound", formatSats(lnd.pendingOutboundLiquiditySat)),
+                        ),
+                    ),
+                    StatsEntry("Total balance", formatSats(lnd.totalBalanceSat)),
                 ),
-                onClick = onShowLightning,
             )
         )
     }
@@ -517,7 +294,7 @@ internal fun infraDashboardSections(
             )
         )
     } else {
-        // Only the success rate is on the card; the runs open on tap.
+        // The success rate on the card; each run expands under it.
         val succeeded = d.syncRuns.count { it.failedAt == null }
         add(
             StatsSection(
@@ -525,9 +302,14 @@ internal fun infraDashboardSections(
                 title = "OSM syncs",
                 icon = "sync",
                 entries = listOf(
-                    StatsEntry("Success rate", "$succeeded/${d.syncRuns.size}"),
+                    StatsEntry(
+                        "Success rate",
+                        "$succeeded/${d.syncRuns.size}",
+                        details = d.syncRuns.map {
+                            StatsEntry("#${it.id} · ${formatTime(it.startedAt)}", syncRunValue(it))
+                        },
+                    ),
                 ),
-                onClick = onShowSyncRuns,
             )
         )
     }
@@ -542,16 +324,25 @@ internal fun infraDashboardSections(
             )
         )
     } else {
-        // One row per wallet; each wallet's transactions open on tap.
+        // One row per wallet; each wallet expands to its cache time and
+        // transactions.
         add(
             StatsSection(
                 key = "wallets",
                 title = "Wallets",
                 icon = "account_balance_wallet",
-                entries = d.wallets.wallets.map {
-                    StatsEntry(it.name, formatSats(it.cachedBalanceSats))
+                entries = d.wallets.wallets.map { wallet ->
+                    StatsEntry(
+                        wallet.name,
+                        formatSats(wallet.cachedBalanceSats),
+                        details = buildList {
+                            add(StatsEntry("Cached", formatTime(wallet.cachedAt)))
+                            wallet.cachedTx.forEach { tx ->
+                                add(StatsEntry(tx.id.take(12) + "…", signedSats(tx.delta)))
+                            }
+                        },
+                    )
                 },
-                onClick = onShowWallets,
             )
         )
     }
@@ -575,6 +366,16 @@ private fun formatSats(satoshi: Long): String = "${formatInteger(satoshi)} sat"
 
 private fun signedSats(satoshi: Long): String =
     (if (satoshi >= 0) "+" else "") + formatSats(satoshi)
+
+private fun syncRunValue(run: DashboardSyncRun): String =
+    if (run.failedAt != null) {
+        "Failed: ${run.failReason ?: "unknown"}"
+    } else {
+        "${formatDuration(run.durationS)} · " +
+            "+${formatInteger(run.elementsCreated)} " +
+            "~${formatInteger(run.elementsUpdated)} " +
+            "-${formatInteger(run.elementsDeleted)}"
+    }
 
 private fun formatDuration(seconds: Double?): String =
     if (seconds == null) "—" else "${(seconds * 10).roundToLong() / 10.0}s"

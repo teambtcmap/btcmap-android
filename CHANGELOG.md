@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+- Expand the infrastructure dashboard's cards in place instead of opening a dialog: a summed import row reveals its per-source breakdown, the API-call totals their top-10 lists, the Lightning balances their pending/confirmed splits, the sync success rate its runs, and each wallet its cache time and transactions; the iOS client row now uses the iOS icon
+- Show a spinner in place of a toolbar's sync/refresh action while the work runs (the database sync and the infrastructure dashboard load) instead of leaving a disabled button, holding the same slot so the action does not shift
 - Rework the database screen: list every table in one card with a compact rows/visible/deleted summary and, on tap, its full breakdown and newest update; add a matching Bundles card for the bundled snapshots; move the sync action into the toolbar and the sync card to the top; and flow the cards into columns on tablets and wide desktop windows
 - Time every step of a full sync and show the last run's per-step durations, expandable from a "Last sync" row in the database screen's sync card
 - Format map distances on the desktop with the app's locale and the metre/kilometre split, so a distance under a kilometre reads in metres as it does on Android instead of a hardcoded "0.5 km"

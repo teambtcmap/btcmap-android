@@ -2,7 +2,6 @@ package org.btcmap.ui
 
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertTrue
 import org.btcmap.api.Dashboard
 import org.btcmap.api.DashboardEndpointCount
 import org.btcmap.api.DashboardImport
@@ -75,35 +74,67 @@ class InfraDashboardSectionsTest {
 
         assertEquals("unique-ips", sections.first().key)
         assertEquals(
-            listOf("public", "android", "phone_iphone", "person", "smart_toy"),
+            listOf("public", "android", "ios", "person", "smart_toy"),
             byKey.getValue("unique-ips").entries.map { it.icon },
         )
         assertEquals("1 / 2 / 3", byKey.getValue("places").entries.first().value)
-        // All sources are merged into one clickable card with summed totals.
+
+        // All sources are merged into one card with summed totals; each summed
+        // row expands to its per-source breakdown.
         val imports = byKey.getValue("imports")
         assertEquals(
             listOf("1 / 0 / 10", "0 / 0 / 2", "0 / 0 / 0"),
             imports.entries.map { it.value },
         )
-        assertTrue(imports.onClick != null)
-        // Both kinds of API call share one clickable card with their totals.
+        assertEquals(
+            listOf("square" to "0 / 0 / 9", "blink" to "1 / 0 / 1"),
+            imports.entries.first().details.map { it.label to it.value },
+        )
+
+        // Both kinds of API call share one card; each kind's top-10 list
+        // expands under its total.
         val apiCalls = byKey.getValue("api-calls")
         assertEquals(listOf("5", "3"), apiCalls.entries.map { it.value })
-        assertTrue(apiCalls.onClick != null)
-        // Only the liquidity split is on the card; the rest is in the dialog.
+        assertEquals(
+            listOf("get_area" to "5"),
+            apiCalls.entries[0].details.map { it.label to it.value },
+        )
+        assertEquals(
+            listOf("GET /v4/places" to "3"),
+            apiCalls.entries[1].details.map { it.label to it.value },
+        )
+
+        // The node's balance and liquidity on the card, each expanding to its
+        // split.
         val lnd = byKey.getValue("lnd")
-        assertEquals(listOf("7 sat", "6 sat"), lnd.entries.map { it.value })
-        assertTrue(lnd.onClick != null)
-        // Only the success rate is on the card; the runs are in the dialog.
+        assertEquals(
+            listOf("On-chain total", "Inbound liquidity", "Outbound liquidity", "Total balance"),
+            lnd.entries.map { it.label },
+        )
+        assertEquals(
+            listOf("Confirmed", "Unconfirmed"),
+            lnd.entries[0].details.map { it.label },
+        )
+        assertEquals(listOf("Pending inbound"), lnd.entries[1].details.map { it.label })
+        assertEquals(listOf("Pending outbound"), lnd.entries[2].details.map { it.label })
+
+        // Only the success rate is on the card; each run expands under it.
         val syncRuns = byKey.getValue("sync-runs")
         assertEquals("Success rate", syncRuns.entries.single().label)
         assertEquals("1/1", syncRuns.entries.single().value)
-        assertTrue(syncRuns.onClick != null)
-        // One card lists every wallet; transactions are in the dialog.
+        assertEquals(
+            listOf("10.0s · +3 ~4 -5"),
+            syncRuns.entries.single().details.map { it.value },
+        )
+
+        // One card lists every wallet; each expands to its cache time and
+        // transactions.
         val wallets = byKey.getValue("wallets")
         assertEquals(listOf("10 sat"), wallets.entries.map { it.value })
-        assertTrue(wallets.onClick != null)
-        assertTrue(byKey.containsKey("unique-ips"))
+        assertEquals(
+            listOf("Cached", "abcdef012345…"),
+            wallets.entries.single().details.map { it.label },
+        )
     }
 
     @Test
@@ -111,13 +142,10 @@ class InfraDashboardSectionsTest {
         val byKey = infraDashboardSections(Dashboard()).associateBy { it.key }
 
         assertEquals("None", byKey.getValue("imports").entries.single().value)
-        kotlin.test.assertNull(byKey.getValue("imports").onClick)
+        assertEquals(0, byKey.getValue("imports").entries.single().details.size)
         assertEquals("Unavailable", byKey.getValue("lnd").entries.single().value)
-        kotlin.test.assertNull(byKey.getValue("lnd").onClick)
+        assertEquals(0, byKey.getValue("lnd").entries.single().details.size)
         assertEquals("None", byKey.getValue("wallets").entries.single().value)
-        kotlin.test.assertNull(byKey.getValue("wallets").onClick)
-        kotlin.test.assertNull(byKey.getValue("api-calls").onClick)
         assertEquals("None", byKey.getValue("sync-runs").entries.single().value)
-        kotlin.test.assertNull(byKey.getValue("sync-runs").onClick)
     }
 }

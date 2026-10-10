@@ -170,7 +170,7 @@ private fun StatsCardContent(section: StatsSection) {
 /**
  * One label/value row. A row whose [StatsEntry.details] are non-empty is
  * tappable: it shows an expand affordance and reveals the details beneath
- * itself, aligned to the same left edge as the row.
+ * itself, drawn in the same shape as an unexpanded row.
  */
 @Composable
 private fun StatsEntryRow(section: StatsSection, entry: StatsEntry) {
@@ -242,14 +242,14 @@ private fun StatsEntryRow(section: StatsSection, entry: StatsEntry) {
                         .testTag(statsDetailTag(section.key, entry.label, detail.label))
                         // Label and value are one node in the details too.
                         .semantics(mergeDescendants = true) {}
-                        .padding(start = 16.dp, end = 16.dp, top = 4.dp, bottom = 10.dp),
+                        .padding(horizontal = 16.dp, vertical = 12.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    // The details keep the same left edge and colours as an
-                    // unexpanded row, so a revealed step reads as one of them.
+                    // The details share an unexpanded row's type scale, colours
+                    // and padding, so a revealed step reads as one of them.
                     Text(
                         text = detail.label,
-                        style = MaterialTheme.typography.bodySmall,
+                        style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
@@ -259,7 +259,7 @@ private fun StatsEntryRow(section: StatsSection, entry: StatsEntry) {
                     )
                     Text(
                         text = detail.value,
-                        style = MaterialTheme.typography.bodySmall,
+                        style = MaterialTheme.typography.bodyMedium,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                     )

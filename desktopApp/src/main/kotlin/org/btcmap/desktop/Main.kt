@@ -833,17 +833,26 @@ private fun runApp() = application {
                             title = LABELS.infraTitle,
                             onBack = { nav.pop() },
                             actions = {
-                                if (infraRefreshing) {
-                                    CircularProgressIndicator(
-                                        strokeWidth = 2.dp,
-                                        modifier = Modifier.size(24.dp),
-                                    )
-                                } else {
-                                    IconButton(onClick = { infraRefreshKey++ }) {
-                                        MaterialSymbol(
-                                            glyph = "refresh",
-                                            contentDescription = LABELS.refresh,
+                                // The spinner and the button share one 48dp
+                                // slot, so swapping between them does not shift
+                                // the action (the row is trailing-aligned, so a
+                                // narrower item would slide right).
+                                Box(
+                                    modifier = Modifier.size(48.dp),
+                                    contentAlignment = Alignment.Center,
+                                ) {
+                                    if (infraRefreshing) {
+                                        CircularProgressIndicator(
+                                            strokeWidth = 2.dp,
+                                            modifier = Modifier.size(24.dp),
                                         )
+                                    } else {
+                                        IconButton(onClick = { infraRefreshKey++ }) {
+                                            MaterialSymbol(
+                                                glyph = "refresh",
+                                                contentDescription = LABELS.refresh,
+                                            )
+                                        }
                                     }
                                 }
                             },
@@ -1110,14 +1119,28 @@ private fun runApp() = application {
                                 title = LABELS.dbStatsTitle,
                                 onBack = { nav.pop() },
                                 actions = {
-                                    IconButton(
-                                        onClick = { syncManager.start() },
-                                        enabled = syncState == SyncState.Idle,
+                                    // A running sync replaces the button with a
+                                    // spinner in the same 48dp slot, so the
+                                    // action does not shift (the row is
+                                    // trailing-aligned, so a narrower item
+                                    // would slide right).
+                                    Box(
+                                        modifier = Modifier.size(48.dp),
+                                        contentAlignment = Alignment.Center,
                                     ) {
-                                        MaterialSymbol(
-                                            glyph = "sync",
-                                            contentDescription = DB_STATS_PAGE_LABELS.syncNow,
-                                        )
+                                        if (syncState == SyncState.Idle) {
+                                            IconButton(onClick = { syncManager.start() }) {
+                                                MaterialSymbol(
+                                                    glyph = "sync",
+                                                    contentDescription = DB_STATS_PAGE_LABELS.syncNow,
+                                                )
+                                            }
+                                        } else {
+                                            CircularProgressIndicator(
+                                                strokeWidth = 2.dp,
+                                                modifier = Modifier.size(24.dp),
+                                            )
+                                        }
                                     }
                                 },
                             ) {

@@ -15,6 +15,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.withContext
@@ -621,7 +622,7 @@ private fun UserProfileRoute(
 
 /**
  * The database stats route: the shared [DbStatsPage] under the standard top bar,
- * whose refresh action starts the app-scoped sync and disables itself while one
+ * whose sync action starts the app-scoped sync and swaps to a spinner while one
  * is running. The bundled snapshot stats are read once, off the main thread.
  */
 @Composable
@@ -644,14 +645,26 @@ private fun DbStatsRoute(
         onBack = onBack,
         backContentDescription = labels.back,
         actions = {
-            IconButton(
-                onClick = { services.syncController.start() },
-                enabled = syncState == SyncState.Idle,
+            // A running sync replaces the button with a spinner in the same
+            // 48dp slot, so the action does not shift (the row is
+            // trailing-aligned, so a narrower item would slide right).
+            Box(
+                modifier = Modifier.size(48.dp),
+                contentAlignment = Alignment.Center,
             ) {
-                MaterialSymbol(
-                    glyph = "sync",
-                    contentDescription = labels.dbStats.syncNow,
-                )
+                if (syncState == SyncState.Idle) {
+                    IconButton(onClick = { services.syncController.start() }) {
+                        MaterialSymbol(
+                            glyph = "sync",
+                            contentDescription = labels.dbStats.syncNow,
+                        )
+                    }
+                } else {
+                    CircularProgressIndicator(
+                        strokeWidth = 2.dp,
+                        modifier = Modifier.size(24.dp),
+                    )
+                }
             }
         },
     ) {
@@ -945,14 +958,22 @@ private fun InfraDashboardRoute(
         onBack = onBack,
         backContentDescription = labels.back,
         actions = {
-            if (refreshing) {
-                CircularProgressIndicator(
-                    strokeWidth = 2.dp,
-                    modifier = Modifier.size(24.dp),
-                )
-            } else {
-                IconButton(onClick = { refreshKey++ }) {
-                    MaterialSymbol(glyph = "refresh", contentDescription = labels.refresh)
+            // The spinner and the button share one 48dp slot, so swapping
+            // between them does not shift the action (the row is
+            // trailing-aligned, so a narrower item would slide right).
+            Box(
+                modifier = Modifier.size(48.dp),
+                contentAlignment = Alignment.Center,
+            ) {
+                if (refreshing) {
+                    CircularProgressIndicator(
+                        strokeWidth = 2.dp,
+                        modifier = Modifier.size(24.dp),
+                    )
+                } else {
+                    IconButton(onClick = { refreshKey++ }) {
+                        MaterialSymbol(glyph = "refresh", contentDescription = labels.refresh)
+                    }
                 }
             }
         },
