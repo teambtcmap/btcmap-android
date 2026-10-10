@@ -11,9 +11,28 @@ import okio.Buffer
 import okio.ForwardingSource
 import okio.Source
 import okio.buffer
+import org.btcmap.bundle.BundledAreas
+import org.btcmap.bundle.BundledComments
+import org.btcmap.bundle.BundledEvents
+import org.btcmap.bundle.BundledPlaces
+import org.btcmap.db.table.area.TABLE as AREA_TABLE
+import org.btcmap.db.table.comment.TABLE as COMMENT_TABLE
+import org.btcmap.db.table.event.TABLE as EVENT_TABLE
+import org.btcmap.db.table.place.TABLE as PLACE_TABLE
 import org.btcmap.json.btcmapJson
 import org.btcmap.util.rethrowIfCancellation
 import org.btcmap.util.toInstantOrNull
+
+/**
+ * The bundled snapshots the database stats read, keyed by the table each seeds.
+ * Shared so every host reports the same set of bundles.
+ */
+val DATABASE_BUNDLES: Map<String, String> = mapOf(
+    PLACE_TABLE to BundledPlaces.FILE_NAME,
+    COMMENT_TABLE to BundledComments.FILE_NAME,
+    AREA_TABLE to BundledAreas.FILE_NAME,
+    EVENT_TABLE to BundledEvents.FILE_NAME,
+)
 
 /** Stats about a bundled snapshot asset. */
 data class BundleStats(

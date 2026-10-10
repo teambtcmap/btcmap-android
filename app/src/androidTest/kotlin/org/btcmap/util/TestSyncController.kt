@@ -7,6 +7,7 @@ import kotlinx.coroutines.flow.StateFlow
 import org.btcmap.sync.Sync
 import org.btcmap.sync.SyncController
 import org.btcmap.sync.SyncEvent
+import org.btcmap.sync.SyncRunStats
 import org.btcmap.sync.SyncState
 
 /**
@@ -26,6 +27,9 @@ internal class TestSyncController(
 
     private val mutableEvents = MutableSharedFlow<SyncEvent>(extraBufferCapacity = 16)
     override val events: SharedFlow<SyncEvent> = mutableEvents
+
+    private val mutableLastSyncStats = MutableStateFlow<SyncRunStats?>(null)
+    override val lastSyncStats: StateFlow<SyncRunStats?> = mutableLastSyncStats
 
     /**
      * Publishes a change the way a finished sync step would, so a test can drive

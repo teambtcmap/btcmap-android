@@ -632,6 +632,7 @@ private fun DbStatsRoute(
     onBack: () -> Unit,
 ) {
     val syncState by services.syncController.state.collectAsState()
+    val lastSyncStats by services.syncController.lastSyncStats.collectAsState()
     var bundles by remember { mutableStateOf(emptyMap<String, BundleStats>()) }
 
     LaunchedEffect(Unit) {
@@ -661,6 +662,7 @@ private fun DbStatsRoute(
             labels = labels.dbStats,
             onSync = { services.syncController.start() },
             bundles = bundles,
+            lastSyncStats = lastSyncStats,
             showSyncButton = false,
         )
     }

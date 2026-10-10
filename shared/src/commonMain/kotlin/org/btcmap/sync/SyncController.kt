@@ -14,6 +14,12 @@ interface SyncController {
     val state: StateFlow<SyncState>
     val events: SharedFlow<SyncEvent>
 
+    /**
+     * The timings of the last completed full sync run, or null before the first
+     * one. In memory only, for the database stats screen.
+     */
+    val lastSyncStats: StateFlow<SyncRunStats?>
+
     /** Starts a full sync unless one is already running. */
     fun start()
 

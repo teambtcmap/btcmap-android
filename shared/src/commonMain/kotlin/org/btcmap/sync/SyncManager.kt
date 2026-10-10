@@ -15,6 +15,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import org.btcmap.util.rethrowIfCancellation
+import kotlin.time.Clock
 import kotlin.time.Duration
 
 /**
@@ -67,6 +68,9 @@ class SyncManager(
     )
     override val events: SharedFlow<SyncEvent> = _events.asSharedFlow()
 
+    private val _lastSyncStats = MutableStateFlow<SyncRunStats?>(null)
+    override val lastSyncStats: StateFlow<SyncRunStats?> = _lastSyncStats.asStateFlow()
+
     private var job: Job? = null
 
     /** Starts a full sync unless one is already running. */
@@ -96,32 +100,44 @@ class SyncManager(
     }
 
     internal suspend fun runFullSync() = mutex.withLock {
+        val runStartedAt = Clock.System.now()
+        val timings = mutableListOf<SyncStepTiming>()
+
+        // Times each step as it runs and keeps its duration, so the last run's
+        // per-step timings can be published when the run finishes.
+        suspend fun <T> timed(state: SyncState, block: suspend () -> T): T? {
+            val startedAt = Clock.System.now()
+            val result = step(state, block)
+            timings.add(SyncStepTiming(state, Clock.System.now() - startedAt))
+            return result
+        }
+
         try {
             // Each seeded batch is announced as it commits, so the map fills in
             // while the rest of the snapshot is still being imported rather than
             // staying empty for the whole seed.
-            step(SyncState.UnbundlingPlaces) { seedPlaces { emit(SyncEvent.PlacesChanged) } }
-            val places = step(SyncState.SyncingPlaces) { sync().syncPlaces() }
+            timed(SyncState.UnbundlingPlaces) { seedPlaces { emit(SyncEvent.PlacesChanged) } }
+            val places = timed(SyncState.SyncingPlaces) { sync().syncPlaces() }
             if ((places?.rowsAffected ?: 0L) > 0) {
                 emit(SyncEvent.PlacesChanged)
             }
 
-            val eventsImported = step(SyncState.UnbundlingEvents) { seedEvents() } ?: 0L
-            val events = step(SyncState.SyncingEvents) { sync().syncEvents() }
+            val eventsImported = timed(SyncState.UnbundlingEvents) { seedEvents() } ?: 0L
+            val events = timed(SyncState.SyncingEvents) { sync().syncEvents() }
             if (eventsImported > 0 || (events?.rowsAffected ?: 0L) > 0) {
                 emit(SyncEvent.EventsChanged)
             }
 
             // Comments are seeded too, so a place's comments work offline; only
             // a sync that changed something has to rebuild the map.
-            step(SyncState.UnbundlingComments) { seedComments() }
-            val comments = step(SyncState.SyncingComments) { sync().syncComments() }
+            timed(SyncState.UnbundlingComments) { seedComments() }
+            val comments = timed(SyncState.SyncingComments) { sync().syncComments() }
             if ((comments?.rowsAffected ?: 0L) > 0) {
                 emit(SyncEvent.CommentsChanged)
             }
 
-            val areasImported = step(SyncState.UnbundlingAreas) { seedAreas() } ?: 0L
-            val areas = step(SyncState.SyncingAreas) { sync().syncAreas() }
+            val areasImported = timed(SyncState.UnbundlingAreas) { seedAreas() } ?: 0L
+            val areas = timed(SyncState.SyncingAreas) { sync().syncAreas() }
             if (areasImported > 0 || (areas?.rowsAffected ?: 0L) > 0) {
                 emit(SyncEvent.AreasChanged)
             }
@@ -137,6 +153,10 @@ class SyncManager(
                 emit(SyncEvent.UserChanged)
             }
         } finally {
+            _lastSyncStats.value = SyncRunStats(
+                steps = timings.toList(),
+                total = Clock.System.now() - runStartedAt,
+            )
             _state.value = SyncState.Idle
         }
     }

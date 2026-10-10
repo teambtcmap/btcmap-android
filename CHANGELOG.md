@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+- Rework the database screen: list every table in one card with a compact rows/visible/deleted summary and, on tap, its full breakdown and newest update; add a matching Bundles card for the bundled snapshots; move the sync action into the toolbar and the sync card to the top; and flow the cards into columns on tablets and wide desktop windows
+- Time every step of a full sync and show the last run's per-step durations, expandable from a "Last sync" row in the database screen's sync card
 - Format map distances on the desktop with the app's locale and the metre/kilometre split, so a distance under a kilometre reads in metres as it does on Android instead of a hardcoded "0.5 km"
 - Upgrade to MapLibre Compose 0.20.0: right-to-left and Arabic labels render correctly, an icon whose image arrives after its tile now appears, line patterns match the browser, locale-aware number formatting and feature queries are more accurate, and map interactions run more smoothly off the UI thread
 - Mark the map marker filter's selected kind by tinting its icon with the new "Button accent" colour instead of ringing it with a border; the accent defaults to the boosted marker colour and is overridable in Customize colors, where the old "Button border" row is renamed

@@ -1,5 +1,6 @@
 package org.btcmap.ui
 
+import kotlin.time.Duration
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -55,6 +56,7 @@ import org.btcmap.settings.showAttribution
 import org.btcmap.settings.verifiedFilterYears
 import org.btcmap.stats.StatsEntry
 import org.btcmap.stats.StatsSection
+import org.btcmap.sync.SyncRunStats
 import org.btcmap.sync.SyncState
 import org.btcmap.ui.map.AreaChipPalette
 import org.btcmap.ui.map.MarkerPalette
@@ -394,15 +396,17 @@ data class DbStatsPageLabels(
     val sync: String,
     val source: String,
     val state: String,
+    val lastSync: String,
     val syncNow: String,
     val syncStateLabel: (SyncState) -> String,
 )
 
 /**
- * The database stats page: the shared [StatsScreen] over the shared
+ * The database stats page: the shared [StatsGrid] over the shared
  * [dbStatsSections], with the host's own sync card and, optionally, a "sync
  * now" button. The Android host reads the bundled snapshots and hides the
- * button, since its toolbar carries the sync action.
+ * button, since its toolbar carries the sync action. The cards flow into
+ * columns on a wide window (see [StatsGrid]).
  */
 @Composable
 fun DbStatsPage(
@@ -412,13 +416,14 @@ fun DbStatsPage(
     labels: DbStatsPageLabels,
     onSync: () -> Unit,
     bundles: Map<String, BundleStats> = emptyMap(),
+    lastSyncStats: SyncRunStats? = null,
     showSyncButton: Boolean = true,
     modifier: Modifier = Modifier,
 ) {
     var sections by remember { mutableStateOf<List<StatsSection>>(emptyList()) }
-    LaunchedEffect(syncState, bundles) {
+    LaunchedEffect(syncState, bundles, lastSyncStats) {
         sections = withContext(Dispatchers.IO) {
-            loadDbStatsSections(db, settings.apiUrl.toString(), syncState, labels, bundles)
+            loadDbStatsSections(db, settings.apiUrl.toString(), syncState, labels, bundles, lastSyncStats)
         }
     }
 
@@ -435,7 +440,7 @@ fun DbStatsPage(
             }
         }
     }
-    StatsScreen(sections = sections, modifier = modifier)
+    StatsGrid(sections = sections, modifier = modifier)
 }
 
 private fun loadDbStatsSections(
@@ -444,12 +449,41 @@ private fun loadDbStatsSections(
     syncState: SyncState,
     labels: DbStatsPageLabels,
     bundles: Map<String, BundleStats>,
+    lastSyncStats: SyncRunStats?,
 ): List<StatsSection> {
     val reader = DbStatsReader(db.conn)
     val file = DatabaseFile.read(db.path)
     val (version, tables) = runDbBlocking { reader.readUserVersion() to reader.readTables() }
 
     return buildList {
+        add(
+            StatsSection(
+                key = "sync",
+                title = labels.sync,
+                icon = "sync",
+                entries = buildList {
+                    add(StatsEntry(labels.source, apiUrl))
+                    add(StatsEntry(labels.state, labels.syncStateLabel(syncState)))
+                    lastSyncStats?.let { stats ->
+                        add(
+                            StatsEntry(
+                                label = labels.lastSync,
+                                value = formatSyncDuration(stats.total),
+                                // The per-step timings are one tap away: the
+                                // whole run is the row's value, each step a
+                                // detail under it.
+                                details = stats.steps.map { step ->
+                                    StatsEntry(
+                                        labels.syncStateLabel(step.state),
+                                        formatSyncDuration(step.duration),
+                                    )
+                                },
+                            )
+                        )
+                    }
+                },
+            )
+        )
         addAll(
             dbStatsSections(
                 file = file,
@@ -460,18 +494,19 @@ private fun loadDbStatsSections(
                 formatBytes = ::formatBytes,
             ),
         )
-        add(
-            StatsSection(
-                key = "sync",
-                title = labels.sync,
-                icon = "sync",
-                entries = listOf(
-                    StatsEntry(labels.source, apiUrl),
-                    StatsEntry(labels.state, labels.syncStateLabel(syncState)),
-                ),
-            )
-        )
     }
+}
+
+/**
+ * Renders a sync step's duration compactly: milliseconds under a second,
+ * tenths of a second under a minute, and whole minutes and seconds above that.
+ */
+internal fun formatSyncDuration(duration: Duration): String {
+    val millis = duration.inWholeMilliseconds
+    if (millis < 1_000) return "$millis ms"
+    val seconds = millis / 1_000
+    if (seconds < 60) return "$seconds.${(millis % 1_000) / 100} s"
+    return "${seconds / 60}m ${seconds % 60}s"
 }
 
 /** A titled radio list in a dialog, the shape Android shows as picker dialogs. */

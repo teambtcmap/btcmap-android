@@ -116,7 +116,10 @@ import org.btcmap.bundle.BundledEvents
 import org.btcmap.bundle.BundledPlaces
 import org.btcmap.boost.BoostPlan
 import org.btcmap.db.Database
+import org.btcmap.dbstats.BundleStats
+import org.btcmap.dbstats.DATABASE_BUNDLES
 import org.btcmap.dbstats.DbStatsLabels
+import org.btcmap.dbstats.readBundles
 import org.btcmap.payment.PaymentInvoice
 import org.btcmap.platform.ioDispatcher
 import org.btcmap.place.ReportType
@@ -1089,17 +1092,46 @@ private fun runApp() = application {
                             ColorsPage(settings = settings, labels = COLORS_PAGE_LABELS)
                         }
 
-                        Route.DbStats -> ScreenPage(
-                            title = LABELS.dbStatsTitle,
-                            onBack = { nav.pop() },
-                        ) {
-                            DbStatsPage(
-                                db = db,
-                                settings = settings,
-                                syncState = syncState,
-                                labels = DB_STATS_PAGE_LABELS,
-                                onSync = { syncManager.start() },
-                            )
+                        Route.DbStats -> {
+                            // The desktop ships the same snapshots as Android, on
+                            // the classpath, so the bundles card reads them like
+                            // the Android host does. Reading streams several
+                            // megabytes, so keep it off the UI thread.
+                            val lastSyncStats by syncManager.lastSyncStats.collectAsState()
+                            var bundles by remember {
+                                mutableStateOf(emptyMap<String, BundleStats>())
+                            }
+                            LaunchedEffect(Unit) {
+                                bundles = withContext(Dispatchers.IO) {
+                                    readBundles(DATABASE_BUNDLES, ::bundledSnapshot).stats
+                                }
+                            }
+                            ScreenPage(
+                                title = LABELS.dbStatsTitle,
+                                onBack = { nav.pop() },
+                                actions = {
+                                    IconButton(
+                                        onClick = { syncManager.start() },
+                                        enabled = syncState == SyncState.Idle,
+                                    ) {
+                                        MaterialSymbol(
+                                            glyph = "sync",
+                                            contentDescription = DB_STATS_PAGE_LABELS.syncNow,
+                                        )
+                                    }
+                                },
+                            ) {
+                                DbStatsPage(
+                                    db = db,
+                                    settings = settings,
+                                    syncState = syncState,
+                                    labels = DB_STATS_PAGE_LABELS,
+                                    onSync = { syncManager.start() },
+                                    bundles = bundles,
+                                    lastSyncStats = lastSyncStats,
+                                    showSyncButton = false,
+                                )
+                            }
                         }
 
                         Route.Account -> {

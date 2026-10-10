@@ -20,6 +20,7 @@ import org.junit.Assert
 import org.junit.Rule
 import org.junit.Test
 import java.util.concurrent.atomic.AtomicInteger
+import kotlin.time.Duration
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class SyncManagerTest {
@@ -94,6 +95,34 @@ class SyncManagerTest {
             listOf("/v4/places", "/v4/events", "/v4/place-comments", "/v4/areas"),
             paths,
         )
+    }
+
+    @Test
+    fun runFullSync_recordsTheTimingsOfEveryStep() = runTest {
+        enqueueEmpty()
+        val sync = Sync(createApi(), createDatabase())
+        val subject = manager(sync = { sync })
+
+        Assert.assertNull(subject.lastSyncStats.value)
+
+        subject.runFullSync()
+
+        val stats = subject.lastSyncStats.value
+        Assert.assertNotNull(stats)
+        Assert.assertEquals(
+            listOf(
+                SyncState.UnbundlingPlaces,
+                SyncState.SyncingPlaces,
+                SyncState.UnbundlingEvents,
+                SyncState.SyncingEvents,
+                SyncState.UnbundlingComments,
+                SyncState.SyncingComments,
+                SyncState.UnbundlingAreas,
+                SyncState.SyncingAreas,
+            ),
+            stats!!.steps.map { it.state },
+        )
+        Assert.assertTrue(stats.total >= Duration.ZERO)
     }
 
     @Test

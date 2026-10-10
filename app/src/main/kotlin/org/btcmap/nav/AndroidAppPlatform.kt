@@ -20,29 +20,14 @@ import okio.source
 import org.btcmap.App
 import org.btcmap.api.ActivityFeedItem
 import org.btcmap.api.getPlaceOsmId
-import org.btcmap.bundle.BundledAreas
-import org.btcmap.bundle.BundledComments
-import org.btcmap.bundle.BundledEvents
-import org.btcmap.bundle.BundledPlaces
-import org.btcmap.db.table.area.TABLE as AREA_TABLE
-import org.btcmap.db.table.comment.TABLE as COMMENT_TABLE
-import org.btcmap.db.table.event.TABLE as EVENT_TABLE
-import org.btcmap.db.table.place.TABLE as PLACE_TABLE
 import org.btcmap.dbstats.BundleStats
+import org.btcmap.dbstats.DATABASE_BUNDLES
 import org.btcmap.dbstats.readBundles
 import org.btcmap.i18n.Strings
 import org.btcmap.map.UpdateNotificationController
 import org.btcmap.place.toOsmUrl
 import org.btcmap.ui.AppPlatform
 import org.btcmap.util.userFacingMessage
-
-/** The bundled snapshots the database stats page reads, keyed by table name. */
-private val DATABASE_BUNDLES = mapOf(
-    PLACE_TABLE to BundledPlaces.FILE_NAME,
-    COMMENT_TABLE to BundledComments.FILE_NAME,
-    AREA_TABLE to BundledAreas.FILE_NAME,
-    EVENT_TABLE to BundledEvents.FILE_NAME,
-)
 
 /** The Android implementation of the shared [AppPlatform]. */
 class AndroidAppPlatform(

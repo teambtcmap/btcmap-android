@@ -27,6 +27,7 @@ import org.btcmap.nav.AppRootFragment
 import org.btcmap.sync.SyncState
 import org.btcmap.ui.AppRoute
 import org.btcmap.ui.STATS_LIST_TAG
+import org.btcmap.ui.statsDetailTag
 import org.btcmap.ui.statsEntryTag
 import org.btcmap.util.AppTestCase
 import org.btcmap.util.TestSyncController
@@ -46,23 +47,34 @@ class DbStatsFragmentTest : AppTestCase() {
     val composeTestRule = createEmptyComposeRule()
 
     @Test
-    fun showsRowCountsForEachTable() = runBlocking<Unit> {
+    fun summarisesEveryTableInOneCard() = runBlocking<Unit> {
         databaseRule.db.place.insert(listOf(place(1L), place(2L)))
 
         launchFragment { _, _ ->
-            waitForSection("place table")
-            entry("table:place", "Rows").assertTextContains("2")
-            entry("table:place", "Visible").assertTextContains("2")
-            entry("table:place", "Deleted").assertTextContains("0")
-
-            waitForSection("event table")
-            entry("table:event", "Future").assertExists()
+            waitForSection("Tables")
+            entry("tables", "place").assertTextContains("2/2/0")
+            entry("tables", "event").assertExists()
 
             waitForSection("Database")
             entry("database", "Version").assertTextContains(Database.VERSION.toString())
 
             waitForSection("Sync")
             entry("sync", "State").assertTextContains("Idle")
+        }
+    }
+
+    @Test
+    fun expandsATableRowToShowTheBreakdown() = runBlocking<Unit> {
+        databaseRule.db.place.insert(listOf(place(1L)))
+
+        launchFragment { _, _ ->
+            waitForSection("Tables")
+            entry("tables", "place").performClick()
+
+            detail("tables", "place", "Rows").assertTextContains("1")
+            detail("tables", "place", "Visible").assertTextContains("1")
+            detail("tables", "place", "Deleted").assertTextContains("0")
+            detail("tables", "place", "Max updated at").assertExists()
         }
     }
 
@@ -80,12 +92,13 @@ class DbStatsFragmentTest : AppTestCase() {
     @Test
     fun showsBundleStatsForEachSnapshot() = runBlocking<Unit> {
         launchFragment { _, _ ->
-            waitForSection("place bundle")
+            waitForSection("Bundles")
+            entry("bundles", "place").performClick()
 
-            entry("bundle:place", "Location")
+            detail("bundles", "place", "Location")
                 .assertTextContains("assets/bundled-places.json")
-            entry("bundle:place", "Visible").assertExists()
-            entry("bundle:place", "Deleted").assertExists()
+            detail("bundles", "place", "Visible").assertExists()
+            detail("bundles", "place", "Deleted").assertExists()
         }
     }
 
@@ -95,8 +108,8 @@ class DbStatsFragmentTest : AppTestCase() {
         databaseRule.db.place.insert(listOf(place(1L)))
 
         launchFragment { scenario, _ ->
-            waitForSection("place table")
-            entry("table:place", "Rows").assertTextContains("1")
+            waitForSection("Tables")
+            entry("tables", "place").assertTextContains("1/1/0")
 
             // The sync writes a new row, reports that it is running, and only
             // then finishes; the counts must be re-read when it does.
@@ -111,8 +124,8 @@ class DbStatsFragmentTest : AppTestCase() {
             scenario.onActivity { controller.setState(SyncState.Idle) }
             composeTestRule.waitUntil(5_000) {
                 runCatching {
-                    scrollToSection("place table")
-                    entry("table:place", "Rows").assertTextContains("2")
+                    scrollToSection("Tables")
+                    entry("tables", "place").assertTextContains("2/2/0")
                 }.isSuccess
             }
         }
@@ -156,6 +169,9 @@ class DbStatsFragmentTest : AppTestCase() {
 
     private fun entry(sectionKey: String, label: String) =
         composeTestRule.onNodeWithTag(statsEntryTag(sectionKey, label))
+
+    private fun detail(sectionKey: String, entryLabel: String, detailLabel: String) =
+        composeTestRule.onNodeWithTag(statsDetailTag(sectionKey, entryLabel, detailLabel))
 
     private fun launchFragment(block: (ActivityScenario<Activity>, AppRootFragment) -> Unit) {
         ActivityScenario.launch(Activity::class.java).use { scenario ->
