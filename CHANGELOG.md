@@ -6,6 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+- Format map distances on the desktop with the app's locale and the metre/kilometre split, so a distance under a kilometre reads in metres as it does on Android instead of a hardcoded "0.5 km"
 - Upgrade to MapLibre Compose 0.20.0: right-to-left and Arabic labels render correctly, an icon whose image arrives after its tile now appears, line patterns match the browser, locale-aware number formatting and feature queries are more accurate, and map interactions run more smoothly off the UI thread
 - Mark the map marker filter's selected kind by tinting its icon with the new "Button accent" colour instead of ringing it with a border; the accent defaults to the boosted marker colour and is overridable in Customize colors, where the old "Button border" row is renamed
 - Hide the map's event-review button while no submissions are waiting, and refresh its count after a sync reports the events changed, so an emptied or filled queue appears without leaving the map

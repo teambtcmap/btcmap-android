@@ -7,18 +7,18 @@ import org.btcmap.platform.ioDispatcher
 import kotlin.time.Duration
 import kotlin.time.TimeSource
 import kotlinx.coroutines.withContext
-import kotlinx.serialization.SerialName
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.DecodeSequenceMode
+import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.okio.decodeBufferedSourceToSequence
 import okio.Source
 import okio.buffer
+import org.btcmap.api.toComment
+import org.btcmap.api.toGetCommentsItem
 import org.btcmap.db.Database
 import org.btcmap.db.table.comment.Comment
 import org.btcmap.json.btcmapJson
 import org.btcmap.sync.reportSyncFailure
 import org.btcmap.util.rethrowIfCancellation
-import org.btcmap.util.toInstantOrNull
 
 /**
  * Seeds the comment table from the bundled snapshot produced by the bundler.
@@ -83,11 +83,11 @@ object BundledComments {
                 source.buffer().useSource { buffered ->
                     db.transaction {
                         var batch = mutableListOf<Comment>()
-                        for (record in btcmapJson.decodeBufferedSourceToSequence<BundledCommentJson>(
+                        for (record in btcmapJson.decodeBufferedSourceToSequence<JsonObject>(
                             buffered,
                             DecodeSequenceMode.ARRAY_WRAPPED,
                         )) {
-                            batch.add(record.toComment())
+                            batch.add(record.toGetCommentsItem().toComment())
                             if (batch.size >= BATCH_SIZE) {
                                 db.comment.insert(batch)
                                 commentsImported += batch.size
@@ -116,39 +116,3 @@ object BundledComments {
     }
 }
 
-/** One comment record as it appears in the bundled snapshot. */
-@Serializable
-internal class BundledCommentJson(
-    val id: Long? = null,
-    @SerialName("place_id") val placeId: Long? = null,
-    val text: String? = null,
-    @SerialName("created_at") val createdAt: String? = null,
-    @SerialName("updated_at") val updatedAt: String? = null,
-)
-
-internal fun BundledCommentJson.toComment(): Comment {
-    // Required fields must be present: defaulting them would silently seed a
-    // bogus comment if the snapshot format ever changes, instead of failing
-    // loudly and rolling the import back. The id is resolved first so the
-    // messages for the remaining fields can name the comment.
-    val commentId = requireNotNull(id) { "bundled comment is missing 'id'" }
-    val commentPlaceId = requireNotNull(placeId) { "bundled comment $commentId is missing 'place_id'" }
-    val commentText = requireNotNull(text) { "bundled comment $commentId is missing 'text'" }
-    val commentCreatedAt = requireNotNull(createdAt?.toInstantOrNull()) {
-        "bundled comment $commentId is missing a parseable 'created_at'"
-    }
-    // `updated_at` drives the delta sync cursor, so a malformed one must fail
-    // the seed rather than silently reset the cursor to an arbitrary value.
-    val commentUpdatedAt = requireNotNull(updatedAt?.toInstantOrNull()) {
-        "bundled comment $commentId is missing a parseable 'updated_at'"
-    }
-    require(commentText.isNotEmpty()) { "bundled comment $commentId has an empty 'text'" }
-    return Comment(
-        id = commentId,
-        placeId = commentPlaceId,
-        comment = commentText,
-        createdAt = commentCreatedAt,
-        updatedAt = commentUpdatedAt,
-        deletedAt = null,
-    )
-}

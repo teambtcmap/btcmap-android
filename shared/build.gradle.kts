@@ -27,7 +27,21 @@ kotlin {
     wasmJs {
     }
 
+    applyDefaultHierarchyTemplate()
+
     sourceSets {
+        // Android and the JVM are both JVM-backed and share the same platform
+        // actuals. Keep them in one source set instead of copying each into
+        // `androidMain` and `jvmMain`.
+        val commonMain by getting
+        val androidMain by getting
+        val jvmMain by getting
+        val jvmCommonMain by creating {
+            dependsOn(commonMain)
+        }
+        androidMain.dependsOn(jvmCommonMain)
+        jvmMain.dependsOn(jvmCommonMain)
+
         commonMain.dependencies {
             implementation(libs.androidx.sqlite)
             // Multiplatform JSON, the Gson replacement. Exposed because the

@@ -30,7 +30,21 @@ kotlin {
         }
     }
 
+    applyDefaultHierarchyTemplate()
+
     sourceSets {
+        // Android and the JVM are both JVM-backed and share the same platform
+        // actuals. Keep them in one source set instead of copying each into
+        // `androidMain` and `jvmMain`.
+        val commonMain by getting
+        val androidMain by getting
+        val jvmMain by getting
+        val jvmCommonMain by creating {
+            dependsOn(commonMain)
+        }
+        androidMain.dependsOn(jvmCommonMain)
+        jvmMain.dependsOn(jvmCommonMain)
+
         commonMain.dependencies {
             implementation(project(":shared"))
             // The db-stats page reads the shared database's connection, so the
@@ -54,13 +68,14 @@ kotlin {
             // WindowCompat, for the system-bar icon appearance over the map.
             implementation(libs.androidx.core)
             runtimeOnly(libs.maplibre.compose.runtime.opengl.android)
-            // Pinyin for the basemap POI sheet's Chinese names.
-            implementation(libs.jpinyin)
         }
 
         jvmMain.dependencies {
             implementation(compose.desktop.currentOs)
             runtimeOnly(libs.maplibre.compose.runtime.opengl.linux.x64)
+        }
+
+        jvmCommonMain.dependencies {
             // Pinyin for the basemap POI sheet's Chinese names.
             implementation(libs.jpinyin)
         }
@@ -81,11 +96,4 @@ tasks.withType<org.gradle.api.tasks.testing.Test>().configureEach {
     jvmArgs("--enable-native-access=ALL-UNNAMED")
     // The bundled Material Symbols font the marker glyph test loads.
     systemProperty("btcmap.iconFontDir", rootProject.file("app/src/main/assets").absolutePath)
-}
-
-compose.desktop {
-    application {
-        mainClass = "org.btcmap.ui.MainKt"
-        jvmArgs += "--enable-native-access=ALL-UNNAMED"
-    }
 }

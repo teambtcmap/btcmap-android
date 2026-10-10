@@ -2,6 +2,7 @@ package org.btcmap.ui
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 import kotlin.time.Instant
@@ -50,3 +51,7 @@ internal fun eventTimeText(
         )
     }
 }
+
+/** Parses the floating local date-time a duplicate pre-fill carries, or null. */
+fun String.toLocalDateTimeOrNull(): LocalDateTime? =
+    runCatching { LocalDateTime.parse(this) }.getOrNull()

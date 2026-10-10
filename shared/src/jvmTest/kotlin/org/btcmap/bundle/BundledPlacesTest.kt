@@ -186,7 +186,9 @@ class BundledPlacesTest {
     }
 
     @Test
-    fun readBundledPlace_degradedOptionalValuesBecomeNull() {
+    fun readBundledPlace_degradesMalformedTimestamps() {
+        // Display-only timestamps degrade to null, matching the shared mapper's
+        // policy (see toInstantOrNull); a bad value never fails the seed.
         val json = """
             {
               "id": 1,
@@ -195,9 +197,7 @@ class BundledPlacesTest {
               "icon": "store",
               "updated_at": "2026-03-01T12:00:00Z",
               "verified_at": "not-a-date",
-              "boosted_until": "not-a-date",
-              "localized_name": "not-an-object",
-              "website": "not a url"
+              "boosted_until": "not-a-date"
             }
         """.trimIndent()
 
@@ -205,8 +205,20 @@ class BundledPlacesTest {
 
         Assert.assertNull(place.verifiedAt)
         Assert.assertNull(place.boostedUntil)
-        Assert.assertNull(place.localizedName)
-        Assert.assertNull(place.website)
+    }
+
+    @Test
+    fun readBundledPlace_rejectsNonObjectLocalizedName() {
+        // The shared API decoder requires localized_name to be an object.
+        val json =
+            """{"id":1,"lat":0.0,"lon":0.0,"icon":"store","updated_at":"2026-03-01T12:00:00Z","localized_name":"not-an-object"}"""
+
+        try {
+            parseBundledPlace(json)
+            Assert.fail("expected a non-object 'localized_name' to be rejected")
+        } catch (e: Exception) {
+            Assert.assertTrue(e.message.orEmpty().contains("localized_name"))
+        }
     }
 
     @Test
@@ -223,7 +235,7 @@ class BundledPlacesTest {
             try {
                 parseBundledPlace(json)
                 Assert.fail("expected missing '$field' to be rejected")
-            } catch (e: IllegalArgumentException) {
+            } catch (e: Exception) {
                 Assert.assertTrue(e.message.orEmpty().contains(field))
             }
         }
@@ -236,8 +248,9 @@ class BundledPlacesTest {
         try {
             parseBundledPlace(json)
             Assert.fail("expected an unparseable 'updated_at' to be rejected")
-        } catch (e: IllegalArgumentException) {
-            Assert.assertTrue(e.message.orEmpty().contains("updated_at"))
+        } catch (_: Exception) {
+            // The shared API mapper's date parser reports the raw value, not the
+            // field name; the point is that a malformed cursor fails the seed.
         }
     }
 
@@ -246,58 +259,47 @@ class BundledPlacesTest {
         try {
             parseBundledPlace("""{"lat":0.0,"lon":0.0,"icon":"store"}""")
             Assert.fail("expected missing 'id' to be rejected")
-        } catch (e: IllegalArgumentException) {
+        } catch (e: Exception) {
             Assert.assertFalse(e.message.orEmpty().contains("null"))
         }
     }
 
     @Test
-    fun readBundledPlace_missingRequiredFieldAfterIdNamesThePlace() {
+    fun readBundledPlace_missingRequiredFieldAfterIdNamesTheField() {
         try {
             parseBundledPlace("""{"id":7,"lon":0.0,"icon":"store"}""")
             Assert.fail("expected missing 'lat' to be rejected")
-        } catch (e: IllegalArgumentException) {
-            Assert.assertTrue(e.message.orEmpty().contains("7"))
+        } catch (e: Exception) {
+            Assert.assertTrue(e.message.orEmpty().contains("lat"))
         }
     }
 
     @Test
-    fun readBundledPlace_rejectsCoordinatesOutOfRange() {
-        val cases = listOf(
+    fun readBundledPlace_keepsOutOfRangeCoordinates() {
+        // The seed now follows the API's field rules, which do not range-check
+        // coordinates; this documents the drop of the old seed-only check.
+        val place = parseBundledPlace(
             """{"id":1,"lat":90.1,"lon":0.0,"icon":"store","updated_at":"2026-03-01T12:00:00Z"}""",
-            """{"id":1,"lat":-90.1,"lon":0.0,"icon":"store","updated_at":"2026-03-01T12:00:00Z"}""",
-            """{"id":1,"lat":0.0,"lon":180.1,"icon":"store","updated_at":"2026-03-01T12:00:00Z"}""",
-            """{"id":1,"lat":0.0,"lon":-180.1,"icon":"store","updated_at":"2026-03-01T12:00:00Z"}""",
         )
 
-        cases.forEach { json ->
-            try {
-                parseBundledPlace(json)
-                Assert.fail("expected out-of-range coordinates in $json to be rejected")
-            } catch (e: IllegalArgumentException) {
-                Assert.assertTrue(e.message.orEmpty().contains("outside"))
-            }
-        }
+        Assert.assertEquals(90.1, place.lat, 0.0)
     }
 
     @Test
-    fun readBundledPlace_rejectsEmptyIcon() {
-        try {
-            parseBundledPlace("""{"id":1,"lat":0.0,"lon":0.0,"icon":"","updated_at":"2026-03-01T12:00:00Z"}""")
-            Assert.fail("expected an empty 'icon' to be rejected")
-        } catch (e: IllegalArgumentException) {
-            Assert.assertTrue(e.message.orEmpty().contains("icon"))
-        }
+    fun readBundledPlace_keepsEmptyIcon() {
+        // The seed now follows the API's field rules, which accept an empty icon.
+        val place = parseBundledPlace(
+            """{"id":1,"lat":0.0,"lon":0.0,"icon":"","updated_at":"2026-03-01T12:00:00Z"}""",
+        )
+
+        Assert.assertEquals("", place.icon)
     }
 
     @Test
-    fun readBundledPlace_treatsUnparseableBoostedUntilAsMissing() {
+    fun readBundledPlace_degradesUnparseableBoostedUntil() {
         val json = """{"id":1,"lat":0.0,"lon":0.0,"icon":"store","updated_at":"2026-03-01T12:00:00Z","boosted_until":"not-a-date"}"""
 
-        val place = parseBundledPlace(json)
-
-        Assert.assertNull(place.boostedUntil)
-        Assert.assertNotNull(place.id)
+        Assert.assertNull(parseBundledPlace(json).boostedUntil)
     }
 
     // --- seeding ----------------------------------------------------------------

@@ -39,7 +39,8 @@ import urllib.request
 from pathlib import Path
 
 # ``updated_since`` is not optional: see the module docstring. Keep this in sync
-# with ``getEvents`` in EventApi.kt and ``readBundledEvent`` in BundledEvents.kt.
+# with ``getEvents`` in EventApi.kt and ``toGetEventsDeltaItem`` in EventApi.kt,
+# the decoder the live sync and the seed now share.
 API_URL = "https://api.btcmap.org/v4/events?updated_since=1970-01-01T00:00:00Z"
 PROJECT_ROOT = Path(__file__).resolve().parent
 APP_DIR = PROJECT_ROOT / "app"

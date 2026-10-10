@@ -17,11 +17,11 @@ import kotlinx.coroutines.withContext
 import org.btcmap.App
 import org.btcmap.api
 import org.btcmap.api.getEvent
+import org.btcmap.api.toEvent
 import org.btcmap.auth.authTokenLabel
 import org.btcmap.databinding.AppRootFragmentBinding
 import org.btcmap.db
 import org.btcmap.db.table.event.Event
-import org.btcmap.event.toEvent
 import org.btcmap.settings.offlineStyleFamily
 import org.btcmap.settings.offlineStyleUrl
 import org.btcmap.settings.prefs

@@ -79,7 +79,6 @@ import org.btcmap.ui.map.MarkerKind
 import org.btcmap.ui.map.OfflinePacks
 import org.btcmap.ui.map.SearchActions
 import org.btcmap.ui.map.categoryToken
-import org.btcmap.ui.map.emptyGlyphRange
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withTimeoutOrNull
 import androidx.compose.material3.Text
@@ -212,12 +211,17 @@ import org.btcmap.ui.EventDeleteAction
 import org.btcmap.ui.EventSheet
 import org.btcmap.ui.rememberEventDeleteState
 import org.btcmap.ui.areaChipPalette
+import org.btcmap.ui.defaultFormatNumber
+import org.btcmap.ui.formatBytes
+import org.btcmap.ui.loadSection
 import org.btcmap.ui.markerPalette
 import org.btcmap.ui.rememberNavController
+import org.btcmap.ui.toLocalDateTimeOrNull
 import org.btcmap.api.GetEventsItem
+import org.btcmap.api.toEvent
 import org.btcmap.area.AreaIssues
-import org.btcmap.area.AreaPlaceIssue
 import org.btcmap.area.AreaSections
+import org.btcmap.area.osmEditUrl
 import org.btcmap.area.websiteDisplayText
 import org.btcmap.db.table.area.Area
 import org.btcmap.db.table.event.Event
@@ -227,10 +231,6 @@ import org.btcmap.i18n.getLocalizedName
 import org.btcmap.map.toEventGeoJson
 import org.btcmap.search.NominatimSearch
 import java.io.File
-import java.net.HttpURLConnection
-import java.net.URI
-import java.net.URLDecoder
-import java.util.concurrent.ConcurrentHashMap
 import okio.Source
 import okio.source
 
@@ -705,11 +705,7 @@ private fun runApp() = application {
                                 mapCenterLat = camera.lat
                                 mapCenterLon = camera.lon
                             },
-                            formatDistance = { meters ->
-                                val km = meters / 1_000
-                                // Beyond 10 km the fraction is noise.
-                                if (km > 10) "%.0f km".format(km) else "%.1f km".format(km)
-                            },
+                            formatDistance = LABELS.formatDistance,
                             nominatimSearch = nominatimSearch,
                             nominatimHeader = STRINGS["search_openstreetmap"],
                         )
@@ -1484,28 +1480,6 @@ private fun DesktopAreaScreen(
     }
 }
 
-/** Reads a secondary section, hiding it when the read or fetch fails. */
-private suspend fun <T> loadSection(block: suspend () -> T): T? = try {
-    // The callers run on the UI dispatcher; the section's reads must not.
-    withContext(Dispatchers.IO) { block() }
-} catch (t: Throwable) {
-    t.rethrowIfCancellation()
-    null
-}
-
-private fun GetEventsItem.toEvent(): Event = Event(
-    id = id,
-    lat = lat,
-    lon = lon,
-    name = name,
-    website = website,
-    startsAt = startsAt,
-    endsAt = endsAt,
-)
-
-private fun AreaPlaceIssue.osmEditUrl(): String =
-    "https://www.openstreetmap.org/edit?$elementOsmType=$elementOsmId"
-
 private const val JOIN_US_URL = "https://btcmap.org/join-us"
 
 /** The desktop app's full-window pages. */
@@ -1549,9 +1523,6 @@ private data class AddNotePrefill(
 )
 
 /** Parses a floating local date-time pre-fill, or null when absent/malformed. */
-private fun String.toLocalDateTimeOrNull(): java.time.LocalDateTime? =
-    runCatching { java.time.LocalDateTime.parse(this) }.getOrNull()
-
 private const val SCREENSHOT_ARG = "--screenshot="
 
 /**
@@ -1842,92 +1813,23 @@ private fun loadIconFont(): FontFamily? {
 
 private const val ICON_FONT_RESOURCE = "material-symbols.ttf"
 
-private const val BUNDLED_MAP_SCHEME = "app"
-
-/** The glyph directory inside `map-styles/`, and the manifest the bundler writes next to it. */
-private const val GLYPH_PATH_PREFIX = "map-styles/glyphs/"
-private const val GLYPH_SOURCE_ASSET = "${GLYPH_PATH_PREFIX}source.json"
-
 /** OpenFreeMap's glyph host, used when the bundle carries no manifest. */
 private const val HOSTED_GLYPHS_URL = "https://tiles.openfreemap.org/fonts/"
 
-/** How long a single online glyph range fetch may take before it gives up. */
-private const val GLYPH_FETCH_TIMEOUT_MS = 10_000
-
 /**
  * Serves `app://map-styles/...` (sprites and glyphs) from the app resources,
- * mirroring the Android host (`org.btcmap.ui.map.configureBundledMapResources`).
- *
- * The glyph bundle omits the CJK ideograph and Hangul blocks (they are ~90 MB on
- * their own), so a range the styles need there is fetched from the glyph host
- * recorded in [GLYPH_SOURCE_ASSET]. When that fetch fails (offline), an empty
- * range is served so the tile still renders: MapLibre Native drops a whole tile
- * whose glyph request errors (maplibre-native#4430), which would otherwise blank
- * the basemap over those regions even though the tile's roads and polygons
- * loaded fine.
+ * through the same shared provider the Android host installs.
  */
-private fun bundledMapResources(): MapResourceProvider {
-    val glyphBase = glyphSourceBase()
-    val glyphCache = ConcurrentHashMap<String, ByteArray>()
-
-    return MapResourceProvider(scheme = BUNDLED_MAP_SCHEME) { request ->
-        // Glyph paths arrive percent-encoded ("Noto%20Sans%20Italic").
-        val encodedPath = request.url.removePrefix("$BUNDLED_MAP_SCHEME://")
-        val path = URLDecoder.decode(encodedPath, Charsets.UTF_8.name())
-        val bundled = resourceBytes(path)
-        when {
-            bundled != null -> bundled
-            !path.startsWith(GLYPH_PATH_PREFIX) -> throw java.io.FileNotFoundException(path)
-            else -> glyphCache.getOrPut(encodedPath) {
-                fetchGlyphRange(glyphBase, encodedPath) ?: emptyGlyphRange(
-                    fontstack = path.removePrefix(GLYPH_PATH_PREFIX).substringBeforeLast('/'),
-                    range = path.substringAfterLast('/').removeSuffix(".pbf"),
-                )
-            }
-        }
-    }
-}
-
-/**
- * The base URL the bundled glyph ranges were downloaded from, from the manifest
- * the bundler writes. Missing or malformed, it falls back to [HOSTED_GLYPHS_URL].
- */
-private fun glyphSourceBase(): String = runCatching {
-    val json = resourceBytes(GLYPH_SOURCE_ASSET)?.decodeToString() ?: return@runCatching null
-    Regex("\"base\"\\s*:\\s*\"([^\"]+)\"").find(json)?.groupValues?.get(1)
-}.getOrNull()?.takeIf { it.isNotBlank() } ?: HOSTED_GLYPHS_URL
-
-/**
- * The glyph range in [encodedPath] (an encoded `map-styles/glyphs/<fontstack>/
- * <range>.pbf`), fetched from [base], or null when it could not be fetched.
- */
-private fun fetchGlyphRange(base: String, encodedPath: String): ByteArray? {
-    val relative = encodedPath.removePrefix(GLYPH_PATH_PREFIX)
-    return runCatching {
-        val url = URI(base).resolve(relative).toURL()
-        (url.openConnection() as HttpURLConnection).run {
-            connectTimeout = GLYPH_FETCH_TIMEOUT_MS
-            readTimeout = GLYPH_FETCH_TIMEOUT_MS
-            try {
-                if (responseCode == HttpURLConnection.HTTP_OK) {
-                    inputStream.use { it.readBytes() }
-                } else {
-                    null
-                }
-            } finally {
-                disconnect()
-            }
-        }
-    }.getOrNull()
-}
+private fun bundledMapResources(): MapResourceProvider =
+    org.btcmap.ui.map.bundledMapResourceProvider(
+        readAssetBytes = ::resourceBytes,
+        fallbackGlyphBase = HOSTED_GLYPHS_URL,
+    )
 
 /** The bundled style at [assetPath], with its sprite and glyph URLs rewritten. */
 private fun bundledStyleJson(assetPath: String): String {
     println("desktop: bundled map style $assetPath")
-    return (
-        resourceBytes(assetPath)?.decodeToString()
-            ?: error("missing bundled map style $assetPath")
-        ).replace("asset://map-styles/", "$BUNDLED_MAP_SCHEME://map-styles/")
+    return org.btcmap.ui.map.bundledStyleJson(::resourceBytes, assetPath)
 }
 
 private fun resourceBytes(path: String): ByteArray? =
@@ -1956,11 +1858,7 @@ private val LABELS: AppLabels by lazy {
     appLabels(
         strings = STRINGS,
         currentStyle = MapStyle.Auto,
-        formatNumber = { value, digits ->
-            java.text.NumberFormat.getNumberInstance(java.util.Locale.forLanguageTag(currentLocale())).apply {
-                maximumFractionDigits = digits
-            }.format(value)
-        },
+        formatNumber = ::defaultFormatNumber,
         formatBytes = ::formatBytes,
         formatFeedDate = ::desktopFeedDate,
     )
@@ -2000,11 +1898,3 @@ private fun desktopFeedDate(iso: String): String = runCatching {
         .withLocale(java.util.Locale.forLanguageTag(currentLocale()))
         .format(java.time.ZonedDateTime.parse(iso))
 }.getOrDefault(iso)
-
-/** A human-readable byte size for the offline estimate. */
-private fun formatBytes(bytes: Long): String = when {
-    bytes < 1024 -> "$bytes B"
-    bytes < 1024 * 1024 -> "%.1f kB".format(bytes / 1024.0)
-    bytes < 1024L * 1024 * 1024 -> "%.1f MB".format(bytes / (1024.0 * 1024))
-    else -> "%.1f GB".format(bytes / (1024.0 * 1024 * 1024))
-}

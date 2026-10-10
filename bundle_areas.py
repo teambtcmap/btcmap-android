@@ -35,8 +35,9 @@ import urllib.request
 from pathlib import Path
 
 # The full field set the app syncs, minus ``deleted_at`` (see the module
-# docstring). Keep this in sync with ``AREA_DELTA_FIELDS`` in AreaApi.kt and
-# with ``readBundledArea`` in BundledAreas.kt.
+# docstring). Keep this in sync with ``AREA_DELTA_FIELDS`` and
+# ``toGetAreasDeltaItem`` in AreaApi.kt, the decoder the live sync and the seed
+# now share.
 FIELDS = (
     "name",
     "type",

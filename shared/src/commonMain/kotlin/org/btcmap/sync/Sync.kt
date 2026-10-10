@@ -3,18 +3,15 @@ package org.btcmap.sync
 import org.btcmap.platform.ioDispatcher
 import kotlinx.coroutines.withContext
 import org.btcmap.api.Api
-import org.btcmap.api.GetAreasDeltaItem
-import org.btcmap.api.GetCommentsItem
-import org.btcmap.api.GetEventsDeltaItem
 import org.btcmap.api.getAreas
 import org.btcmap.api.getComments
 import org.btcmap.api.getEvents
 import org.btcmap.api.getPlaces
+import org.btcmap.api.toArea
+import org.btcmap.api.toComment
+import org.btcmap.api.toEvent
 import org.btcmap.api.toPlace
 import org.btcmap.db.Database
-import org.btcmap.db.table.area.Area
-import org.btcmap.db.table.comment.Comment
-import org.btcmap.db.table.event.Event
 import kotlin.time.Clock
 import kotlin.time.Duration
 import kotlin.time.Instant
@@ -201,48 +198,6 @@ class Sync(val api: Api, val db: Database) {
         )
     }
 }
-
-private fun GetCommentsItem.toComment(): Comment = Comment(
-    id = id,
-    placeId = placeId,
-    comment = comment,
-    createdAt = createdAt.toInstant(),
-    updatedAt = updatedAt.toInstant(),
-    deletedAt = deletedAt?.toInstant(),
-)
-
-private fun GetEventsDeltaItem.toEvent(): Event = Event(
-    id = id,
-    lat = lat,
-    lon = lon,
-    name = name,
-    website = website,
-    startsAt = startsAt,
-    endsAt = endsAt,
-    updatedAt = updatedAt.toInstant(),
-    deletedAt = deletedAt?.toInstant(),
-)
-
-private fun GetAreasDeltaItem.toArea(): Area = Area(
-    id = id,
-    name = name,
-    type = type,
-    urlAlias = urlAlias,
-    icon = icon,
-    iconWide = iconWide,
-    websiteUrl = websiteUrl,
-    description = description,
-    verifiedAt = verifiedAt,
-    bboxWest = bboxWest,
-    bboxSouth = bboxSouth,
-    bboxEast = bboxEast,
-    bboxNorth = bboxNorth,
-    geoJson = geoJson,
-    updatedAt = updatedAt.toInstant(),
-    deletedAt = deletedAt?.toInstant(),
-    localizedName = localizedName,
-    localizedDescription = localizedDescription,
-)
 
 /**
  * Records a non-fatal sync failure. The sync is best-effort and offline-first,

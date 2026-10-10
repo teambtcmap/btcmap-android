@@ -592,7 +592,11 @@ private fun ChannelSlider(
     }
 }
 
-/** A human-readable byte size, the desktop stand-in for Android's file formatter. */
+/**
+ * A human-readable byte size. The desktop host passes this to the shared
+ * labels, and the db-stats page uses it on both hosts; Android's image-stats
+ * page keeps its own `Formatter.formatFileSize`-based label.
+ */
 fun formatBytes(bytes: Long): String {
     val units = listOf("B", "KB", "MB", "GB", "TB")
     var value = bytes.toDouble()

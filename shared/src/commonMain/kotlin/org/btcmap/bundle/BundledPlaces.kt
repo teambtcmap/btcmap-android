@@ -8,24 +8,19 @@ import androidx.sqlite.execSQL
 import kotlin.time.Duration
 import kotlin.time.TimeSource
 import kotlinx.coroutines.withContext
-import kotlinx.serialization.SerialName
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.DecodeSequenceMode
-import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.okio.decodeBufferedSourceToSequence
 import okio.Source
 import okio.buffer
-import kotlin.time.Instant
-import org.btcmap.api.toVerifiedAt
+import org.btcmap.api.toGetPlacesItem
+import org.btcmap.api.toPlace
 import org.btcmap.db.Database
 import org.btcmap.db.table.place.CREATE_INDEXES
 import org.btcmap.db.table.place.INDEX_NAMES
 import org.btcmap.db.table.place.Place
 import org.btcmap.json.btcmapJson
 import org.btcmap.util.rethrowIfCancellation
-import org.btcmap.util.toInstantOrNull
-import org.btcmap.util.toUrlOrNull
 
 /**
  * Seeds the places table from the bundled snapshot produced by the bundler.
@@ -120,11 +115,11 @@ object BundledPlaces {
                     dropPlaceIndexes(db)
                     try {
                         var batch = mutableListOf<Place>()
-                        for (record in btcmapJson.decodeBufferedSourceToSequence<BundledPlaceJson>(
+                        for (record in btcmapJson.decodeBufferedSourceToSequence<JsonObject>(
                             buffered,
                             DecodeSequenceMode.ARRAY_WRAPPED,
                         )) {
-                            batch.add(record.toPlace())
+                            batch.add(record.toGetPlacesItem().toPlace())
                             if (batch.size >= BATCH_SIZE) {
                                 placesImported += insertBatch(db, batch)
                                 onBatch(placesImported)
@@ -219,84 +214,3 @@ object BundledPlaces {
     }
 }
 
-/** One place record as it appears in the bundled snapshot. */
-@Serializable
-internal class BundledPlaceJson(
-    val id: Long? = null,
-    val lat: Double? = null,
-    val lon: Double? = null,
-    val icon: String? = null,
-    val name: String? = null,
-    @SerialName("localized_name") val localizedName: JsonElement? = null,
-    @SerialName("updated_at") val updatedAt: String? = null,
-    @SerialName("verified_at") val verifiedAt: String? = null,
-    val address: String? = null,
-    @SerialName("opening_hours") val openingHours: String? = null,
-    val phone: String? = null,
-    val website: String? = null,
-    val email: String? = null,
-    val twitter: String? = null,
-    val facebook: String? = null,
-    val instagram: String? = null,
-    val line: String? = null,
-    @SerialName("required_app_url") val requiredAppUrl: String? = null,
-    @SerialName("boosted_until") val boostedUntil: String? = null,
-    val comments: Long? = null,
-    val telegram: String? = null,
-    @SerialName("osm_id") val osmId: String? = null,
-)
-
-internal fun BundledPlaceJson.toPlace(): Place {
-    // Required fields must be present: defaulting them would silently seed a
-    // bogus place (for example id 0 at Null Island) if the snapshot format ever
-    // changes, instead of failing loudly and rolling the import back. The id is
-    // resolved first so the messages for the remaining fields can name the place
-    // and the missing-id message never interpolates a null id.
-    val placeId = requireNotNull(id) { "bundled place is missing 'id'" }
-    val placeLat = requireNotNull(lat) { "bundled place $placeId is missing 'lat'" }
-    val placeLon = requireNotNull(lon) { "bundled place $placeId is missing 'lon'" }
-    val placeIcon = requireNotNull(icon) { "bundled place $placeId is missing 'icon'" }
-    // `updated_at` drives the delta sync cursor, so a malformed one must fail
-    // the seed rather than silently reset the cursor to an arbitrary value.
-    val placeUpdatedAt = requireNotNull(updatedAt?.toInstantOrNull()) {
-        "bundled place $placeId is missing a parseable 'updated_at'"
-    }
-    // Coordinates are range-checked here as well as by the bundler: the asset is
-    // committed to the repository and could be edited directly, and a bogus
-    // coordinate would otherwise seed a marker that can never be reached. NaN is
-    // rejected too, because it fails the range check.
-    require(placeLat in -90.0..90.0) { "bundled place $placeId has 'lat' outside [-90, 90]" }
-    require(placeLon in -180.0..180.0) { "bundled place $placeId has 'lon' outside [-180, 180]" }
-    require(placeIcon.isNotEmpty()) { "bundled place $placeId has an empty 'icon'" }
-    return Place(
-        id = placeId,
-        updatedAt = placeUpdatedAt,
-        lat = placeLat,
-        lon = placeLon,
-        icon = placeIcon,
-        name = name,
-        localizedName = localizedName as? JsonObject,
-        verifiedAt = verifiedAt?.toVerifiedAtOrNull(),
-        address = address,
-        openingHours = openingHours,
-        phone = phone,
-        website = website?.toUrlOrNull(),
-        email = email,
-        twitter = twitter?.toUrlOrNull(),
-        facebook = facebook?.toUrlOrNull(),
-        instagram = instagram?.toUrlOrNull(),
-        line = line?.toUrlOrNull(),
-        requiredAppUrl = requiredAppUrl?.toUrlOrNull(),
-        boostedUntil = boostedUntil?.toInstantOrNull(),
-        comments = comments,
-        telegram = telegram?.toUrlOrNull(),
-        osmId = osmId,
-    )
-}
-
-private fun String.toVerifiedAtOrNull(): Instant? =
-    try {
-        toVerifiedAt()
-    } catch (_: RuntimeException) {
-        null
-    }

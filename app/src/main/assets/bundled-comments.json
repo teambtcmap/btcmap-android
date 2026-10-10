@@ -13284,5 +13284,159 @@
     "text": "Bought toothpaste and paid by lightning.",
     "created_at": "2026-09-17T20:30:39.509Z",
     "updated_at": "2026-09-17T20:31:00.94Z"
+  },
+  {
+    "id": 2823,
+    "place_id": 39435,
+    "text": "Best ribeyes ever!  Fresh cut the way you want them, from local farms with no BS.",
+    "created_at": "2026-09-20T16:31:14.719Z",
+    "updated_at": "2026-09-20T16:31:36.013Z"
+  },
+  {
+    "id": 2824,
+    "place_id": 11979,
+    "text": "We ate dinner and had beers there today. No problem with payment (LN on Phoenix wallet)",
+    "created_at": "2026-09-21T21:09:57.891Z",
+    "updated_at": "2026-09-21T21:10:46.388Z"
+  },
+  {
+    "id": 2825,
+    "place_id": 6110,
+    "text": "We had beers and wine there today. No problem with payment (LN on Wallet of Satoshi)",
+    "created_at": "2026-09-21T21:14:19.346Z",
+    "updated_at": "2026-09-21T21:14:36.377Z"
+  },
+  {
+    "id": 2827,
+    "place_id": 21444,
+    "text": "Great coffee for sats!",
+    "created_at": "2026-09-24T04:26:59.971Z",
+    "updated_at": "2026-09-24T04:27:41.494Z"
+  },
+  {
+    "id": 2828,
+    "place_id": 25965,
+    "text": "For payments made in Bitcoin, a 20% discount will be applied to the rate listed on the Airbnb website.\nPara los pagos en Bitcoin se aplicará un descuento del 20% sobre el precio de tarifa ofrecido en la web Airbnb.",
+    "created_at": "2026-09-24T13:21:21.578Z",
+    "updated_at": "2026-09-24T13:22:15.818Z"
+  },
+  {
+    "id": 2829,
+    "place_id": 42872,
+    "text": "Das ist der Ort von:\n₿AMO21 - Bitcoin am Ottisee\nSamstag, 26. September 2026\nGemüsehof in Hamburg-Ochsenwerder\nEin Tag von Plebs für Plebs: Austausch, Vorträge und Workshops rund um Bitcoin – zwischen Gemüsebeeten, Wiese und See. Offen für alle, vom Einsteiger bis zum alten Hasen.\nhttps://bamo21.de/\nDanke an den Veranstalter!",
+    "created_at": "2026-09-24T16:25:24.886Z",
+    "updated_at": "2026-09-24T16:26:01.031Z"
+  },
+  {
+    "id": 2831,
+    "place_id": 24409,
+    "text": "Heerlijk ijs, fijn personeel",
+    "created_at": "2026-09-25T17:39:25.387Z",
+    "updated_at": "2026-09-25T17:40:57.968Z"
+  },
+  {
+    "id": 2832,
+    "place_id": 33433,
+    "text": "Adam's a champ",
+    "created_at": "2026-09-25T23:05:38.427Z",
+    "updated_at": "2026-09-25T23:06:00.094Z"
+  },
+  {
+    "id": 2833,
+    "place_id": 18028,
+    "text": "Zkuste se zeptat na možnost placení. Já včera neuspěl, ale bylo slíbeno, že možnost placení LN oživí.",
+    "created_at": "2026-09-26T08:55:45.111Z",
+    "updated_at": "2026-09-26T08:58:51.992Z"
+  },
+  {
+    "id": 2834,
+    "place_id": 29094,
+    "text": "Dnes neúspěšný pokus. Obsluha nevěděla, že něco takového v minulosti umožňovali.",
+    "created_at": "2026-09-27T13:34:00.655Z",
+    "updated_at": "2026-09-27T13:34:36.924Z"
+  },
+  {
+    "id": 2835,
+    "place_id": 10095,
+    "text": "I had the opportunity to return to Alxama and it was another 10/10 experience. Having the possibility to pay with bitcoin for this quality of food/drink is a privilege, I hope they continue to provide this service for many years",
+    "created_at": "2026-09-28T13:59:46.997Z",
+    "updated_at": "2026-09-28T14:00:09.729Z"
+  },
+  {
+    "id": 2836,
+    "place_id": 29686,
+    "text": "bitcoin ATM now available ",
+    "created_at": "2026-09-28T20:14:43.337Z",
+    "updated_at": "2026-09-28T20:15:26.886Z"
+  },
+  {
+    "id": 2838,
+    "place_id": 42951,
+    "text": "Great food and location, bitcoiner-owned",
+    "created_at": "2026-09-30T04:49:09.215Z",
+    "updated_at": "2026-09-30T04:49:49.392Z"
+  },
+  {
+    "id": 2839,
+    "place_id": 20423,
+    "text": "Loved new xtra piece of chit xpa",
+    "created_at": "2026-09-30T08:15:53.67Z",
+    "updated_at": "2026-09-30T08:16:21.586Z"
+  },
+  {
+    "id": 2842,
+    "place_id": 42067,
+    "text": "Purchased tallow cream and paid by lightning. Seller uses BTCPay server on a tablet to receive payments.",
+    "created_at": "2026-10-01T12:30:45.082Z",
+    "updated_at": "2026-10-01T12:30:58.659Z"
+  },
+  {
+    "id": 2843,
+    "place_id": 19599,
+    "text": "Paid for hamburger with sats via LN.",
+    "created_at": "2026-10-01T14:40:19.452Z",
+    "updated_at": "2026-10-01T14:40:33.037Z"
+  },
+  {
+    "id": 2844,
+    "place_id": 8541,
+    "text": "Visited during the Noderunners conference. Was able to pay with sats for drinks at the bar.",
+    "created_at": "2026-10-01T14:42:48.876Z",
+    "updated_at": "2026-10-01T14:43:02.431Z"
+  },
+  {
+    "id": 2846,
+    "place_id": 4813,
+    "text": "Cash and Lightning Payments Welcome\n\nLightning Address:  \ngrainheaven@bitcash.one\n\nGrainheaven LN URL Paylink:  \nhttps://bitcash.one/lnurlp/link/cDAAFw",
+    "created_at": "2026-10-01T19:47:48.481Z",
+    "updated_at": "2026-10-01T19:48:49.627Z"
+  },
+  {
+    "id": 2852,
+    "place_id": 2470,
+    "text": "Unfortunately, the bitcoin device is broken according to personnel. I hope they get it back online soon. It’s a really nice spot in Berlin also with Kokosmilch - I wish the bar at Holzmarkt also accepts sats.",
+    "created_at": "2026-10-04T13:10:26.17Z",
+    "updated_at": "2026-10-04T13:11:01.026Z"
+  },
+  {
+    "id": 2855,
+    "place_id": 13520,
+    "text": "Paid with wallet of satoshi. Great experience. Good wine, good fries. Fun time.",
+    "created_at": "2026-10-08T14:05:36.217Z",
+    "updated_at": "2026-10-08T14:06:04.843Z"
+  },
+  {
+    "id": 2856,
+    "place_id": 18933,
+    "text": "Beer, live music, all paid in sats!",
+    "created_at": "2026-10-08T23:35:50.722Z",
+    "updated_at": "2026-10-08T23:36:10.689Z"
+  },
+  {
+    "id": 2857,
+    "place_id": 9705,
+    "text": "We had group meeting there today. No problem with the payment",
+    "created_at": "2026-10-09T21:41:02.032Z",
+    "updated_at": "2026-10-09T21:41:23.222Z"
   }
 ]

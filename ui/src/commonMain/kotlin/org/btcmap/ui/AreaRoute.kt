@@ -24,11 +24,10 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.btcmap.api.GetEventsItem
 import org.btcmap.area.AreaIssues
-import org.btcmap.area.AreaPlaceIssue
 import org.btcmap.area.AreaSections
+import org.btcmap.area.osmEditUrl
 import org.btcmap.area.websiteDisplayText
 import org.btcmap.db.table.area.Area
-import org.btcmap.db.table.event.Event
 import org.btcmap.db.table.place.Place
 import org.btcmap.i18n.getLocalizedDescription
 import org.btcmap.i18n.getLocalizedName
@@ -39,7 +38,6 @@ import org.btcmap.saved.SavedItems
 import org.btcmap.settings.authorized
 import org.btcmap.settings.mapStyle
 import org.btcmap.ui.map.CITY_AREA_TYPE
-import org.btcmap.util.rethrowIfCancellation
 
 private const val JOIN_US_URL = "https://btcmap.org/join-us"
 
@@ -229,19 +227,6 @@ internal fun AreaRoute(
     }
 }
 
-/** Reads a secondary area section, hiding it when the read or fetch fails. */
-private suspend fun <T> loadSection(block: suspend () -> T): T? = try {
-    // The callers run on the UI dispatcher; the section's reads must not.
-    withContext(ioDispatcher) { block() }
-} catch (t: Throwable) {
-    t.rethrowIfCancellation()
-    null
-}
-
-/** The OSM edit URL that pre-fills the fix for [issue]. */
-private fun AreaPlaceIssue.osmEditUrl(): String =
-    "https://www.openstreetmap.org/edit?$elementOsmType=$elementOsmId"
-
 /**
  * The area's bounding box as [OfflineBounds], or null when any side is missing:
  * an area without a bbox has no offline region to download.
@@ -253,14 +238,3 @@ fun Area.offlineBounds(): OfflineBounds? {
     val north = bboxNorth ?: return null
     return OfflineBounds(west = west, south = south, east = east, north = north)
 }
-
-/** The event screen's model, built from an API event. */
-internal fun GetEventsItem.toEvent(): Event = Event(
-    id = id,
-    lat = lat,
-    lon = lon,
-    name = name,
-    website = website,
-    startsAt = startsAt,
-    endsAt = endsAt,
-)

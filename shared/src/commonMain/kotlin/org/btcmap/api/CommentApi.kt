@@ -1,6 +1,7 @@
 package org.btcmap.api
 
 import io.ktor.http.HttpMethod
+import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
 import org.btcmap.util.toJsonArray
@@ -59,16 +60,18 @@ suspend fun Api.addComment(placeId: Long, comment: String): AddCommentResponse {
 }
 
 private fun String.toGetCommentsItems(): List<GetCommentsItem> {
-    return toJsonArray().map {
-        GetCommentsItem(
-            id = it.long("id"),
-            placeId = it.long("place_id"),
-            comment = it.string("text"),
-            createdAt = it.string("created_at"),
-            updatedAt = it.string("updated_at"),
-            deletedAt = it.nonBlankStringOrNull("deleted_at"),
-        )
-    }
+    return toJsonArray().map { it.toGetCommentsItem() }
+}
+
+internal fun JsonObject.toGetCommentsItem(): GetCommentsItem {
+    return GetCommentsItem(
+        id = long("id"),
+        placeId = long("place_id"),
+        comment = string("text"),
+        createdAt = string("created_at"),
+        updatedAt = string("updated_at"),
+        deletedAt = nonBlankStringOrNull("deleted_at"),
+    )
 }
 
 private fun String.toAddCommentResponse(): AddCommentResponse {

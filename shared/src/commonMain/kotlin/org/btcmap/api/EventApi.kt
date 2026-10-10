@@ -266,7 +266,7 @@ private fun String.toFloatingLocalTime(): String {
     return if (offsetInRest >= 0) substring(0, t + 1 + offsetInRest) else this
 }
 
-private fun JsonObject.toGetEventsDeltaItem(): GetEventsDeltaItem {
+internal fun JsonObject.toGetEventsDeltaItem(): GetEventsDeltaItem {
     val item = toGetEventsItem()
     return GetEventsDeltaItem(
         id = item.id,

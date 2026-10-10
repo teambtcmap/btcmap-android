@@ -31,8 +31,8 @@ import urllib.request
 from pathlib import Path
 
 # ``GET /v4/place-comments`` always returns this shape; it has no ``fields``
-# projection. Keep the names in sync with ``toGetCommentsItems`` in
-# CommentApi.kt and ``readBundledComment`` in BundledComments.kt.
+# projection. Keep the names in sync with ``toGetCommentsItem`` in CommentApi.kt,
+# the decoder the live sync and the seed now share.
 API_URL = "https://api.btcmap.org/v4/place-comments"
 PROJECT_ROOT = Path(__file__).resolve().parent
 APP_DIR = PROJECT_ROOT / "app"

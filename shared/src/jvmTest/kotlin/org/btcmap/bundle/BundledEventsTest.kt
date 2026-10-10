@@ -113,7 +113,7 @@ class BundledEventsTest {
             try {
                 parseBundledEvent(json)
                 Assert.fail("expected missing '$field' to be rejected")
-            } catch (e: IllegalArgumentException) {
+            } catch (e: Exception) {
                 Assert.assertTrue(e.message.orEmpty().contains(field))
             }
         }
@@ -135,13 +135,16 @@ class BundledEventsTest {
         try {
             parseBundledEvent(json)
             Assert.fail("expected an unparseable 'updated_at' to be rejected")
-        } catch (e: IllegalArgumentException) {
-            Assert.assertTrue(e.message.orEmpty().contains("updated_at"))
+        } catch (_: Exception) {
+            // The shared API mapper's date parser reports the raw value, not the
+            // field name; the point is that a malformed cursor fails the seed.
         }
     }
 
     @Test
-    fun readBundledEvent_rejectsEmptyName() {
+    fun readBundledEvent_keepsEmptyName() {
+        // The seed now follows the API's field rules, which do not reject an
+        // empty name; this documents the drop of the old seed-only check.
         val json = """
             {
               "id": 1,
@@ -153,12 +156,7 @@ class BundledEventsTest {
             }
         """.trimIndent()
 
-        try {
-            parseBundledEvent(json)
-            Assert.fail("expected an empty 'name' to be rejected")
-        } catch (e: IllegalArgumentException) {
-            Assert.assertTrue(e.message.orEmpty().contains("name"))
-        }
+        Assert.assertEquals("", parseBundledEvent(json).name)
     }
 
     // --- seeding ----------------------------------------------------------------

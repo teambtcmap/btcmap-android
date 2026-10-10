@@ -123,7 +123,7 @@ suspend fun Api.saveArea(id: Long): List<Long> = saveItem("areas", id)
 
 suspend fun Api.removeSavedArea(id: Long): List<Long> = removeSavedItem("areas", id)
 
-private fun JsonObject.toGetAreasDeltaItem(): GetAreasDeltaItem {
+internal fun JsonObject.toGetAreasDeltaItem(): GetAreasDeltaItem {
     val bbox = doubleArrayOrNull("bbox")?.takeIf { it.size == 4 }
 
     return GetAreasDeltaItem(

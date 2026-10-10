@@ -1,14 +1,13 @@
-package org.btcmap.event
+package org.btcmap.api
 
-import java.time.LocalDateTime
-import org.btcmap.api.GetEventsItem
 import org.btcmap.db.table.event.Event
+import org.btcmap.db.table.event.eventOf
 
 /**
  * The event screen's model, built from an API event. The API payload carries no
  * `updated_at`/`deleted_at`, so the defaults stand; they are only used for sync.
  */
-fun GetEventsItem.toEvent(): Event = Event(
+fun GetEventsItem.toEvent(): Event = eventOf(
     id = id,
     lat = lat,
     lon = lon,
@@ -17,7 +16,3 @@ fun GetEventsItem.toEvent(): Event = Event(
     startsAt = startsAt,
     endsAt = endsAt,
 )
-
-/** Parses the floating local date-time a duplicate pre-fill carries, or null. */
-fun String.toLocalDateTimeOrNull(): LocalDateTime? =
-    runCatching { LocalDateTime.parse(this) }.getOrNull()

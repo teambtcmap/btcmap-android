@@ -84,7 +84,7 @@ class BundledCommentsTest {
             try {
                 parseBundledComment(json)
                 Assert.fail("expected missing '$field' to be rejected")
-            } catch (e: IllegalArgumentException) {
+            } catch (e: Exception) {
                 Assert.assertTrue(e.message.orEmpty().contains(field))
             }
         }
@@ -105,13 +105,16 @@ class BundledCommentsTest {
         try {
             parseBundledComment(json)
             Assert.fail("expected an unparseable 'updated_at' to be rejected")
-        } catch (e: IllegalArgumentException) {
-            Assert.assertTrue(e.message.orEmpty().contains("updated_at"))
+        } catch (_: Exception) {
+            // The shared API mapper's date parser reports the raw value, not the
+            // field name; the point is that a malformed cursor fails the seed.
         }
     }
 
     @Test
-    fun readBundledComment_rejectsEmptyText() {
+    fun readBundledComment_keepsEmptyText() {
+        // The seed now follows the API's field rules, which do not reject an
+        // empty text; this documents the drop of the old seed-only check.
         val json = """
             {
               "id": 1,
@@ -122,12 +125,7 @@ class BundledCommentsTest {
             }
         """.trimIndent()
 
-        try {
-            parseBundledComment(json)
-            Assert.fail("expected an empty 'text' to be rejected")
-        } catch (e: IllegalArgumentException) {
-            Assert.assertTrue(e.message.orEmpty().contains("text"))
-        }
+        Assert.assertEquals("", parseBundledComment(json).comment)
     }
 
     // --- seeding ----------------------------------------------------------------

@@ -5,36 +5,35 @@ import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.atStartOfDayIn
 import org.btcmap.db.table.place.FullProjection
+import org.btcmap.db.table.place.placeOf
 import org.btcmap.util.toInstant
-import org.btcmap.util.toUrlOrNull
+import org.btcmap.util.toInstantOrNull
 
-fun GetPlacesItem.toPlace(): FullProjection {
-    return FullProjection(
-        id = id,
-        updatedAt = updatedAt.toInstant(),
-        lat = lat,
-        lon = lon,
-        icon = icon,
-        name = name,
-        localizedName = localizedName,
-        verifiedAt = verifiedAt?.toVerifiedAt(),
-        address = address,
-        openingHours = openingHours,
-        phone = phone,
-        website = website?.toUrlOrNull(),
-        email = email,
-        twitter = twitter?.toUrlOrNull(),
-        facebook = facebook?.toUrlOrNull(),
-        instagram = instagram?.toUrlOrNull(),
-        line = line?.toUrlOrNull(),
-        requiredAppUrl = requiredAppUrl?.toUrlOrNull(),
-        boostedUntil = boostedUntil?.toInstant(),
-        comments = comments,
-        telegram = telegram?.toUrlOrNull(),
-        osmId = osmId,
-        deletedAt = deletedAt?.toInstant(),
-    )
-}
+fun GetPlacesItem.toPlace(): FullProjection = placeOf(
+    id = id,
+    updatedAt = updatedAt.toInstant(),
+    lat = lat,
+    lon = lon,
+    icon = icon,
+    name = name,
+    localizedName = localizedName,
+    verifiedAt = verifiedAt?.toVerifiedAtOrNull(),
+    address = address,
+    openingHours = openingHours,
+    phone = phone,
+    website = website,
+    email = email,
+    twitter = twitter,
+    facebook = facebook,
+    instagram = instagram,
+    line = line,
+    requiredAppUrl = requiredAppUrl,
+    boostedUntil = boostedUntil?.toInstantOrNull(),
+    comments = comments,
+    telegram = telegram,
+    osmId = osmId,
+    deletedAt = deletedAt?.toInstant(),
+)
 
 fun String.toVerifiedAt(): Instant {
     // A date-only value gets midnight UTC; anything else is a full timestamp.
@@ -47,3 +46,9 @@ fun String.toVerifiedAt(): Instant {
         LocalDate.parse(this).atStartOfDayIn(TimeZone.UTC)
     }
 }
+
+/**
+ * A display-only verification date, degraded to null when malformed so a bad
+ * value never rolls back a whole snapshot or sync page (see [toInstantOrNull]).
+ */
+fun String.toVerifiedAtOrNull(): Instant? = runCatching { toVerifiedAt() }.getOrNull()

@@ -25,6 +25,10 @@ data class AreaPlaceIssue(
     val placeIcon: String?,
 )
 
+/** The OSM edit URL that pre-fills the fix for [issue]. */
+fun AreaPlaceIssue.osmEditUrl(): String =
+    "https://www.openstreetmap.org/edit?$elementOsmType=$elementOsmId"
+
 /** The capped issue rows and the true total number of issues an area has. */
 data class AreaIssues(
     val rows: List<AreaPlaceIssue>,

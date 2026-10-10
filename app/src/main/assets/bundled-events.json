@@ -1,73 +1,14 @@
 [
   {
-    "id": 123,
-    "lat": 46.314976657594485,
-    "lon": 7.9906962547669025,
-    "name": "Bitcoin Wallis Meetup",
-    "website": "https://bitcoin-wallis.ch/",
-    "starts_at": "2026-10-06T19:00:00+02:00",
-    "ends_at": "2026-10-06T22:00:00+02:00",
-    "updated_at": "2026-09-24T05:38:11.458Z"
-  },
-  {
     "id": 126,
     "lat": 13.733638846756705,
     "lon": 100.5284061557058,
     "name": "Bitcoin Thailand 2026",
     "website": "https://bitcointhailand.co/",
+    "status": "live",
     "starts_at": "2026-10-28T09:00:00+07:00",
     "ends_at": "2026-10-29T22:00:00+07:00",
     "updated_at": "2026-09-24T05:38:12.141Z"
-  },
-  {
-    "id": 134,
-    "lat": 16.3490211,
-    "lon": -86.4977513,
-    "name": "Bitchill s04",
-    "website": "https://thebitcoindistrict.com/bitchill",
-    "starts_at": "2026-10-01T09:00:00-06:00",
-    "ends_at": "2026-10-11T18:00:00-06:00",
-    "updated_at": "2026-09-24T05:38:14.87Z"
-  },
-  {
-    "id": 135,
-    "lat": 52.4980122,
-    "lon": 13.380209,
-    "name": "bitcoin++ Berlin",
-    "website": "https://btcpp.dev/berlin26",
-    "starts_at": "2026-10-01T09:00:00+02:00",
-    "ends_at": "2026-10-03T18:00:00+02:00",
-    "updated_at": "2026-09-24T05:38:15.557Z"
-  },
-  {
-    "id": 136,
-    "lat": 40.416782,
-    "lon": -3.703507,
-    "name": "Watch Out, Bitcoin!",
-    "website": "https://wobitcoin.org/",
-    "starts_at": "2026-10-02T09:00:00+02:00",
-    "ends_at": "2026-10-04T18:00:00+02:00",
-    "updated_at": "2026-09-24T05:38:16.253Z"
-  },
-  {
-    "id": 137,
-    "lat": 52.4015817,
-    "lon": 16.9054611,
-    "name": "Bitcoin Poland",
-    "website": "https://bitcoin-poland.com/",
-    "starts_at": "2026-10-05T09:00:00+02:00",
-    "ends_at": "2026-10-06T18:00:00+02:00",
-    "updated_at": "2026-09-24T05:38:16.945Z"
-  },
-  {
-    "id": 138,
-    "lat": 36.1622767,
-    "lon": -86.7742984,
-    "name": "Imagine IF",
-    "website": "https://www.imagineifnashville.com/",
-    "starts_at": "2026-10-05T09:00:00-05:00",
-    "ends_at": "2026-10-06T18:00:00-05:00",
-    "updated_at": "2026-09-24T05:38:17.63Z"
   },
   {
     "id": 139,
@@ -75,6 +16,7 @@
     "lon": -84.3988077,
     "name": "TABConf",
     "website": "https://7.tabconf.com/",
+    "status": "live",
     "starts_at": "2026-10-12T09:00:00-04:00",
     "ends_at": "2026-10-15T18:00:00-04:00",
     "updated_at": "2026-09-24T05:38:18.323Z"
@@ -85,6 +27,7 @@
     "lon": -118.491227,
     "name": "Bitcoin Alpha",
     "website": "https://bitcoinalpha.org/",
+    "status": "live",
     "starts_at": "2026-10-15T09:00:00-07:00",
     "ends_at": "2026-10-17T18:00:00-07:00",
     "updated_at": "2026-09-24T05:38:18.991Z"
@@ -95,6 +38,7 @@
     "lon": 115.3488754,
     "name": "Bitcoin Bush Bash Busselton",
     "website": "https://bitcoinbushbash.info/busselton/",
+    "status": "live",
     "starts_at": "2026-10-16T09:00:00+08:00",
     "ends_at": "2026-10-18T18:00:00+08:00",
     "updated_at": "2026-09-24T05:38:19.682Z"
@@ -105,6 +49,7 @@
     "lon": 8.9512275,
     "name": "Future of Capital Markets",
     "website": "https://thefutureofcapitalmarkets.com/",
+    "status": "live",
     "starts_at": "2026-10-22T09:00:00+02:00",
     "ends_at": "2026-10-22T18:00:00+02:00",
     "updated_at": "2026-09-24T05:38:20.354Z"
@@ -115,6 +60,7 @@
     "lon": 8.9512275,
     "name": "Plan B Forum Lugano",
     "website": "https://planb.lugano.ch/planb-forum/",
+    "status": "live",
     "starts_at": "2026-10-23T09:00:00+02:00",
     "ends_at": "2026-10-24T18:00:00+02:00",
     "updated_at": "2026-09-24T05:38:21.023Z"
@@ -125,6 +71,7 @@
     "lon": 174.7772114,
     "name": "Bitkiwi XVII",
     "website": "https://kiwibitcoinguide.org/home/bitkiwi-meetups/bitkiwi-xvii-october-2026-wellington/",
+    "status": "live",
     "starts_at": "2026-10-24T09:00:00+13:00",
     "ends_at": "2026-10-24T18:00:00+13:00",
     "updated_at": "2026-09-24T05:38:21.707Z"
@@ -135,6 +82,7 @@
     "lon": -105.529442,
     "name": "Mita Tech Talks",
     "website": "https://2026.mitatechtalks.com/",
+    "status": "live",
     "starts_at": "2026-10-25T09:00:00-06:00",
     "ends_at": "2026-10-27T18:00:00-06:00",
     "updated_at": "2026-09-24T05:38:22.389Z"
@@ -145,6 +93,7 @@
     "lon": -86.7742984,
     "name": "Custody & Treasury Summit",
     "website": "https://www.meetup.com/bitcoinpark/events/314966347/",
+    "status": "live",
     "starts_at": "2026-10-28T09:00:00-05:00",
     "ends_at": "2026-10-29T18:00:00-05:00",
     "updated_at": "2026-09-24T05:38:23.063Z"
@@ -155,6 +104,7 @@
     "lon": -58.3955661,
     "name": "LABITCONF",
     "website": "https://labitconf.com/",
+    "status": "live",
     "starts_at": "2026-10-30T09:00:00-03:00",
     "ends_at": "2026-10-31T18:00:00-03:00",
     "updated_at": "2026-09-24T05:38:23.74Z"
@@ -165,6 +115,7 @@
     "lon": 4.8924534,
     "name": "Bitcoin for Corporations Symposium",
     "website": "https://bitcoinforcorporations.com/events/amsterdam-symposium-2026/",
+    "status": "live",
     "starts_at": "2026-11-04T09:00:00+01:00",
     "ends_at": "2026-11-04T18:00:00+01:00",
     "updated_at": "2026-09-24T05:38:24.424Z"
@@ -175,6 +126,7 @@
     "lon": 4.8924534,
     "name": "Bitcoin Amsterdam",
     "website": "https://www.bitcoin.amsterdam/2026",
+    "status": "live",
     "starts_at": "2026-11-05T09:00:00+01:00",
     "ends_at": "2026-11-06T18:00:00+01:00",
     "updated_at": "2026-09-24T05:38:25.121Z"
@@ -185,6 +137,7 @@
     "lon": 126.9782914,
     "name": "bitcoin++ Seoul",
     "website": "https://btcpp.dev/seoul",
+    "status": "live",
     "starts_at": "2026-11-05T09:00:00+09:00",
     "ends_at": "2026-11-06T18:00:00+09:00",
     "updated_at": "2026-09-24T05:38:25.817Z"
@@ -195,6 +148,7 @@
     "lon": -2.2324547,
     "name": "Bitfest + Nostrshire",
     "website": "https://bitfest.uk/",
+    "status": "live",
     "starts_at": "2026-11-20T09:00:00Z",
     "ends_at": "2026-11-22T18:00:00Z",
     "updated_at": "2026-09-24T05:38:26.503Z"
@@ -205,6 +159,7 @@
     "lon": 139.7743684,
     "name": "Bitcoin Japan",
     "website": "https://btc-jpn.com",
+    "status": "live",
     "starts_at": "2026-11-27T09:00:00+09:00",
     "ends_at": "2026-11-28T18:00:00+09:00",
     "updated_at": "2026-09-24T05:38:27.195Z"
@@ -215,6 +170,7 @@
     "lon": 35.0035694,
     "name": "Africa Bitcoin Conference",
     "website": "https://www.afrobitcoin.org/",
+    "status": "live",
     "starts_at": "2026-12-02T09:00:00+02:00",
     "ends_at": "2026-12-05T18:00:00+02:00",
     "updated_at": "2026-09-24T05:38:27.865Z"
@@ -225,6 +181,7 @@
     "lon": -81.7942944,
     "name": "Bitcoin Day Naples",
     "website": "https://bitcoinday.io/",
+    "status": "live",
     "starts_at": "2027-01-16T09:00:00-05:00",
     "ends_at": "2027-01-16T18:00:00-05:00",
     "updated_at": "2026-09-24T05:38:28.546Z"
@@ -235,6 +192,7 @@
     "lon": -89.191156,
     "name": "Plan B Forum El Salvador",
     "website": "https://planb.sv/",
+    "status": "live",
     "starts_at": "2027-01-29T09:00:00-06:00",
     "ends_at": "2027-01-30T18:00:00-06:00",
     "updated_at": "2026-09-24T05:38:29.25Z"
@@ -245,6 +203,7 @@
     "lon": -80.1220423,
     "name": "The Sovereign Summit",
     "website": "https://thesovereignsummit.com/",
+    "status": "live",
     "starts_at": "2027-02-04T09:00:00-05:00",
     "ends_at": "2027-02-07T18:00:00-05:00",
     "updated_at": "2026-09-24T05:38:29.946Z"
@@ -255,6 +214,7 @@
     "lon": 18.4172197,
     "name": "Adopting Bitcoin Cape Town",
     "website": "https://za27.adoptingbitcoin.org/",
+    "status": "live",
     "starts_at": "2027-02-26T09:00:00+02:00",
     "ends_at": "2027-02-27T18:00:00+02:00",
     "updated_at": "2026-09-24T05:38:30.631Z"
@@ -265,6 +225,7 @@
     "lon": -96.7968559,
     "name": "Mining Disrupt",
     "website": "https://miningdisrupt.com/",
+    "status": "live",
     "starts_at": "2027-03-22T09:00:00-05:00",
     "ends_at": "2027-03-24T18:00:00-05:00",
     "updated_at": "2026-09-24T05:38:31.33Z"
@@ -275,6 +236,7 @@
     "lon": -97.3477684,
     "name": "BitBlockBoom",
     "website": "https://bitblockboom.com/",
+    "status": "live",
     "starts_at": "2027-04-01T09:00:00-05:00",
     "ends_at": "2027-04-04T18:00:00-05:00",
     "updated_at": "2026-09-24T05:38:32.017Z"
@@ -285,6 +247,7 @@
     "lon": 168.7395712,
     "name": "Sovereignty Summit",
     "website": "https://sovereigntysummit.nz/",
+    "status": "live",
     "starts_at": "2027-04-02T09:00:00+13:00",
     "ends_at": "2027-04-03T18:00:00+13:00",
     "updated_at": "2026-09-24T05:38:32.699Z"
@@ -295,6 +258,7 @@
     "lon": 14.4212535,
     "name": "BTC Prague 2027",
     "website": "https://btcprague.com/",
+    "status": "live",
     "starts_at": "2027-05-06T09:00:00+02:00",
     "ends_at": "2027-05-08T18:00:00+02:00",
     "updated_at": "2026-09-24T05:38:33.379Z"
@@ -305,6 +269,7 @@
     "lon": -6.2605593,
     "name": "Bitcoin Ireland Conference",
     "website": "https://www.bitcoinireland.eu/",
+    "status": "live",
     "starts_at": "2027-05-21T09:00:00+01:00",
     "ends_at": "2027-05-23T18:00:00+01:00",
     "updated_at": "2026-09-24T05:38:34.062Z"
@@ -315,6 +280,7 @@
     "lon": 5.9108573,
     "name": "Adopting Bitcoin Arnhem",
     "website": "https://adoptingbitcoinarnhem.com/",
+    "status": "live",
     "starts_at": "2027-05-28T09:00:00+02:00",
     "ends_at": "2027-05-29T18:00:00+02:00",
     "updated_at": "2026-09-24T05:38:34.738Z"
@@ -325,6 +291,7 @@
     "lon": -2.5816622,
     "name": "Bitcoin Treasuries Summit",
     "website": "https://www.smarterwebcompany.co.uk/bitcoin-treasuries-unconference-uk-2027/",
+    "status": "live",
     "starts_at": "2027-05-28T09:00:00+01:00",
     "ends_at": "2027-05-28T18:00:00+01:00",
     "updated_at": "2026-09-24T05:38:35.427Z"
@@ -335,6 +302,7 @@
     "lon": 21.0711489,
     "name": "Bitcoin FilmFest",
     "website": "https://bitcoinfilmfest.com",
+    "status": "live",
     "starts_at": "2027-06-24T09:00:00+02:00",
     "ends_at": "2027-06-27T18:00:00+02:00",
     "updated_at": "2026-09-24T05:38:36.099Z"
@@ -345,6 +313,7 @@
     "lon": -86.7784512,
     "name": "Bitcoin 2027",
     "website": "https://conference.b.tc/",
+    "status": "live",
     "starts_at": "2027-07-15T09:00:00-05:00",
     "ends_at": "2027-07-17T18:00:00-05:00",
     "updated_at": "2026-09-24T05:38:36.776Z"
@@ -355,6 +324,7 @@
     "lon": -86.7742984,
     "name": "Bitcoin-Only Side Events Nashville",
     "website": "https://www.eventbrite.com/e/3-days-of-bitcoin-only-side-events-nashville-2027-including-pleb-party-tickets-1997169893915",
+    "status": "live",
     "starts_at": "2027-07-15T09:00:00-05:00",
     "ends_at": "2027-07-17T18:00:00-05:00",
     "updated_at": "2026-09-24T05:38:37.45Z"
@@ -365,6 +335,7 @@
     "lon": 114.1730688,
     "name": "Bitcoin Asia 2027",
     "website": "https://asia.b.tc/2027",
+    "status": "live",
     "starts_at": "2027-08-27T09:00:00+08:00",
     "ends_at": "2027-08-28T18:00:00+08:00",
     "updated_at": "2026-09-24T05:38:38.137Z"
@@ -375,6 +346,7 @@
     "lon": 126.9782914,
     "name": "Origin Seoul 2027",
     "website": "https://originseoulbtc.com/",
+    "status": "live",
     "starts_at": "2027-09-01T09:00:00+09:00",
     "ends_at": "2027-09-03T18:00:00+09:00",
     "updated_at": "2026-09-24T05:38:38.822Z"
@@ -385,18 +357,20 @@
     "lon": 7.986653406838201,
     "name": "Bitcoin Wallis Walk",
     "website": "https://bitcoin-wallis.ch",
+    "status": "live",
     "starts_at": "2026-10-10T13:13:00+02:00",
     "ends_at": "2026-10-10T18:00:00+02:00",
     "updated_at": "2026-09-24T05:38:39.52Z"
   },
   {
-    "id": 172,
-    "lat": 18.78221139823596,
-    "lon": 98.99420724061156,
-    "name": "Chiang Mai Weekly Meetup",
-    "website": "https://sababacm.com/meet-ups/",
-    "starts_at": "2026-10-01T19:00:00+07:00",
-    "ends_at": "2026-10-01T22:00:00+07:00",
-    "updated_at": "2026-09-28T11:07:21.9Z"
+    "id": 178,
+    "lat": 46.314973521672385,
+    "lon": 7.990696847834016,
+    "name": "Bitcoin Wallis Meetup",
+    "website": "https://bitcoin-wallis.ch/",
+    "status": "live",
+    "starts_at": "2026-11-17T19:00:00+01:00",
+    "ends_at": "2026-11-17T22:00:00+01:00",
+    "updated_at": "2026-10-07T20:59:51.269Z"
   }
 ]

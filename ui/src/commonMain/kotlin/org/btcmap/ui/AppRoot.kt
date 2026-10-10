@@ -33,6 +33,7 @@ import org.btcmap.api.setAreaDescription
 import org.btcmap.api.setAreaName
 import org.btcmap.api.submitEvent
 import org.btcmap.api.submitPlace
+import org.btcmap.api.toEvent
 import org.btcmap.api.verifyArea
 import org.btcmap.db.table.area.Area
 import org.btcmap.db.table.event.Event
@@ -617,10 +618,6 @@ private fun UserProfileRoute(
         )
     }
 }
-
-/** Parses the floating local date-time a duplicate pre-fill carries, or null. */
-private fun String.toLocalDateTimeOrNull(): java.time.LocalDateTime? =
-    runCatching { java.time.LocalDateTime.parse(this) }.getOrNull()
 
 /**
  * The database stats route: the shared [DbStatsPage] under the standard top bar,

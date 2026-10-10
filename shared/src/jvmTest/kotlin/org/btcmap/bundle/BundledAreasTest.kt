@@ -201,7 +201,7 @@ class BundledAreasTest {
             try {
                 parseBundledArea(json)
                 Assert.fail("expected missing '$field' to be rejected")
-            } catch (e: IllegalArgumentException) {
+            } catch (e: Exception) {
                 Assert.assertTrue(e.message.orEmpty().contains(field))
             }
         }
@@ -223,13 +223,16 @@ class BundledAreasTest {
         try {
             parseBundledArea(json)
             Assert.fail("expected an unparseable 'updated_at' to be rejected")
-        } catch (e: IllegalArgumentException) {
-            Assert.assertTrue(e.message.orEmpty().contains("updated_at"))
+        } catch (_: Exception) {
+            // The shared API mapper's date parser reports the raw value, not the
+            // field name; the point is that a malformed cursor fails the seed.
         }
     }
 
     @Test
-    fun readBundledArea_degradesNonObjectGeoJsonToNull() {
+    fun readBundledArea_rejectsNonObjectGeoJson() {
+        // The seed now uses the API decoder, whose `geo_json` must be an object;
+        // a wrong type fails the seed instead of being dropped as before.
         val json = """
             {
               "id": 1,
@@ -242,11 +245,16 @@ class BundledAreasTest {
             }
         """.trimIndent()
 
-        Assert.assertNull(parseBundledArea(json).geoJson)
+        try {
+            parseBundledArea(json)
+            Assert.fail("expected a non-object 'geo_json' to be rejected")
+        } catch (e: Exception) {
+            Assert.assertTrue(e.message.orEmpty().contains("geo_json"))
+        }
     }
 
     @Test
-    fun readBundledArea_degradesNonObjectLocalizedFieldsToNull() {
+    fun readBundledArea_rejectsNonObjectLocalizedFields() {
         val json = """
             {
               "id": 1,
@@ -260,10 +268,12 @@ class BundledAreasTest {
             }
         """.trimIndent()
 
-        val area = parseBundledArea(json)
-
-        Assert.assertNull(area.localizedName)
-        Assert.assertNull(area.localizedDescription)
+        try {
+            parseBundledArea(json)
+            Assert.fail("expected a non-object 'localized_name' to be rejected")
+        } catch (e: Exception) {
+            Assert.assertTrue(e.message.orEmpty().contains("localized_name"))
+        }
     }
 
     // --- seeding ----------------------------------------------------------------

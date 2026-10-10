@@ -36,7 +36,7 @@ data class GetPlacesItem(
     val lat: Double,
     val lon: Double,
     val icon: String,
-    val name: String,
+    val name: String?,
     val localizedName: JsonObject?,
     val updatedAt: String,
     val deletedAt: String?,
@@ -112,13 +112,13 @@ private fun String.toGetPlacesItems(): List<GetPlacesItem> {
     return toJsonArray().map { it.toGetPlacesItem() }
 }
 
-private fun JsonObject.toGetPlacesItem(): GetPlacesItem {
+internal fun JsonObject.toGetPlacesItem(): GetPlacesItem {
     return GetPlacesItem(
         id = long("id"),
         lat = double("lat"),
         lon = double("lon"),
         icon = string("icon"),
-        name = string("name"),
+        name = nonBlankStringOrNull("name"),
         localizedName = objectOrNull("localized_name"),
         updatedAt = string("updated_at"),
         deletedAt = nonBlankStringOrNull("deleted_at"),

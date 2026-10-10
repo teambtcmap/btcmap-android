@@ -32,8 +32,8 @@ import urllib.request
 from pathlib import Path
 
 # The full field set the app syncs, minus ``deleted_at`` (see the module
-# docstring). Keep this in sync with ``placeFields`` in PlaceApi.kt and with
-# ``readBundledPlace`` in BundledPlaces.kt.
+# docstring). Keep this in sync with ``placeFields`` and ``toGetPlacesItem`` in
+# PlaceApi.kt, the decoder the live sync and the seed now share.
 FIELDS = (
     "lat",
     "lon",

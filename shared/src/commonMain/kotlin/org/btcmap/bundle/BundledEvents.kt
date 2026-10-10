@@ -7,18 +7,17 @@ import org.btcmap.platform.ioDispatcher
 import kotlin.time.Duration
 import kotlin.time.TimeSource
 import kotlinx.coroutines.withContext
-import kotlinx.serialization.SerialName
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.DecodeSequenceMode
+import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.okio.decodeBufferedSourceToSequence
 import okio.Source
 import okio.buffer
+import org.btcmap.api.toEvent
+import org.btcmap.api.toGetEventsDeltaItem
 import org.btcmap.db.Database
 import org.btcmap.db.table.event.Event
 import org.btcmap.json.btcmapJson
 import org.btcmap.util.rethrowIfCancellation
-import org.btcmap.util.toUrlOrNull
-import org.btcmap.util.toInstantOrNull
 
 /**
  * Seeds the event table from the bundled snapshot produced by the bundler.
@@ -83,11 +82,11 @@ object BundledEvents {
                 source.buffer().useSource { buffered ->
                     db.transaction {
                         var batch = mutableListOf<Event>()
-                        for (record in btcmapJson.decodeBufferedSourceToSequence<BundledEventJson>(
+                        for (record in btcmapJson.decodeBufferedSourceToSequence<JsonObject>(
                             buffered,
                             DecodeSequenceMode.ARRAY_WRAPPED,
                         )) {
-                            batch.add(record.toEvent())
+                            batch.add(record.toGetEventsDeltaItem().toEvent())
                             if (batch.size >= BATCH_SIZE) {
                                 db.event.insert(batch)
                                 eventsImported += batch.size
@@ -113,46 +112,3 @@ object BundledEvents {
     }
 }
 
-/** One event record as it appears in the bundled snapshot. */
-@Serializable
-internal class BundledEventJson(
-    val id: Long? = null,
-    val lat: Double? = null,
-    val lon: Double? = null,
-    val name: String? = null,
-    val website: String? = null,
-    @SerialName("starts_at") val startsAt: String? = null,
-    @SerialName("ends_at") val endsAt: String? = null,
-    @SerialName("updated_at") val updatedAt: String? = null,
-)
-
-internal fun BundledEventJson.toEvent(): Event {
-    // Required fields must be present: defaulting them would silently seed a
-    // bogus event if the snapshot format ever changes, instead of failing
-    // loudly and rolling the import back. The id is resolved first so the
-    // messages for the remaining fields can name the event.
-    val eventId = requireNotNull(id) { "bundled event is missing 'id'" }
-    val eventLat = requireNotNull(lat) { "bundled event $eventId is missing 'lat'" }
-    val eventLon = requireNotNull(lon) { "bundled event $eventId is missing 'lon'" }
-    val eventName = requireNotNull(name) { "bundled event $eventId is missing 'name'" }
-    val eventStartsAt = requireNotNull(startsAt?.toInstantOrNull()) {
-        "bundled event $eventId is missing a parseable 'starts_at'"
-    }
-    // `updated_at` drives the delta sync cursor, so a malformed one must fail
-    // the seed rather than silently reset the cursor to an arbitrary value.
-    val eventUpdatedAt = requireNotNull(updatedAt?.toInstantOrNull()) {
-        "bundled event $eventId is missing a parseable 'updated_at'"
-    }
-    require(eventName.isNotEmpty()) { "bundled event $eventId has an empty 'name'" }
-    return Event(
-        id = eventId,
-        lat = eventLat,
-        lon = eventLon,
-        name = eventName,
-        website = website?.toUrlOrNull(),
-        startsAt = eventStartsAt,
-        endsAt = endsAt?.toInstantOrNull(),
-        updatedAt = eventUpdatedAt,
-        deletedAt = null,
-    )
-}

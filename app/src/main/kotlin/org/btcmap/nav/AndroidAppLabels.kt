@@ -4,15 +4,13 @@ import android.content.Context
 import android.text.format.DateFormat
 import android.text.format.Formatter
 import org.btcmap.i18n.Strings
-import org.btcmap.platform.currentLocale
 import org.btcmap.settings.mapStyle
 import org.btcmap.settings.prefs
 import org.btcmap.ui.AppLabels
 import org.btcmap.ui.appLabels
-import java.text.NumberFormat
+import org.btcmap.ui.defaultFormatNumber
 import java.time.Instant
 import java.util.Date
-import java.util.Locale
 
 /**
  * Builds the shared [AppLabels] from the cross-platform string catalog, so the
@@ -22,11 +20,7 @@ import java.util.Locale
 internal fun Context.androidAppLabels(): AppLabels = appLabels(
     strings = Strings.current(),
     currentStyle = prefs.mapStyle,
-    formatNumber = { value, maximumFractionDigits ->
-        NumberFormat.getNumberInstance(Locale.forLanguageTag(currentLocale())).apply {
-            this.maximumFractionDigits = maximumFractionDigits
-        }.format(value)
-    },
+    formatNumber = ::defaultFormatNumber,
     formatBytes = { Formatter.formatFileSize(this, it) },
     formatFeedDate = { iso ->
         try {
