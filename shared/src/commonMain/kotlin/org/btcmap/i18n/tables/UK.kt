@@ -52,7 +52,7 @@ internal val UK: Map<String, String> = mapOf(
         "btn_submit" to "Надіслати",
         "btn_verify" to "Підтвердити",
         "button_background" to "Фон кнопки",
-        "button_border" to "Рамка кнопки",
+        "button_accent" to "Акцент кнопки",
         "button_icon" to "Іконка кнопки",
         "category" to "Категорія",
         "category_placeholder" to "кафе",

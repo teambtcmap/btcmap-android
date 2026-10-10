@@ -22,7 +22,16 @@ enum class MapColor(
     BadgeText("badgeTextColor", 0xFFFFFFFF.toInt()),
     ButtonBackground("buttonBackgroundColor", 0xFF1F2937.toInt()),
     ButtonIcon("buttonIconColor", 0xFFFFFFFF.toInt()),
-    ButtonBorder("buttonBorderColor", 0xFFFFFFFF.toInt()),
+
+    /**
+     * Tints the selected marker-filter icon. It has no colour of its own by
+     * default: it follows [BoostedMarkerBackground] until the user picks one, so
+     * changing the boosted colour also changes the accent (see [mapColor]).
+     * [defaultArgb] mirrors the boosted default for callers that need a standalone
+     * value, and [key] keeps the name the colour had as the button border so an
+     * override set back then still applies.
+     */
+    ButtonAccent("buttonBorderColor", 0xFFF7931A.toInt(), resettable = true),
     ;
 
     companion object {
@@ -32,7 +41,12 @@ enum class MapColor(
 }
 
 /** The stored color for [color], or its default when the user has not overridden it. */
-fun Settings.mapColor(color: MapColor): Int = getIntOrNull(color.key) ?: color.defaultArgb
+fun Settings.mapColor(color: MapColor): Int = getIntOrNull(color.key) ?: when (color) {
+    // The button accent has no default of its own: it tracks the boosted marker
+    // colour unless the user has picked a colour for it.
+    MapColor.ButtonAccent -> mapColor(MapColor.BoostedMarkerBackground)
+    else -> color.defaultArgb
+}
 
 /** Stores [argb] for [color]; null clears the override back to the default. */
 fun Settings.setMapColor(color: MapColor, argb: Int?) = putInt(color.key, argb)

@@ -52,7 +52,7 @@ internal val CA: Map<String, String> = mapOf(
         "btn_submit" to "Envia",
         "btn_verify" to "Verifica",
         "button_background" to "Fons del botó",
-        "button_border" to "Vora del botó",
+        "button_accent" to "Accent del botó",
         "button_icon" to "Icona del botó",
         "category" to "Categoria",
         "category_placeholder" to "cafeteria",

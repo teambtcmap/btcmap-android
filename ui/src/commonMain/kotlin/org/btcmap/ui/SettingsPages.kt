@@ -73,7 +73,7 @@ fun markerPalette(settings: Settings): MarkerPalette = MarkerPalette(
 fun areaChipPalette(settings: Settings): AreaChipPalette = AreaChipPalette(
     buttonBackground = Color(settings.mapColor(MapColor.ButtonBackground)),
     buttonIcon = Color(settings.mapColor(MapColor.ButtonIcon)),
-    buttonBorder = Color(settings.mapColor(MapColor.ButtonBorder)),
+    buttonAccent = Color(settings.mapColor(MapColor.ButtonAccent)),
     badgeBackground = Color(settings.mapColor(MapColor.BadgeBackground)),
     badgeText = Color(settings.mapColor(MapColor.BadgeText)),
 )

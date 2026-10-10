@@ -52,7 +52,7 @@ internal val DA: Map<String, String> = mapOf(
         "btn_submit" to "Indsend",
         "btn_verify" to "Bekræft",
         "button_background" to "Knap baggrund",
-        "button_border" to "Knap kant",
+        "button_accent" to "Knapaccent",
         "button_icon" to "Knap ikon",
         "category" to "Kategori",
         "category_placeholder" to "cafe",

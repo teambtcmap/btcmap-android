@@ -52,7 +52,7 @@ internal val IW: Map<String, String> = mapOf(
         "btn_submit" to "שליחה",
         "btn_verify" to "אימות",
         "button_background" to "רקע כפתור",
-        "button_border" to "גבול כפתור",
+        "button_accent" to "הדגשת כפתור",
         "button_icon" to "אייקון כפתור",
         "category" to "קטגוריה",
         "category_placeholder" to "בית קפה",

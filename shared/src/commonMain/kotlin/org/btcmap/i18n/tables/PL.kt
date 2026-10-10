@@ -52,7 +52,7 @@ internal val PL: Map<String, String> = mapOf(
         "btn_submit" to "Wyślij",
         "btn_verify" to "Zweryfikuj",
         "button_background" to "Tło przycisku",
-        "button_border" to "Obramowanie przycisku",
+        "button_accent" to "Akcent przycisku",
         "button_icon" to "Ikona przycisku",
         "category" to "Kategoria",
         "category_placeholder" to "kawiarnia",

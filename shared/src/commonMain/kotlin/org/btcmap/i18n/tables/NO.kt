@@ -52,7 +52,7 @@ internal val NO: Map<String, String> = mapOf(
         "btn_submit" to "Send inn",
         "btn_verify" to "Bekreft",
         "button_background" to "Knapp bakgrunn",
-        "button_border" to "Knapp ramme",
+        "button_accent" to "Knapp aksent",
         "button_icon" to "Knapp ikon",
         "category" to "Kategori",
         "category_placeholder" to "kafé",

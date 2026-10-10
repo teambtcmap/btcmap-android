@@ -504,7 +504,7 @@ private fun MapColor.titleKey(): String = when (this) {
     MapColor.BadgeText -> "badge_text"
     MapColor.ButtonBackground -> "button_background"
     MapColor.ButtonIcon -> "button_icon"
-    MapColor.ButtonBorder -> "button_border"
+    MapColor.ButtonAccent -> "button_accent"
 }
 
 /** The string key for each sync state. */

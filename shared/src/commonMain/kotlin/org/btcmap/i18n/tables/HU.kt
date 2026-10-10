@@ -52,7 +52,7 @@ internal val HU: Map<String, String> = mapOf(
         "btn_submit" to "Beküldés",
         "btn_verify" to "Ellenőrzés",
         "button_background" to "Gomb háttér",
-        "button_border" to "Gomb keret",
+        "button_accent" to "Gomb kiemelőszíne",
         "button_icon" to "Gomb ikon",
         "category" to "Kategória",
         "category_placeholder" to "kávézó",

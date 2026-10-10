@@ -52,7 +52,7 @@ internal val FI: Map<String, String> = mapOf(
         "btn_submit" to "Lähetä",
         "btn_verify" to "Vahvista",
         "button_background" to "Painikkeen tausta",
-        "button_border" to "Painikkeen reunus",
+        "button_accent" to "Painikkeen korostus",
         "button_icon" to "Painikkeen kuvake",
         "category" to "Luokka",
         "category_placeholder" to "kahvila",

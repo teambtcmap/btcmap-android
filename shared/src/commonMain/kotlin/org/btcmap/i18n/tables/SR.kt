@@ -52,7 +52,7 @@ internal val SR: Map<String, String> = mapOf(
         "btn_submit" to "Пошаљи",
         "btn_verify" to "Потврди",
         "button_background" to "Позадина дугмета",
-        "button_border" to "Оквир дугмета",
+        "button_accent" to "Акцент дугмета",
         "button_icon" to "Иконица дугмета",
         "category" to "Категорија",
         "category_placeholder" to "кафе",

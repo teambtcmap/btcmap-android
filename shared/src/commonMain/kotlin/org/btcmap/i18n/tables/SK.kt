@@ -52,7 +52,7 @@ internal val SK: Map<String, String> = mapOf(
         "btn_submit" to "Odoslať",
         "btn_verify" to "Overiť",
         "button_background" to "Pozadie tlačidla",
-        "button_border" to "Orámovanie tlačidla",
+        "button_accent" to "Akcent tlačidla",
         "button_icon" to "Ikona tlačidla",
         "category" to "Kategória",
         "category_placeholder" to "kaviareň",

@@ -52,7 +52,7 @@ internal val AR: Map<String, String> = mapOf(
         "btn_submit" to "إرسال",
         "btn_verify" to "تحقق",
         "button_background" to "خلفية الزر",
-        "button_border" to "حد الزر",
+        "button_accent" to "تمييز الزر",
         "button_icon" to "أيقونة الزر",
         "category" to "الفئة",
         "category_placeholder" to "مقهى",

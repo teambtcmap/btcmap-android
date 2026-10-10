@@ -52,7 +52,7 @@ internal val CS: Map<String, String> = mapOf(
         "btn_submit" to "Odeslat",
         "btn_verify" to "Ověřit",
         "button_background" to "Pozadí tlačítka",
-        "button_border" to "Okraj tlačítka",
+        "button_accent" to "Akcent tlačítka",
         "button_icon" to "Ikona tlačítka",
         "category" to "Kategorie",
         "category_placeholder" to "kavárna",

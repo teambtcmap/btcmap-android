@@ -61,7 +61,7 @@ internal val EN: Map<String, String> = mapOf(
         "btn_submit" to "Submit",
         "btn_verify" to "Verify",
         "button_background" to "Button background",
-        "button_border" to "Button border",
+        "button_accent" to "Button accent",
         "button_icon" to "Button icon",
         "cancel" to "Cancel",
         "category" to "Category",

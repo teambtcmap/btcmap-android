@@ -52,7 +52,7 @@ internal val VI: Map<String, String> = mapOf(
         "btn_submit" to "Gửi",
         "btn_verify" to "Xác minh",
         "button_background" to "Nền nút",
-        "button_border" to "Viền nút",
+        "button_accent" to "Màu nhấn nút",
         "button_icon" to "Biểu tượng nút",
         "category" to "Danh mục",
         "category_placeholder" to "quán cà phê",

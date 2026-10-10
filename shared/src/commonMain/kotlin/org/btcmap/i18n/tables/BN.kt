@@ -52,7 +52,7 @@ internal val BN: Map<String, String> = mapOf(
         "btn_submit" to "জমা দিন",
         "btn_verify" to "যাচাই করুন",
         "button_background" to "বোতাম পটভূমি",
-        "button_border" to "বোতাম সীমানা",
+        "button_accent" to "বাটন অ্যাকসেন্ট",
         "button_icon" to "বোতাম আইকন",
         "category" to "বিভাগ",
         "category_placeholder" to "ক্যাফে",

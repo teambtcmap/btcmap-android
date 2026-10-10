@@ -52,7 +52,7 @@ internal val FA: Map<String, String> = mapOf(
         "btn_submit" to "ارسال",
         "btn_verify" to "تأیید",
         "button_background" to "پس‌زمینه دکمه",
-        "button_border" to "مرز دکمه",
+        "button_accent" to "رنگ تأکید دکمه",
         "button_icon" to "آیکون دکمه",
         "category" to "دسته‌بندی",
         "category_placeholder" to "کافه",

@@ -52,7 +52,7 @@ internal val NL: Map<String, String> = mapOf(
         "btn_submit" to "Verzenden",
         "btn_verify" to "Verifiëren",
         "button_background" to "Knop achtergrond",
-        "button_border" to "Knop rand",
+        "button_accent" to "Knopaccent",
         "button_icon" to "Knop icoon",
         "category" to "Categorie",
         "category_placeholder" to "café",

@@ -52,7 +52,7 @@ internal val IT: Map<String, String> = mapOf(
         "btn_submit" to "Invia",
         "btn_verify" to "Verifica",
         "button_background" to "Sfondo pulsante",
-        "button_border" to "Bordo pulsante",
+        "button_accent" to "Accento pulsante",
         "button_icon" to "Icona pulsante",
         "category" to "Categoria",
         "category_placeholder" to "bar",

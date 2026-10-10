@@ -52,7 +52,7 @@ internal val UR: Map<String, String> = mapOf(
         "btn_submit" to "جمع کریں",
         "btn_verify" to "تصدیق کریں",
         "button_background" to "بٹن کا پس منظر",
-        "button_border" to "بٹن کا سرحد",
+        "button_accent" to "بٹن کا نمایاں رنگ",
         "button_icon" to "بٹن آئیکن",
         "category" to "زمرہ",
         "category_placeholder" to "کیفے",

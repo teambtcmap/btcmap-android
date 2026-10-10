@@ -52,7 +52,7 @@ internal val AF: Map<String, String> = mapOf(
         "btn_submit" to "Dien in",
         "btn_verify" to "Verifieer",
         "button_background" to "Knoppie agtergrond",
-        "button_border" to "Knoppie rand",
+        "button_accent" to "Knoppie-aksent",
         "button_icon" to "Knoppie ikoon",
         "category" to "Kategorie",
         "category_placeholder" to "kafee",

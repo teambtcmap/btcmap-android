@@ -37,6 +37,22 @@ class MapColorsTest {
     }
 
     @Test
+    fun buttonAccentFollowsTheBoostedMarkerUntilOverridden() {
+        val settings = settings()
+
+        // With no override it tracks the boosted marker colour.
+        settings.setMapColor(MapColor.BoostedMarkerBackground, 0xFF112233.toInt())
+        Assert.assertEquals(0xFF112233.toInt(), settings.mapColor(MapColor.ButtonAccent))
+
+        // An override wins, and clearing it falls back to the boosted colour again.
+        settings.setMapColor(MapColor.ButtonAccent, 0xFF445566.toInt())
+        Assert.assertEquals(0xFF445566.toInt(), settings.mapColor(MapColor.ButtonAccent))
+
+        settings.setMapColor(MapColor.ButtonAccent, null)
+        Assert.assertEquals(0xFF112233.toInt(), settings.mapColor(MapColor.ButtonAccent))
+    }
+
+    @Test
     fun fromKey_findsAColorAndRejectsTheRest() {
         Assert.assertEquals(MapColor.BadgeText, MapColor.fromKey("badgeTextColor"))
         Assert.assertNull(MapColor.fromKey("notAColor"))

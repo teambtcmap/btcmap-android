@@ -52,7 +52,7 @@ internal val SV: Map<String, String> = mapOf(
         "btn_submit" to "Skicka",
         "btn_verify" to "Verifiera",
         "button_background" to "Knapp bakgrund",
-        "button_border" to "Knapp kant",
+        "button_accent" to "Knappaccent",
         "button_icon" to "Knapp ikon",
         "category" to "Kategori",
         "category_placeholder" to "kafé",

@@ -79,6 +79,6 @@ fun Settings.buttonIconColor(context: Context): Int = mapColor(MapColor.ButtonIc
 
 fun Settings.setButtonIconColor(color: Int?) = setMapColor(MapColor.ButtonIcon, color)
 
-fun Settings.buttonBorderColor(context: Context): Int = mapColor(MapColor.ButtonBorder)
+fun Settings.buttonAccentColor(context: Context): Int = mapColor(MapColor.ButtonAccent)
 
-fun Settings.setButtonBorderColor(color: Int?) = setMapColor(MapColor.ButtonBorder, color)
+fun Settings.setButtonAccentColor(color: Int?) = setMapColor(MapColor.ButtonAccent, color)

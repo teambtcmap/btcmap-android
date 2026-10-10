@@ -1,11 +1,7 @@
 package org.btcmap.ui.map
 
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.runtime.Composable
@@ -30,9 +26,11 @@ const val MARKER_FILTER_EXCHANGES_TAG = "marker-filter-exchanges"
 const val MARKER_FILTER_NOTES_TAG = "marker-filter-notes"
 
 /**
- * The map's marker-kind filter: one button per kind, the active one ringed.
- * Ported from the Views button group the map swap dropped, whose buttons shared
- * the app's button background and marked the selected one with a border.
+ * The map's marker-kind filter: one button per kind, the active one's icon
+ * tinted with the button accent. Ported from the Views button group the map swap
+ * dropped, whose buttons shared the app's button background and marked the
+ * selected one with a border; that ring is gone, so the tinted icon now marks
+ * the selection.
  */
 @Composable
 fun MarkerFilterButtons(
@@ -92,37 +90,20 @@ private fun MarkerFilterButton(
     onSelect: (MarkerKind) -> Unit,
     palette: AreaChipPalette,
 ) {
+    val isSelected = kind == selected
     FilledTonalIconButton(
         onClick = { onSelect(kind) },
         colors = IconButtonDefaults.filledTonalIconButtonColors(
+            // The active kind is only tinted, so all four keep the same button
+            // background and the accent colour alone marks the selection.
             containerColor = palette.buttonBackground,
-            contentColor = palette.buttonIcon,
+            contentColor = if (isSelected) palette.buttonAccent else palette.buttonIcon,
         ),
         modifier = Modifier.testTag(tag),
     ) {
-        // The ring is drawn on the button's visual circle, not its larger touch
-        // target, so it traces the background the way the Views border did.
-        Box(
-            contentAlignment = Alignment.Center,
-            modifier = Modifier
-                .size(FILTER_BUTTON_SIZE)
-                .then(
-                    if (kind == selected) {
-                        Modifier.border(FILTER_BORDER_WIDTH, palette.buttonBorder, CircleShape)
-                    } else {
-                        Modifier
-                    },
-                ),
-        ) {
-            MaterialSymbol(glyph = glyph, contentDescription = null)
-        }
+        MaterialSymbol(glyph = glyph, contentDescription = null)
     }
 }
 
-/** Material's icon button visual container, which its touch target pads to 48. */
-private val FILTER_BUTTON_SIZE = 40.dp
-
-/** Half the padding the 48dp touch target adds around the [FILTER_BUTTON_SIZE] circle. */
+/** Half the padding the 48dp touch target adds around the button's 40dp circle. */
 internal val FILTER_BUTTON_INSET = 4.dp
-
-private val FILTER_BORDER_WIDTH = 2.dp

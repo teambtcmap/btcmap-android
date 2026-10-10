@@ -52,7 +52,7 @@ internal val HI: Map<String, String> = mapOf(
         "btn_submit" to "जमा करें",
         "btn_verify" to "सत्यापित करें",
         "button_background" to "बटन पृष्ठभूमि",
-        "button_border" to "बटन सीमा",
+        "button_accent" to "बटन एक्सेंट",
         "button_icon" to "बटन आइकन",
         "category" to "श्रेणी",
         "category_placeholder" to "कैफ़े",

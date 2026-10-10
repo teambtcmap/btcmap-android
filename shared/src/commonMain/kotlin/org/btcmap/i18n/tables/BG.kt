@@ -52,7 +52,7 @@ internal val BG: Map<String, String> = mapOf(
         "btn_submit" to "Изпрати",
         "btn_verify" to "Потвърди",
         "button_background" to "Фон на бутона",
-        "button_border" to "Рамка на бутона",
+        "button_accent" to "Акцент на бутона",
         "button_icon" to "Икона на бутона",
         "category" to "Категория",
         "category_placeholder" to "кафене",

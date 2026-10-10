@@ -52,7 +52,7 @@ internal val TR: Map<String, String> = mapOf(
         "btn_submit" to "Gönder",
         "btn_verify" to "Doğrula",
         "button_background" to "Düğme arka planı",
-        "button_border" to "Düğme kenarlığı",
+        "button_accent" to "Düğme vurgusu",
         "button_icon" to "Düğme simgesi",
         "category" to "Kategori",
         "category_placeholder" to "kafe",

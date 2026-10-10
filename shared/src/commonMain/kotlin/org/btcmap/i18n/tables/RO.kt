@@ -52,7 +52,7 @@ internal val RO: Map<String, String> = mapOf(
         "btn_submit" to "Trimite",
         "btn_verify" to "Verifică",
         "button_background" to "Fundal buton",
-        "button_border" to "Margine buton",
+        "button_accent" to "Accent buton",
         "button_icon" to "Pictogramă buton",
         "category" to "Categorie",
         "category_placeholder" to "cafenea",

@@ -52,7 +52,7 @@ internal val KO: Map<String, String> = mapOf(
         "btn_submit" to "제출",
         "btn_verify" to "확인",
         "button_background" to "버튼 배경",
-        "button_border" to "버튼 테두리",
+        "button_accent" to "버튼 강조 색",
         "button_icon" to "버튼 아이콘",
         "category" to "카테고리",
         "category_placeholder" to "카페",

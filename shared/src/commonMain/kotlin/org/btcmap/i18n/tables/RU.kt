@@ -52,7 +52,7 @@ internal val RU: Map<String, String> = mapOf(
         "btn_submit" to "Отправить",
         "btn_verify" to "Подтвердить",
         "button_background" to "Фон кнопки",
-        "button_border" to "Обрамление кнопки",
+        "button_accent" to "Акцент кнопки",
         "button_icon" to "Иконка кнопки",
         "category" to "Категория",
         "category_placeholder" to "кафе",

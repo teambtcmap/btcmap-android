@@ -52,7 +52,7 @@ internal val EL: Map<String, String> = mapOf(
         "btn_submit" to "Υποβολή",
         "btn_verify" to "Επαλήθευση",
         "button_background" to "Φόντο κουμπιού",
-        "button_border" to "Περίγραμμα κουμπιού",
+        "button_accent" to "Τονισμός κουμπιού",
         "button_icon" to "Εικονίδιο κουμπιού",
         "category" to "Κατηγορία",
         "category_placeholder" to "καφέ",

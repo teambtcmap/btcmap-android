@@ -52,7 +52,7 @@ internal val TH: Map<String, String> = mapOf(
         "btn_submit" to "ส่ง",
         "btn_verify" to "ยืนยัน",
         "button_background" to "พื้นหลังปุ่ม",
-        "button_border" to "ขอบปุ่ม",
+        "button_accent" to "สีเน้นปุ่ม",
         "button_icon" to "ไอคอนปุ่ม",
         "category" to "หมวดหมู่",
         "category_placeholder" to "คาเฟ่",

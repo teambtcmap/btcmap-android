@@ -52,7 +52,7 @@ internal val ZH: Map<String, String> = mapOf(
         "btn_submit" to "提交",
         "btn_verify" to "验证",
         "button_background" to "按钮背景",
-        "button_border" to "按钮边框",
+        "button_accent" to "按钮强调色",
         "button_icon" to "按钮图标",
         "category" to "类别",
         "category_placeholder" to "咖啡馆",

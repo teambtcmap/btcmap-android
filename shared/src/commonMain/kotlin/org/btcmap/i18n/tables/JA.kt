@@ -52,7 +52,7 @@ internal val JA: Map<String, String> = mapOf(
         "btn_submit" to "送信",
         "btn_verify" to "確認",
         "button_background" to "ボタン背景",
-        "button_border" to "ボタン境界",
+        "button_accent" to "ボタンのアクセント",
         "button_icon" to "ボタンアイコン",
         "category" to "カテゴリ",
         "category_placeholder" to "カフェ",

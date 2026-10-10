@@ -25,7 +25,7 @@ class MarkerFilterButtonsTest {
                         palette = AreaChipPalette(
                             buttonBackground = Color(0xFF1F2937),
                             buttonIcon = Color.White,
-                            buttonBorder = Color.White,
+                            buttonAccent = Color(0xFFF7931A),
                             badgeBackground = Color(0xFFE53935),
                             badgeText = Color.White,
                         ),
