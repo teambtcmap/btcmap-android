@@ -114,15 +114,22 @@ internal val TEST_PROFILE_LABELS = UserProfileLabels(
     password = "Password",
     savedPlaces = "Saved places",
     savedAreas = "Saved areas",
-    noSavedPlaces = "No saved places.",
-    noSavedAreas = "No saved areas.",
     logOut = "Log out",
     editUsername = "Change username",
     editPassword = "Change password",
-    delete = "Delete",
     uploadedImages = "Uploaded images",
     myEvents = "My events",
     myNotes = "My notes",
+)
+
+internal val TEST_SAVED_PLACES_LABELS = SavedItemsLabels(
+    empty = "No saved places.",
+    delete = "Delete",
+)
+
+internal val TEST_SAVED_AREAS_LABELS = SavedItemsLabels(
+    empty = "No saved areas.",
+    delete = "Delete",
 )
 
 internal val TEST_UPLOADED_IMAGES_LABELS = UploadedImagesLabels(

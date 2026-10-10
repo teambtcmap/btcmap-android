@@ -1199,17 +1199,22 @@ private fun runApp() = application {
                         }
 
                         Route.Account -> {
-                            // Uploaded images, my events and my notes are inside
-                            // the profile, so the screen's back arrow returns to
-                            // the profile page before leaving the account screen.
+                            // Saved places, saved areas, uploaded images, my
+                            // events and my notes are inside the profile, so the
+                            // screen's back arrow returns to the profile page
+                            // before leaving the account screen.
                             var showUploadedImages by remember { mutableStateOf(false) }
                             var showMyEvents by remember { mutableStateOf(false) }
                             var showMyNotes by remember { mutableStateOf(false) }
+                            var showSavedPlaces by remember { mutableStateOf(false) }
+                            var showSavedAreas by remember { mutableStateOf(false) }
                             ScreenPage(
                                 title = when {
                                     showUploadedImages -> PROFILE_LABELS.uploadedImages
                                     showMyEvents -> PROFILE_LABELS.myEvents
                                     showMyNotes -> PROFILE_LABELS.myNotes
+                                    showSavedPlaces -> PROFILE_LABELS.savedPlaces
+                                    showSavedAreas -> PROFILE_LABELS.savedAreas
                                     else -> STRINGS["account"]
                                 },
                                 onBack = {
@@ -1217,6 +1222,8 @@ private fun runApp() = application {
                                         showUploadedImages -> showUploadedImages = false
                                         showMyEvents -> showMyEvents = false
                                         showMyNotes -> showMyNotes = false
+                                        showSavedPlaces -> showSavedPlaces = false
+                                        showSavedAreas -> showSavedAreas = false
                                         else -> nav.pop()
                                     }
                                 },
@@ -1237,6 +1244,8 @@ private fun runApp() = application {
                                             imagesLabels = UPLOADED_IMAGES_LABELS,
                                             eventsLabels = MY_EVENTS_LABELS,
                                             notesLabels = MY_NOTES_LABELS,
+                                            savedPlacesLabels = SAVED_PLACES_LABELS,
+                                            savedAreasLabels = SAVED_AREAS_LABELS,
                                             mapStyleUrl = HOSTED_STYLE_URL,
                                             mapStyleJson = styleJson,
                                             showUploadedImages = showUploadedImages,
@@ -1247,6 +1256,10 @@ private fun runApp() = application {
                                             onShowMyEventsChange = { showMyEvents = it },
                                             showMyNotes = showMyNotes,
                                             onShowMyNotesChange = { showMyNotes = it },
+                                            showSavedPlaces = showSavedPlaces,
+                                            onShowSavedPlacesChange = { showSavedPlaces = it },
+                                            showSavedAreas = showSavedAreas,
+                                            onShowSavedAreasChange = { showSavedAreas = it },
                                             onDuplicateEvent = { event ->
                                                 addEvent = AddEventPrefill(
                                                     lat = event.lat,
@@ -1266,6 +1279,8 @@ private fun runApp() = application {
                                                 showUploadedImages = false
                                                 showMyEvents = false
                                                 showMyNotes = false
+                                                showSavedPlaces = false
+                                                showSavedAreas = false
                                                 onLoggedOut()
                                             },
                                         )
@@ -1701,6 +1716,8 @@ private fun renderScreen(spec: String) {
                         var showUploadedImages by remember { mutableStateOf(false) }
                         var showMyEvents by remember { mutableStateOf(false) }
                         var showMyNotes by remember { mutableStateOf(false) }
+                        var showSavedPlaces by remember { mutableStateOf(false) }
+                        var showSavedAreas by remember { mutableStateOf(false) }
                         AccountScreen(
                             api = api,
                             db = db,
@@ -1717,6 +1734,8 @@ private fun renderScreen(spec: String) {
                                     imagesLabels = UPLOADED_IMAGES_LABELS,
                                     eventsLabels = MY_EVENTS_LABELS,
                                     notesLabels = MY_NOTES_LABELS,
+                                    savedPlacesLabels = SAVED_PLACES_LABELS,
+                                    savedAreasLabels = SAVED_AREAS_LABELS,
                                     mapStyleUrl = HOSTED_STYLE_URL,
                                     mapStyleJson = null,
                                     showUploadedImages = showUploadedImages,
@@ -1727,6 +1746,10 @@ private fun renderScreen(spec: String) {
                                     onShowMyEventsChange = { showMyEvents = it },
                                     showMyNotes = showMyNotes,
                                     onShowMyNotesChange = { showMyNotes = it },
+                                    showSavedPlaces = showSavedPlaces,
+                                    onShowSavedPlacesChange = { showSavedPlaces = it },
+                                    showSavedAreas = showSavedAreas,
+                                    onShowSavedAreasChange = { showSavedAreas = it },
                                     onLoggedOut = onLoggedOut,
                                 )
                             },
@@ -1981,6 +2004,8 @@ private val ADD_PLACE_LABELS get() = LABELS.addPlace
 private val ADD_EVENT_LABELS get() = LABELS.addEvent
 private val ADD_NOTE_LABELS get() = LABELS.addNote
 private val MY_NOTES_LABELS get() = LABELS.myNotes
+private val SAVED_PLACES_LABELS get() = LABELS.savedPlaces
+private val SAVED_AREAS_LABELS get() = LABELS.savedAreas
 private val ADD_LOCATION_LABELS get() = LABELS.addLocation
 private val PLACE_SHEET_STRINGS get() = LABELS.placeStrings
 private val DESKTOP_AREA_STRINGS get() = LABELS.area

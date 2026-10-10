@@ -68,6 +68,7 @@ class UserProfileSavedItemsTest : AppTestCase() {
         }
 
         withProfile {
+            openSavedPlaces()
             waitForText("One")
             deleteFirst()
 
@@ -93,6 +94,7 @@ class UserProfileSavedItemsTest : AppTestCase() {
         }
 
         withProfile {
+            openSavedAreas()
             waitForText("Grand Paris")
             deleteFirst()
 
@@ -124,6 +126,7 @@ class UserProfileSavedItemsTest : AppTestCase() {
         }
 
         withProfile {
+            openSavedPlaces()
             waitForText("One")
             deleteFirst()
 
@@ -131,6 +134,21 @@ class UserProfileSavedItemsTest : AppTestCase() {
             waitUntil { userFetches.get() == 1 }
             Assert.assertEquals("Other", runBlocking { databaseRule.db.user.select() }?.savedPlaces?.single()?.name)
         }
+    }
+
+    private fun openSavedPlaces() {
+        openSavedItems("saved_places")
+    }
+
+    private fun openSavedAreas() {
+        openSavedItems("saved_areas")
+    }
+
+    /** The profile now holds the saved lists behind buttons; open one first. */
+    private fun openSavedItems(key: String) {
+        val label = Strings.current()[key]
+        composeTestRule.waitUntil(5_000) { showsText(label) }
+        composeTestRule.onAllNodesWithText(label).onFirst().performClick()
     }
 
     private fun waitForText(text: String) {

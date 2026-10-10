@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+- Add icons to the profile screen: a leading icon on its username/password sections, on the saved-places, saved-areas, my-events, my-notes and uploaded-images buttons, and on the log-out button
+- Move the saved places and saved areas lists off the profile page onto their own sub-pages, opened from buttons like the existing my-events, my-notes and uploaded-images ones, so the profile stays short; each list is capped at a readable width and centred on tablets and wide desktop windows
 - Fetch the infrastructure dashboard from `GET /v4/dashboard/infra` instead of the `dashboard` RPC method, and add a "Top users (24h)" card listing the most active authenticated users
 - Send the signed-in session token with every API request, not just the ones that require it, so the server can prioritize requests from logged-in users; signing up still sends no token, and sign-in keeps carrying the password
 - Keep the desktop map composed across navigation, so returning to it from the settings or any other screen is instant instead of rebuilding the MapLibre map and showing a blank map for a few seconds

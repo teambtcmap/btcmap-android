@@ -9,8 +9,22 @@ class MaterialSymbolNamesTest {
 
     @Test
     fun containsTheIconsTheAppUses() {
-        listOf("notes", "star", "favorite", "local_atm", "storefront", "currency_exchange", "event")
-            .forEach { assertTrue(it in MATERIAL_SYMBOL_NAMES, "missing icon: $it") }
+        listOf(
+            "notes",
+            "star",
+            "favorite",
+            "local_atm",
+            "storefront",
+            "currency_exchange",
+            "event",
+            // The profile screen's section and navigation icons.
+            "person",
+            "lock",
+            "bookmark",
+            "public",
+            "photo_library",
+            "logout",
+        ).forEach { assertTrue(it in MATERIAL_SYMBOL_NAMES, "missing icon: $it") }
     }
 
     @Test

@@ -99,6 +99,8 @@ fun ProfileScreen(
     imagesLabels: UploadedImagesLabels,
     eventsLabels: MyEventsLabels,
     notesLabels: MyNotesLabels,
+    savedPlacesLabels: SavedItemsLabels,
+    savedAreasLabels: SavedItemsLabels,
     /** The map style the my-events previews render with. */
     mapStyleUrl: String,
     mapStyleJson: String?,
@@ -108,6 +110,10 @@ fun ProfileScreen(
     onShowMyEventsChange: (Boolean) -> Unit,
     showMyNotes: Boolean,
     onShowMyNotesChange: (Boolean) -> Unit,
+    showSavedPlaces: Boolean,
+    onShowSavedPlacesChange: (Boolean) -> Unit,
+    showSavedAreas: Boolean,
+    onShowSavedAreasChange: (Boolean) -> Unit,
     /** Opens the add-event screen pre-filled from one of the user's events. */
     onDuplicateEvent: (MyEventUi) -> Unit = {},
     /** Moves the app back to the map, centred on one of the user's notes. */
@@ -121,14 +127,20 @@ fun ProfileScreen(
     val scope = rememberCoroutineScope()
 
     suspend fun reload() {
-        account = withContext(Dispatchers.IO) {
-            val user = db.user.select() ?: return@withContext null
-            user.copy(
-                savedPlaces = user.savedPlaces.withLocalizedPlaceNames(db),
-                savedAreas = user.savedAreas.withLocalizedAreaNames(db),
-            )
-        }
+        account = withContext(Dispatchers.IO) { db.user.select() }
         loaded = true
+    }
+
+    /** The saved places, re-resolved against the local cache for localized names. */
+    suspend fun loadSavedPlaces(): List<SavedItemUi> {
+        val saved = withContext(Dispatchers.IO) { db.user.select()?.savedPlaces ?: emptyList() }
+        return saved.withLocalizedPlaceNames(db).map { SavedItemUi(it.id, it.name) }
+    }
+
+    /** The saved areas, re-resolved against the local cache for localized names. */
+    suspend fun loadSavedAreas(): List<SavedItemUi> {
+        val saved = withContext(Dispatchers.IO) { db.user.select()?.savedAreas ?: emptyList() }
+        return saved.withLocalizedAreaNames(db).map { SavedItemUi(it.id, it.name) }
     }
 
     LaunchedEffect(Unit) { reload() }
@@ -148,6 +160,18 @@ fun ProfileScreen(
             withContext(Dispatchers.IO) { settings.clearSession(db) }
             onLoggedOut()
         }
+
+        showSavedPlaces -> SavedItemsScreen(
+            labels = savedPlacesLabels,
+            load = { loadSavedPlaces() },
+            delete = { item -> SavedItems.removePlace(api, db, item.id) },
+        )
+
+        showSavedAreas -> SavedItemsScreen(
+            labels = savedAreasLabels,
+            load = { loadSavedAreas() },
+            delete = { item -> SavedItems.removeArea(api, db, item.id) },
+        )
 
         showUploadedImages -> UploadedImagesScreen(
             labels = imagesLabels,
@@ -271,8 +295,6 @@ fun ProfileScreen(
                     state = UserProfileUiState(
                         username = current.name,
                         password = formLabels.passwordMask,
-                        savedPlaces = current.savedPlaces.map { SavedItemUi(it.id, it.name) },
-                        savedAreas = current.savedAreas.map { SavedItemUi(it.id, it.name) },
                         labels = profileLabels,
                     ),
                     onEditUsername = {
@@ -282,6 +304,14 @@ fun ProfileScreen(
                     onEditPassword = {
                         message = null
                         editing = ProfileEdit.Password
+                    },
+                    onOpenSavedPlaces = {
+                        message = null
+                        onShowSavedPlacesChange(true)
+                    },
+                    onOpenSavedAreas = {
+                        message = null
+                        onShowSavedAreasChange(true)
                     },
                     onOpenUploadedImages = {
                         message = null
@@ -294,18 +324,6 @@ fun ProfileScreen(
                     onOpenMyNotes = {
                         message = null
                         onShowMyNotesChange(true)
-                    },
-                    onDeletePlace = { id ->
-                        scope.launch {
-                            SavedItems.removePlace(api, db, id)
-                            reload()
-                        }
-                    },
-                    onDeleteArea = { id ->
-                        scope.launch {
-                            SavedItems.removeArea(api, db, id)
-                            reload()
-                        }
                     },
                     onLogOut = {
                         scope.launch {

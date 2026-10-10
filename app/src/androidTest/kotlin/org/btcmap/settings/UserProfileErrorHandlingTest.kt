@@ -75,6 +75,17 @@ class UserProfileErrorHandlingTest : AppTestCase() {
                 }
 
                 composeTestRule.waitUntil(5_000) {
+                    composeTestRule
+                        .onAllNodesWithText(Strings.current()["saved_places"])
+                        .fetchSemanticsNodes()
+                        .isNotEmpty()
+                }
+                composeTestRule
+                    .onAllNodesWithText(Strings.current()["saved_places"])
+                    .onFirst()
+                    .performClick()
+
+                composeTestRule.waitUntil(5_000) {
                     composeTestRule.onAllNodesWithText("Test Place").fetchSemanticsNodes().isNotEmpty()
                 }
 

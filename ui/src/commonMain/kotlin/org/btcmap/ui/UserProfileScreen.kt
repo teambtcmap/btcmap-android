@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
@@ -19,13 +20,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-
-/** A saved place or area row: a name and a delete action. */
-data class SavedItemUi(
-    val id: Long,
-    val name: String,
-)
+import androidx.compose.ui.unit.sp
 
 /** The already-resolved strings [UserProfileScreen] renders. */
 data class UserProfileLabels(
@@ -33,12 +30,9 @@ data class UserProfileLabels(
     val password: String,
     val savedPlaces: String,
     val savedAreas: String,
-    val noSavedPlaces: String,
-    val noSavedAreas: String,
     val logOut: String,
     val editUsername: String,
     val editPassword: String,
-    val delete: String,
     val uploadedImages: String,
     val myEvents: String,
     val myNotes: String,
@@ -47,8 +41,6 @@ data class UserProfileLabels(
 data class UserProfileUiState(
     val username: String,
     val password: String,
-    val savedPlaces: List<SavedItemUi>,
-    val savedAreas: List<SavedItemUi>,
     val labels: UserProfileLabels,
 )
 
@@ -57,11 +49,11 @@ fun UserProfileScreen(
     state: UserProfileUiState,
     onEditUsername: () -> Unit,
     onEditPassword: () -> Unit,
+    onOpenSavedPlaces: () -> Unit,
+    onOpenSavedAreas: () -> Unit,
     onOpenUploadedImages: () -> Unit,
     onOpenMyEvents: () -> Unit,
     onOpenMyNotes: () -> Unit,
-    onDeletePlace: (id: Long) -> Unit,
-    onDeleteArea: (id: Long) -> Unit,
     onLogOut: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -70,56 +62,42 @@ fun UserProfileScreen(
             .fillMaxSize()
             .verticalScroll(rememberScrollState()),
     ) {
-        SectionLabel(state.labels.username)
+        SectionLabel(state.labels.username, glyph = "person")
         EditRow(state.username, state.labels.editUsername, onEditUsername)
 
-        SectionLabel(state.labels.password)
+        SectionLabel(state.labels.password, glyph = "lock")
         EditRow(state.password, state.labels.editPassword, onEditPassword)
 
-        SectionLabel(state.labels.savedPlaces)
-        if (state.savedPlaces.isEmpty()) {
-            EmptyLabel(state.labels.noSavedPlaces)
-        } else {
-            state.savedPlaces.forEach { item ->
-                SavedItemRow(item, state.labels.delete) { onDeletePlace(item.id) }
-            }
-        }
-
-        SectionLabel(state.labels.savedAreas)
-        if (state.savedAreas.isEmpty()) {
-            EmptyLabel(state.labels.noSavedAreas)
-        } else {
-            state.savedAreas.forEach { item ->
-                SavedItemRow(item, state.labels.delete) { onDeleteArea(item.id) }
-            }
-        }
-
-        OutlinedButton(
+        NavButton(
+            glyph = "bookmark",
+            text = state.labels.savedPlaces,
+            topPadding = 24.dp,
+            onClick = onOpenSavedPlaces,
+        )
+        NavButton(
+            glyph = "public",
+            text = state.labels.savedAreas,
+            topPadding = 8.dp,
+            onClick = onOpenSavedAreas,
+        )
+        NavButton(
+            glyph = "event",
+            text = state.labels.myEvents,
+            topPadding = 8.dp,
             onClick = onOpenMyEvents,
-            modifier = Modifier
-                .padding(start = 16.dp, end = 16.dp, top = 24.dp)
-                .fillMaxWidth(),
-        ) {
-            Text(state.labels.myEvents)
-        }
-
-        OutlinedButton(
+        )
+        NavButton(
+            glyph = "notes",
+            text = state.labels.myNotes,
+            topPadding = 8.dp,
             onClick = onOpenMyNotes,
-            modifier = Modifier
-                .padding(start = 16.dp, end = 16.dp, top = 8.dp)
-                .fillMaxWidth(),
-        ) {
-            Text(state.labels.myNotes)
-        }
-
-        OutlinedButton(
+        )
+        NavButton(
+            glyph = "photo_library",
+            text = state.labels.uploadedImages,
+            topPadding = 8.dp,
             onClick = onOpenUploadedImages,
-            modifier = Modifier
-                .padding(start = 16.dp, end = 16.dp, top = 8.dp)
-                .fillMaxWidth(),
-        ) {
-            Text(state.labels.uploadedImages)
-        }
+        )
 
         Button(
             onClick = onLogOut,
@@ -127,6 +105,8 @@ fun UserProfileScreen(
                 .padding(16.dp)
                 .fillMaxWidth(),
         ) {
+            MaterialSymbol(glyph = "logout", contentDescription = null)
+            Spacer(Modifier.width(8.dp))
             Text(state.labels.logOut)
         }
 
@@ -135,21 +115,38 @@ fun UserProfileScreen(
 }
 
 @Composable
-private fun SectionLabel(text: String) {
-    Text(
-        text = text,
-        style = MaterialTheme.typography.labelMedium,
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
+private fun SectionLabel(text: String, glyph: String) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier.padding(start = 16.dp, top = 24.dp, end = 16.dp, bottom = 8.dp),
-    )
+    ) {
+        MaterialSymbol(
+            glyph = glyph,
+            contentDescription = null,
+            size = 18.sp,
+            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        Spacer(Modifier.width(8.dp))
+        Text(
+            text = text,
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+    }
 }
 
 @Composable
-private fun EmptyLabel(text: String) {
-    Text(
-        text = text,
-        modifier = Modifier.padding(start = 16.dp, top = 8.dp, end = 16.dp),
-    )
+private fun NavButton(glyph: String, text: String, topPadding: Dp, onClick: () -> Unit) {
+    OutlinedButton(
+        onClick = onClick,
+        modifier = Modifier
+            .padding(start = 16.dp, end = 16.dp, top = topPadding)
+            .fillMaxWidth(),
+    ) {
+        MaterialSymbol(glyph = glyph, contentDescription = null)
+        Spacer(Modifier.width(8.dp))
+        Text(text)
+    }
 }
 
 @Composable
@@ -166,23 +163,6 @@ private fun EditRow(value: String, editDescription: String, onEdit: () -> Unit) 
             modifier = Modifier.weight(1f),
         )
         IconGlyph("edit", editDescription, onEdit)
-    }
-}
-
-@Composable
-private fun SavedItemRow(item: SavedItemUi, deleteDescription: String, onDelete: () -> Unit) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(start = 16.dp, end = 8.dp, top = 12.dp, bottom = 12.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Text(
-            text = item.name,
-            style = MaterialTheme.typography.bodyLarge,
-            modifier = Modifier.weight(1f),
-        )
-        IconGlyph("delete", deleteDescription, onDelete)
     }
 }
 

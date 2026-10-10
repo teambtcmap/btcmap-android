@@ -570,8 +570,9 @@ private fun EventDetailsRoute(
 
 /**
  * The account route: the shared [ProfileScreen] under a bar whose title follows
- * the profile's current sub-screen (uploaded images, my events or my notes), so
- * the back affordance returns to the profile before leaving the screen.
+ * the profile's current sub-screen (saved places, saved areas, uploaded images,
+ * my events or my notes), so the back affordance returns to the profile before
+ * leaving the screen.
  */
 @Composable
 private fun UserProfileRoute(
@@ -584,6 +585,8 @@ private fun UserProfileRoute(
     var showUploadedImages by remember { mutableStateOf(false) }
     var showMyEvents by remember { mutableStateOf(false) }
     var showMyNotes by remember { mutableStateOf(false) }
+    var showSavedPlaces by remember { mutableStateOf(false) }
+    var showSavedAreas by remember { mutableStateOf(false) }
     val mapStyle = services.rememberMapStyle()
 
     ScreenPage(
@@ -591,6 +594,8 @@ private fun UserProfileRoute(
             showUploadedImages -> labels.uploadedImagesTitle
             showMyEvents -> labels.myEventsTitle
             showMyNotes -> labels.myNotesTitle
+            showSavedPlaces -> labels.savedPlacesTitle
+            showSavedAreas -> labels.savedAreasTitle
             else -> labels.profileTitle
         },
         onBack = {
@@ -598,6 +603,8 @@ private fun UserProfileRoute(
                 showUploadedImages -> showUploadedImages = false
                 showMyEvents -> showMyEvents = false
                 showMyNotes -> showMyNotes = false
+                showSavedPlaces -> showSavedPlaces = false
+                showSavedAreas -> showSavedAreas = false
                 else -> onBack()
             }
         },
@@ -612,6 +619,8 @@ private fun UserProfileRoute(
             imagesLabels = labels.uploadedImages,
             eventsLabels = labels.myEvents,
             notesLabels = labels.myNotes,
+            savedPlacesLabels = labels.savedPlaces,
+            savedAreasLabels = labels.savedAreas,
             mapStyleUrl = mapStyle.url,
             mapStyleJson = mapStyle.json,
             showUploadedImages = showUploadedImages,
@@ -620,6 +629,10 @@ private fun UserProfileRoute(
             onShowMyEventsChange = { showMyEvents = it },
             showMyNotes = showMyNotes,
             onShowMyNotesChange = { showMyNotes = it },
+            showSavedPlaces = showSavedPlaces,
+            onShowSavedPlacesChange = { showSavedPlaces = it },
+            showSavedAreas = showSavedAreas,
+            onShowSavedAreasChange = { showSavedAreas = it },
             onDuplicateEvent = onDuplicateEvent,
             onOpenNoteOnMap = onOpenNoteOnMap,
             onLoggedOut = onBack,
