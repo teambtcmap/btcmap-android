@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+- Make a note's text selectable, so part of a long note can be selected and copied straight from the sheet
+- Search for short queries in dense scripts: a CJK ideograph, a kana or a Hangul syllable now counts double toward the map search's minimum query length, so a two-character term like "肉饼" searches while "ab" stays too broad
 - Add a change-icon action to the note sheet: tapping the note's icon opens the same icon search the add-note form uses, with the note's current icon selected, and saving it updates the note on the server, in the cache and on the map pin
 - Make the map search's OpenStreetMap group local and nearest-first: the Nominatim query is bounded to the visible map, falling back to a global search when nothing is in view, its rows are sorted by distance, and clicking a result zooms to 18 and opens the basemap POI whose name matches, so a searched hotel opens its own sheet without a second tap
 - Show a compass on the map whenever it is not facing north, centred under the search bar: it appears once the map is rotated and returns it to north when tapped (leaving any tilt in place), and it is drawn when the map reopens rotated even if map rotation is disabled

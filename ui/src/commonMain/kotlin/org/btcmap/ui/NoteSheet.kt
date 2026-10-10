@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
@@ -190,14 +191,18 @@ fun NoteSheet(
                     .fillMaxWidth()
                     .padding(start = 16.dp, end = 8.dp, top = 8.dp, bottom = 8.dp),
             ) {
-                Text(
-                    text = text,
-                    style = MaterialTheme.typography.bodyLarge,
+                // Selectable, so a long note's text can be partially copied.
+                SelectionContainer(
                     modifier = Modifier
                         .weight(1f)
-                        .padding(vertical = 8.dp)
-                        .testTag(NOTE_SHEET_TEXT_TAG),
-                )
+                        .padding(vertical = 8.dp),
+                ) {
+                    Text(
+                        text = text,
+                        style = MaterialTheme.typography.bodyLarge,
+                        modifier = Modifier.testTag(NOTE_SHEET_TEXT_TAG),
+                    )
+                }
                 if (onEditText != null) {
                     IconButton(
                         onClick = { editing = true },

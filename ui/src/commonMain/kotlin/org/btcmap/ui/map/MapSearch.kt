@@ -33,9 +33,41 @@ import kotlin.math.cos
 import kotlin.math.sin
 import kotlin.math.sqrt
 
-private const val MIN_QUERY_LENGTH = 3
 private const val MAX_RESULTS = 20
 private const val SEARCH_DEBOUNCE_MS = 300L
+
+/**
+ * The minimum search-query weight. A Latin character counts one, but a character
+ * from a script whose glyphs carry more information — a CJK ideograph, a
+ * Japanese kana or a Hangul syllable — counts two, so "肉饼" (two characters, a
+ * complete term) is searched like a three-letter word while "ab" is still too
+ * broad to run.
+ */
+private const val MIN_QUERY_WEIGHT = 3
+
+/**
+ * Whether [query] carries enough to search for. A plain character count is wrong
+ * for the dense scripts, where two characters are a whole word; see
+ * [MIN_QUERY_WEIGHT].
+ */
+internal fun isSearchableQuery(query: String): Boolean =
+    query.trim().sumOf { if (it.isDenseScript()) 2 else 1 } >= MIN_QUERY_WEIGHT
+
+/**
+ * Whether the character is from a script where one grapheme carries more than a
+ * Latin letter: a CJK ideograph (including the compatibility and extension A
+ * blocks), Japanese kana, or a Hangul syllable or Jamo.
+ */
+private fun Char.isDenseScript(): Boolean = when (code) {
+    in 0x1100..0x11FF, // Hangul Jamo
+    in 0x3040..0x30FF, // Hiragana and Katakana
+    in 0x3400..0x4DBF, // CJK Unified Ideographs Extension A
+    in 0x4E00..0x9FFF, // CJK Unified Ideographs
+    in 0xAC00..0xD7AF, // Hangul Syllables
+    in 0xF900..0xFAFF, // CJK Compatibility Ideographs
+    -> true
+    else -> false
+}
 
 /** The search results, whether a search is running, and whether the query is
  * long enough that one has been run (so "no results" can be told apart from
@@ -80,7 +112,7 @@ fun rememberSearchResults(
 
     LaunchedEffect(db, state, query, nominatimSearch) {
         val trimmed = query.trim()
-        if (trimmed.length < MIN_QUERY_LENGTH) {
+        if (!isSearchableQuery(trimmed)) {
             results = SearchResults()
             return@LaunchedEffect
         }

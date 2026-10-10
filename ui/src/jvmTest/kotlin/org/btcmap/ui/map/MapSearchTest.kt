@@ -6,6 +6,7 @@ import java.nio.file.Files
 import kotlin.time.Instant
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
@@ -137,6 +138,30 @@ class MapSearchTest {
         val names = search(db, "paris").map { it.name }
 
         assertEquals(listOf("Paris", "Paris Cafe"), names)
+    }
+
+    @Test
+    fun shortCjkQuery_isSearchable() {
+        // Two ideographs are a whole word, unlike two Latin letters.
+        assertTrue(isSearchableQuery("肉饼"))
+        assertTrue(isSearchableQuery("北京"))
+        assertTrue(isSearchableQuery("  肉饼  "))
+        assertTrue(isSearchableQuery("ラーメン"))
+        assertTrue(isSearchableQuery("김밥"))
+    }
+
+    @Test
+    fun shortLatinQuery_isNotSearchable() {
+        assertFalse(isSearchableQuery("ab"))
+        assertFalse(isSearchableQuery("a"))
+        assertFalse(isSearchableQuery("  "))
+        assertFalse(isSearchableQuery(""))
+        assertTrue(isSearchableQuery("abc"))
+    }
+
+    @Test
+    fun singleCjkCharacter_isNotSearchable() {
+        assertFalse(isSearchableQuery("肉"))
     }
 
     @Test
