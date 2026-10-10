@@ -38,8 +38,8 @@ import org.btcmap.util.rethrowIfCancellation
 const val INFRA_DASHBOARD_RETRY_TAG = "infra-dashboard-retry"
 
 /**
- * The infrastructure dashboard: an admin-only snapshot fetched over the
- * `dashboard` RPC method and rendered as the shared [StatsGrid] cards.
+ * The infrastructure dashboard: an admin-only snapshot fetched from
+ * `GET /v4/dashboard/infra` and rendered as the shared [StatsGrid] cards.
  *
  * The load state machine lives here, like the activity feed's: [load] runs on
  * first composition and on every retry, a failure is shown with a retry, and a
@@ -236,6 +236,32 @@ internal fun infraDashboardSections(d: Dashboard): List<StatsSection> = buildLis
             ),
         )
     )
+
+    val topUsers = d.logs.topUsers
+    if (topUsers.isEmpty()) {
+        add(
+            StatsSection(
+                key = "top-users",
+                title = "Top users (24h)",
+                icon = "person",
+                entries = listOf(StatsEntry("Users", "None")),
+            )
+        )
+    } else {
+        // One row per user, named where the server knows the account and
+        // falling back to the id otherwise.
+        add(
+            StatsSection(
+                key = "top-users",
+                title = "Top users (24h)",
+                icon = "person",
+                entries = topUsers.map { user ->
+                    val label = user.name?.takeIf { it.isNotBlank() } ?: "#${user.userId}"
+                    StatsEntry(label, formatInteger(user.count))
+                },
+            )
+        )
+    }
 
     val lnd = d.lnd
     if (lnd == null) {

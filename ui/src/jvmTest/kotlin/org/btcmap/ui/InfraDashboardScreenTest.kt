@@ -15,6 +15,7 @@ import org.btcmap.api.DashboardLogs
 import org.btcmap.api.DashboardLnd
 import org.btcmap.api.DashboardMethodCount
 import org.btcmap.api.DashboardSyncRun
+import org.btcmap.api.DashboardTopUser
 import org.btcmap.api.DashboardWallet
 import org.btcmap.api.DashboardWallets
 import org.btcmap.api.DashboardWindow
@@ -67,6 +68,30 @@ class InfraDashboardScreenTest {
             onNodeWithText("get_area").assertIsDisplayed()
             onNodeWithText("REST (top 10)").performClick()
             onNodeWithText("GET /v4/places").assertIsDisplayed()
+        }
+    }
+
+    @OptIn(ExperimentalTestApi::class)
+    @Test
+    fun topUsersCardListsTheUsers() {
+        val dashboard = Dashboard(
+            logs = DashboardLogs(
+                topUsers = listOf(
+                    DashboardTopUser(userId = 10, name = "Scheduler", count = 1819),
+                    DashboardTopUser(userId = 42, name = null, count = 7),
+                ),
+            ),
+        )
+
+        runComposeUiTest {
+            setContent {
+                InfraDashboardScreen(load = { dashboard })
+            }
+
+            onNodeWithText("Top users (24h)").assertIsDisplayed()
+            onNodeWithText("Scheduler").assertIsDisplayed()
+            // A nameless account falls back to its id.
+            onNodeWithText("#42").assertIsDisplayed()
         }
     }
 

@@ -7,6 +7,6 @@ val ADMIN_ROLES = setOf("admin", "root")
 
 /**
  * Whether [user] holds an admin or root role. Mirrors the server's rule for the
- * `dashboard` RPC method, which stays authoritative.
+ * `GET /v4/dashboard/infra` endpoint, which stays authoritative.
  */
 fun User.isAdmin(): Boolean = roles.any { it in ADMIN_ROLES }

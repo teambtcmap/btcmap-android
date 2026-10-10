@@ -10,6 +10,7 @@ import org.btcmap.api.DashboardLogs
 import org.btcmap.api.DashboardMethodCount
 import org.btcmap.api.DashboardPlaces
 import org.btcmap.api.DashboardSyncRun
+import org.btcmap.api.DashboardTopUser
 import org.btcmap.api.DashboardUniqueIps
 import org.btcmap.api.DashboardWallet
 import org.btcmap.api.DashboardWalletTx
@@ -41,6 +42,7 @@ class InfraDashboardSectionsTest {
                 topRestApiCalls = listOf(
                     DashboardEndpointCount(method = "GET", path = "/v4/places", count = 3),
                 ),
+                topUsers = listOf(DashboardTopUser(userId = 10, name = "Scheduler", count = 9)),
             ),
             uniqueIps24h = DashboardUniqueIps(web = 6, bots = 7),
             lnd = DashboardLnd(
@@ -104,6 +106,10 @@ class InfraDashboardSectionsTest {
             apiCalls.entries[1].details.map { it.label to it.value },
         )
 
+        // One row per most-active user, with the server's name when known.
+        val topUsers = byKey.getValue("top-users")
+        assertEquals(listOf("Scheduler" to "9"), topUsers.entries.map { it.label to it.value })
+
         // The node's balance and liquidity on the card, each expanding to its
         // split.
         val lnd = byKey.getValue("lnd")
@@ -147,5 +153,6 @@ class InfraDashboardSectionsTest {
         assertEquals(0, byKey.getValue("lnd").entries.single().details.size)
         assertEquals("None", byKey.getValue("wallets").entries.single().value)
         assertEquals("None", byKey.getValue("sync-runs").entries.single().value)
+        assertEquals("None", byKey.getValue("top-users").entries.single().value)
     }
 }

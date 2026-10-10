@@ -3,11 +3,6 @@ package org.btcmap.api
 import io.ktor.http.HttpMethod
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.json.buildJsonObject
-import kotlinx.serialization.json.jsonObject
-import kotlinx.serialization.json.jsonPrimitive
-import kotlinx.serialization.json.put
-import kotlinx.serialization.json.putJsonObject
 import org.btcmap.json.btcmapJson
 import org.btcmap.json.parseJson
 
@@ -51,6 +46,14 @@ data class DashboardEndpointCount(
     val count: Long = 0,
 )
 
+/** A most-active authenticated user and their request count. */
+@Serializable
+data class DashboardTopUser(
+    @SerialName("user_id") val userId: Long = 0,
+    val name: String? = null,
+    val count: Long = 0,
+)
+
 /** Request-log stats. */
 @Serializable
 data class DashboardLogs(
@@ -59,6 +62,7 @@ data class DashboardLogs(
     @SerialName("top_rpcs") val topRpcs: List<DashboardMethodCount> = emptyList(),
     @SerialName("top_rest_api_calls")
     val topRestApiCalls: List<DashboardEndpointCount> = emptyList(),
+    @SerialName("top_users") val topUsers: List<DashboardTopUser> = emptyList(),
 )
 
 /** Unique client IPs in the last 24 hours, bucketed by platform. */
@@ -160,38 +164,15 @@ data class Dashboard(
 )
 
 /**
- * Fetches the infrastructure dashboard over the JSON-RPC endpoint (`POST /rpc`,
- * method `dashboard`). The stored session token is attached by [call]; the
- * server requires it to hold an admin or root role.
+ * Fetches the infrastructure dashboard from `GET /v4/dashboard/infra`. The
+ * stored session token is attached by [call]; the server requires it to hold a
+ * `dashboard`, `admin` or `root` role.
  */
 suspend fun Api.getDashboard(): Dashboard {
-    val url = buildUrl("rpc")
-    val body = buildJsonObject {
-        put("jsonrpc", "2.0")
-        put("method", "dashboard")
-        putJsonObject("params") {}
-        put("id", 1)
-    }
+    val url = buildUrl("v4", "dashboard", "infra")
 
-    return call(HttpMethod.Post, url, body = body) { it.toDashboard() }
+    return call(HttpMethod.Get, url) { it.toDashboard() }
 }
 
-private fun String.toDashboard(): Dashboard {
-    val root = parseJson(this).jsonObject
-
-    // A JSON-RPC error is reported under `error`, even on a 200 response.
-    root["error"]?.let { error ->
-        val message = runCatching {
-            error.jsonObject["message"]?.jsonPrimitive?.content
-        }.getOrNull()
-        throw ApiException(
-            code = 200,
-            message = message ?: "Dashboard request failed",
-        )
-    }
-
-    val result = root["result"]
-        ?: throw ApiParseException("Dashboard response is missing 'result'")
-
-    return btcmapJson.decodeFromJsonElement(Dashboard.serializer(), result)
-}
+private fun String.toDashboard(): Dashboard =
+    btcmapJson.decodeFromJsonElement(Dashboard.serializer(), parseJson(this))
