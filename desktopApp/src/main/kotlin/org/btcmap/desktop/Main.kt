@@ -21,6 +21,7 @@ import org.maplibre.compose.util.ExperimentalMaplibreComposeApi
 import java.awt.Color as AwtColor
 import androidx.compose.ui.graphics.Color
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.width
@@ -92,6 +93,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.pointer.pointerInput
 import org.btcmap.util.toUrl
 import org.btcmap.api.Api
 import org.btcmap.api.signIn
@@ -492,8 +494,16 @@ private fun runApp() = application {
                         Color.Black.copy(alpha = 0.8f)
                     }
 
-                    when (route) {
-                        Route.Map -> MapScreen(
+                    // The map is the root and is kept composed once it has been
+                    // shown, so returning to it from another screen does not
+                    // rebuild the MapLibre map and its render session (a blank few
+                    // seconds). The switch below draws every other screen on top,
+                    // and the scrim in between keeps taps and scrolls off the map
+                    // behind.
+                    var mapShown by remember { mutableStateOf(false) }
+                    LaunchedEffect(route) { if (route == Route.Map) mapShown = true }
+                    if (route == Route.Map || mapShown) {
+                        MapScreen(
                             db = db,
                             openPlaceId = feedPlaceId,
                             // Reopen the place that was selected before leaving
@@ -715,6 +725,27 @@ private fun runApp() = application {
                             nominatimSearch = nominatimSearch,
                             nominatimHeader = STRINGS["search_openstreetmap"],
                         )
+                    }
+                    if (route != Route.Map) {
+                        // While another screen is on top, swallow taps and
+                        // scrolls so they cannot reach the kept-alive map behind;
+                        // the opaque fill also hides it.
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(MaterialTheme.colorScheme.surface)
+                                .pointerInput(Unit) {
+                                    awaitPointerEventScope {
+                                        while (true) {
+                                            awaitPointerEvent().changes.forEach { it.consume() }
+                                        }
+                                    }
+                                },
+                        )
+                    }
+                    when (route) {
+                        // The map is drawn above, before the switch.
+                        Route.Map -> Unit
 
                         Route.Report -> ScreenPage(
                             title = reportPlace?.second?.ifBlank { STRINGS["report_a_place"] } ?: STRINGS["report_a_place"],

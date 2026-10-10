@@ -6,6 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+- Keep the desktop map composed across navigation, so returning to it from the settings or any other screen is instant instead of rebuilding the MapLibre map and showing a blank map for a few seconds
 - Right-click the map on the desktop to add a place, event or note: the same choices the search field's action offers open at the clicked point, so the chosen form is positioned there instead of at the map centre
 - Return straight to the map after adding a note — no "note added" confirmation — and switch to the notes filter so the new note is visible
 - Centre and zoom the map when an event or a note is selected, as it already did for a place, so the selected marker is not left under the sheet or lost inside a cluster
