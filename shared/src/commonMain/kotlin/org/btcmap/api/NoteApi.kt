@@ -5,6 +5,7 @@ import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.put
+import kotlin.time.Instant
 import org.btcmap.util.toJsonArray
 import org.btcmap.util.toJsonObject
 
@@ -27,6 +28,8 @@ data class Note(
     val authorName: String,
     val createdAt: String,
     val updatedAt: String,
+    /** Set only on owner responses that asked for `include_deleted=true`. */
+    val deletedAt: String? = null,
 )
 
 /**
@@ -56,12 +59,21 @@ suspend fun Api.createNote(
 }
 
 /**
- * Lists every note belonging to the authenticated user (`GET /v4/users/me/notes`),
- * public and private, deleted ones excluded. Newest first, as the server returns
- * them.
+ * Lists the authenticated user's notes (`GET /v4/users/me/notes`), public and
+ * private, for the delta sync. [updatedSince] filters to notes changed after it
+ * (null reads from the beginning), [includeDeleted] also returns soft-deleted
+ * notes so the client can keep their tombstones, and [limit] caps the page.
  */
-suspend fun Api.getMyNotes(): List<Note> {
-    val url = buildUrl("v4", "users", "me", "notes")
+suspend fun Api.getMyNotes(
+    updatedSince: Instant?,
+    includeDeleted: Boolean,
+    limit: Long,
+): List<Note> {
+    val url = buildUrl("v4", "users", "me", "notes") {
+        parameters.append("limit", "$limit")
+        if (includeDeleted) parameters.append("include_deleted", "true")
+        addUpdatedSince(updatedSince)
+    }
 
     return call(HttpMethod.Get, url) { body -> body.toJsonArray().map { it.jsonObject.toNote() } }
 }
@@ -132,5 +144,6 @@ internal fun JsonObject.toNote(): Note {
         authorName = author.string("name"),
         createdAt = string("created_at"),
         updatedAt = string("updated_at"),
+        deletedAt = stringOrNull("deleted_at"),
     )
 }

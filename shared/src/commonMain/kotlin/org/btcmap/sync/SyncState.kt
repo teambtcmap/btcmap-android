@@ -21,4 +21,7 @@ sealed interface SyncState {
     data object SyncingComments : SyncState
     data object UnbundlingAreas : SyncState
     data object SyncingAreas : SyncState
+
+    /** The signed-in user's personal notes (no bundled snapshot to unbundle). */
+    data object SyncingNotes : SyncState
 }

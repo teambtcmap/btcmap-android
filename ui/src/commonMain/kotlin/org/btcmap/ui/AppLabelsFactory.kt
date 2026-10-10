@@ -519,6 +519,7 @@ private fun SyncState.labelKey(): String = when (this) {
     SyncState.SyncingComments -> "db_stats_sync_state_syncing_comments"
     SyncState.UnbundlingAreas -> "db_stats_sync_state_unbundling_areas"
     SyncState.SyncingAreas -> "db_stats_sync_state_syncing_areas"
+    SyncState.SyncingNotes -> "db_stats_sync_state_syncing_notes"
 }
 
 /** The string key for each activity interval. */

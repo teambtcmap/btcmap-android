@@ -12,7 +12,6 @@ import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import org.btcmap.db.table.event.Event
@@ -51,8 +50,6 @@ fun EventSheet(
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
-        // The place sheet keeps the map fully visible; match it.
-        scrimColor = Color.Transparent,
         modifier = modifier,
     ) {
         Row(

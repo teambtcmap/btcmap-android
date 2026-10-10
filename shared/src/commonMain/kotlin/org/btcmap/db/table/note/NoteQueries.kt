@@ -1,15 +1,20 @@
 package org.btcmap.db.table.note
 
 import androidx.sqlite.SQLiteConnection
+import androidx.sqlite.SQLiteStatement
+import kotlin.time.Instant
 import kotlin.use
 import org.btcmap.db.bindInstant
+import org.btcmap.db.bindInstantOrNull
 import org.btcmap.db.getInstant
+import org.btcmap.db.getInstantOrNull
 
 /**
  * Reads and writes the signed-in user's personal notes, newest first.
  *
- * The table is a pure cache of one owner's notes: the sync rewrites it whole
- * (see [deleteAll] + [insert]), so there is no cursor, index or tombstone here.
+ * The table caches one owner's notes and mirrors the other tables' delta sync:
+ * a soft-deleted note is kept as a tombstone so `max(updated_at)` advances past
+ * the deletion, and reads exclude it.
  */
 class NoteQueries(private val conn: SQLiteConnection) {
 
@@ -19,9 +24,9 @@ class NoteQueries(private val conn: SQLiteConnection) {
         conn.prepare(
             """
             INSERT OR REPLACE INTO $TABLE (
-                $ID, $LAT, $LON, $TEXT, $ICON, $IS_PUBLIC, $CREATED_AT, $UPDATED_AT
+                $ID, $LAT, $LON, $TEXT, $ICON, $IS_PUBLIC, $CREATED_AT, $UPDATED_AT, $DELETED_AT
             )
-            VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8);
+            VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9);
             """
         ).use {
             rows.forEach { row ->
@@ -33,37 +38,47 @@ class NoteQueries(private val conn: SQLiteConnection) {
                 it.bindLong(6, if (row.public) 1L else 0L)
                 it.bindInstant(7, row.createdAt)
                 it.bindInstant(8, row.updatedAt)
+                it.bindInstantOrNull(9, row.deletedAt)
                 it.step()
                 it.reset()
             }
         }
     }
 
-    /** Every cached note, newest first (the order the endpoint returns them in). */
+    /**
+     * Every live cached note, newest first (the order the endpoint returns them
+     * in). Soft-deleted notes are kept as tombstones for the sync cursor and are
+     * excluded here.
+     */
     suspend fun selectAll(): List<Note> {
         conn.prepare(
             """
-            SELECT $ID, $LAT, $LON, $TEXT, $ICON, $IS_PUBLIC, $CREATED_AT, $UPDATED_AT
+            SELECT $ID, $LAT, $LON, $TEXT, $ICON, $IS_PUBLIC, $CREATED_AT, $UPDATED_AT, $DELETED_AT
             FROM $TABLE
+            WHERE $DELETED_AT IS NULL
             ORDER BY julianday($CREATED_AT) DESC, $ID DESC;
             """
         ).use {
             val rows = mutableListOf<Note>()
             while (it.step()) {
-                rows.add(
-                    Note(
-                        id = it.getLong(0),
-                        lat = it.getDouble(1),
-                        lon = it.getDouble(2),
-                        text = it.getText(3),
-                        icon = it.getText(4),
-                        public = it.getLong(5) != 0L,
-                        createdAt = it.getInstant(6),
-                        updatedAt = it.getInstant(7),
-                    )
-                )
+                rows.add(it.toNote())
             }
             return rows
+        }
+    }
+
+    /** The newest `updated_at` in the table, tombstone included: the sync cursor. */
+    suspend fun selectMaxUpdatedAt(): Instant? {
+        conn.prepare(
+            """
+            SELECT $UPDATED_AT
+            FROM $TABLE
+            ORDER BY julianday($UPDATED_AT) DESC
+            LIMIT 1;
+            """
+        ).use {
+            if (!it.step()) return null
+            return it.getInstantOrNull(0)
         }
     }
 
@@ -71,27 +86,18 @@ class NoteQueries(private val conn: SQLiteConnection) {
         conn.prepare("DELETE FROM $TABLE;").use { it.step() }
     }
 
-    /** The cached note with [id], or null when it is not cached. */
+    /** The live cached note with [id], or null when it is not cached or deleted. */
     suspend fun selectById(id: Long): Note? {
         conn.prepare(
             """
-            SELECT $ID, $LAT, $LON, $TEXT, $ICON, $IS_PUBLIC, $CREATED_AT, $UPDATED_AT
+            SELECT $ID, $LAT, $LON, $TEXT, $ICON, $IS_PUBLIC, $CREATED_AT, $UPDATED_AT, $DELETED_AT
             FROM $TABLE
-            WHERE $ID = ?1;
+            WHERE $ID = ?1 AND $DELETED_AT IS NULL;
             """
         ).use {
             it.bindLong(1, id)
             if (!it.step()) return null
-            return Note(
-                id = it.getLong(0),
-                lat = it.getDouble(1),
-                lon = it.getDouble(2),
-                text = it.getText(3),
-                icon = it.getText(4),
-                public = it.getLong(5) != 0L,
-                createdAt = it.getInstant(6),
-                updatedAt = it.getInstant(7),
-            )
+            return it.toNote()
         }
     }
 
@@ -128,11 +134,28 @@ class NoteQueries(private val conn: SQLiteConnection) {
         }
     }
 
-    /** Number of cached notes. */
-    suspend fun selectCount(): Long {
-        conn.prepare("SELECT count(*) FROM $TABLE;").use {
+    /**
+     * Row count for the table. Tombstones are excluded by default; pass
+     * [includeDeleted] = true to count every row.
+     */
+    suspend fun selectCount(includeDeleted: Boolean = false): Long {
+        val where = if (includeDeleted) "" else " WHERE $DELETED_AT IS NULL"
+        conn.prepare("SELECT count(*) FROM $TABLE$where;").use {
             it.step()
             return it.getLong(0)
         }
     }
 }
+
+/** Reads one note row, tombstone included, from the current statement position. */
+private fun SQLiteStatement.toNote(): Note = Note(
+    id = getLong(0),
+    lat = getDouble(1),
+    lon = getDouble(2),
+    text = getText(3),
+    icon = getText(4),
+    public = getLong(5) != 0L,
+    createdAt = getInstant(6),
+    updatedAt = getInstant(7),
+    deletedAt = getInstantOrNull(8),
+)

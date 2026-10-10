@@ -40,9 +40,10 @@ class SyncManager(
      */
     private val refreshUser: suspend () -> Boolean,
     /**
-     * Rewrites the cached personal notes from the server and returns whether they
-     * changed. Run with [refreshUser] at the end of a full sync; the host decides
-     * whether a session exists, and a signed-out call returns false.
+     * Pulls the cached personal-notes delta from the server and returns whether
+     * any row changed. Run as a timed step with [refreshUser] at the end of a
+     * full sync; the host decides whether a session exists, and a signed-out
+     * call returns false.
      */
     private val syncNotes: suspend () -> Boolean,
     private val scope: CoroutineScope = CoroutineScope(SupervisorJob() + ioDispatcher),
@@ -144,9 +145,10 @@ class SyncManager(
 
             // Refresh the user-scoped state last, so it neither delays the
             // bundled places import (and the first pins) nor the data deltas:
-            // the cached personal notes are rewritten, then the profile is
+            // the cached personal notes are pulled as their own timed step (no
+            // bundled snapshot, so no unbundling step), then the profile is
             // re-read and a change is announced so the role-gated UI re-derives.
-            if (guarded { syncNotes() } == true) {
+            if (timed(SyncState.SyncingNotes) { syncNotes() } == true) {
                 emit(SyncEvent.NotesChanged)
             }
             if (guarded { refreshUser() } == true) {

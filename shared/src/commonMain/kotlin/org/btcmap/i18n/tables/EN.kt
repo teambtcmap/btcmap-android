@@ -112,6 +112,7 @@ internal val EN: Map<String, String> = mapOf(
         "db_stats_sync_state_syncing_areas" to "Syncing areas",
         "db_stats_sync_state_syncing_comments" to "Syncing comments",
         "db_stats_sync_state_syncing_events" to "Syncing events",
+        "db_stats_sync_state_syncing_notes" to "Syncing notes",
         "db_stats_sync_state_syncing_places" to "Syncing places",
         "db_stats_sync_state_unbundling_areas" to "Importing bundled areas",
         "db_stats_sync_state_unbundling_comments" to "Importing bundled comments",

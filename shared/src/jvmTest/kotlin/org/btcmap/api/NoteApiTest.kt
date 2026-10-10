@@ -1,13 +1,20 @@
 package org.btcmap.api
 
 import kotlinx.coroutines.test.runTest
+import kotlin.time.Instant
 import org.junit.Assert
 import org.junit.Test
 
 class NoteApiTest : ApiTestBase() {
 
-    private fun noteJson(id: Long = 7, public: Boolean = true, icon: String = "notes"): String =
-        """
+    private fun noteJson(
+        id: Long = 7,
+        public: Boolean = true,
+        icon: String = "notes",
+        deletedAt: String? = null,
+    ): String {
+        val deleted = if (deletedAt == null) "" else ",\"deleted_at\":\"$deletedAt\""
+        return """
         {
             "id": $id,
             "lat": 53.55,
@@ -17,9 +24,10 @@ class NoteApiTest : ApiTestBase() {
             "public": $public,
             "author": { "id": 17, "name": "satoshi" },
             "created_at": "2026-10-07T12:00:00Z",
-            "updated_at": "2026-10-07T12:00:00Z"
+            "updated_at": "2026-10-07T12:00:00Z"$deleted
         }
         """.trimIndent()
+    }
 
     @Test
     fun createNote_postsCoordinatesTextIconAndVisibility() = runTest {
@@ -54,15 +62,37 @@ class NoteApiTest : ApiTestBase() {
                 "${noteJson(id = 2, public = true)}]",
         )
 
-        val notes = api().getMyNotes()
+        val notes = api().getMyNotes(updatedSince = null, includeDeleted = true, limit = 500)
 
         val request = takeRequest()
         Assert.assertEquals("GET", request.method)
         Assert.assertEquals("/v4/users/me/notes", request.url.encodedPath)
+        Assert.assertEquals("500", request.url.queryParameter("limit"))
+        Assert.assertEquals("true", request.url.queryParameter("include_deleted"))
+        Assert.assertNull(request.url.queryParameter("updated_since"))
         Assert.assertEquals(listOf(1L, 2L), notes.map { it.id })
         Assert.assertEquals(listOf("star", "notes"), notes.map { it.icon })
         Assert.assertFalse(notes.first().public)
         Assert.assertTrue(notes.last().public)
+    }
+
+    @Test
+    fun getMyNotes_passesTheDeltaCursorAndParsesTombstones() = runTest {
+        enqueueJson("[${noteJson(id = 3, deletedAt = "2026-10-08T00:00:00Z")}]")
+
+        val notes = api().getMyNotes(
+            updatedSince = Instant.parse("2026-10-07T12:00:00Z"),
+            includeDeleted = false,
+            limit = 100,
+        )
+
+        val request = takeRequest()
+        Assert.assertEquals(
+            "2026-10-07T12:00:00Z",
+            request.url.queryParameter("updated_since"),
+        )
+        Assert.assertNull(request.url.queryParameter("include_deleted"))
+        Assert.assertEquals("2026-10-08T00:00:00Z", notes.single().deletedAt)
     }
 
     @Test

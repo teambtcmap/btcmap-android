@@ -119,6 +119,7 @@ class SyncManagerTest {
                 SyncState.SyncingComments,
                 SyncState.UnbundlingAreas,
                 SyncState.SyncingAreas,
+                SyncState.SyncingNotes,
             ),
             stats!!.steps.map { it.state },
         )

@@ -293,6 +293,13 @@ fun AppRoot(
                 },
                 onBack = back,
                 initialText = route.text,
+                // A new note is only visible on the notes layer, so return to
+                // the map at once and switch to it rather than showing the
+                // in-place confirmation.
+                onSubmitted = {
+                    if (markerKind != MarkerKind.Notes) markerKind = MarkerKind.Notes
+                    back()
+                },
             )
 
             is AppRoute.AddEvent -> AddEventScreen(

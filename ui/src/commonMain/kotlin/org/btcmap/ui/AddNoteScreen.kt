@@ -118,6 +118,11 @@ data class AddNoteLabels(
  *
  * [initialText] pre-fills the note body for a note added from a basemap POI,
  * which already knows the feature's name.
+ *
+ * [onSubmitted], when the host supplies it, replaces the in-place "note added"
+ * confirmation: it runs once the note has been created, so the host can return
+ * to the map at once (and, say, select the notes filter so the new note is
+ * visible). Null keeps the confirmation.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -133,6 +138,8 @@ fun AddNoteScreen(
     onBack: () -> Unit,
     /** Pre-fills the note body when the note is added from a basemap POI. */
     initialText: String = "",
+    /** Runs after a successful [submit] instead of showing the confirmation. */
+    onSubmitted: (() -> Unit)? = null,
     map: @Composable (icon: String, onCenterChanged: (Double, Double) -> Unit) -> Unit =
         { selectedIcon, onCenterChanged ->
             LocationPickerMap(
@@ -231,7 +238,11 @@ fun AddNoteScreen(
                             scope.launch {
                                 try {
                                     submit(draft)
-                                    submitted = true
+                                    // A host that wants to return to the map at
+                                    // once (e.g. to show the new note) does so
+                                    // here; otherwise the confirmation stays up.
+                                    val afterSubmit = onSubmitted
+                                    if (afterSubmit != null) afterSubmit() else submitted = true
                                 } catch (t: Throwable) {
                                     error = t.message ?: t.toString()
                                 } finally {

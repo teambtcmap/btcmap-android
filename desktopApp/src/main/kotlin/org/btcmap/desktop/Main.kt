@@ -578,6 +578,9 @@ private fun runApp() = application {
                             },
                             onOpenUrl = { openUrl(it) },
                             addLocationLabels = ADD_LOCATION_LABELS,
+                            // A right-click offers the same add-location choices
+                            // as the search field's action, at the clicked point.
+                            addLocationOnSecondaryClick = true,
                             onOpenFeed = { nav.push(Route.Feed) },
                             onOpenInfra = if (isAdmin) {
                                 { nav.push(Route.Infra) }
@@ -799,6 +802,13 @@ private fun runApp() = application {
                             },
                             onBack = { nav.pop() },
                             initialText = addNote?.text.orEmpty(),
+                            // A new note is only visible on the notes layer, so
+                            // return to the map at once and switch to it rather
+                            // than showing the in-place confirmation.
+                            onSubmitted = {
+                                if (markerKind != MarkerKind.Notes) markerKind = MarkerKind.Notes
+                                nav.pop()
+                            },
                         )
 
                         Route.AddComment -> ScreenPage(

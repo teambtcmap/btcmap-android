@@ -91,6 +91,36 @@ class AddNoteScreenTest {
 
     @OptIn(ExperimentalTestApi::class)
     @Test
+    fun onSubmitted_returnsToTheMapInsteadOfShowingConfirmation() {
+        val drafts = mutableListOf<AddNoteDraft>()
+        var submitted = false
+        runComposeUiTest {
+            setContent {
+                AddNoteScreen(
+                    lat = 1.0,
+                    lon = 2.0,
+                    styleUrl = "",
+                    styleJson = null,
+                    labels = labels,
+                    iconFont = null,
+                    palette = palette,
+                    submit = { drafts += it },
+                    onBack = {},
+                    onSubmitted = { submitted = true },
+                    map = { _, _ -> },
+                )
+            }
+            onNodeWithTag(ADD_NOTE_TEXT_TAG).performTextInput("ATM is inside")
+            onNodeWithTag(ADD_NOTE_SUBMIT_TAG).performScrollTo().performClick()
+            // The host takes over instead of the in-place confirmation.
+            onNodeWithText("Note added").assertDoesNotExist()
+        }
+        assertTrue(submitted)
+        assertEquals(1, drafts.size)
+    }
+
+    @OptIn(ExperimentalTestApi::class)
+    @Test
     fun choosingAnIcon_submitsThatIcon() {
         val drafts = mutableListOf<AddNoteDraft>()
         runComposeUiTest {

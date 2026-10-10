@@ -29,7 +29,7 @@ class Database(driver: SQLiteDriver, val path: String) {
          * project's history, so the stale file can be told apart from ours by
          * the pragma alone (see [initialize]).
          */
-        const val VERSION = 110
+        const val VERSION = 111
 
         /**
          * The first version this app is responsible for upgrading. Anything
@@ -217,6 +217,7 @@ class Database(driver: SQLiteDriver, val path: String) {
         conn.execSQL(org.btcmap.db.table.event.CREATE_INDEX_UPDATED_AT)
         conn.execSQL(org.btcmap.db.table.event.CREATE_INDEX_BOUNDS)
         conn.execSQL(org.btcmap.db.table.area.CREATE_INDEX_UPDATED_AT)
+        conn.execSQL(org.btcmap.db.table.note.CREATE_INDEX_UPDATED_AT)
         conn.execSQL("PRAGMA user_version=$VERSION;")
     }
 
@@ -505,6 +506,19 @@ class Database(driver: SQLiteDriver, val path: String) {
                             "ADD COLUMN ${org.btcmap.db.table.note.ICON} " +
                             "TEXT NOT NULL DEFAULT 'notes';"
                     )
+                }
+
+                110 -> {
+                    // Notes now sync incrementally like the other tables: a
+                    // soft-deleted note is kept as a tombstone and the cursor is
+                    // max(updated_at), served by the expression index. Add the
+                    // column and the index; the next sync backfills the
+                    // tombstones for anything deleted on the server.
+                    conn.execSQL(
+                        "ALTER TABLE ${org.btcmap.db.table.note.TABLE} " +
+                            "ADD COLUMN ${org.btcmap.db.table.note.DELETED_AT} TEXT;"
+                    )
+                    conn.execSQL(org.btcmap.db.table.note.CREATE_INDEX_UPDATED_AT)
                 }
 
                 else -> throw Exception("migration is missing for version $version")

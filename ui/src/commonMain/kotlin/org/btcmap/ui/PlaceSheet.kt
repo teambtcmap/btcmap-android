@@ -126,9 +126,6 @@ fun PlaceSheet(
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
-        // The default scrim dims the whole map behind the sheet. The map is the
-        // context the sheet is about, so keep it fully visible instead.
-        scrimColor = Color.Transparent,
     ) {
         PlaceDetails(
             place = place,

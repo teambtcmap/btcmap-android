@@ -166,6 +166,20 @@ private const val VERSION_106_PLACE_CREATE = """
     );
 """
 
+/** The note table as of version 110: after `icon`, before `deleted_at`. */
+private const val VERSION_110_NOTE_CREATE = """
+    CREATE TABLE note (
+        id INTEGER PRIMARY KEY NOT NULL,
+        lat REAL NOT NULL,
+        lon REAL NOT NULL,
+        text TEXT NOT NULL,
+        icon TEXT NOT NULL DEFAULT 'notes',
+        is_public INTEGER NOT NULL,
+        created_at TEXT NOT NULL,
+        updated_at TEXT NOT NULL
+    );
+"""
+
 class DatabaseTest {
 
     @Test
@@ -366,6 +380,26 @@ class DatabaseTest {
             Assert.assertTrue(indexes(db.conn, "place").contains("place_updated_at"))
             Assert.assertTrue(indexes(db.conn, "place").contains("place_osm_id"))
             Assert.assertTrue(indexes(db.conn, "place").contains("place_bounds"))
+        } finally {
+            db.conn.close()
+        }
+    }
+
+    @Test
+    fun version110Database_isMigratedWithTheNoteTombstoneColumn() = runBlocking<Unit> {
+        val path = existingPath()
+        // Reproduces the last schema before notes synced incrementally: version
+        // 110 with the note table but without its deleted_at column.
+        createVersion110Database(path)
+
+        val db = Database(BundledSQLiteDriver(), path).apply { connect() }
+
+        try {
+            // Migration 110 adds the tombstone column and the cursor index,
+            // leaving the rows in place; the next sync backfills tombstones.
+            Assert.assertEquals(Database.VERSION, userVersion(db.conn))
+            Assert.assertTrue(noteColumns(db.conn).contains("deleted_at"))
+            Assert.assertTrue(indexes(db.conn, "note").contains("note_updated_at"))
         } finally {
             db.conn.close()
         }
@@ -739,8 +773,38 @@ class DatabaseTest {
         }
     }
 
+    /**
+     * The schema as of version 110: the current tables, with the note table
+     * still missing its `deleted_at` tombstone column.
+     */
+    private fun createVersion110Database(path: String) {
+        val conn = BundledSQLiteDriver().open(path)
+        try {
+            conn.execSQL(VERSION_106_PLACE_CREATE)
+            conn.execSQL(org.btcmap.db.table.event.CREATE)
+            conn.execSQL(org.btcmap.db.table.comment.CREATE)
+            conn.execSQL(VERSION_107_AREA_CREATE)
+            conn.execSQL(org.btcmap.db.table.preference.CREATE)
+            conn.execSQL(VERSION_110_NOTE_CREATE)
+            conn.execSQL(org.btcmap.db.table.comment.CREATE_INDEX_PLACE_ID_CREATED_AT)
+            conn.execSQL(org.btcmap.db.table.comment.CREATE_INDEX_UPDATED_AT)
+            conn.execSQL(org.btcmap.db.table.place.CREATE_INDEX_UPDATED_AT)
+            conn.execSQL(org.btcmap.db.table.place.CREATE_INDEX_OSM_ID)
+            conn.execSQL(org.btcmap.db.table.place.CREATE_INDEX_BOUNDS)
+            conn.execSQL(org.btcmap.db.table.event.CREATE_INDEX_UPDATED_AT)
+            conn.execSQL(org.btcmap.db.table.event.CREATE_INDEX_BOUNDS)
+            conn.execSQL(org.btcmap.db.table.area.CREATE_INDEX_UPDATED_AT)
+            conn.execSQL("PRAGMA user_version=110;")
+        } finally {
+            conn.close()
+        }
+    }
+
     private fun areaColumns(conn: SQLiteConnection): List<String> =
         columns(conn, "area")
+
+    private fun noteColumns(conn: SQLiteConnection): List<String> =
+        columns(conn, "note")
 
     private fun eventColumns(conn: SQLiteConnection): List<String> =
         columns(conn, "event")

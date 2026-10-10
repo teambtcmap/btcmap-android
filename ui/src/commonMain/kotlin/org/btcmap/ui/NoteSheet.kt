@@ -28,7 +28,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
@@ -130,8 +129,6 @@ fun NoteSheet(
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
-        // The map is the context the sheet is about, so keep it fully visible.
-        scrimColor = Color.Transparent,
     ) {
         Column(
             modifier = Modifier

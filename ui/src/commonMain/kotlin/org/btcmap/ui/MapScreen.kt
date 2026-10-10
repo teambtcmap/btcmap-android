@@ -42,6 +42,7 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.DpRect
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.Dispatchers
@@ -72,7 +73,9 @@ import org.btcmap.map.toMarkerGeoJson
 import org.btcmap.map.toNoteGeoJson
 import org.btcmap.place.isMerchant
 import org.btcmap.ui.map.AREA_CHIP_SIZE
+import org.btcmap.ui.map.AddLocationDropdown
 import org.btcmap.ui.map.AddLocationLabels
+import org.btcmap.ui.map.addLocationItems
 import org.btcmap.ui.map.AreaChipPalette
 import org.btcmap.ui.map.AreaChips
 import org.btcmap.ui.map.EventLayers
@@ -113,6 +116,7 @@ import org.maplibre.compose.camera.CameraPosition
 import org.maplibre.compose.camera.CameraUpdate
 import org.maplibre.compose.interaction.ClickResult
 import org.maplibre.compose.interaction.MapInteractions
+import org.maplibre.compose.interaction.PointerButton
 import org.maplibre.compose.layers.LocationIndicatorLayer
 import org.maplibre.compose.location.LocationPermission
 import org.maplibre.compose.location.LocationTrackingEffect
@@ -253,6 +257,16 @@ fun MapScreen(
         addEvent = "Add an event",
         addNote = "Add a note",
     ),
+    /**
+     * Whether a secondary (right) click on the map opens the add-location
+     * chooser, creating the chosen kind at the clicked point. The choices are the
+     * same the search field's add action offers, and the host applies the same
+     * rules to them (its callbacks gate on authorization). False by default,
+     * because Android has no secondary click; only the desktop host enables it.
+     * With exactly one kind offered the click acts directly, as the action does;
+     * with none it does nothing.
+     */
+    addLocationOnSecondaryClick: Boolean = false,
     onOpenFeed: ((List<MapArea>) -> Unit)? = null,
     /**
      * Opens the infrastructure dashboard. Null unless the signed-in user holds
@@ -381,10 +395,11 @@ fun MapScreen(
     var viewportTopPx by remember { mutableStateOf(0f) }
     var viewportHeightPx by remember { mutableStateOf(0f) }
 
-    // The camera padding that centres a place between the search bar's bottom
-    // and the sheet's top edge. The sheet opens at half the viewport, so its top
-    // edge sits there; the horizontal padding stays zero, centring the place.
-    fun placeSheetPadding(): DpPadding? {
+    // The camera padding that centres a selected place or event between the
+    // search bar's bottom and the sheet's top edge. The sheet opens at half the
+    // viewport, so its top edge sits there; the horizontal padding stays zero,
+    // centring the feature.
+    fun sheetPadding(): DpPadding? {
         if (!placeSheet || searchBarBottomPx <= 0f || viewportHeightPx <= 0f) return null
         return with(density) {
             DpPadding(
@@ -394,14 +409,16 @@ fun MapScreen(
         }
     }
 
-    // Opening a place is a coordinate jump: the zoom the user is at is kept when
-    // it is already close enough (15+, where the cluster layers stop clustering),
-    // otherwise the map zooms in to 15 so the place is not lost inside a cluster.
-    fun placeCameraUpdate(place: Place, currentZoom: Double?): CameraUpdate = CameraUpdate(
-        center = Position(place.lon, place.lat),
-        zoom = if (currentZoom != null && currentZoom < PLACE_MIN_ZOOM) PLACE_MIN_ZOOM else null,
-        padding = placeSheetPadding(),
-    )
+    // Opening a place's or an event's sheet is a coordinate jump: the zoom the
+    // user is at is kept when it is already close enough (15+, where the cluster
+    // layers stop clustering), otherwise the map zooms in to 15 so the feature is
+    // not lost inside a cluster.
+    fun sheetCameraUpdate(lat: Double, lon: Double, currentZoom: Double?): CameraUpdate =
+        CameraUpdate(
+            center = Position(lon, lat),
+            zoom = if (currentZoom != null && currentZoom < PLACE_MIN_ZOOM) PLACE_MIN_ZOOM else null,
+            padding = sheetPadding(),
+        )
 
     val scope = rememberCoroutineScope()
     var selectedPlace by remember { mutableStateOf<Place?>(null) }
@@ -409,9 +426,21 @@ fun MapScreen(
     // the style draws), shown in its own sheet. Independent of the place sheet,
     // which only the app's own marker layers open.
     var shownPoi by remember { mutableStateOf<PoiInfo?>(null) }
-    // Bumped on every marker tap, even for the place already selected, so the
-    // recentring effect below runs again.
+    // Bumped on every marker tap, even for the feature already selected, so the
+    // recentring effect below runs again; [recenterTarget] is what it centres on.
     var recenterKey by remember { mutableStateOf(0) }
+    var recenterTarget by remember { mutableStateOf<Pair<Double, Double>?>(null) }
+    // Centres and zooms to a place, event or note whose sheet has just opened.
+    // The map state the camera belongs to is not in scope here, so the move
+    // itself runs in the effect below.
+    fun recenterOn(lat: Double, lon: Double) {
+        recenterTarget = lat to lon
+        recenterKey++
+    }
+    // The point a right-click opened the add-location chooser at (in map-local
+    // dp, where it is anchored) and the geographic point it creates at. Null
+    // while no chooser is open.
+    var addLocationMenu by remember { mutableStateOf<AddLocationMenuState?>(null) }
     // The sheet shows the current row: a sync rewrites rows in place, so the
     // selected copy is re-read whenever the host bumps the reload key.
     val shownPlace = rememberReloadedPlace(selectedPlace, db, reloadKey)
@@ -441,12 +470,17 @@ fun MapScreen(
                 // A place or event selection replaces any basemap POI sheet.
                 shownPoi = null
                 if (isEvent) {
-                    withContext(Dispatchers.Default) { db.event.selectById(id) }?.let(onSelectEvent)
+                    withContext(Dispatchers.Default) { db.event.selectById(id) }?.let { event ->
+                        onSelectEvent(event)
+                        // The event sheet opens at the same half height a place's
+                        // does, so centre and zoom to it the same way.
+                        recenterOn(event.lat, event.lon)
+                    }
                 } else {
                     withContext(Dispatchers.Default) { db.place.selectById(id) }?.let {
                         selectedPlace = it
                         onPlaceSelected(it)
-                        recenterKey++
+                        recenterOn(it.lat, it.lon)
                     }
                 }
             }
@@ -463,7 +497,12 @@ fun MapScreen(
         } else {
             scope.launch {
                 shownPoi = null
-                withContext(Dispatchers.Default) { db.note.selectById(id) }?.let { shownNote = it }
+                withContext(Dispatchers.Default) { db.note.selectById(id) }?.let { note ->
+                    shownNote = note
+                    // The note panel opens over the map like a place's sheet, so
+                    // centre and zoom to the note the same way.
+                    recenterOn(note.lat, note.lon)
+                }
             }
             ClickResult.Consume
         }
@@ -591,7 +630,13 @@ fun MapScreen(
     // the result arrives on the map scope. The dismissal callback goes through a
     // live state so a changed host lambda is still the one called.
     val currentOnPlaceDismissed by rememberUpdatedState(onPlaceDismissed)
-    val mapInteractions = remember(mapRotationEnabled, mapTiltEnabled) {
+    // A right-click's add-location action is read live, so a new host lambda is
+    // the one called without rebuilding the interactions.
+    val currentOnAddPlace by rememberUpdatedState(onAddPlace)
+    val currentOnAddEvent by rememberUpdatedState(onAddEvent)
+    val currentOnAddNote by rememberUpdatedState(onAddNote)
+    val currentAddLocationLabels by rememberUpdatedState(addLocationLabels)
+    val mapInteractions = remember(mapRotationEnabled, mapTiltEnabled, addLocationOnSecondaryClick) {
         MapInteractions {
             camera {
                 // Bearing permission. A gesture binding cannot re-enable a
@@ -628,18 +673,64 @@ fun MapScreen(
                         ClickResult.Consume
                     }
                 }
+                // A right-click is the library's secondary click, which it routes
+                // to the long-press callback; a touch long press arrives here too,
+                // so the button is checked. It opens the same add-location choices
+                // the search field's action offers, but at the clicked point. With
+                // one kind it acts directly, as that action does; with none it
+                // leaves the click alone.
+                if (addLocationOnSecondaryClick) {
+                    longClick {
+                        onEvent { event ->
+                            if (PointerButton.Secondary !in event.buttons) {
+                                return@onEvent ClickResult.Pass
+                            }
+                            val position = event.position ?: return@onEvent ClickResult.Pass
+                            val items = addLocationItems(
+                                onAddPlace = currentOnAddPlace?.let { create ->
+                                    { create(position.latitude, position.longitude) }
+                                },
+                                onAddEvent = currentOnAddEvent?.let { create ->
+                                    { create(position.latitude, position.longitude) }
+                                },
+                                onAddNote = currentOnAddNote?.let { create ->
+                                    { create(position.latitude, position.longitude) }
+                                },
+                                labels = currentAddLocationLabels,
+                            )
+                            when (items.size) {
+                                0 -> ClickResult.Pass
+                                1 -> {
+                                    items.single().onClick()
+                                    ClickResult.Consume
+                                }
+
+                                else -> {
+                                    addLocationMenu = AddLocationMenuState(
+                                        offset = event.screenOffset,
+                                        lat = position.latitude,
+                                        lon = position.longitude,
+                                    )
+                                    ClickResult.Consume
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
     }
 
     val areas = rememberMapAreas(state, db, reloadKey)
 
-    // A marker tap centres the place between the search bar and the sheet. The
-    // padding stays when the sheet closes, so dismissing it does not shift the
-    // map back.
+    // A marker tap centres the place, event or note between the search bar and the
+    // sheet. The padding stays when the sheet closes, so dismissing it does not
+    // shift the map back.
     LaunchedEffect(recenterKey) {
         if (recenterKey == 0) return@LaunchedEffect
-        selectedPlace?.let { state.animateCamera(placeCameraUpdate(it, state.cameraPosition.zoom)) }
+        recenterTarget?.let { (lat, lon) ->
+            state.animateCamera(sheetCameraUpdate(lat, lon, state.cameraPosition.zoom))
+        }
     }
 
     // The host may want to remember where the user left the map. The callback is
@@ -684,7 +775,7 @@ fun MapScreen(
         // before moving to it, as the Views map did.
         onMarkerKindChange(if (place.isMerchant()) MarkerKind.Merchants else MarkerKind.Exchanges)
         onPlaceSelected(place)
-        state.animateCamera(placeCameraUpdate(place, state.cameraPosition.zoom))
+        state.animateCamera(sheetCameraUpdate(place.lat, place.lon, state.cameraPosition.zoom))
     }
 
     // Reopens the place a host remembered when the map was last left, so
@@ -703,7 +794,7 @@ fun MapScreen(
         // the reopened sheet. Wait for the search bar and viewport to be
         // measured, then apply the same padded camera a marker tap does.
         snapshotFlow { searchBarBottomPx > 0f && viewportHeightPx > 0f }.first { it }
-        state.animateCamera(placeCameraUpdate(place, state.cameraPosition.zoom))
+        state.animateCamera(sheetCameraUpdate(place.lat, place.lon, state.cameraPosition.zoom))
     }
 
     // The host supplies what it can do, but only the map knows where it is
@@ -771,7 +862,7 @@ fun MapScreen(
                             current.copy(
                                 center = Position(place.lon, place.lat),
                                 zoom = maxOf(current.zoom, PLACE_MIN_ZOOM),
-                                padding = placeSheetPadding() ?: DpPadding.Zero,
+                                padding = sheetPadding() ?: DpPadding.Zero,
                             ),
                         )
                     }
@@ -779,8 +870,20 @@ fun MapScreen(
             }
 
             is SearchAdapterItem.Event -> scope.launch {
-                withContext(Dispatchers.Default) { db.event.selectById(result.eventId) }
-                    ?.let(onSelectEvent)
+                withContext(Dispatchers.Default) { db.event.selectById(result.eventId) }?.let { event ->
+                    onSelectEvent(event)
+                    // Like a place search result: jump to the event and open its
+                    // sheet, so it is not lost inside a cluster.
+                    state.cameraPosition.let { current ->
+                        state.setCameraPosition(
+                            current.copy(
+                                center = Position(event.lon, event.lat),
+                                zoom = maxOf(current.zoom, PLACE_MIN_ZOOM),
+                                padding = sheetPadding() ?: DpPadding.Zero,
+                            ),
+                        )
+                    }
+                }
             }
 
             // A typed coordinate has no row behind it: the map simply moves to
@@ -1281,6 +1384,28 @@ fun MapScreen(
                         searchBarBottomPx = it.positionInRoot().y + it.size.height
                     },
             )
+            // The add-location chooser a right-click opened, anchored at the
+            // click. The same choices and order as the search field's action.
+            addLocationMenu?.let { menu ->
+                Box(modifier = Modifier.offset(x = menu.offset.x, y = menu.offset.y)) {
+                    AddLocationDropdown(
+                        expanded = true,
+                        onDismissRequest = { addLocationMenu = null },
+                        items = addLocationItems(
+                            onAddPlace = onAddPlace?.let { create ->
+                                { create(menu.lat, menu.lon) }
+                            },
+                            onAddEvent = onAddEvent?.let { create ->
+                                { create(menu.lat, menu.lon) }
+                            },
+                            onAddNote = onAddNote?.let { create ->
+                                { create(menu.lat, menu.lon) }
+                            },
+                            labels = addLocationLabels,
+                        ),
+                    )
+                }
+            }
         }
     }
 }
@@ -1351,3 +1476,13 @@ private const val LOCATION_ZOOM = 14.0
 
 /** The id of the user-location layer the puck draws through. */
 private const val LOCATION_INDICATOR_LAYER_ID = "user-location"
+
+/**
+ * Where a right-click opened the add-location chooser: [offset] anchors the menu
+ * in map-local dp, and [lat]/[lon] are the point a chosen kind is created at.
+ */
+private data class AddLocationMenuState(
+    val offset: DpOffset,
+    val lat: Double,
+    val lon: Double,
+)

@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+- Right-click the map on the desktop to add a place, event or note: the same choices the search field's action offers open at the clicked point, so the chosen form is positioned there instead of at the map centre
+- Return straight to the map after adding a note — no "note added" confirmation — and switch to the notes filter so the new note is visible
+- Centre and zoom the map when an event or a note is selected, as it already did for a place, so the selected marker is not left under the sheet or lost inside a cluster
+- Dim the map behind every sheet (place, event, note and basemap POI) with the standard scrim instead of leaving it fully visible, so the map reads as non-interactive until the sheet is dismissed
+- Sync the signed-in user's personal notes incrementally like the other tables: only the changes after the last cursor are fetched and soft-deleted notes are kept as tombstones, so a large note list is no longer re-downloaded whole on every sync, and the notes step now appears with its duration in the database screen's sync card
 - Expand the infrastructure dashboard's cards in place instead of opening a dialog: a summed import row reveals its per-source breakdown, the API-call totals their top-10 lists, the Lightning balances their pending/confirmed splits, the sync success rate its runs, and each wallet its cache time and transactions; the iOS client row now uses the iOS icon
 - Show a spinner in place of a toolbar's sync/refresh action while the work runs (the database sync and the infrastructure dashboard load) instead of leaving a disabled button, holding the same slot so the action does not shift
 - Rework the database screen: list every table in one card with a compact rows/visible/deleted summary and, on tap, its full breakdown and newest update; add a matching Bundles card for the bundled snapshots; move the sync action into the toolbar and the sync card to the top; and flow the cards into columns on tablets and wide desktop windows

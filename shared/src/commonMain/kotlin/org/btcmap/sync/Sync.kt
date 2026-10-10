@@ -105,98 +105,99 @@ class Sync(val api: Api, val db: Database) {
             }
         },
     )
+}
 
-    /**
-     * Runs the incremental-sync state machine shared by all four tables.
-     *
-     * Reads pages newer than [cursor], advancing it to the newest timestamp
-     * that is certainly complete and widening [baseBatchSize] when a whole page
-     * shares one timestamp (see [nextUpdatedAtCursor]). A failed page read,
-     * cursor computation or apply stops the loop and leaves the cursor where it
-     * is, so the next sync retries the same page; it never throws an [Exception]
-     * at the caller. An [Error] is left to propagate.
-     */
-    private suspend fun <T> syncDelta(
-        baseBatchSize: Long,
-        cursor: suspend () -> Instant?,
-        fetch: suspend (since: Instant?, limit: Long) -> List<T>,
-        updatedAt: (T) -> String,
-        apply: suspend (List<T>) -> Unit,
-    ): Report = withContext(ioDispatcher) {
-        val startedAt = Clock.System.now()
-        var rowsAffected = 0L
-        var failed = false
-        // [cursor] is a lambda, not an already-read value, so the read runs on
-        // this IO dispatcher: a comment sync started from the UI thread must not
-        // touch the shared SQLite connection on the main thread, where the
-        // connection's lock can stall it behind a background write.
-        var maxKnownUpdatedAt = cursor()
-        var batchSize = baseBatchSize
+/**
+ * Runs the incremental-sync state machine shared by the tables and the user's
+ * notes.
+ *
+ * Reads pages newer than [cursor], advancing it to the newest timestamp that is
+ * certainly complete and widening [baseBatchSize] when a whole page shares one
+ * timestamp (see [nextUpdatedAtCursor]). A failed page read, cursor computation
+ * or apply stops the loop and leaves the cursor where it is, so the next sync
+ * retries the same page; it never throws an [Exception] at the caller. An
+ * [Error] is left to propagate.
+ */
+internal suspend fun <T> syncDelta(
+    baseBatchSize: Long,
+    cursor: suspend () -> Instant?,
+    fetch: suspend (since: Instant?, limit: Long) -> List<T>,
+    updatedAt: (T) -> String,
+    apply: suspend (List<T>) -> Unit,
+): Sync.Report = withContext(ioDispatcher) {
+    val startedAt = Clock.System.now()
+    var rowsAffected = 0L
+    var failed = false
+    // [cursor] is a lambda, not an already-read value, so the read runs on
+    // this IO dispatcher: a comment sync started from the UI thread must not
+    // touch the shared SQLite connection on the main thread, where the
+    // connection's lock can stall it behind a background write.
+    var maxKnownUpdatedAt = cursor()
+    var batchSize = baseBatchSize
 
-        while (true) {
-            // Only [Exception] is caught, never [Error]: a failed delta must not
-            // crash the caller, but a non-recoverable condition (OutOfMemory,
-            // and the like) must keep propagating, matching the bundled seeds.
-            val delta = try {
-                fetch(maxKnownUpdatedAt, batchSize)
-            } catch (e: Exception) {
-                // A failed delta must not crash the caller; leave the cursor
-                // where it is so the next sync retries the same page.
-                e.rethrowIfCancellation()
-                reportSyncFailure(e)
-                failed = true
-                break
-            }
-
-            if (delta.isEmpty()) {
-                break
-            }
-
-            // The cursor computation parses every row's `updated_at`, so guard it
-            // too: a malformed timestamp from the server must be reported as a
-            // failure rather than thrown at the caller.
-            val nextCursor = try {
-                nextUpdatedAtCursor(delta.map(updatedAt), batchSize)
-            } catch (e: Exception) {
-                e.rethrowIfCancellation()
-                reportSyncFailure(e)
-                failed = true
-                break
-            }
-            if (nextCursor == null) {
-                batchSize *= 2
-                continue
-            }
-
-            maxKnownUpdatedAt = nextCursor
-            val reachedTip = delta.size < batchSize
-
-            try {
-                // Guard the whole apply step, not just the request: a malformed
-                // row or a database failure here must not escape and take down
-                // the lifecycle coroutine that called sync.
-                apply(delta)
-            } catch (e: Exception) {
-                e.rethrowIfCancellation()
-                reportSyncFailure(e)
-                failed = true
-                break
-            }
-
-            rowsAffected += delta.size
-
-            if (reachedTip) {
-                break
-            }
-            batchSize = baseBatchSize
+    while (true) {
+        // Only [Exception] is caught, never [Error]: a failed delta must not
+        // crash the caller, but a non-recoverable condition (OutOfMemory,
+        // and the like) must keep propagating, matching the bundled seeds.
+        val delta = try {
+            fetch(maxKnownUpdatedAt, batchSize)
+        } catch (e: Exception) {
+            // A failed delta must not crash the caller; leave the cursor
+            // where it is so the next sync retries the same page.
+            e.rethrowIfCancellation()
+            reportSyncFailure(e)
+            failed = true
+            break
         }
 
-        Report(
-            duration = Clock.System.now() - startedAt,
-            rowsAffected = rowsAffected,
-            failed = failed,
-        )
+        if (delta.isEmpty()) {
+            break
+        }
+
+        // The cursor computation parses every row's `updated_at`, so guard it
+        // too: a malformed timestamp from the server must be reported as a
+        // failure rather than thrown at the caller.
+        val nextCursor = try {
+            nextUpdatedAtCursor(delta.map(updatedAt), batchSize)
+        } catch (e: Exception) {
+            e.rethrowIfCancellation()
+            reportSyncFailure(e)
+            failed = true
+            break
+        }
+        if (nextCursor == null) {
+            batchSize *= 2
+            continue
+        }
+
+        maxKnownUpdatedAt = nextCursor
+        val reachedTip = delta.size < batchSize
+
+        try {
+            // Guard the whole apply step, not just the request: a malformed
+            // row or a database failure here must not escape and take down
+            // the lifecycle coroutine that called sync.
+            apply(delta)
+        } catch (e: Exception) {
+            e.rethrowIfCancellation()
+            reportSyncFailure(e)
+            failed = true
+            break
+        }
+
+        rowsAffected += delta.size
+
+        if (reachedTip) {
+            break
+        }
+        batchSize = baseBatchSize
     }
+
+    Sync.Report(
+        duration = Clock.System.now() - startedAt,
+        rowsAffected = rowsAffected,
+        failed = failed,
+    )
 }
 
 /**
