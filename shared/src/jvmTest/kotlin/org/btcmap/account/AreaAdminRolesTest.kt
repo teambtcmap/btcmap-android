@@ -16,16 +16,17 @@ class AreaAdminRolesTest {
     )
 
     @Test
-    fun areaAdminAndAdminAndRootCanManage() {
-        assertTrue(user("area_admin").canManageAreas())
+    fun areaManagerAndAdminAndRootCanManage() {
+        assertTrue(user("area_manager").canManageAreas())
         assertTrue(user("admin").canManageAreas())
         assertTrue(user("root").canManageAreas())
-        assertTrue(user("user", "area_admin").canManageAreas())
+        assertTrue(user("user", "area_manager").canManageAreas())
     }
 
     @Test
     fun regularUsersCannotManage() {
         assertFalse(user("user").canManageAreas())
+        assertFalse(user("event_manager").canManageAreas())
         assertFalse(user().canManageAreas())
     }
 }

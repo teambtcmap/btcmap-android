@@ -13,6 +13,7 @@ class UserExtTest {
             roles = listOf("admin", "user"),
             savedPlaces = listOf(SavedItem(id = 1, name = "Bitcoin Cafe")),
             savedAreas = listOf(SavedItem(id = 2, name = "Downtown")),
+            geofence = listOf(3L, 7L),
         )
 
         val dbUser = user.toDbUser()
@@ -28,5 +29,6 @@ class UserExtTest {
             listOf(DbSavedItem(id = 2, name = "Downtown")),
             dbUser.savedAreas,
         )
+        Assert.assertEquals(listOf(3L, 7L), dbUser.geofence)
     }
 }

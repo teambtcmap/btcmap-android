@@ -6,6 +6,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+- Hide the map's event-review button while no submissions are waiting, and refresh its count after a sync reports the events changed, so an emptied or filled queue appears without leaving the map
+- Fix area managers never seeing the "Manage areas" settings row: the app checked a nonexistent `area_admin` role instead of the server's `area_manager`, so the row was hidden from exactly the users it is meant for
+- Make the "Manage areas" screen geofence-aware: an account restricted to a set of areas now sees just those (of any type, since a geofence can name a country) and loses the search field the restriction makes pointless, matching the server's area-id geofence
 - Add a "Manage users" item to the Admin settings section, shown only to admins and roots: it searches the server for users by name and opens a read-only record holding the id, name, roles, creation date, geofence (resolved to area names) and linked Nostr npub
 - Edit a user's roles and geofence from their record: the roles dialog greys out the roles the caller may not change and the geofence dialog picks the areas by name, both following the server's permission policy — root may edit any non-root user (never assigning root) but not its own roles, and admin may only add or remove the event- and area-manager roles for a non-admin, non-root user and may edit its own or such a user's geofence
 - Show a failed add-event, add-place or add-note submission in a dismissable dialog instead of a transient snackbar, so a message such as a geofence refusal can be read and screenshotted before it is dismissed

@@ -62,7 +62,7 @@ const val MANAGE_AREAS_SEARCH_TAG = "manage-areas-search"
  */
 const val EARTH_NAME = "Earth"
 
-/** The only area type the screen lists: communities, not countries or cities. */
+/** The only area type the screen lists for an unrestricted account. */
 const val COMMUNITY_AREA_TYPE = "community"
 
 /** The manage-areas screen's strings, so the screen stays resource-free. */
@@ -80,11 +80,16 @@ data class ManageAreasLabels(
  * The "manage areas" screen: every community area in the local cache (countries
  * and cities are not listed), ordered so the ones that need attention come
  * first — never-verified areas (which wear a warning) ahead of the oldest
- * verification dates. The search field filters the list to
- * the names that contain the query, so an admin can find one area among the
- * thousand-odd. Only users holding an area-admin role reach it (the settings row
- * is hidden for everyone else). The list is loaded through [load] so the host
- * owns the cache read and the screen stays testable.
+ * verification dates. The search field filters the list to the names that
+ * contain the query, so an area manager can find one area among the
+ * thousand-odd. Only users holding an area-manager role reach it (the settings
+ * row is hidden for everyone else). The list is loaded through [load] so the
+ * host owns the cache read and the screen stays testable.
+ *
+ * When [geofence] is non-empty the account may only edit those area ids (the
+ * server rejects any other area), so the search field is hidden and the list
+ * shows just the geofenced areas — of any type, since a geofence can name a
+ * country the community-only list would otherwise drop.
  *
  * The body is a single column capped at [CONTENT_MAX_WIDTH] and centred, so a
  * desktop or tablet window does not stretch the rows and the search field edge
@@ -100,6 +105,11 @@ fun ManageAreasScreen(
     load: suspend () -> List<Area>,
     onAreaClick: (Area) -> Unit = {},
     modifier: Modifier = Modifier,
+    /**
+     * The area ids the account is restricted to, or empty when unrestricted.
+     * Non-empty hides the search and lists only these areas.
+     */
+    geofence: List<Long> = emptyList(),
 ) {
     var loaded by remember { mutableStateOf(false) }
     var failed by remember { mutableStateOf(false) }
@@ -107,18 +117,21 @@ fun ManageAreasScreen(
     var reloadKey by remember { mutableStateOf(0) }
     var query by remember { mutableStateOf("") }
 
+    val restricted = geofence.isNotEmpty()
+
     LaunchedEffect(reloadKey) {
         failed = false
         try {
             // Only communities are managed here; countries and cities are
-            // synced for the map but not editable area records.
+            // synced for the map but not editable area records — unless the
+            // account is geofenced, which names the exact areas it may edit.
             //
             // Unverified areas first (they need attention), then the oldest
             // verification dates, so the stale ones surface at the top. The
             // name is a stable tiebreaker. `verified_at` is an ISO date, so a
             // plain string compare is chronological.
             areas = load()
-                .filter { it.type == COMMUNITY_AREA_TYPE }
+                .filter { if (restricted) it.id in geofence else it.type == COMMUNITY_AREA_TYPE }
                 .sortedWith(
                     compareBy<Area> { it.verifiedAt != null }
                         .thenBy { it.verifiedAt.orEmpty() }
@@ -160,12 +173,16 @@ fun ManageAreasScreen(
             )
 
             else -> {
-                ManageAreasSearchField(
-                    query = query,
-                    onQueryChange = { query = it },
-                    placeholder = labels.search,
-                    clearDescription = labels.clear,
-                )
+                // A geofenced account can only reach its own areas, so the
+                // search would never narrow anything.
+                if (!restricted) {
+                    ManageAreasSearchField(
+                        query = query,
+                        onQueryChange = { query = it },
+                        placeholder = labels.search,
+                        clearDescription = labels.clear,
+                    )
+                }
                 when {
                     areas.isEmpty() -> ManageAreasStateMessage(
                         icon = "travel_explore",

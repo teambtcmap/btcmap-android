@@ -111,8 +111,8 @@ sealed interface AppRoute {
     data class UserAdmin(val user: ManageUserUi) : AppRoute
 
     /**
-     * The admin-only area management list (see `ManageAreasScreen`), reached from
-     * the settings row shown to area admins.
+     * The area-manager-only area management list (see `ManageAreasScreen`),
+     * reached from the settings row shown to area managers.
      */
     data object ManageAreas : AppRoute
 

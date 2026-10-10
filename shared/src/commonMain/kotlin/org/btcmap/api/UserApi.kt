@@ -18,6 +18,7 @@ data class User(
     val roles: List<String>,
     val savedPlaces: List<SavedItem>,
     val savedAreas: List<SavedItem>,
+    val geofence: List<Long> = emptyList(),
 )
 
 /** One user returned by the admin/root user search. */
@@ -176,6 +177,7 @@ private fun JsonObject.toUser(): User {
         roles = arrayOrNull("roles")?.map { it.jsonPrimitive.content } ?: emptyList(),
         savedPlaces = arrayOrNull("saved_places")?.map { it.jsonObject.toSavedItem() } ?: emptyList(),
         savedAreas = arrayOrNull("saved_areas")?.map { it.jsonObject.toSavedItem() } ?: emptyList(),
+        geofence = arrayOrNull("geofence")?.map { it.jsonPrimitive.long } ?: emptyList(),
     )
 }
 

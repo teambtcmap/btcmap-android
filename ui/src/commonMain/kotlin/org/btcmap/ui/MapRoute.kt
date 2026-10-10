@@ -111,6 +111,9 @@ internal fun MapRoute(
     var isAdmin by remember { mutableStateOf(false) }
     var canManageEvents by remember { mutableStateOf(false) }
     var pendingEventCount by remember { mutableStateOf(0) }
+    // Bumped by a sync that reports the events (or the profile) changed, so the
+    // pending-event count below is refetched without re-entering the map.
+    var pendingEventRefresh by remember { mutableStateOf(0) }
 
     // The sync is app-scoped: starting it here only kicks it off; it keeps
     // running after the screen is left.
@@ -118,11 +121,15 @@ internal fun MapRoute(
 
     // A finished sync asks the map to re-query its features rather than leaving
     // it stale until the user moves it. A profile change additionally re-derives
-    // the role-gated buttons.
+    // the role-gated buttons, and an events (or profile) change refetches the
+    // pending-event count, so the review button appears once the queue fills.
     LaunchedEffect(Unit) {
         services.syncController.events.collect { event ->
             reloadKey++
             if (event == SyncEvent.UserChanged) userVersion++
+            if (event == SyncEvent.EventsChanged || event == SyncEvent.UserChanged) {
+                pendingEventRefresh++
+            }
         }
     }
 
@@ -136,9 +143,11 @@ internal fun MapRoute(
         canManageEvents = user?.canManageEvents() == true
     }
 
-    // The pending-event badge is a network read, so it is refreshed only when
-    // the event-manager role changes rather than on every sync state change.
-    LaunchedEffect(canManageEvents) {
+    // The pending-event count is a network read: refetched when the
+    // event-manager role changes, and whenever a sync reports the events (or the
+    // profile) changed, so a newly submitted or reviewed event updates the
+    // button without re-entering the map.
+    LaunchedEffect(canManageEvents, pendingEventRefresh) {
         pendingEventCount = if (canManageEvents) {
             runCatching { services.api.getPendingEvents().size }.getOrDefault(0)
         } else {

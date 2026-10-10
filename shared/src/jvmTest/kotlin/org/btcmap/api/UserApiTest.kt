@@ -47,7 +47,8 @@ class UserApiTest : ApiTestBase() {
                 "name": "satoshi",
                 "roles": ["user"],
                 "saved_places": [{"id": 1, "name": "Bitcoin Cafe"}],
-                "saved_areas": [{"id": 2, "name": "Downtown"}]
+                "saved_areas": [{"id": 2, "name": "Downtown"}],
+                "geofence": [3, 7]
             }
             """.trimIndent()
         )
@@ -61,6 +62,7 @@ class UserApiTest : ApiTestBase() {
         Assert.assertEquals(1, user.savedAreas.size)
         Assert.assertEquals(1L, user.savedPlaces.single().id)
         Assert.assertEquals("Bitcoin Cafe", user.savedPlaces.single().name)
+        Assert.assertEquals(listOf(3L, 7L), user.geofence)
     }
 
     @Test

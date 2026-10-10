@@ -14,6 +14,7 @@ fun User.toDbUser(): DbUser = DbUser(
     roles = roles,
     savedPlaces = savedPlaces.map { it.toDbSavedItem() },
     savedAreas = savedAreas.map { it.toDbSavedItem() },
+    geofence = geofence,
 )
 
 private fun SavedItem.toDbSavedItem(): DbSavedItem = DbSavedItem(id = id, name = name)

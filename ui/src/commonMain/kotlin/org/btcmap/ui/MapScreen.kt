@@ -264,7 +264,10 @@ fun MapScreen(
      * event manager, admin or root role, so the button is only drawn for them.
      */
     onOpenEventReview: (() -> Unit)? = null,
-    /** The number of events awaiting review, shown as the button's badge. */
+    /**
+     * The number of events awaiting review. It is the button's badge, and the
+     * button is only drawn while it is non-zero, so an empty queue hides it.
+     */
     pendingEventCount: Int = 0,
     /**
      * Bumped by the host when the synced data changed, so the markers and the
@@ -1111,9 +1114,11 @@ fun MapScreen(
                         MaterialSymbol(glyph = "host", contentDescription = "Infra dashboard")
                     }
                 }
-                onOpenEventReview?.let { openReview ->
-                    // Shown only to event managers/admins/roots; the badge counts
-                    // the submissions waiting for review.
+                val openReview = onOpenEventReview
+                if (openReview != null && pendingEventCount > 0) {
+                    // Shown only to event managers/admins/roots, and only while
+                    // submissions are actually waiting for review; the badge
+                    // counts them.
                     BadgedBox(
                         badge = {
                             if (pendingEventCount > 0) {

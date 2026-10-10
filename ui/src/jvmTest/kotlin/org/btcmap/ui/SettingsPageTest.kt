@@ -155,8 +155,8 @@ class SettingsPageTest {
 
     @OptIn(ExperimentalTestApi::class)
     @Test
-    fun manageAreasRow_isShownToAreaAdmins() {
-        signIn(roles = listOf("area_admin"))
+    fun manageAreasRow_isShownToAreaManagers() {
+        signIn(roles = listOf("area_manager"))
         runComposeUiTest {
             setContent { SettingsPage(settings, db, TEST_SETTINGS_PAGE_LABELS, onOpenAccount = {}, onOpenColors = {}, onOpenDbStats = {}) }
             // The account row names the signed-in user once the page has read
@@ -255,8 +255,8 @@ class SettingsPageTest {
 
     @OptIn(ExperimentalTestApi::class)
     @Test
-    fun managePlaceImagesRow_isHiddenFromAreaAdminsWithoutAnAdminRole() {
-        signIn(roles = listOf("area_admin"))
+    fun managePlaceImagesRow_isHiddenFromAreaManagersWithoutAnAdminRole() {
+        signIn(roles = listOf("area_manager"))
         runComposeUiTest {
             setContent { SettingsPage(settings, db, TEST_SETTINGS_PAGE_LABELS, onOpenAccount = {}, onOpenColors = {}, onOpenDbStats = {}) }
             waitUntil(timeoutMillis = 5_000) {

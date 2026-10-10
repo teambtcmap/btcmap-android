@@ -752,7 +752,8 @@ private fun UserAdminRoute(
 /**
  * The manage-areas route: the shared [ManageAreasScreen] under the standard top
  * bar, listing every cached area. Only the settings row (itself hidden from
- * non-admins) opens it.
+ * non-area-managers) opens it. A geofenced account may only edit the areas in
+ * its geofence, so the screen is told to hide its search and list just those.
  */
 @Composable
 private fun ManageAreasRoute(
@@ -761,6 +762,13 @@ private fun ManageAreasRoute(
     onBack: () -> Unit,
     onOpenArea: (Area) -> Unit,
 ) {
+    // Read once per visit: the cached profile's geofence is a tiny preference
+    // lookup, so blocking here is cheaper than a state that would briefly render
+    // the search before the geofence arrives.
+    val geofence = remember {
+        runDbBlocking { services.db.user.select()?.geofence ?: emptyList() }
+    }
+
     ScreenPage(
         title = labels.manageAreasTitle,
         onBack = onBack,
@@ -770,6 +778,7 @@ private fun ManageAreasRoute(
             labels = labels.manageAreas,
             load = { withContext(ioDispatcher) { services.db.area.selectAll() } },
             onAreaClick = onOpenArea,
+            geofence = geofence,
         )
     }
 }

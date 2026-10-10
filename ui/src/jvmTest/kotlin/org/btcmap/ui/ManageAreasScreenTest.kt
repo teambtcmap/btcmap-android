@@ -1,8 +1,10 @@
 package org.btcmap.ui
 
 import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.onAllNodesWithContentDescription
+import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
@@ -227,6 +229,35 @@ class ManageAreasScreenTest {
             waitForIdle()
 
             assertTrue(onAllNodesWithText("No matching areas").fetchSemanticsNodes().isNotEmpty())
+        }
+    }
+
+    @OptIn(ExperimentalTestApi::class)
+    @Test
+    fun geofence_listsOnlyFencedAreasOfAnyTypeAndHidesTheSearch() {
+        runComposeUiTest {
+            setContent {
+                ManageAreasScreen(
+                    labels = labels,
+                    load = {
+                        listOf(
+                            area(1, "Fenced Community", type = "community"),
+                            area(2, "Fenced Country", type = "country"),
+                            area(3, "Other Community", type = "community"),
+                        )
+                    },
+                    geofence = listOf(1L, 2L),
+                )
+            }
+            waitForIdle()
+
+            // Both fenced areas show (a geofence can name a country), and the
+            // unfenced community is dropped.
+            assertTrue(onAllNodesWithText("Fenced Community").fetchSemanticsNodes().isNotEmpty())
+            assertTrue(onAllNodesWithText("Fenced Country").fetchSemanticsNodes().isNotEmpty())
+            assertTrue(onAllNodesWithText("Other Community").fetchSemanticsNodes().isEmpty())
+            // The search would never narrow a geofenced list, so it is hidden.
+            onAllNodesWithTag(MANAGE_AREAS_SEARCH_TAG).assertCountEquals(0)
         }
     }
 

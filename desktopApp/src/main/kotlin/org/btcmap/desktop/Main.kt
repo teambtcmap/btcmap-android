@@ -415,6 +415,10 @@ private fun runApp() = application {
                     var isAdmin by remember { mutableStateOf(false) }
                     var canManageEvents by remember { mutableStateOf(false) }
                     var pendingEventCount by remember { mutableStateOf(0) }
+                    // Bumped by a sync that reports the events (or the profile)
+                    // changed, so the pending-event count below is refetched
+                    // without re-entering the map, as Android's MapRoute does.
+                    var pendingEventRefresh by remember { mutableStateOf(0) }
                     // Bumped after a sync changes the data, so the map re-queries
                     // its features rather than leaving them stale until the next
                     // camera move, as Android's MapRoute does.
@@ -435,10 +439,12 @@ private fun runApp() = application {
                         }
                     }
 
-                    // The pending-event badge is a network read, so it is
-                    // refreshed only when the event-manager role changes rather
-                    // than on every sync state change.
-                    LaunchedEffect(canManageEvents) {
+                    // The pending-event count is a network read: refetched when
+                    // the event-manager role changes, and whenever a sync
+                    // reports the events (or the profile) changed, so a newly
+                    // submitted or reviewed event updates the button without
+                    // re-entering the map.
+                    LaunchedEffect(canManageEvents, pendingEventRefresh) {
                         pendingEventCount = if (canManageEvents) {
                             runCatching { api.getPendingEvents().size }.getOrDefault(0)
                         } else {
@@ -459,6 +465,9 @@ private fun runApp() = application {
                             syncManager.events.collect { event ->
                                 reloadKey++
                                 if (event == SyncEvent.UserChanged) userVersion++
+                                if (event == SyncEvent.EventsChanged || event == SyncEvent.UserChanged) {
+                                    pendingEventRefresh++
+                                }
                             }
                         }
                     }
@@ -963,20 +972,29 @@ private fun runApp() = application {
                             }
                         }
 
-                        Route.ManageAreas -> ScreenPage(
-                            title = LABELS.manageAreasTitle,
-                            onBack = { nav.pop() },
-                        ) {
-                            ManageAreasScreen(
-                                labels = LABELS.manageAreas,
-                                load = {
-                                    withContext(ioDispatcher) { db.area.selectAll() }
-                                },
-                                onAreaClick = { area ->
-                                    selectedAreaId = area.id
-                                    nav.push(Route.AreaAdmin)
-                                },
-                            )
+                        Route.ManageAreas -> {
+                            // A geofenced account may only edit the areas in its
+                            // geofence, so the screen hides its search and lists
+                            // just those; read once per visit.
+                            val geofence = remember {
+                                runBlocking { db.user.select()?.geofence ?: emptyList() }
+                            }
+                            ScreenPage(
+                                title = LABELS.manageAreasTitle,
+                                onBack = { nav.pop() },
+                            ) {
+                                ManageAreasScreen(
+                                    labels = LABELS.manageAreas,
+                                    load = {
+                                        withContext(ioDispatcher) { db.area.selectAll() }
+                                    },
+                                    onAreaClick = { area ->
+                                        selectedAreaId = area.id
+                                        nav.push(Route.AreaAdmin)
+                                    },
+                                    geofence = geofence,
+                                )
+                            }
                         }
 
                         Route.ManagePlaceImages -> ScreenPage(

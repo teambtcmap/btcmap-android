@@ -34,6 +34,7 @@ class UserStoreTest {
             roles = listOf("user", "admin"),
             savedPlaces = listOf(SavedItem(id = 10L, name = "Bitcoin Cafe")),
             savedAreas = listOf(SavedItem(id = 20L, name = "Grand Paris")),
+            geofence = listOf(20L),
         )
 
         db.user.insert(user)
@@ -42,6 +43,7 @@ class UserStoreTest {
         Assert.assertEquals(listOf("user", "admin"), result.roles)
         Assert.assertEquals(listOf(SavedItem(10L, "Bitcoin Cafe")), result.savedPlaces)
         Assert.assertEquals(listOf(SavedItem(20L, "Grand Paris")), result.savedAreas)
+        Assert.assertEquals(listOf(20L), result.geofence)
     }
 
     @Test
@@ -105,6 +107,7 @@ class UserStoreTest {
         roles: List<String> = emptyList(),
         savedPlaces: List<SavedItem> = emptyList(),
         savedAreas: List<SavedItem> = emptyList(),
+        geofence: List<Long> = emptyList(),
     ): User {
         return User(
             id = id,
@@ -112,6 +115,7 @@ class UserStoreTest {
             roles = roles,
             savedPlaces = savedPlaces,
             savedAreas = savedAreas,
+            geofence = geofence,
         )
     }
 }

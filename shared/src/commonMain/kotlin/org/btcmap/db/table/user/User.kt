@@ -9,4 +9,9 @@ data class User(
     val roles: List<String>,
     val savedPlaces: List<SavedItem>,
     val savedAreas: List<SavedItem>,
+    /**
+     * The area ids the account is restricted to, or empty when unrestricted.
+     * The default keeps pre-geofence cached profiles decodable.
+     */
+    val geofence: List<Long> = emptyList(),
 )
