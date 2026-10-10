@@ -7,6 +7,7 @@ import kotlinx.datetime.DateTimePeriod
 import kotlin.time.Clock
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.cio.CIO
+import io.ktor.client.request.header
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpMethod
 import io.ktor.http.headersOf
@@ -49,6 +50,25 @@ class RetryTest {
 
         Assert.assertEquals(200, response.status.value)
         Assert.assertEquals(2, server().requestCount)
+    }
+
+    @Test
+    fun preservesConfiguredHeadersOnRetry() = runBlocking<Unit> {
+        server().enqueue(retryableResponse(retryAfter = "0"))
+        server().enqueue(MockResponse.Builder().body("ok").build())
+
+        client().executeIdempotent(HttpMethod.Get, url("/x")) {
+            header(HttpHeaders.Authorization, "Bearer token-1")
+        }
+
+        Assert.assertEquals(
+            "Bearer token-1",
+            server().takeRequest().headers["Authorization"],
+        )
+        Assert.assertEquals(
+            "Bearer token-1",
+            server().takeRequest().headers["Authorization"],
+        )
     }
 
     @Test

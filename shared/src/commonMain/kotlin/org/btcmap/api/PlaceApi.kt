@@ -70,7 +70,7 @@ suspend fun Api.getPlaces(updatedSince: Instant?, limit: Long): List<GetPlacesIt
         addUpdatedSince(updatedSince)
     }
 
-    return call(HttpMethod.Get, url, withoutAuth = true) { it.toGetPlacesItems() }
+    return call(HttpMethod.Get, url) { it.toGetPlacesItems() }
 }
 
 suspend fun Api.getPlaceCoordinates(id: Long): PlaceCoordinates {
@@ -78,7 +78,7 @@ suspend fun Api.getPlaceCoordinates(id: Long): PlaceCoordinates {
         parameters.append("fields", "lat,lon")
     }
 
-    return call(HttpMethod.Get, url, withoutAuth = true) { body ->
+    return call(HttpMethod.Get, url) { body ->
         val parsed = body.toJsonObject()
         PlaceCoordinates(
             lat = parsed.double("lat"),
@@ -99,7 +99,7 @@ suspend fun Api.getPlaceOsmId(id: Long): String? {
         parameters.append("fields", "osm_id")
     }
 
-    return call(HttpMethod.Get, url, withoutAuth = true) { body ->
+    return call(HttpMethod.Get, url) { body ->
         body.toJsonObject().nonBlankStringOrNull("osm_id")
     }
 }

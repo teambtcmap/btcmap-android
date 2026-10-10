@@ -86,13 +86,13 @@ suspend fun Api.getEvents(updatedSince: Instant, limit: Long): List<GetEventsDel
         parameters.append("include_deleted", "true")
     }
 
-    return call(HttpMethod.Get, url, withoutAuth = true) { it.toGetEventsDeltaItems() }
+    return call(HttpMethod.Get, url) { it.toGetEventsDeltaItems() }
 }
 
 suspend fun Api.getEvent(id: Long): GetEventsItem {
     val url = buildUrl("v4", "events", "$id")
 
-    return call(HttpMethod.Get, url, withoutAuth = true) { body ->
+    return call(HttpMethod.Get, url) { body ->
         body.toJsonObject().toGetEventsItem()
     }
 }

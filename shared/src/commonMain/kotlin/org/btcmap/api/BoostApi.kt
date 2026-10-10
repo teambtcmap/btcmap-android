@@ -19,7 +19,7 @@ data class PlaceBoostResponse(
 suspend fun Api.getPlaceBoostQuote(): PlaceBoostQuoteResponse {
     val url = buildUrl("v4", "place-boosts", "quote")
 
-    return call(HttpMethod.Get, url, withoutAuth = true) { body ->
+    return call(HttpMethod.Get, url) { body ->
         val parsed = body.toJsonObject()
 
         PlaceBoostQuoteResponse(
@@ -38,7 +38,7 @@ suspend fun Api.boostPlace(placeId: Long, days: Long): PlaceBoostResponse {
         put("days", days)
     }
 
-    return call(HttpMethod.Post, url, withoutAuth = true, body = req) { body ->
+    return call(HttpMethod.Post, url, body = req) { body ->
         val parsed = body.toJsonObject()
 
         PlaceBoostResponse(

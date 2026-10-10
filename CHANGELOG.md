@@ -6,6 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+- Send the signed-in session token with every API request, not just the ones that require it, so the server can prioritize requests from logged-in users; signing up still sends no token, and sign-in keeps carrying the password
 - Keep the desktop map composed across navigation, so returning to it from the settings or any other screen is instant instead of rebuilding the MapLibre map and showing a blank map for a few seconds
 - Right-click the map on the desktop to add a place, event or note: the same choices the search field's action offers open at the clicked point, so the chosen form is positioned there instead of at the map centre
 - Return straight to the map after adding a note — no "note added" confirmation — and switch to the notes filter so the new note is visible

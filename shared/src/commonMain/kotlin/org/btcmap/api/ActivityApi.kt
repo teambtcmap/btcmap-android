@@ -48,7 +48,7 @@ suspend fun Api.getActivity(
         parameters.append("days", "$days")
     }
 
-    return call(HttpMethod.Get, url, withoutAuth = true) { it.toActivityFeedItems() }
+    return call(HttpMethod.Get, url) { it.toActivityFeedItems() }
 }
 
 private fun String.toActivityFeedItems(): List<ActivityFeedItem> {

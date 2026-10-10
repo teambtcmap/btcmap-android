@@ -27,7 +27,7 @@ data class PlaceImage(
 suspend fun Api.getPlaceImages(placeId: Long): List<PlaceImage> {
     val url = buildUrl("v4", "places", "$placeId", "images")
 
-    return call(HttpMethod.Get, url, withoutAuth = true) { body ->
+    return call(HttpMethod.Get, url) { body ->
         body.toJsonArray().map { it.toPlaceImage() }
     }
 }

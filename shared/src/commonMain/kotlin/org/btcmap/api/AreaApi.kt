@@ -66,7 +66,7 @@ suspend fun Api.getAreas(updatedSince: Instant, limit: Long): List<GetAreasDelta
         parameters.append("include_deleted", "true")
     }
 
-    return call(HttpMethod.Get, url, withoutAuth = true) { it.toGetAreasDeltaItems() }
+    return call(HttpMethod.Get, url) { it.toGetAreasDeltaItems() }
 }
 
 suspend fun Api.getArea(
@@ -77,7 +77,7 @@ suspend fun Api.getArea(
         if (lang.isNotBlank()) parameters.append("lang", lang)
     }
 
-    return call(HttpMethod.Get, url, withoutAuth = true) { body ->
+    return call(HttpMethod.Get, url) { body ->
         val parsed = body.toJsonObject()
         GetAreaItem(
             id = parsed.long("id"),

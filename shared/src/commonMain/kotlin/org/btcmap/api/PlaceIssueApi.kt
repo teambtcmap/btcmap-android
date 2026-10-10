@@ -22,7 +22,7 @@ suspend fun Api.getPlaceIssues(areaId: Long, limit: Long = 50): GetPlaceIssuesRe
         parameters.append("limit", limit.toString())
     }
 
-    return call(HttpMethod.Get, url, withoutAuth = true) { it.toGetPlaceIssuesResponse() }
+    return call(HttpMethod.Get, url) { it.toGetPlaceIssuesResponse() }
 }
 
 private fun String.toGetPlaceIssuesResponse(): GetPlaceIssuesResponse {

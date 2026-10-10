@@ -18,7 +18,7 @@ val Invoice.paid: Boolean
 suspend fun Api.getInvoice(id: String): Invoice {
     val url = buildUrl("v4", "invoices", id)
 
-    return call(HttpMethod.Get, url, withoutAuth = true) { body ->
+    return call(HttpMethod.Get, url) { body ->
         val parsed = body.toJsonObject()
 
         Invoice(

@@ -98,8 +98,10 @@ class Api(
      *
      * [authorization] is an explicit `Authorization` header value (used by
      * sign-in, which carries the password as a bearer token). Otherwise the
-     * stored [token] is attached for same-origin requests unless [withoutAuth]
-     * is set. [parse] receives the response body as text.
+     * stored [token] is attached to every same-origin request, so the server can
+     * prioritize requests from signed-in users. Account creation is the only
+     * request that opts out with [withoutAuth]: it runs before a session exists.
+     * [parse] receives the response body as text.
      */
     internal suspend fun <T> call(
         method: HttpMethod,
@@ -166,9 +168,10 @@ class Api(
     }
 
     /**
-     * The token to attach to a request to [url], or null when it is a public
-     * request, the token is blank, or the host is not the configured API. A
-     * malformed stored API URL is treated like a foreign host.
+     * The token to attach to a request to [url], or null when the request opts
+     * out ([withoutAuth], account creation), the token is blank, or the host is
+     * not the configured API. A malformed stored API URL is treated like a
+     * foreign host.
      */
     private fun attachedToken(url: Url, authorization: String?, withoutAuth: Boolean): String? {
         authorization?.removePrefix("Bearer ")?.takeIf { it.isNotBlank() }?.let { return it }

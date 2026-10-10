@@ -33,13 +33,13 @@ suspend fun Api.getComments(updatedSince: Instant?, limit: Long): List<GetCommen
         addUpdatedSince(updatedSince)
     }
 
-    return call(HttpMethod.Get, url, withoutAuth = true) { it.toGetCommentsItems() }
+    return call(HttpMethod.Get, url) { it.toGetCommentsItems() }
 }
 
 suspend fun Api.getCommentQuote(): CommentQuoteResponse {
     val url = buildUrl("v4", "place-comments", "quote")
 
-    return call(HttpMethod.Get, url, withoutAuth = true) { body ->
+    return call(HttpMethod.Get, url) { body ->
         val parsed = body.toJsonObject()
 
         CommentQuoteResponse(
@@ -56,7 +56,7 @@ suspend fun Api.addComment(placeId: Long, comment: String): AddCommentResponse {
         put("comment", comment)
     }
 
-    return call(HttpMethod.Post, url, withoutAuth = true, body = req) { it.toAddCommentResponse() }
+    return call(HttpMethod.Post, url, body = req) { it.toAddCommentResponse() }
 }
 
 private fun String.toGetCommentsItems(): List<GetCommentsItem> {
