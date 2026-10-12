@@ -9,6 +9,9 @@ pluginManagement {
         }
         mavenCentral()
         gradlePluginPortal()
+        // The Conveyor packaging plugin. It is not on the Gradle Plugin Portal's
+        // own repository, only its marker is; the plugin itself lives here.
+        maven("https://maven.hq.hydraulic.software")
     }
 }
 

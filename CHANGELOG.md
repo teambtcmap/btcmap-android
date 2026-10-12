@@ -6,6 +6,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+- Ship the desktop app for Windows and Apple Silicon macOS: the deploy commands now build a Windows MSIX (with an installer `.exe` and a portable `.zip`) and a signed macOS `.app` archive with an update feed, both from this Linux machine, alongside the existing Linux AppImage. The Windows packages install but do not start yet, and the macOS ones are untested: the packaged launcher hides the Windows system directories from MapLibre's native runtime, which is left to an upstream fix. The macOS build needs no extra tooling, and until the project has Windows and Apple certificates the packages are self-signed, so the Windows installer asks the user to trust the app's certificate first and macOS needs the usual "Open anyway" on first launch
+- Move every desktop download off the Android paths, from `cdn.static.btcmap.org/android/appimage/` to `cdn.static.btcmap.org/desktop/<beta|release>/`, so the AppImage now lives beside the Windows and macOS packages and each channel is a single directory
+
 - Add icons to the profile screen: a leading icon on its username/password sections, on the saved-places, saved-areas, my-events, my-notes and uploaded-images buttons, and on the log-out button
 - Move the saved places and saved areas lists off the profile page onto their own sub-pages, opened from buttons like the existing my-events, my-notes and uploaded-images ones, so the profile stays short; each list is capped at a readable width and centred on tablets and wide desktop windows
 - Fetch the infrastructure dashboard from `GET /v4/dashboard/infra` instead of the `dashboard` RPC method, and add a "Top users (24h)" card listing the most active authenticated users

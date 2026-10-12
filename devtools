@@ -12,8 +12,8 @@ Usage:
   ./devtools app install        Install debug build
   ./devtools app run            Install and run debug build
   ./devtools app uninstall      Uninstall the app
-  ./devtools app deploy-beta    Build and deploy beta APK and desktop AppImage
-  ./devtools app deploy-release Build and deploy release APK
+  ./devtools app deploy-beta    Build and deploy beta APK, desktop packages and manifest
+  ./devtools app deploy-release Build and deploy release APK and desktop packages
   ./devtools bundle data        Download latest places, areas, comments and events snapshots
   ./devtools bundle map-styles  Bundle MapLibre styles, sprites and glyphs (--force re-downloads)
   ./devtools bundle icons       Extract the icon-name list from the bundled font
@@ -44,8 +44,10 @@ Commands:
   install        Install debug build
   run            Install and run debug build
   uninstall      Uninstall the app
-  deploy-beta    Build and deploy beta APK, desktop AppImage and manifest
-  deploy-release Build and deploy release APK
+  deploy-beta    Build and deploy the beta APK, the Windows/macOS packages, the
+                 Linux AppImage and the beta manifest
+  deploy-release Build and deploy the release APK and the Windows/macOS/Linux
+                 desktop packages
 EOF
 }
 
@@ -347,6 +349,145 @@ DESKTOP
 
 # END appimage section
 
+# START conveyor section
+
+# Every desktop artifact lives under one directory on the CDN, one per channel:
+# the Windows and macOS packages Conveyor builds and the Linux AppImage.
+desktop_cdn_base="https://cdn.static.btcmap.org/desktop"
+desktop_dest="btcmap-api:/srv/http/static.btcmap.org/desktop"
+
+# Conveyor builds the Windows (MSIX, plus an installer .exe and a portable .zip)
+# and macOS (a signed, Sparkle-updating .app archive) packages from this Linux
+# machine. That is the whole reason it is here: jpackage, which the Compose
+# plugin wraps, cannot cross-compile and silently skips the foreign-OS formats,
+# so without Conveyor the desktop app could only ever ship as a Linux AppImage.
+#
+# It is a ~111 MB tool, cached under ${XDG_CACHE_HOME}/btcmap/conveyor on first
+# use. Point CONVEYOR at a binary to use an install of your own instead, or
+# CONVEYOR_URL at a different download.
+conveyor_version_default="22.3"
+conveyor_url_default="https://downloads.hydraulic.dev/conveyor/conveyor-${conveyor_version_default}-linux-amd64.tar.gz"
+
+# Downloads and unpacks Conveyor into a cache on first use, then prints the path
+# to its launcher.
+prepare_conveyor() {
+  if [ -n "${CONVEYOR:-}" ]; then
+    printf '%s' "$CONVEYOR"
+    return 0
+  fi
+
+  local dir="${XDG_CACHE_HOME:-$HOME/.cache}/btcmap/conveyor"
+  local bin="$dir/conveyor-${conveyor_version_default}/bin/conveyor"
+  if [ -x "$bin" ]; then
+    printf '%s' "$bin"
+    return 0
+  fi
+
+  local url="${CONVEYOR_URL:-$conveyor_url_default}"
+  echo "Downloading Conveyor from $url..." >&2
+  mkdir -p "$dir"
+  local tarball="$dir/conveyor.tar.gz"
+  curl -fsSL -o "$tarball" "$url"
+  tar xzf "$tarball" -C "$dir"
+  rm -f "$tarball"
+  if [ ! -x "$bin" ]; then
+    err "could not unpack Conveyor"
+    return 1
+  fi
+  printf '%s' "$bin"
+}
+
+# The Conveyor signing root key: the one key every Windows and macOS package
+# key, update feed and package identity is derived from. It is signing material,
+# so it is kept beside the Android keystore and outside the repository, and
+# local.properties points at it, exactly as it points at the keystore itself.
+# Losing or rotating it breaks updates for every copy already installed and
+# looks like a different app to Windows, so it is never created anywhere else.
+conveyor_signing_key() {
+  sed -n 's/^conveyor\.signing\.key=//p' local.properties 2>/dev/null | head -n1
+}
+
+# Uses the root key at the configured path, generating it there on first use. If
+# it has a passphrase (conveyor keys passphrase), export it as
+# CONVEYOR_PASSPHRASE so the builds can unlock it.
+ensure_conveyor_key() {
+  local conveyor="$1"
+  local key
+  key="$(conveyor_signing_key)"
+  if [ -z "$key" ]; then
+    err "no 'conveyor.signing.key' in local.properties; refusing to deploy."
+    err "It must point at the Conveyor signing root key file, which belongs beside the Android keystore, outside the repository."
+    return 1
+  fi
+  if [ "$(basename "$key")" != "defaults.conf" ]; then
+    err "conveyor.signing.key must name the file defaults.conf, the name Conveyor writes the root key to (got $(basename "$key"))."
+    return 1
+  fi
+  if [ -f "$key" ]; then
+    return 0
+  fi
+
+  echo "Generating the Conveyor signing root key (once) at $key..." >&2
+  mkdir -p "$(dirname "$key")"
+  "$conveyor" --agree-to-license=1 keys generate --no-passphrase -o "$(dirname "$key")"
+  cat >&2 <<EOF
+
+Back this file up now: $key
+Every Windows and macOS package key, update feed and package identity comes from
+it. Without it, every copy already installed can never be updated again.
+EOF
+}
+
+# Builds the Windows and macOS packages and their update site into $3 for the
+# channel in $2 (beta or release), using the Conveyor in $1. The channel is the
+# last path segment of the update URL baked into the packages, so installed
+# copies check only their own channel; changing it later strands the copies
+# already out there.
+build_desktop_packages() {
+  local conveyor="$1"
+  local channel="$2"
+  local out="$3"
+
+  rm -rf "$out"
+
+  # A debuggable build when asked for: the same packages, but with the JVM
+  # attach mechanism re-enabled (a signed launcher disables it, which is why a
+  # running Windows build cannot be inspected), a console, and a JDWP port. See
+  # conveyor-debug.conf. Traffic and the published channel are unchanged.
+  local conf="desktopApp/conveyor.conf"
+  if [ -n "${CONVEYOR_DEBUG:-}" ]; then
+    conf="desktopApp/conveyor-debug.conf"
+    echo "Building a DEBUG build of the desktop packages (attach enabled, console, JDWP on 127.0.0.1:5005)." >&2
+  fi
+
+  local args=("--agree-to-license=1")
+  # Conveyor will not prompt for a passphrase without a terminal, so an
+  # encrypted root key has to be unlocked through the environment.
+  if [ -n "${CONVEYOR_PASSPHRASE:-}" ]; then
+    args+=("--passphrase=env:CONVEYOR_PASSPHRASE")
+  fi
+  args+=("-f" "$conf" "-Kapp.site.base-url=$desktop_cdn_base/$channel")
+
+  echo "Building the Windows and macOS packages for the $channel channel..."
+  "$conveyor" "${args[@]}" make site --output-dir "$out"
+}
+
+# Purges every file the packaged site contains from the CDN. The names embed the
+# version and are stable only across a rebuild of the same version, so they are
+# read from the output directory rather than listed by hand.
+purge_conveyor_site() {
+  local channel="$1"
+  local dir="$2"
+  local urls=()
+  local file
+  while IFS= read -r file; do
+    urls+=("$desktop_cdn_base/$channel/${file#"$dir"/}")
+  done < <(find "$dir" -type f | sort)
+  purge_cdn "${urls[@]}"
+}
+
+# END conveyor section
+
 # START app section
 
 cmd_app_install() {
@@ -426,19 +567,31 @@ cmd_app_uninstall() {
 cmd_app_deploy_beta() {
   assert_bunny_api_key
 
-  ./gradlew assembleBeta :desktopApp:createDistributable "$@"
+  # Resolve the signing key before Gradle runs: the generated Conveyor config
+  # includes it, so it has to exist by the time writeConveyorConfig writes that.
+  local conveyor
+  conveyor="$(prepare_conveyor)"
+  ensure_conveyor_key "$conveyor"
+
+  # The APKs need the beta build type; the desktop app is a single build every
+  # channel shares, so its packages come from the ordinary jar. The generated
+  # Conveyor config has to be written before Conveyor reads it.
+  ./gradlew assembleBeta :desktopApp:createDistributable \
+    :shared:jvmJar :ui:jvmJar :desktopApp:jar :desktopApp:writeConveyorConfig "$@"
 
   local apk_dir="app/build/outputs/apk/beta"
   local dest="btcmap-api:/srv/http/static.btcmap.org/android/apk/"
   local manifest_dest="btcmap-api:/srv/http/static.btcmap.org/android/latest-app-beta-ver.json"
   local appimage_out="desktopApp/build/compose/appimage/BTC-Map-x86_64.AppImage"
-  local appimage_dest="btcmap-api:/srv/http/static.btcmap.org/android/appimage/beta-x86_64.AppImage"
+  local packages_out="desktopApp/build/conveyor/beta"
+  local beta_dest="$desktop_dest/beta/"
   local build_config="app/build/generated/source/buildConfig/beta/org/btcmap/BuildConfig.java"
 
   assert_apk_signed "$apk_dir/app-arm64-v8a-beta.apk"
   assert_apk_signed "$apk_dir/app-universal-beta.apk"
 
   build_desktop_appimage "$appimage_out"
+  build_desktop_packages "$conveyor" beta "$packages_out"
 
   local version_code version_name
   version_code="$(sed -n 's/.*VERSION_CODE = \([0-9]*\);.*/\1/p' "$build_config" | head -n1)"
@@ -461,27 +614,43 @@ JSON
 
   rsync -avz --progress "$apk_dir"/app-arm64-v8a-beta.apk "$dest/beta.apk"
   rsync -avz --progress "$apk_dir"/app-universal-beta.apk "$dest/beta-universal.apk"
-  rsync -avz --progress --mkpath --chmod=F755 "$appimage_out" "$appimage_dest"
+  # No --delete on the site: Conveyor keeps each version's package online so it
+  # can generate deltas from it for the next one, so the older files are meant to
+  # stay. Its own versioned file names never collide.
+  rsync -avz --progress --mkpath --chmod=D755,F644 "$packages_out"/ "$beta_dest"
+  rsync -avz --progress --mkpath --chmod=F755 "$appimage_out" "$beta_dest/BTC-Map-x86_64.AppImage"
   rsync -avz --progress --chmod=F644 "$manifest" "$manifest_dest"
   rm -f "$manifest"
 
-  # The APK, AppImage and manifest are overwritten in place, so the pull zone
+  # The APK, the AppImage and the manifest are overwritten in place, as is the
+  # part of the site whose names do not carry a version (the update metadata,
+  # the download page, the installer and the update checker), so the pull zone
   # would keep serving its cached copy for the full max-age window unless we
   # purge it.
   purge_cdn \
     "https://cdn.static.btcmap.org/android/apk/beta.apk" \
     "https://cdn.static.btcmap.org/android/apk/beta-universal.apk" \
-    "https://cdn.static.btcmap.org/android/appimage/beta-x86_64.AppImage" \
+    "$desktop_cdn_base/beta/BTC-Map-x86_64.AppImage" \
     "https://cdn.static.btcmap.org/android/latest-app-beta-ver.json"
+  purge_conveyor_site beta "$packages_out"
 }
 
 cmd_app_deploy_release() {
   assert_bunny_api_key
 
-  ./gradlew assembleRelease "$@"
+  # Resolve the signing key before Gradle runs: the generated Conveyor config
+  # includes it, so it has to exist by the time writeConveyorConfig writes that.
+  local conveyor
+  conveyor="$(prepare_conveyor)"
+  ensure_conveyor_key "$conveyor"
+
+  ./gradlew assembleRelease :desktopApp:createDistributable \
+    :shared:jvmJar :ui:jvmJar :desktopApp:jar :desktopApp:writeConveyorConfig "$@"
 
   local apk_dir="app/build/outputs/apk/release"
   local dest="btcmap-api:/srv/http/static.btcmap.org/android/apk/"
+  local packages_out="desktopApp/build/conveyor/release"
+  local release_dest="$desktop_dest/release/"
   local build_config="app/build/generated/source/buildConfig/release/org/btcmap/BuildConfig.java"
 
   assert_apk_signed "$apk_dir/app-arm64-v8a-release.apk"
@@ -495,17 +664,27 @@ cmd_app_deploy_release() {
   fi
 
   local apk_base="btcmap-android-${version_name}"
+  # The release AppImage is named after the version, like the APKs, so each
+  # release can be told apart; the beta one keeps a stable name instead.
+  local appimage_out="desktopApp/build/compose/appimage/BTC-Map-${version_name}-x86_64.AppImage"
+
+  build_desktop_appimage "$appimage_out"
+  build_desktop_packages "$conveyor" release "$packages_out"
 
   rsync -avz --progress "$apk_dir"/app-arm64-v8a-release.apk "$dest/${apk_base}.apk"
   rsync -avz --progress "$apk_dir"/app-universal-release.apk "$dest/${apk_base}-universal.apk"
+  rsync -avz --progress --mkpath --chmod=D755,F644 "$packages_out"/ "$release_dest"
+  rsync -avz --progress --mkpath --chmod=F755 "$appimage_out" "$release_dest"
 
-  # A rebuilt APK can be published under a version name that is already on the
-  # CDN (for example when re-releasing a fix for the same version), so the pull
-  # zone would keep serving the previous bytes for the full max-age window
-  # unless we purge it.
+  # A rebuilt APK, AppImage or site can be published under a name that is
+  # already on the CDN (for example when re-releasing a fix for the same
+  # version), so the pull zone would keep serving the previous bytes for the
+  # full max-age window unless we purge it.
   purge_cdn \
     "https://cdn.static.btcmap.org/android/apk/${apk_base}.apk" \
-    "https://cdn.static.btcmap.org/android/apk/${apk_base}-universal.apk"
+    "https://cdn.static.btcmap.org/android/apk/${apk_base}-universal.apk" \
+    "$desktop_cdn_base/release/$(basename "$appimage_out")"
+  purge_conveyor_site release "$packages_out"
 }
 
 cmd_app() {

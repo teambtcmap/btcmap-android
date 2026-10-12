@@ -70,10 +70,12 @@ kotlin {
             runtimeOnly(libs.maplibre.compose.runtime.opengl.android)
         }
 
-        jvmMain.dependencies {
-            implementation(compose.desktop.currentOs)
-            runtimeOnly(libs.maplibre.compose.runtime.opengl.linux.x64)
-        }
+        // `jvmMain` deliberately declares no Compose or MapLibre native runtime.
+        // `:ui` is a library: a consumer packaging it for another platform would
+        // inherit whatever host-native jars are on its runtime classpath, and the
+        // Conveyor plugin reads exactly that classpath as the set of inputs every
+        // package shares. The desktop app adds the right natives per platform,
+        // and the tests below add this host's.
 
         jvmCommonMain.dependencies {
             // Pinyin for the basemap POI sheet's Chinese names.
@@ -87,6 +89,10 @@ kotlin {
             implementation(libs.androidx.sqlite.bundled.jvm)
             // `runComposeUiTest`, for the tests that drive a composable.
             implementation(compose.uiTest)
+            // The tests render on this machine only, so they take this machine's
+            // native runtimes (the library itself deliberately carries none).
+            implementation(compose.desktop.currentOs)
+            implementation(libs.maplibre.compose.runtime.opengl.linux.x64)
         }
     }
 }

@@ -80,6 +80,12 @@ zxing = "3.5.4"
 # https://github.com/stuxuhai/jpinyin
 jpinyin = "1.1.8"
 
+# Cross-platform desktop packaging: builds the Windows and macOS artifacts from
+# this Linux machine, which jpackage cannot do (it has no cross-compilation). It
+# is free for OSI-approved licences, which this project's AGPL-3.0 is.
+# https://conveyor.hydraulic.dev/
+conveyor = "2.0"
+
 # Image loading
 # https://github.com/coil-kt/coil/releases
 coil = "3.6.3"
@@ -121,6 +127,11 @@ material = { group = "com.google.android.material", name = "material", version.r
 maplibre-compose = { module = "org.maplibre.compose:maplibre-compose", version.ref = "maplibre-compose" }
 maplibre-compose-runtime-opengl-android = { module = "org.maplibre.compose:maplibre-compose-runtime-opengl-android", version.ref = "maplibre-compose" }
 maplibre-compose-runtime-opengl-linux-x64 = { module = "org.maplibre.compose:maplibre-compose-runtime-opengl-linux-x64", version.ref = "maplibre-compose" }
+# The other desktop platforms the cross-built packages need. Note there is no
+# macOS x64 runtime: MapLibre Compose 0.20.0 publishes only arm64 natives for
+# macOS, so Intel Macs cannot be supported.
+maplibre-compose-runtime-opengl-windows-x64 = { module = "org.maplibre.compose:maplibre-compose-runtime-opengl-windows-x64", version.ref = "maplibre-compose" }
+maplibre-compose-runtime-opengl-macos-arm64 = { module = "org.maplibre.compose:maplibre-compose-runtime-opengl-macos-arm64", version.ref = "maplibre-compose" }
 zxing-core = { module = "com.google.zxing:core", version.ref = "zxing" }
 jpinyin = { module = "com.github.stuxuhai:jpinyin", version.ref = "jpinyin" }
 coil = { group = "io.coil-kt.coil3", name = "coil", version.ref = "coil" }
@@ -152,3 +163,4 @@ kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref 
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 jetbrains-compose = { id = "org.jetbrains.compose", version.ref = "compose-plugin" }
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+conveyor = { id = "dev.hydraulic.conveyor", version.ref = "conveyor" }
