@@ -15,6 +15,9 @@ signing.properties
 # Build output directory
 build/
 
+# Release binaries staged by ./devtools app prepare-release
+/release/
+
 # Gradle cache
 .gradle
 

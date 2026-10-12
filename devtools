@@ -9,8 +9,8 @@ devtools — manage the BTC Map Android dev environment.
 Usage:
   ./devtools emulator start     Boot the AVD asynchronously
   ./devtools app run            Run the app (desktop by default; --android for the emulator)
-  ./devtools app deploy-beta    Build and deploy beta APK, desktop packages and manifest
-  ./devtools app deploy-release Build and deploy release APK and desktop packages
+  ./devtools app deploy-beta     Build and deploy beta packages for the named platforms
+  ./devtools app prepare-release Build the release binaries for every supported platform
   ./devtools bundle data        Download latest places, areas, comments and events snapshots
   ./devtools bundle map-styles  Bundle MapLibre styles, sprites and glyphs (--force re-downloads)
   ./devtools bundle icons       Extract the icon-name list from the bundled font
@@ -39,10 +39,12 @@ Usage: ./devtools app <command>
 Commands:
   run            Run the app. Runs the desktop app by default, or the Android
                  build on the emulator with --android.
-  deploy-beta    Build and deploy the beta APK, the Windows/macOS packages, the
-                 Linux AppImage and the beta manifest
-  deploy-release Build and deploy the release APK and the Windows/macOS/Linux
-                 desktop packages
+  deploy-beta    Build and deploy beta packages for the named platforms:
+                 --android (the APKs and update manifest), --linux (the AppImage)
+                 and --windows / --macos (the Conveyor packages). At least one
+                 platform is required.
+  prepare-release Build the release binaries for every supported platform and
+                 stage them in the repository's release/ directory
 EOF
 }
 
@@ -447,14 +449,17 @@ EOF
 }
 
 # Builds the Windows and macOS packages and their update site into $3 for the
-# channel in $2 (beta or release), using the Conveyor in $1. The channel is the
-# last path segment of the update URL baked into the packages, so installed
+# channel in $2 (beta or release), using the Conveyor in $1. $4 optionally
+# narrows the build to a subset of the machines, as a HOCON list (e.g.
+# [windows.amd64]); empty builds every machine the config names. The channel is
+# the last path segment of the update URL baked into the packages, so installed
 # copies check only their own channel; changing it later strands the copies
 # already out there.
 build_desktop_packages() {
   local conveyor="$1"
   local channel="$2"
   local out="$3"
+  local machines="${4:-}"
 
   rm -rf "$out"
 
@@ -475,8 +480,11 @@ build_desktop_packages() {
     args+=("--passphrase=env:CONVEYOR_PASSPHRASE")
   fi
   args+=("-f" "$conf" "-Kapp.site.base-url=$desktop_cdn_base/$channel")
+  if [ -n "$machines" ]; then
+    args+=("-Kapp.machines=$machines")
+  fi
 
-  echo "Building the Windows and macOS packages for the $channel channel..."
+  echo "Building the desktop packages for the $channel channel..."
   "$conveyor" "${args[@]}" make site --output-dir "$out"
 }
 
@@ -570,93 +578,173 @@ cmd_app_run() {
   esac
 }
 
+# The platforms `deploy-beta` can publish, each selectable on its own: the
+# Android APKs and update manifest (--android), the Linux AppImage (--linux) and
+# the packages Conveyor builds for Windows (--windows) and Apple Silicon macOS
+# (--macos). At least one has to be named; naming several narrows neither the
+# build nor the upload, it just does each.
+deploy_android=""
+deploy_linux=""
+deploy_windows=""
+deploy_macos=""
+
+parse_deploy_platforms() {
+  deploy_android=""
+  deploy_linux=""
+  deploy_windows=""
+  deploy_macos=""
+  local arg
+  for arg in "$@"; do
+    case "$arg" in
+      --android) deploy_android=1 ;;
+      --linux) deploy_linux=1 ;;
+      --windows) deploy_windows=1 ;;
+      --macos) deploy_macos=1 ;;
+      help|-h|--help) print_usage_app; return 1 ;;
+      *) err "Unknown deploy-beta parameter: $arg"; print_usage_app; return 1 ;;
+    esac
+  done
+  if [ -z "$deploy_android$deploy_linux$deploy_windows$deploy_macos" ]; then
+    err "deploy-beta needs at least one platform: --android, --linux, --windows or --macos."
+    print_usage_app
+    return 1
+  fi
+}
+
 cmd_app_deploy_beta() {
+  parse_deploy_platforms "$@" || return 1
   assert_bunny_api_key
 
-  # Resolve the signing key before Gradle runs: the generated Conveyor config
-  # includes it, so it has to exist by the time writeConveyorConfig writes that.
-  local conveyor
-  conveyor="$(prepare_conveyor)"
-  ensure_conveyor_key "$conveyor"
+  # Windows and macOS are one Conveyor build, so either flag means that build.
+  local desktop=""
+  if [ -n "$deploy_windows$deploy_macos" ]; then
+    desktop=1
+  fi
 
-  # The APKs need the beta build type; the desktop app is a single build every
-  # channel shares, so its packages come from the ordinary jar. The generated
-  # Conveyor config has to be written before Conveyor reads it.
-  ./gradlew assembleBeta :desktopApp:createDistributable \
-    :shared:jvmJar :ui:jvmJar :desktopApp:jar :desktopApp:writeConveyorConfig "$@"
+  # The Conveyor signing root key has to exist before Gradle runs: the generated
+  # config includes it, so writeConveyorConfig embeds it.
+  local conveyor=""
+  if [ -n "$desktop" ]; then
+    conveyor="$(prepare_conveyor)"
+    ensure_conveyor_key "$conveyor"
+  fi
 
-  local apk_dir="app/build/outputs/apk/beta"
-  local dest="btcmap-api:/srv/http/static.btcmap.org/android/apk/"
-  local manifest_dest="btcmap-api:/srv/http/static.btcmap.org/android/latest-app-beta-ver.json"
+  # Assemble only what the selected platforms need. The APKs need the beta build
+  # type; the Linux AppImage comes from the jpackage app image; the Windows and
+  # macOS packages share the ordinary jars and the generated Conveyor config.
+  local gradle_tasks=()
+  if [ -n "$deploy_android" ]; then
+    gradle_tasks+=(assembleBeta)
+  fi
+  if [ -n "$deploy_linux" ]; then
+    gradle_tasks+=(:desktopApp:createDistributable)
+  fi
+  if [ -n "$desktop" ]; then
+    gradle_tasks+=(:shared:jvmJar :ui:jvmJar :desktopApp:jar :desktopApp:writeConveyorConfig)
+  fi
+
+  echo "Assembling: ${gradle_tasks[*]}"
+  ./gradlew "${gradle_tasks[@]}"
+
   local appimage_out="desktopApp/build/compose/appimage/BTC-Map-x86_64.AppImage"
   local packages_out="desktopApp/build/conveyor/beta"
   local beta_dest="$desktop_dest/beta/"
-  local build_config="app/build/generated/source/buildConfig/beta/org/btcmap/BuildConfig.java"
 
-  assert_apk_signed "$apk_dir/app-arm64-v8a-beta.apk"
-  assert_apk_signed "$apk_dir/app-universal-beta.apk"
+  if [ -n "$deploy_android" ]; then
+    local apk_dir="app/build/outputs/apk/beta"
+    local dest="btcmap-api:/srv/http/static.btcmap.org/android/apk/"
+    local manifest_dest="btcmap-api:/srv/http/static.btcmap.org/android/latest-app-beta-ver.json"
+    local build_config="app/build/generated/source/buildConfig/beta/org/btcmap/BuildConfig.java"
 
-  build_desktop_appimage "$appimage_out"
-  build_desktop_packages "$conveyor" beta "$packages_out"
+    assert_apk_signed "$apk_dir/app-arm64-v8a-beta.apk"
+    assert_apk_signed "$apk_dir/app-universal-beta.apk"
 
-  local version_code version_name
-  version_code="$(sed -n 's/.*VERSION_CODE = \([0-9]*\);.*/\1/p' "$build_config" | head -n1)"
-  version_name="$(sed -n 's/.*VERSION_NAME = "\(.*\)";.*/\1/p' "$build_config" | head -n1)"
-  if [ -z "$version_code" ] || [ -z "$version_name" ]; then
-    echo "Error: could not read version info from $build_config" >&2
-    return 1
-  fi
+    local version_code version_name
+    version_code="$(sed -n 's/.*VERSION_CODE = \([0-9]*\);.*/\1/p' "$build_config" | head -n1)"
+    version_name="$(sed -n 's/.*VERSION_NAME = "\(.*\)";.*/\1/p' "$build_config" | head -n1)"
+    if [ -z "$version_code" ] || [ -z "$version_name" ]; then
+      echo "Error: could not read version info from $build_config" >&2
+      return 1
+    fi
 
-  local manifest
-  manifest="$(mktemp)"
-  cat > "$manifest" <<JSON
+    local manifest
+    manifest="$(mktemp)"
+    cat > "$manifest" <<JSON
 {
   "code": $version_code,
   "name": "$version_name",
   "url": "https://cdn.static.btcmap.org/android/apk/beta.apk"
 }
 JSON
-  chmod 644 "$manifest"
+    chmod 644 "$manifest"
 
-  rsync -avz --progress "$apk_dir"/app-arm64-v8a-beta.apk "$dest/beta.apk"
-  rsync -avz --progress "$apk_dir"/app-universal-beta.apk "$dest/beta-universal.apk"
-  # No --delete on the site: Conveyor keeps each version's package online so it
-  # can generate deltas from it for the next one, so the older files are meant to
-  # stay. Its own versioned file names never collide.
-  rsync -avz --progress --mkpath --chmod=D755,F644 "$packages_out"/ "$beta_dest"
-  rsync -avz --progress --mkpath --chmod=F755 "$appimage_out" "$beta_dest/BTC-Map-x86_64.AppImage"
-  rsync -avz --progress --chmod=F644 "$manifest" "$manifest_dest"
-  rm -f "$manifest"
+    rsync -avz --progress "$apk_dir"/app-arm64-v8a-beta.apk "$dest/beta.apk"
+    rsync -avz --progress "$apk_dir"/app-universal-beta.apk "$dest/beta-universal.apk"
+    rsync -avz --progress --chmod=F644 "$manifest" "$manifest_dest"
+    rm -f "$manifest"
 
-  # The APK, the AppImage and the manifest are overwritten in place, as is the
-  # part of the site whose names do not carry a version (the update metadata,
-  # the download page, the installer and the update checker), so the pull zone
-  # would keep serving its cached copy for the full max-age window unless we
-  # purge it.
-  purge_cdn \
-    "https://cdn.static.btcmap.org/android/apk/beta.apk" \
-    "https://cdn.static.btcmap.org/android/apk/beta-universal.apk" \
-    "$desktop_cdn_base/beta/BTC-Map-x86_64.AppImage" \
-    "https://cdn.static.btcmap.org/android/latest-app-beta-ver.json"
-  purge_conveyor_site beta "$packages_out"
+    # The APKs and the manifest are overwritten in place, so the pull zone would
+    # keep serving its cached copy for the full max-age window unless we purge
+    # it.
+    purge_cdn \
+      "https://cdn.static.btcmap.org/android/apk/beta.apk" \
+      "https://cdn.static.btcmap.org/android/apk/beta-universal.apk" \
+      "https://cdn.static.btcmap.org/android/latest-app-beta-ver.json"
+  fi
+
+  if [ -n "$deploy_linux" ]; then
+    build_desktop_appimage "$appimage_out"
+    # Overwritten in place, so purge the cached copy as above.
+    rsync -avz --progress --mkpath --chmod=F755 "$appimage_out" "$beta_dest/BTC-Map-x86_64.AppImage"
+    purge_cdn "$desktop_cdn_base/beta/BTC-Map-x86_64.AppImage"
+  fi
+
+  if [ -n "$desktop" ]; then
+    # Conveyor builds both machines by default; narrow it to the ones asked for
+    # so a Windows- or macOS-only deploy does not build and upload the other.
+    local machines=""
+    if [ -n "$deploy_windows" ] && [ -n "$deploy_macos" ]; then
+      machines="[windows.amd64,mac.aarch64]"
+    elif [ -n "$deploy_windows" ]; then
+      machines="[windows.amd64]"
+    else
+      machines="[mac.aarch64]"
+    fi
+
+    build_desktop_packages "$conveyor" beta "$packages_out" "$machines"
+
+    # No --delete on the site: Conveyor keeps each version's package online so it
+    # can generate deltas from it for the next one, so the older files are meant
+    # to stay. Its own versioned file names never collide.
+    rsync -avz --progress --mkpath --chmod=D755,F644 "$packages_out"/ "$beta_dest"
+
+    # The part of the site whose names do not carry a version (the update
+    # metadata, the download page, the installer and the update checker) is
+    # overwritten in place, so the pull zone would keep serving its cached copy
+    # for the full max-age window unless we purge it.
+    purge_conveyor_site beta "$packages_out"
+  fi
 }
 
-cmd_app_deploy_release() {
-  assert_bunny_api_key
-
+# Builds the release binaries for every supported platform — the Android APKs,
+# the Linux AppImage and the Windows and macOS packages — and stages them in a
+# `release/` directory in the repository root. Nothing is uploaded; this only
+# prepares the files.
+cmd_app_prepare_release() {
   # Resolve the signing key before Gradle runs: the generated Conveyor config
   # includes it, so it has to exist by the time writeConveyorConfig writes that.
   local conveyor
   conveyor="$(prepare_conveyor)"
   ensure_conveyor_key "$conveyor"
 
+  # The desktop app is a single build every channel shares, so its packages come
+  # from the ordinary jar. The generated Conveyor config has to be written before
+  # Conveyor reads it.
   ./gradlew assembleRelease :desktopApp:createDistributable \
     :shared:jvmJar :ui:jvmJar :desktopApp:jar :desktopApp:writeConveyorConfig "$@"
 
   local apk_dir="app/build/outputs/apk/release"
-  local dest="btcmap-api:/srv/http/static.btcmap.org/android/apk/"
   local packages_out="desktopApp/build/conveyor/release"
-  local release_dest="$desktop_dest/release/"
   local build_config="app/build/generated/source/buildConfig/release/org/btcmap/BuildConfig.java"
 
   assert_apk_signed "$apk_dir/app-arm64-v8a-release.apk"
@@ -677,20 +765,16 @@ cmd_app_deploy_release() {
   build_desktop_appimage "$appimage_out"
   build_desktop_packages "$conveyor" release "$packages_out"
 
-  rsync -avz --progress "$apk_dir"/app-arm64-v8a-release.apk "$dest/${apk_base}.apk"
-  rsync -avz --progress "$apk_dir"/app-universal-release.apk "$dest/${apk_base}-universal.apk"
-  rsync -avz --progress --mkpath --chmod=D755,F644 "$packages_out"/ "$release_dest"
-  rsync -avz --progress --mkpath --chmod=F755 "$appimage_out" "$release_dest"
+  local out="release"
+  echo "Staging the release binaries in $out/..."
+  rm -rf "$out"
+  mkdir -p "$out"
+  cp "$apk_dir/app-arm64-v8a-release.apk" "$out/${apk_base}.apk"
+  cp "$apk_dir/app-universal-release.apk" "$out/${apk_base}-universal.apk"
+  cp "$appimage_out" "$out/"
+  cp -a "$packages_out"/. "$out/"
 
-  # A rebuilt APK, AppImage or site can be published under a name that is
-  # already on the CDN (for example when re-releasing a fix for the same
-  # version), so the pull zone would keep serving the previous bytes for the
-  # full max-age window unless we purge it.
-  purge_cdn \
-    "https://cdn.static.btcmap.org/android/apk/${apk_base}.apk" \
-    "https://cdn.static.btcmap.org/android/apk/${apk_base}-universal.apk" \
-    "$desktop_cdn_base/release/$(basename "$appimage_out")"
-  purge_conveyor_site release "$packages_out"
+  echo "Release binaries are in $out/."
 }
 
 cmd_app() {
@@ -699,7 +783,7 @@ cmd_app() {
   case "$target" in
     run) cmd_app_run "$@" ;;
     deploy-beta) cmd_app_deploy_beta "$@" ;;
-    deploy-release) cmd_app_deploy_release "$@" ;;
+    prepare-release) cmd_app_prepare_release "$@" ;;
     help|-h|--help) print_usage_app ;;
     *) err "Unknown app command: $target"; print_usage_app; return 1 ;;
   esac
