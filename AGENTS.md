@@ -1,94 +1,33 @@
-# AGENTS.md - BTC Map Android Development Guide
+# AGENTS.md - BTC Map Compose Development Guide
 
 ## Project Overview
 - **Language**: Kotlin
 - **Build System**: Gradle with Kotlin DSL
-- **Min SDK**: 29 (Android 10)
-- **Target SDK**: 37
-- **Architecture**: Compose Multiplatform UI over a shared Kotlin Multiplatform core; on Android the Compose screens are hosted by Views fragments. SQLite database, Coroutines for async. No iOS target.
+- **Key architectural pillars**: Compose Multiplatform 1.12.1, MapLibre Compose v0.20.0, SQLite
 
 There are four Gradle modules:
 
-- **`:app`** — the Android application: the remaining Views chrome (fragments), platform glue, and the `AbstractComposeView` hosts for the shared screens. It has no Compose compiler.
+- **`:app`** — the Android application: the remaining Views chrome (`AppRootFragment`), platform glue, and the `AppServices`/labels the host needs. It has no Compose compiler.
 - **`:shared`** — Kotlin Multiplatform (Android + JVM + wasmJs): the whole portable core (`api`, `db`, `i18n`, `sync`, `openinghours`, `stats`, `settings`, the pure `map` data helpers, `offline`, `payment`, `imagestats`, `auth`/`http`). No Android dependency.
-- **`:ui`** — Kotlin Multiplatform (Android + JVM): the Compose Multiplatform UI (`AppTheme`, `MaterialSymbol`, the screens, and the map: `MapScreen`, its layers, markers, chips, search and place sheet).
+- **`:ui`** — Kotlin Multiplatform (Android + JVM): the Compose Multiplatform UI (`AppTheme`, `MaterialSymbol`, the screens, and the map: `MapScreen`, its layers, markers, chips, search and place sheet), plus the single Android `AbstractComposeView` host (`AppRootComposeView`) in `androidMain`.
 - **`:desktopApp`** — the JVM Compose Desktop app, sharing `:shared` and `:ui`.
 
-The only Android-carrying logic left in `:app` outside the UI is `area/AreaFormatting` (`R.string`) and `UserAgent` (`BuildConfig.VERSION_CODE`).
-
 ## Build Commands
-
-### Full Build & Verification
-```bash
-./gradlew check              # Run all verification (lint + tests)
-./gradlew assembleDebug      # Build debug APK
-./gradlew assembleRelease    # Build release APK
-```
 
 Bundled assets (places snapshot, map styles) are managed
 outside Gradle via the `./devtools bundle` commands, see below.
 
-### Running Tests
-
-Unit tests are the default. Run only the tests for the code you touched rather
-than the whole suite, and always run a test you newly added to confirm it passes:
-
-```bash
-# Run a specific unit test class
-./gradlew testDebugUnitTest --tests 'org.btcmap.sync.SyncManagerTest'
-
-# Run all unit tests
-./gradlew testDebugUnitTest
-```
-
-`:shared` and `:ui` also have JVM tests, and `:desktopApp` has Compose UI tests
-that run without a window:
-
-```bash
-./gradlew :shared:jvmTest :ui:jvmTest :desktopApp:test
-```
-
-Instrumented tests are **opt-in**: do not run `connectedDebugAndroidTest` on
-your own to verify a change, and never run the whole instrumented suite unless
-the user explicitly asks for it. When asked, target the single class or method
-under discussion:
-
-```bash
-# Run a single instrumented test class
-./gradlew connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=org.btcmap.ExampleInstrumentedTest
-
-# Run a single test method
-./gradlew connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=org.btcmap.ExampleInstrumentedTest#useAppContext
-```
-
-Instrumented tests run against `emulator-5554`. Only when the user asks to run
-them: treat the emulator as always available, and if `adb devices` does not list
-it, start it yourself with `./devtools emulator start` (do not ask the user) and
-wait for boot to finish (`adb -s emulator-5554 shell getprop sys.boot_completed`
-returns `1`) before running the tests.
-
-`-Pandroid.testInstrumentationRunnerArguments.class` does not reliably run a
-comma-separated list: only the first class is executed. To target several
-classes, run one `connectedDebugAndroidTest` invocation per class (Gradle reuses
-the already-installed APKs, so each run is quick).
-
-### Linting
-```bash
-./gradlew lint               # Run lint analysis
-./gradlew lintDebug          # Run lint on debug build
-./gradlew lintRelease        # Run lint on release build
-```
-
 ## Development Environment (devtools script)
 
-The `./devtools` wrapper manages the emulator and app deployment. Default device is `emulator-5554` running the `Resizable_Experimental` AVD; debug package is `org.btcmap.debug`.
+The `./devtools` wrapper manages an Android emulator, website, and app deployment across all supported platforms. Default device is `emulator-5554` running the `Resizable_Experimental` AVD; debug package is `org.btcmap.debug`.
 
 ```bash
 ./devtools emulator start    # Boot AVD asynchronously (logs to emulator.log)
 ./devtools emulator stop     # Shut down emulator and remove log
 
 ./devtools app install       # Build and install debug APK
-./devtools app run           # Build, install and launch the app via monkey
+./devtools app run           # Run the app (desktop by default; --android for the emulator)
+./devtools app stop          # Stop the running app (desktop by default; --android for the emulator)
 ./devtools app uninstall     # Remove debug package from device
 ./devtools app deploy-beta     # Build and rsync beta APK and desktop packages to btcmap-api server
 ./devtools app deploy-release  # Build and rsync release APK and desktop packages to btcmap-api server
@@ -100,7 +39,7 @@ The `./devtools` wrapper manages the emulator and app deployment. Default device
 ./devtools website deploy      # Build and rsync the documentation site to android.btcmap.org
 ```
 
-When asked to "launch", "run", or "start" the app, use `./devtools app run` (it builds, installs and launches in one step). Assume the emulator is already running; if it is not, start it yourself with `./devtools emulator start` and wait for boot to complete (check `adb devices` or `adb -s emulator-5554 shell getprop sys.boot_completed`). Use `./devtools app install` when only an install is needed (e.g. before running instrumented tests). `./devtools app deploy-beta` and `./devtools app deploy-release` build and push the APKs and the desktop packages to the remote `btcmap-api` host — use only when explicitly asked to publish a build. Both build the desktop app image, pack it into a Linux AppImage (with `appimagetool`, cached under `${XDG_CACHE_HOME:-~/.cache}/btcmap/appimagetool`) and build the Windows and macOS packages with Conveyor (cached under `${XDG_CACHE_HOME:-~/.cache}/btcmap/conveyor`), uploading everything under `desktop/beta/` and `desktop/release/` respectively: the beta AppImage keeps the stable name `BTC-Map-x86_64.AppImage`, the release one embeds the version, and Conveyor's output is the rest of the directory. Both also purge the files that are overwritten in place — `beta.apk`, `beta-universal.apk`, `latest-app-beta-ver.json`, and every file in the packaged site whose name a rebuild can repeat — from the BunnyCDN `static.btcmap.org` pull zone, so both therefore require a BunnyCDN API key in `BUNNY_API_KEY` or `bunny.api.key` in `local.properties`, and refuse to deploy when neither is set rather than silently leaving stale objects on the CDN. `./devtools website deploy` builds the Hugo documentation site and rsyncs it to `android.btcmap.org` — use only when explicitly asked to publish the site. That site is the Hugo project in `website/`, with its pages in `website/content/` and screenshots in `website/static/images/`.
+When asked to "launch", "run", or "start" the app, use `./devtools app run` (runs the desktop app, launched detached — see the desktop section below) or `./devtools app run --android` (builds, installs and launches the Android build via monkey). Stop a running app with `./devtools app stop` (desktop) or `./devtools app stop --android` (force-stop on the emulator). Assume the emulator is already running when using `--android`; if it is not, start it yourself with `./devtools emulator start` and wait for boot to complete (check `adb devices` or `adb -s emulator-5554 shell getprop sys.boot_completed`). Use `./devtools app install` when only an install is needed (e.g. before running instrumented tests). `./devtools app deploy-beta` and `./devtools app deploy-release` build and push the APKs and the desktop packages to the remote `btcmap-api` host — use only when explicitly asked to publish a build. Both build the desktop app image, pack it into a Linux AppImage (with `appimagetool`, cached under `${XDG_CACHE_HOME:-~/.cache}/btcmap/appimagetool`) and build the Windows and macOS packages with Conveyor (cached under `${XDG_CACHE_HOME:-~/.cache}/btcmap/conveyor`), uploading everything under `desktop/beta/` and `desktop/release/` respectively: the beta AppImage keeps the stable name `BTC-Map-x86_64.AppImage`, the release one embeds the version, and Conveyor's output is the rest of the directory. Both also purge the files that are overwritten in place — `beta.apk`, `beta-universal.apk`, `latest-app-beta-ver.json`, and every file in the packaged site whose name a rebuild can repeat — from the BunnyCDN `static.btcmap.org` pull zone, so both therefore require a BunnyCDN API key in `BUNNY_API_KEY` or `bunny.api.key` in `local.properties`, and refuse to deploy when neither is set rather than silently leaving stale objects on the CDN. `./devtools website deploy` builds the Hugo documentation site and rsyncs it to `android.btcmap.org` — use only when explicitly asked to publish the site. That site is the Hugo project in `website/`, with its pages in `website/content/` and screenshots in `website/static/images/`.
 
 ### Verifying on the emulator
 
@@ -197,10 +136,15 @@ Shares `:shared` and `:ui`; it opens the shared database under `$BTCMAP_HOME` or
 `~/.btcmap`.
 
 ```bash
-./gradlew :desktopApp:run        # open the window; launch it in the background, see below
+./devtools app run               # open the window (detached; logs to /tmp/btcmap-desktop.log)
+./devtools app stop              # stop the running window
 ./gradlew :desktopApp:test       # Compose UI tests, no window
 ./gradlew :desktopApp:screenshot -Pscreenshot=settings:/tmp/x.png:dark
 ```
+
+Launching and stopping the window go through `./devtools`; the Compose UI tests
+and the headless `screenshot` renderer have no wrapper and run with Gradle
+directly.
 
 - `screenshot` renders one screen headlessly to a PNG; today's screens are
   `settings`, `account`, `report`, `addplace`, `addevent`, `addnote` and
@@ -215,87 +159,19 @@ Shares `:shared` and `:ui`; it opens the shared database under `$BTCMAP_HOME` or
   task forces `BTCMAP_HOME` to a throwaway `build/screenshot-home` so it cannot
   touch live data; override it only with `-PbtcmapHome=<scratch dir>`, never
   `~/.btcmap`.
-- When asked to run or restart the window, **never run `:desktopApp:run` in the
-  foreground and never `sleep`/poll waiting for it to start**. `run` blocks for
-  the life of the window, so launch it detached with its output in a named log,
-  e.g. `(./gradlew :desktopApp:run > /tmp/btcmap-desktop.log 2>&1 &)`, and return
-  control immediately.
-- The user's workflow is this editor tiled on the **left** and the app tiled on
-  the **right**, so **every fresh launch must end in a half/half layout**:
-  un-maximize the focused editor with `Super+Down`, split it left with
-  `Super+Left`, then tile the app to the right half. Do it all in one detached
-  step, so control still returns immediately while the build runs:
-  ```bash
-  (
-    ydotool key 125:1 108:1 108:0 125:0       # Super+Down: un-maximize the editor
-    ydotool key 125:1 105:1 105:0 125:0       # Super+Left: editor to left half
-    ./gradlew :desktopApp:run > /tmp/btcmap-desktop.log 2>&1 &
-    wid=""
-    for i in $(seq 1 600); do
-      wid=$(xdotool search --name "BTC Map" 2>/dev/null | head -n1)
-      [ -n "$wid" ] && break
-      sleep 0.05
-    done
-    [ -n "$wid" ] || exit 0
-    # Tile only once the app itself holds focus, never the editor: poll
-    # windowactivate until _NET_ACTIVE_WINDOW is the "BTC Map" window. This is
-    # what lets us drop the old fixed ~2.5 s sleep that left the window sitting
-    # at its 480×720 default before it snapped to the tile.
-    focused=0
-    for i in $(seq 1 200); do
-      xdotool windowactivate "$wid" >/dev/null 2>&1
-      active=$(xdotool getactivewindow 2>/dev/null)
-      if [ "$(xdotool getwindowname "$active" 2>/dev/null)" = "BTC Map" ]; then focused=1; break; fi
-      sleep 0.05
-    done
-    [ "$focused" = 1 ] && ydotool key 125:1 106:1 106:0 125:0   # Super+Right: split right
-  ) &
-  ```
-  The poll loops are the sanctioned exception to "never poll waiting for it to
-  start": they run inside the backgrounded step, not in the foreground. On this
-  4096×2304 physical / 2×-scale display the right half is `x=2048`, `width=2048`,
-  full height; verify with `xdotool getwindowgeometry <frame-id>` (the tiled frame
-  sits at `2048,138`). Skip the tiling only if the user asks for a different
-  placement. The desktop app's shipped default is now maximized
-  (`rememberWindowState(placement = WindowPlacement.Maximized)` in
-  `desktopApp/src/main/kotlin/org/btcmap/desktop/Main.kt`), so on launch the window
-  appears full screen and only then tiles to the right half (~0.7 s later) — that
-  is AWT window-map latency, not a fixed sleep. `mutter` *does* honour an initial
-  window position (a Swing `JFrame` with `setBounds(3100,1650,600,380)` landed at
-  exactly `x=3100`), so a truly flash-free start would instead have to open the
-  desktop window directly at the right half via `WindowState`; that would change
-  the shipped default again, so do not do it unless the user asks.
-  The leading `Super+Down`/`Super+Left` acts on **whatever window is focused**, so
-  it only shrinks the editor when the editor holds focus: that is true for a fresh
-  start (the user has just typed in it) and right after killing the app (GNOME
-  returns focus to the editor), but *not* after driving the app with `ydotool`
-  (the app keeps focus) — there the editor would silently stay full and the app's
-  tile would be the only change. When in doubt, check `xdotool getactivewindow`
-  (a focused Wayland window shows a bare, no-property dummy; the app is the
-  `BTC Map` window) and only send the keys when the app is not active. Both keys
-  are needed: after the close flow maximized the editor (`Super+Up`), `Super+Left`
-  **alone did not un-maximize the Wayland editor** (it did for the X11 app), so
-  the editor stayed full until `Super+Down` was sent first. `Alt+Tab` does *not*
-  switch focus here (ydotool sends it, the active X11 window never changes), so
-  the editor cannot be refocused by keyboard; verify visually if a click is not
-  acceptable.
+- When asked to run or restart the window, use `./devtools app run`. It launches
+  `:desktopApp:run` detached with its output in `/tmp/btcmap-desktop.log` and
+  returns control immediately, so **never run `:desktopApp:run` in the foreground
+  or `sleep`/poll waiting for it to start**.
 - The running app is identified by `pgrep -f "org.btcmap.desktop.MainK[t]"`
-  (the brackets keep the pattern from matching the shell). Check it *before*
-  launching: if it is already listed, the window is already open — do not start a
-  second instance. The log at `/tmp/btcmap-desktop.log` is the other marker, and
-  its last lines (e.g. `desktop: icon font ...`, and the `Rendered the first map
-  frame` line once the map is up) tell you how far startup got when you next look,
-  without blocking on it.
-- Stop a running window with
-  `pgrep -f "org.btcmap.desktop.MainK[t]" | xargs -r kill` (the brackets keep the
-  pattern from matching the shell). Do this before a restart so only one instance
-  is ever open. When closing (not restarting) the app that was tiled in the right
-  half, GNOME leaves the freed space empty, so make the left window fill it:
-  send `Super+Up` once (`ydotool key 125:1 103:1 103:0 125:0`). Focus returns to
-  the editor on its own (it is a native Wayland window, invisible to X11 tools),
-  and `maximize` is a one-way binding here (`unmaximize` is Super+Down/Alt+F5), so
-  it is safe even if the editor already filled the space. Do not do this on a
-  restart, which immediately re-tiles the app to the right.
+  (the brackets keep the pattern from matching the shell); `./devtools app run`
+  checks it and refuses to start a second instance. The log at
+  `/tmp/btcmap-desktop.log` is the other marker, and its last lines (e.g.
+  `desktop: icon font ...`, and the `Rendered the first map frame` line once the
+  map is up) tell you how far startup got when you next look, without blocking on
+  it.
+- Stop a running window with `./devtools app stop` before a restart so only one
+  instance is ever open.
 - The running app is an XWayland client (Compose Desktop's Skiko renderer is
   X11-only on Linux), so X11 tools see it even though the session is Wayland.
   Find its window with `xdotool search --name "BTC Map"`; the client window
@@ -335,18 +211,13 @@ Shares `:shared` and `:ui`; it opens the shared database under `$BTCMAP_HOME` or
     form — `ydotool` rejects a single axis, and `-y -1` parses the negative as an
     option), wheel `ydotool mousemove -w -- 0 1` (up, zoom in) / `-w -- 0 -1`
     (down, zoom out), click `ydotool click 0xC0` (left; `0xC1` right, `0xC2`
-    middle), keys `ydotool key 125:1 103:1 103:0 125:0` (Super+Up), typing into a
+    middle), keys `ydotool key 28:1 28:0` (Enter), typing into a
     focused field `ydotool type -d 60 -- "text"`. `ydotool mousemove --absolute
     -a` does not move the pointer here (the virtual device is relative-only), so
     position by relative moves from a known origin, below.
   - **Check focus, then position the pointer from a known origin.** The app must
     be the active window (`xdotool getactivewindow` matches its client id), or
-    the events land on the desktop and nothing happens. `xdotool`/`wmctrl` cannot
-    move or resize the window (GNOME ignores X configure requests) — use the GNOME
-    tiling shortcuts instead: Super+Up to maximize
-    (`ydotool key 125:1 103:1 103:0 125:0`), Super+Right to split right
-    (`ydotool key 125:1 106:1 106:0 125:0`), which is the app's default placement
-    above.
+    the events land on the desktop and nothing happens.
   - `ydotool` moves in the compositor's **logical** pixels, but
     `xdotool getwindowgeometry`, `import` captures and `xrandr` are in
     **physical** pixels: on this 2×-scale display logical = physical/2 (the same
@@ -435,9 +306,8 @@ intentional:
 - **Color Picker**: shared Compose picker in `:ui`
 
 ## Testing
-- Unit tests (app/src/test) are the default. Run the tests for the code you
-  changed, and run any test you newly added; do not run the whole unit suite
-  unless asked
+- Run the tests for the code you changed, and run any test you newly added; do
+  not run the whole unit suite unless asked
 - Do not run instrumented tests (`connectedDebugAndroidTest`) unless the user
   explicitly asks for them. Never run the full instrumented suite to verify a
   change on your own

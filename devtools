@@ -10,7 +10,8 @@ Usage:
   ./devtools emulator start     Boot the AVD asynchronously
   ./devtools emulator stop      Shut the emulator down cleanly
   ./devtools app install        Install debug build
-  ./devtools app run            Install and run debug build
+  ./devtools app run            Run the app (desktop by default; --android for the emulator)
+  ./devtools app stop           Stop the running app (desktop by default)
   ./devtools app uninstall      Uninstall the app
   ./devtools app deploy-beta    Build and deploy beta APK, desktop packages and manifest
   ./devtools app deploy-release Build and deploy release APK and desktop packages
@@ -42,7 +43,9 @@ Usage: ./devtools app <command>
 
 Commands:
   install        Install debug build
-  run            Install and run debug build
+  run            Run the app. Runs the desktop app by default, or the Android
+                 build on the emulator with --android.
+  stop           Stop the running app (desktop by default; --android for the emulator)
   uninstall      Uninstall the app
   deploy-beta    Build and deploy the beta APK, the Windows/macOS packages, the
                  Linux AppImage and the beta manifest
@@ -511,7 +514,7 @@ cmd_app_install() {
   adb -s "$device" install -r -t "$apk_path"
 }
 
-cmd_app_run() {
+cmd_app_run_android() {
   local device="emulator-5554"
   local package="org.btcmap.debug"
   local apk_path="./app/build/outputs/apk/debug/app-x86_64-debug.apk"
@@ -537,6 +540,81 @@ cmd_app_run() {
 
   echo "Process status:"
   adb -s "$device" shell ps -A | grep btcmap || echo "(process not visible yet — give it a moment)"
+}
+
+cmd_app_run_desktop() {
+  local log="/tmp/btcmap-desktop.log"
+
+  # Two instances would open the same database under $BTCMAP_HOME, so refuse to
+  # start a second one.
+  if pgrep -f "org.btcmap.desktop.MainK[t]" >/dev/null 2>&1; then
+    echo "The desktop app is already running; not starting a second instance."
+    echo "Stop it with: ./devtools app stop"
+    return 0
+  fi
+
+  echo "Launching the desktop app (logs: $log)..."
+  # Detached: `run` blocks for the life of the window, so control returns here.
+  (./gradlew :desktopApp:run "$@" > "$log" 2>&1 &)
+}
+
+cmd_app_stop_desktop() {
+  if ! pgrep -f "org.btcmap.desktop.MainK[t]" >/dev/null 2>&1; then
+    echo "The desktop app is not running. Nothing to do."
+    return 0
+  fi
+
+  echo "Stopping the desktop app..."
+  pgrep -f "org.btcmap.desktop.MainK[t]" | xargs -r kill
+}
+
+cmd_app_stop_android() {
+  local device="emulator-5554"
+  local package="org.btcmap.debug"
+
+  if ! adb devices | grep -q "^$device[[:space:]]"; then
+    echo "Error: emulator $device is not running. Start it with: ./devtools emulator start" >&2
+    return 1
+  fi
+
+  echo "Stopping $package on $device..."
+  adb -s "$device" shell am force-stop "$package"
+}
+
+# Chooses the app target from optional --android/--desktop flags (desktop by
+# default), leaving the remaining arguments (forwarded to Gradle) in
+# app_target_args. Prints the app usage and returns 1 when asked for help.
+app_target="desktop"
+app_target_args=()
+
+parse_app_target() {
+  app_target="desktop"
+  app_target_args=()
+  local arg
+  for arg in "$@"; do
+    case "$arg" in
+      --android) app_target="android" ;;
+      --desktop) app_target="desktop" ;;
+      help|-h|--help) print_usage_app; return 1 ;;
+      *) app_target_args+=("$arg") ;;
+    esac
+  done
+}
+
+cmd_app_run() {
+  parse_app_target "$@" || return 0
+  case "$app_target" in
+    android) cmd_app_run_android "${app_target_args[@]}" ;;
+    desktop) cmd_app_run_desktop "${app_target_args[@]}" ;;
+  esac
+}
+
+cmd_app_stop() {
+  parse_app_target "$@" || return 0
+  case "$app_target" in
+    android) cmd_app_stop_android ;;
+    desktop) cmd_app_stop_desktop ;;
+  esac
 }
 
 cmd_app_uninstall() {
@@ -693,6 +771,7 @@ cmd_app() {
   case "$target" in
     install) cmd_app_install "$@" ;;
     run) cmd_app_run "$@" ;;
+    stop) cmd_app_stop "$@" ;;
     uninstall) cmd_app_uninstall "$@" ;;
     deploy-beta) cmd_app_deploy_beta "$@" ;;
     deploy-release) cmd_app_deploy_release "$@" ;;
