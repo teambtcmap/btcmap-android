@@ -40,6 +40,60 @@ class UpdateCheckTest : ApiTestBase() {
     }
 
     @Test
+    fun laterBuildAtTheSameVersionCode_isAvailable() {
+        // A beta is rebuilt at one version code, so the deploy's build time is
+        // what makes the next rollout an update.
+        Assert.assertTrue(
+            UpdateCheck.isUpdateAvailable(
+                currentVersionCode = 6,
+                latestVersionCode = 6,
+                currentBuildTime = 1_000L,
+                latestBuildTime = 2_000L,
+                isDebugBuild = false,
+            ),
+        )
+        Assert.assertFalse(
+            UpdateCheck.isUpdateAvailable(
+                currentVersionCode = 6,
+                latestVersionCode = 6,
+                currentBuildTime = 2_000L,
+                latestBuildTime = 1_000L,
+                isDebugBuild = false,
+            ),
+        )
+    }
+
+    @Test
+    fun missingBuildTimes_neverCountAsNewer() {
+        // The release manifest carries no build time, so an unchanged version
+        // code stays current.
+        Assert.assertFalse(
+            UpdateCheck.isUpdateAvailable(
+                currentVersionCode = 6,
+                latestVersionCode = 6,
+                isDebugBuild = false,
+            ),
+        )
+    }
+
+    @Test
+    fun fetch_readsTheBuildTime() = runTest {
+        enqueueJson(
+            """{"code": 240, "name": "1.3.0", "buildTime": 1728600000000, "url": "https://example.com/app.apk"}""",
+        )
+
+        val update = UpdateCheck.fetch(
+            httpClient = HttpClient(CIO),
+            manifestUrl = server.url("/latest-app-beta-ver.json").toString(),
+            currentVersionCode = 240,
+            isDebugBuild = false,
+            currentBuildTime = 1728500000000L,
+        )
+
+        Assert.assertEquals(1728600000000L, update?.buildTime)
+    }
+
+    @Test
     fun fetch_returnsTheNewerBuild() = runTest {
         enqueueJson("""{"code": 240, "name": "1.3.0", "url": "https://example.com/app.apk"}""")
 

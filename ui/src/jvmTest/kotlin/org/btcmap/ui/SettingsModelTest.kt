@@ -189,10 +189,32 @@ class SettingsModelTest {
             mapRotationEnabled = false,
             mapTiltEnabled = false,
             includeManageAreas = true,
+            includeAbout = true,
         )
 
         assertTrue(items.filterNot { it is SettingsItem.Header }.all { it.icon != null })
         assertTrue(items.filterIsInstance<SettingsItem.Header>().all { it.icon == null })
+    }
+
+    @Test
+    fun settingsItems_includeAboutOnlyWhenAsked() {
+        val items = settingsItems(
+            strings(),
+            showAttribution = true,
+            mapRotationEnabled = false,
+            mapTiltEnabled = false,
+            includeAbout = true,
+        )
+
+        assertEquals(
+            listOf("headerAbout", "version", "checkForUpdates"),
+            items.takeLast(3).map { it.key },
+        )
+        assertEquals("1.2.0-beta (311)", (items.first { it.key == "version" } as SettingsItem.Info).secondary)
+        assertTrue(
+            settingsItems(strings(), showAttribution = true, mapRotationEnabled = false, mapTiltEnabled = false)
+                .none { it.key == "version" },
+        )
     }
 
     @Test
@@ -239,5 +261,10 @@ class SettingsModelTest {
         sectionData = "section-data",
         sectionAdmin = "section-admin",
         sectionGeneral = "section-general",
+        sectionAbout = "section-about",
+        version = "version",
+        versionValue = "1.2.0-beta (311)",
+        checkForUpdates = "check-for-updates",
+        checkForUpdatesSecondary = "check-for-updates-secondary",
     )
 }

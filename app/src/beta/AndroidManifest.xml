@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- The beta build installs its own APK updates, so it asks the OS to allow
+         package installs. Kept to the beta build type alone: the release is an
+         ordinary published build and must not request it. -->
+    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
+
+</manifest>

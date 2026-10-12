@@ -658,7 +658,17 @@ cmd_app_deploy_beta() {
   fi
 
   echo "Assembling: ${gradle_tasks[*]}"
-  ./gradlew "${gradle_tasks[@]}"
+  # The beta build is stamped with its build time, so a rebuild at the same
+  # version code is still newer than the build an installed copy is running. The
+  # manifest written below carries the same stamp, read back from the APK's
+  # BuildConfig, so the two agree.
+  if [ -n "$deploy_android" ]; then
+    local build_time
+    build_time="$(date +%s%3N)"
+    ./gradlew "${gradle_tasks[@]}" -PbtcmapBuildTime="$build_time"
+  else
+    ./gradlew "${gradle_tasks[@]}"
+  fi
 
   local appimage_out="desktopApp/build/compose/appimage/BTC-Map-x86_64.AppImage"
   local packages_out="desktopApp/build/conveyor/beta"
@@ -673,10 +683,11 @@ cmd_app_deploy_beta() {
     assert_apk_signed "$apk_dir/app-arm64-v8a-beta.apk"
     assert_apk_signed "$apk_dir/app-universal-beta.apk"
 
-    local version_code version_name
+    local version_code version_name build_time_value
     version_code="$(sed -n 's/.*VERSION_CODE = \([0-9]*\);.*/\1/p' "$build_config" | head -n1)"
     version_name="$(sed -n 's/.*VERSION_NAME = "\(.*\)";.*/\1/p' "$build_config" | head -n1)"
-    if [ -z "$version_code" ] || [ -z "$version_name" ]; then
+    build_time_value="$(sed -n 's/.*BUILD_TIME = \([0-9]*\)L;.*/\1/p' "$build_config" | head -n1)"
+    if [ -z "$version_code" ] || [ -z "$version_name" ] || [ -z "$build_time_value" ]; then
       echo "Error: could not read version info from $build_config" >&2
       return 1
     fi
@@ -687,6 +698,7 @@ cmd_app_deploy_beta() {
 {
   "code": $version_code,
   "name": "$version_name",
+  "buildTime": $build_time_value,
   "url": "https://cdn.static.btcmap.org/android/apk/beta.apk"
 }
 JSON

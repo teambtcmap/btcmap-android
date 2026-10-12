@@ -409,6 +409,8 @@ fun AppRoot(
                     onOpenManagePlaceImages = { nav.push(AppRoute.ManagePlaceImages) },
                     onLanguageChanged = onLanguageChanged,
                     reloadKey = authReload,
+                    versionLabel = platform.updateVersionLabel,
+                    onCheckForUpdates = { onResult -> platform.checkForUpdates(onResult) },
                 )
             }
 

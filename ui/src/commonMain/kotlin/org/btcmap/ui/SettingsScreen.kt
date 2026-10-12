@@ -56,6 +56,17 @@ sealed interface SettingsItem {
         override val icon: String? = null,
     ) : SettingsItem
 
+    /**
+     * A read-only row that reports a value, shown on the trailing edge. It opens
+     * nothing, so it carries no chevron and is not clickable.
+     */
+    data class Info(
+        override val key: String,
+        override val title: String,
+        override val secondary: String? = null,
+        override val icon: String? = null,
+    ) : SettingsItem
+
     /** A row with a switch on the trailing edge. */
     data class Toggle(
         override val key: String,
@@ -136,7 +147,9 @@ private fun SettingsRow(
     }
 
     val supporting: (@Composable () -> Unit)? =
-        item.secondary?.let { text -> { Text(text) } }
+        // An info row shows its value on the trailing edge, not under the title.
+        if (item is SettingsItem.Info) null
+        else item.secondary?.let { text -> { Text(text) } }
 
     val trailing: (@Composable () -> Unit)? = when (item) {
         is SettingsItem.Toggle -> {
@@ -158,11 +171,22 @@ private fun SettingsRow(
                 )
             }
         }
+        is SettingsItem.Info -> {
+            item.secondary?.let { value ->
+                {
+                    Text(
+                        text = value,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            }
+        }
         is SettingsItem.Header -> null
     }
 
     // The whole row toggles for a switch row and opens for an action row, so the
-    // label is a target too, not only the trailing control.
+    // label is a target too, not only the trailing control. An info row reports
+    // a value and does nothing.
     val modifier = when (item) {
         is SettingsItem.Toggle -> Modifier.toggleable(
             value = item.checked,
@@ -170,6 +194,7 @@ private fun SettingsRow(
             onValueChange = { onItemCheckedChange(item.key, it) },
         )
         is SettingsItem.Action -> Modifier.clickable { onItemClick(item.key) }
+        is SettingsItem.Info -> Modifier
         is SettingsItem.Header -> Modifier
     }
 

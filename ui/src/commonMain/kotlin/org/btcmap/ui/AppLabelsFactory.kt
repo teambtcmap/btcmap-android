@@ -296,6 +296,9 @@ fun appLabels(
         mapStyleDialogTitle = strings["map_style"],
         verifiedFilterDialogTitle = strings["verified_filter"],
         close = strings["close"],
+        sectionAbout = strings["settings_section_about"],
+        version = strings["version"],
+        checkForUpdates = strings["check_for_updates"],
     ),
     manageUsersTitle = strings["manage_users"],
     manageUsers = ManageUsersLabels(

@@ -271,6 +271,44 @@ class SettingsPageTest {
 
     @OptIn(ExperimentalTestApi::class)
     @Test
+    fun aboutGroup_isHiddenWithoutAVersionLabel() {
+        runComposeUiTest {
+            setContent { SettingsPage(settings, db, TEST_SETTINGS_PAGE_LABELS, onOpenAccount = {}, onOpenColors = {}, onOpenDbStats = {}) }
+            // Scroll to the last row a build without an update channel has, so
+            // the absent About rows are proven absent, not merely uncomposed.
+            onNode(hasScrollAction()).performScrollToNode(hasText("Image cache"))
+            onAllNodesWithText("Check for updates").assertCountEquals(0)
+            onAllNodesWithText("Version").assertCountEquals(0)
+        }
+    }
+
+    @OptIn(ExperimentalTestApi::class)
+    @Test
+    fun aboutGroup_showsTheVersionAndReportsTheManualCheck() {
+        runComposeUiTest {
+            setContent {
+                SettingsPage(
+                    settings,
+                    db,
+                    TEST_SETTINGS_PAGE_LABELS,
+                    onOpenAccount = {},
+                    onOpenColors = {},
+                    onOpenDbStats = {},
+                    versionLabel = "1.2.0-beta (311)",
+                    onCheckForUpdates = { onResult -> onResult("This is the latest build.") },
+                )
+            }
+            // The list is lazy, so the About group at the bottom is only
+            // composed once scrolled into view.
+            onNode(hasScrollAction()).performScrollToNode(hasText("Check for updates"))
+            onNodeWithText("1.2.0-beta (311)").assertIsDisplayed()
+            onNodeWithText("Check for updates").performClick()
+            onNodeWithText("This is the latest build.").assertIsDisplayed()
+        }
+    }
+
+    @OptIn(ExperimentalTestApi::class)
+    @Test
     fun languageRow_picksALanguageAndStoresIt() {
         var changed = false
         try {

@@ -107,6 +107,9 @@ internal val TEST_SETTINGS_PAGE_LABELS = SettingsPageLabels(
     mapStyleDialogTitle = "Map style",
     verifiedFilterDialogTitle = "Only show places",
     close = "Close",
+    sectionAbout = "About",
+    version = "Version",
+    checkForUpdates = "Check for updates",
 )
 
 internal val TEST_PROFILE_LABELS = UserProfileLabels(

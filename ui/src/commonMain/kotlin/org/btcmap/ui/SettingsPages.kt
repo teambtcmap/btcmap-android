@@ -119,6 +119,11 @@ data class SettingsPageLabels(
     val mapStyleDialogTitle: String,
     val verifiedFilterDialogTitle: String,
     val close: String,
+    // The "About" group, shown only where the host has an update channel; the
+    // shared list adds it when the page is given a version label.
+    val sectionAbout: String = "",
+    val version: String = "",
+    val checkForUpdates: String = "",
 )
 
 /** The dialog the settings list can raise. */
@@ -155,6 +160,8 @@ fun SettingsPage(
     onOpenManagePlaceImages: () -> Unit = {},
     onLanguageChanged: () -> Unit = {},
     reloadKey: Int = 0,
+    versionLabel: String? = null,
+    onCheckForUpdates: ((String) -> Unit) -> Unit = { _ -> },
 ) {
     var attribution by remember { mutableStateOf(settings.showAttribution) }
     var rotation by remember { mutableStateOf(settings.mapRotationEnabled) }
@@ -162,6 +169,10 @@ fun SettingsPage(
     var mapStyle by remember { mutableStateOf(settings.mapStyle) }
     var verifiedYears by remember { mutableStateOf(settings.verifiedFilterYears) }
     var language by remember { mutableStateOf(settings.language) }
+
+    // The manual update check's outcome, shown under the "Check for updates"
+    // row. Null until the first manual check.
+    var updateMessage by remember { mutableStateOf<String?>(null) }
 
     // The account row names the cached user, which is read off the main thread.
     // [reloadKey] lets a host re-read it after a sign-in, which the page cannot
@@ -230,6 +241,11 @@ fun SettingsPage(
                 sectionData = labels.sectionData,
                 sectionAdmin = labels.sectionAdmin,
                 sectionGeneral = labels.sectionGeneral,
+                sectionAbout = labels.sectionAbout,
+                version = labels.version,
+                versionValue = versionLabel ?: "",
+                checkForUpdates = labels.checkForUpdates,
+                checkForUpdatesSecondary = updateMessage ?: "",
             ),
             showAttribution = attribution,
             mapRotationEnabled = rotation,
@@ -238,6 +254,7 @@ fun SettingsPage(
             includeManageUsers = canManageUsers,
             includeManageAreas = canManageAreas,
             includeManagePlaceImages = canManagePlaceImages,
+            includeAbout = versionLabel != null,
         ),
         onItemClick = { key ->
             when (key) {
@@ -251,6 +268,10 @@ fun SettingsPage(
                 "manageUsers" -> onOpenManageUsers()
                 "manageAreas" -> onOpenManageAreas()
                 "managePlaceImages" -> onOpenManagePlaceImages()
+                "checkForUpdates" -> {
+                    updateMessage = null
+                    onCheckForUpdates { message -> updateMessage = message }
+                }
             }
         },
         onItemCheckedChange = { key, checked ->

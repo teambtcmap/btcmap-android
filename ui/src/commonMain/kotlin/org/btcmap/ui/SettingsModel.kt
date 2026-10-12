@@ -39,6 +39,14 @@ data class SettingsStrings(
     val sectionMap: String,
     val sectionData: String,
     val sectionAdmin: String,
+    // The "About" group is only shown where the host has an update channel (the
+    // Android beta), so its labels default to empty and hosts that have none
+    // need not fill them.
+    val sectionAbout: String = "",
+    val version: String = "",
+    val versionValue: String = "",
+    val checkForUpdates: String = "",
+    val checkForUpdatesSecondary: String = "",
 )
 
 /**
@@ -55,6 +63,8 @@ data class SettingsStrings(
  * telemetry to show. [includeManageUsers], [includeManageAreas] and
  * [includeManagePlaceImages] are set by the page from the cached user's roles;
  * the shared "Admin" header is added only when at least one of their rows is.
+ * [includeAbout] adds the "About" group with the running version and a manual
+ * update check; only a host with an update channel (the Android beta) sets it.
  */
 fun settingsItems(
     strings: SettingsStrings,
@@ -65,6 +75,7 @@ fun settingsItems(
     includeManageUsers: Boolean = false,
     includeManageAreas: Boolean = false,
     includeManagePlaceImages: Boolean = false,
+    includeAbout: Boolean = false,
 ): List<SettingsItem> = buildList {
     add(
         SettingsItem.Action(
@@ -186,5 +197,24 @@ fun settingsItems(
                 )
             )
         }
+    }
+    if (includeAbout) {
+        add(SettingsItem.Header("headerAbout", strings.sectionAbout))
+        add(
+            SettingsItem.Info(
+                "version",
+                strings.version,
+                strings.versionValue,
+                icon = "info",
+            )
+        )
+        add(
+            SettingsItem.Action(
+                "checkForUpdates",
+                strings.checkForUpdates,
+                strings.checkForUpdatesSecondary.ifBlank { null },
+                icon = "sync",
+            )
+        )
     }
 }

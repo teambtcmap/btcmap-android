@@ -80,6 +80,19 @@ interface AppPlatform {
     /** Opens the update dialog when a newer build was found. */
     fun showUpdateDialog()
 
+    /**
+     * The running build's version label for the settings screen's "About" group,
+     * or null where the host has no update channel to report (the desktop, the
+     * release and debug builds). A null hides the group.
+     */
+    val updateVersionLabel: String?
+
+    /**
+     * Re-checks the update channel and reports the outcome through [onResult];
+     * a newer build opens the update dialog instead, as the map's button does.
+     */
+    fun checkForUpdates(onResult: (String) -> Unit)
+
     /** Reports the app's fully-drawn moment once the first markers have drawn. */
     fun reportFullyDrawn()
 }

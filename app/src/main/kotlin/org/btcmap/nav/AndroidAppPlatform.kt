@@ -18,6 +18,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import okio.source
 import org.btcmap.App
+import org.btcmap.BuildConfig
 import org.btcmap.api.ActivityFeedItem
 import org.btcmap.api.getPlaceOsmId
 import org.btcmap.dbstats.BundleStats
@@ -48,6 +49,16 @@ class AndroidAppPlatform(
 
     override fun showUpdateDialog() {
         updateController.showDialog()
+    }
+
+    // Only the beta build can install its own updates, so only it reports a
+    // version or offers the manual check. The release is updated by its store
+    // and the debug build is installed locally.
+    override val updateVersionLabel: String?
+        get() = updateController.versionLabel.takeIf { BuildConfig.BUILD_TYPE == "beta" }
+
+    override fun checkForUpdates(onResult: (String) -> Unit) {
+        updateController.checkForUpdates(onResult)
     }
 
     override fun reportFullyDrawn() {

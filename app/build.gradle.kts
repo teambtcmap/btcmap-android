@@ -8,6 +8,15 @@ val localProperties = Properties().apply {
     }
 }
 
+/*
+ * When this build was made, in epoch milliseconds, used by the beta update
+ * check to tell one deploy from the next (a beta is rebuilt at one version
+ * code). `devtools app deploy-beta --android` passes an explicit
+ * `-PbtcmapBuildTime=…` so the APK and the manifest it publishes agree; other
+ * builds leave it at 0, which never looks newer than a deployed beta.
+ */
+val buildTime: Long = (findProperty("btcmapBuildTime") as String?)?.toLongOrNull() ?: 0L
+
 plugins {
     alias(libs.plugins.android.application)
 }
@@ -27,8 +36,10 @@ android {
         targetSdk {
             version = release(37)
         }
-        versionCode = 311
+        versionCode = 313
         versionName = "1.2.0"
+
+        buildConfigField("long", "BUILD_TIME", "${buildTime}L")
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }

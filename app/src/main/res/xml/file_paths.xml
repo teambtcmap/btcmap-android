@@ -6,4 +6,10 @@
     <cache-path
         name="photos"
         path="photos/" />
+
+    <!-- The beta build's self-updater downloads its APK here and hands it to the
+         system package installer through this provider. -->
+    <cache-path
+        name="updates"
+        path="updates/" />
 </paths>
