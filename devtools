@@ -7,15 +7,14 @@ print_usage() {
 devtools — manage the BTC Map Android dev environment.
 
 Usage:
-  ./devtools emulator start     Boot the AVD asynchronously
-  ./devtools app run            Run the app (desktop by default; --android for the emulator)
-  ./devtools app deploy-beta     Build and deploy beta packages for the named platforms
-  ./devtools app prepare-release Build the release binaries for every supported platform
-  ./devtools bundle data        Download latest places, areas, comments and events snapshots
-  ./devtools bundle map-styles  Bundle MapLibre styles, sprites and glyphs (--force re-downloads)
-  ./devtools bundle icons       Extract the icon-name list from the bundled font
-  ./devtools bundle all         Run all bundlers (--force applies to map-styles)
-  ./devtools website deploy     Build the Hugo site and rsync it to android.btcmap.org
+  ./devtools emulator start        Boot the AVD asynchronously
+  ./devtools app run               Run the app (desktop by default; --android for the emulator)
+  ./devtools app deploy-beta       Build and deploy beta packages for the named platforms
+  ./devtools app prepare-release   Build the release binaries for every supported platform
+  ./devtools app bundle-data       Download latest places, areas, comments and events snapshots
+  ./devtools app bundle-map-styles Bundle MapLibre styles, sprites and glyphs (--force re-downloads)
+  ./devtools bundle icons          Extract the icon-name list from the bundled font
+  ./devtools website deploy        Build the Hugo site and rsync it to android.btcmap.org
 EOF
 }
 
@@ -37,14 +36,18 @@ print_usage_app() {
 Usage: ./devtools app <command>
 
 Commands:
-  run            Run the app. Runs the desktop app by default, or the Android
-                 build on the emulator with --android.
-  deploy-beta    Build and deploy beta packages for the named platforms:
-                 --android (the APKs and update manifest), --linux (the AppImage)
-                 and --windows / --macos (the Conveyor packages). At least one
-                 platform is required.
-  prepare-release Build the release binaries for every supported platform and
-                 stage them in the repository's release/ directory
+  run                Run the app. Runs the desktop app by default, or the
+                     Android build on the emulator with --android.
+  deploy-beta        Build and deploy beta packages for the named platforms:
+                     --android (the APKs and update manifest), --linux (the
+                     AppImage) and --windows / --macos (the Conveyor packages).
+                     At least one platform is required.
+  prepare-release    Build the release binaries for every supported platform
+                     and stage them in the repository's release/ directory
+  bundle-data        Download latest places, areas, comments and events
+                     snapshots (always refreshes)
+  bundle-map-styles  Bundle MapLibre styles, sprites and glyphs (--force
+                     re-downloads)
 EOF
 }
 
@@ -53,10 +56,7 @@ print_usage_bundle() {
 Usage: ./devtools bundle <command>
 
 Commands:
-  data         Download latest places, areas, comments and events snapshots (always refreshes)
-  map-styles   Bundle MapLibre styles, sprites and glyphs (--force re-downloads)
   icons        Extract the icon-name list from the bundled Material Symbols font
-  all          Run all bundlers (--force applies to map-styles)
 EOF
 }
 
@@ -158,17 +158,6 @@ assert_apk_signed() {
 
 # START bundle section
 
-cmd_bundle_data() {
-  python3 bundle_places.py "$@"
-  python3 bundle_areas.py "$@"
-  python3 bundle_comments.py "$@"
-  python3 bundle_events.py "$@"
-}
-
-cmd_bundle_map_styles() {
-  python3 bundle_map_styles.py "$@"
-}
-
 cmd_bundle_icons() {
   python3 bundle_icons.py "$@"
 }
@@ -177,10 +166,7 @@ cmd_bundle() {
   local target="${1:-help}"
   shift || true
   case "$target" in
-    data) cmd_bundle_data "$@" ;;
-    map-styles) cmd_bundle_map_styles "$@" ;;
     icons) cmd_bundle_icons "$@" ;;
-    all) cmd_bundle_data "$@"; cmd_bundle_map_styles "$@"; cmd_bundle_icons "$@" ;;
     help|-h|--help) print_usage_bundle ;;
     *) err "Unknown bundle command: $target"; print_usage_bundle; return 1 ;;
   esac
@@ -506,6 +492,21 @@ purge_conveyor_site() {
 
 # START app section
 
+# Downloads the latest places, areas, comments and events snapshots. The
+# snapshots are committed as assets and refreshed manually; see AGENTS.md,
+# "Bundled Assets".
+cmd_app_bundle_data() {
+  python3 bundle_places.py "$@"
+  python3 bundle_areas.py "$@"
+  python3 bundle_comments.py "$@"
+  python3 bundle_events.py "$@"
+}
+
+# Bundles the MapLibre styles, sprites and glyphs.
+cmd_app_bundle_map_styles() {
+  python3 bundle_map_styles.py "$@"
+}
+
 cmd_app_run_android() {
   local device="emulator-5554"
   local package="org.btcmap.debug"
@@ -784,6 +785,8 @@ cmd_app() {
     run) cmd_app_run "$@" ;;
     deploy-beta) cmd_app_deploy_beta "$@" ;;
     prepare-release) cmd_app_prepare_release "$@" ;;
+    bundle-data) cmd_app_bundle_data "$@" ;;
+    bundle-map-styles) cmd_app_bundle_map_styles "$@" ;;
     help|-h|--help) print_usage_app ;;
     *) err "Unknown app command: $target"; print_usage_app; return 1 ;;
   esac

@@ -26,9 +26,9 @@ There are four Gradle modules:
 
 ./devtools emulator start    # Boot the AVD asynchronously
 
-./devtools bundle data         # Download latest places, areas, comments and events snapshots
-./devtools bundle map-styles   # Bundle MapLibre styles, sprites and glyphs
-./devtools bundle all          # Run all bundlers
+./devtools app bundle-data       # Download latest places, areas, comments and events snapshots
+./devtools app bundle-map-styles # Bundle MapLibre styles, sprites and glyphs
+./devtools bundle icons          # Extract the icon-name list from the bundled font
 
 ./devtools website deploy      # Build and rsync the documentation site to android.btcmap.org
 ```
@@ -253,7 +253,8 @@ The Windows and macOS packages are built by **Conveyor** (`desktopApp/conveyor.c
 ## Bundled Assets
 
 Places, areas, comments, events and map styles are
-committed as assets and refreshed manually with `./devtools bundle`. This is
+committed as assets and refreshed manually with `./devtools app bundle-data` and
+`./devtools app bundle-map-styles`. This is
 intentional:
 
 - Never propose adding CI (GitHub Actions or any other pipeline) to this
