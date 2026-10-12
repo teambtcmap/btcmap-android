@@ -254,7 +254,7 @@ internal val HU: Map<String, String> = mapOf(
         "tap_to_retry" to "Koppints az újrapróbáláshoz",
         "update_available" to "Frissítés elérhető",
         "update_available_description" to "Ha az alkalmazást egy áruházból telepítetted, figyelmen kívül hagyhatod, és hagyd, hogy az áruház kezelje a frissítéseket. Ha közvetlenül APK-n keresztül telepítetted, nyomd meg a \"APK letöltése\" gombot a frissítéshez.\n\nJelenlegi verzió: %1\$s\nLegújabb verzió: %2\$s",
-        "update_available_description_beta" to "Új béta build érhető el. Köszönjük, hogy részt veszel a BTC Map bétatessztelésében. Kérjük, vedd fel velünk a kapcsolatot, ha hibát észlelsz vagy funkciójavaslatod van.\n\nJelenlegi verziókód: %1\$d\nLegújabb verziókód: %2\$d",
+        "update_available_description_beta" to "Új béta build érhető el. Köszönjük, hogy részt veszel a BTC Map bétatessztelésében. Kérjük, vedd fel velünk a kapcsolatot, ha hibát észlelsz vagy funkciójavaslatod van.\n\nTelepített build: %1\$s\nLegújabb build: %2\$s",
         "username" to "Felhasználónév",
         "username_changed" to "Felhasználónév frissítve",
         "verification_warning_not_verified" to "Ezt a helyet még nem ellenőrizték, így az adatai megbízhatatlanok lehetnek. Ha tudja, hogy még mindig elfogad satot, koppintson az Ellenőrzés elemre. Ha tudja, hogy már nem, koppintson a Bejelentés elemre.",

@@ -254,7 +254,7 @@ internal val FR: Map<String, String> = mapOf(
         "tap_to_retry" to "Touchez pour réessayer",
         "update_available" to "Mise à jour disponible",
         "update_available_description" to "Si vous avez installé cette application depuis un magasin, vous pouvez ignorer cela et laisser votre magasin gérer les mises à jour. Si vous avez installé via un APK direct, appuyez sur le bouton \"Obtenir l'APK\" pour mettre à jour.\n\nVersion actuelle: %1\$s\nDernière version: %2\$s",
-        "update_available_description_beta" to "Une nouvelle version bêta est disponible. Merci de participer aux tests bêta de BTC Map. Contactez-nous si vous remarquez un bug ou avez des suggestions de fonctionnalités.\n\nCode de la version actuelle : %1\$d\nCode de la dernière version : %2\$d",
+        "update_available_description_beta" to "Une nouvelle version bêta est disponible. Merci de participer aux tests bêta de BTC Map. Contactez-nous si vous remarquez un bug ou avez des suggestions de fonctionnalités.\n\nVersion installée: %1\$s\nDernière version: %2\$s",
         "username" to "Nom d'utilisateur",
         "username_changed" to "Nom d'utilisateur mis à jour",
         "verification_warning_not_verified" to "Ce lieu n'a pas encore été vérifié, ses informations peuvent donc ne pas être fiables. Si vous savez qu'il accepte toujours des sats, appuyez sur Vérifier. Si vous savez que ce n'est plus le cas, appuyez sur Signaler.",

@@ -254,7 +254,7 @@ internal val CS: Map<String, String> = mapOf(
         "tap_to_retry" to "Klepnutím zkuste znovu",
         "update_available" to "Aktualizace k dispozici",
         "update_available_description" to "Pokud jste tuto aplikaci nainstalovali z obchodu, můžete to ignorovat a nechat obchod spravovat aktualizace. Pokud jste nainstalovali přímo přes APK, stiskněte tlačítko \"Získat APK\" pro aktualizaci.\n\nAktuální verze: %1\$s\nNejnovější verze: %2\$s",
-        "update_available_description_beta" to "Je k dispozici nová beta verze. Děkujeme, že se účastníte beta testování BTC Map. Pokud narazíte na chybu nebo máte návrhy na funkce, kontaktujte nás.\n\nKód aktuální verze: %1\$d\nKód nejnovější verze: %2\$d",
+        "update_available_description_beta" to "Je k dispozici nová beta verze. Děkujeme, že se účastníte beta testování BTC Map. Pokud narazíte na chybu nebo máte návrhy na funkce, kontaktujte nás.\n\nNainstalovaná verze: %1\$s\nNejnovější verze: %2\$s",
         "username" to "Uživatelské jméno",
         "username_changed" to "Uživatelské jméno aktualizováno",
         "verification_warning_not_verified" to "Toto místo ještě nebylo ověřeno, takže jeho údaje mohou být nespolehlivé. Pokud víte, že stále přijímá sats, klepněte na Ověřit. Pokud víte, že už ne, klepněte na Nahlásit.",

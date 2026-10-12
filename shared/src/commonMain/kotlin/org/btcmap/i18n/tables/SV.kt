@@ -254,7 +254,7 @@ internal val SV: Map<String, String> = mapOf(
         "tap_to_retry" to "Tryck för att försöka igen",
         "update_available" to "Uppdatering tillgänglig",
         "update_available_description" to "Om du installerade denna app från en butik kan du ignorera detta och låta din butik hantera uppdateringar. Om du installerade via en direkt APK, tryck på \"Hämta APK\"-knappen för att uppdatera.\n\nNuvarande version: %1\$s\nSenaste version: %2\$s",
-        "update_available_description_beta" to "En ny betaversion är tillgänglig. Tack för att du deltar i BTC Maps betatestning. Kontakta oss om du upptäcker en bugg eller har förslag på funktioner.\n\nAktuell versionskod: %1\$d\nSenaste versionskod: %2\$d",
+        "update_available_description_beta" to "En ny betaversion är tillgänglig. Tack för att du deltar i BTC Maps betatestning. Kontakta oss om du upptäcker en bugg eller har förslag på funktioner.\n\nInstallerad version: %1\$s\nSenaste version: %2\$s",
         "username" to "Användarnamn",
         "username_changed" to "Användarnamn uppdaterat",
         "verification_warning_not_verified" to "Den här platsen har inte verifierats ännu, så uppgifterna kan vara opålitliga. Om du vet att den fortfarande accepterar sats, tryck på Verifiera. Om du vet att den inte gör det längre, tryck på Rapportera.",

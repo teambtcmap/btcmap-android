@@ -254,7 +254,7 @@ internal val NL: Map<String, String> = mapOf(
         "tap_to_retry" to "Tik om opnieuw te proberen",
         "update_available" to "Update beschikbaar",
         "update_available_description" to "Als je deze app uit een winkel hebt geïnstalleerd, kun je dit negeren en je winkel de updates laten beheren. Als je via een directe APK hebt geïnstalleerd, druk op de \"APK ophalen\" knop om bij te werken.\n\nHuidige versie: %1\$s\nNieuwste versie: %2\$s",
-        "update_available_description_beta" to "Er is een nieuwe bèta-build beschikbaar. Bedankt voor je deelname aan de BTC Map-bètatest. Neem contact met ons op als je een bug opmerkt of suggesties voor functies hebt.\n\nHuidige versiecode: %1\$d\nNieuwste versiecode: %2\$d",
+        "update_available_description_beta" to "Er is een nieuwe bèta-build beschikbaar. Bedankt voor je deelname aan de BTC Map-bètatest. Neem contact met ons op als je een bug opmerkt of suggesties voor functies hebt.\n\nGeïnstalleerde build: %1\$s\nNieuwste build: %2\$s",
         "username" to "Gebruikersnaam",
         "username_changed" to "Gebruikersnaam bijgewerkt",
         "verification_warning_not_verified" to "Deze plek is nog niet geverifieerd, dus de gegevens zijn mogelijk onbetrouwbaar. Als je weet dat er nog steeds sats worden geaccepteerd, tik op Verifiëren. Als je weet dat dit niet meer het geval is, tik op Rapporteren.",

@@ -254,7 +254,7 @@ internal val PL: Map<String, String> = mapOf(
         "tap_to_retry" to "Dotknij, aby ponowić",
         "update_available" to "Dostępna aktualizacja",
         "update_available_description" to "Jeśli zainstalowałeś tę aplikację ze sklepu, możesz to zignorować i pozwolić sklepowi zarządzać aktualizacjami. Jeśli zainstalowałeś bezpośrednio przez APK, naciśnij przycisk \"Pobierz APK\", aby zaktualizować.\n\nAktualna wersja: %1\$s\nNajnowsza wersja: %2\$s",
-        "update_available_description_beta" to "Dostępna jest nowa kompilacja beta. Dziękujemy za udział w testach beta BTC Map. Skontaktuj się z nami, jeśli zauważysz błąd lub masz sugestie dotyczące funkcji.\n\nKod bieżącej wersji: %1\$d\nKod najnowszej wersji: %2\$d",
+        "update_available_description_beta" to "Dostępna jest nowa kompilacja beta. Dziękujemy za udział w testach beta BTC Map. Skontaktuj się z nami, jeśli zauważysz błąd lub masz sugestie dotyczące funkcji.\n\nZainstalowana kompilacja: %1\$s\nNajnowsza kompilacja: %2\$s",
         "username" to "Nazwa użytkownika",
         "username_changed" to "Nazwa użytkownika zaktualizowana",
         "verification_warning_not_verified" to "To miejsce nie zostało jeszcze zweryfikowane, więc jego dane mogą być niewiarygodne. Jeśli wiesz, że nadal przyjmuje saty, dotknij Zweryfikuj. Jeśli wiesz, że już nie, dotknij Zgłoś.",

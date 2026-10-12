@@ -254,7 +254,7 @@ internal val TR: Map<String, String> = mapOf(
         "tap_to_retry" to "Yeniden denemek için dokunun",
         "update_available" to "Güncelleme mevcut",
         "update_available_description" to "Bu uygulamayı bir mağazadan yüklediyseniz, bunu göz ardı edebilir ve güncellemeleri mağazanızın yönetmesine izin verebilirsiniz. Doğrudan APK ile yüklediyseniz, güncellemek için \"APK al\" düğmesine basın.\n\nMevcut sürüm: %1\$s\nEn son sürüm: %2\$s",
-        "update_available_description_beta" to "Yeni bir beta sürümü mevcut. BTC Map beta testine katıldığınız için teşekkürler. Bir hata fark ederseniz veya özellik önerileriniz varsa lütfen bizimle iletişime geçin.\n\nMevcut sürüm kodu: %1\$d\nEn son sürüm kodu: %2\$d",
+        "update_available_description_beta" to "Yeni bir beta sürümü mevcut. BTC Map beta testine katıldığınız için teşekkürler. Bir hata fark ederseniz veya özellik önerileriniz varsa lütfen bizimle iletişime geçin.\n\nYüklü sürüm: %1\$s\nEn son sürüm: %2\$s",
         "username" to "Kullanıcı adı",
         "username_changed" to "Kullanıcı adı güncellendi",
         "verification_warning_not_verified" to "Bu yer henüz doğrulanmadı, bu nedenle ayrıntıları güvenilir olmayabilir. Hâlâ sats kabul ettiğini biliyorsanız Doğrula'ya dokunun. Artık kabul etmediğini biliyorsanız Bildir'e dokunun.",

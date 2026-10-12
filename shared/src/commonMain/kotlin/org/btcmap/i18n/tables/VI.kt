@@ -254,7 +254,7 @@ internal val VI: Map<String, String> = mapOf(
         "tap_to_retry" to "Nhấn để thử lại",
         "update_available" to "Cập nhật có sẵn",
         "update_available_description" to "Nếu bạn đã cài đặt ứng dụng này từ cửa hàng, bạn có thể bỏ qua và để cửa hàng quản lý cập nhật. Nếu bạn đã cài đặt qua APK trực tiếp, nhấn nút \"Tải APK\" để cập nhật.\n\nPhiên bản hiện tại: %1\$s\nPhiên bản mới nhất: %2\$s",
-        "update_available_description_beta" to "Có bản beta mới. Cảm ơn bạn đã tham gia thử nghiệm beta BTC Map. Vui lòng liên hệ với chúng tôi nếu bạn phát hiện lỗi hoặc có đề xuất tính năng.\n\nMã phiên bản hiện tại: %1\$d\nMã phiên bản mới nhất: %2\$d",
+        "update_available_description_beta" to "Có bản beta mới. Cảm ơn bạn đã tham gia thử nghiệm beta BTC Map. Vui lòng liên hệ với chúng tôi nếu bạn phát hiện lỗi hoặc có đề xuất tính năng.\n\nBản đã cài đặt: %1\$s\nBản mới nhất: %2\$s",
         "username" to "Tên người dùng",
         "username_changed" to "Đã cập nhật tên người dùng",
         "verification_warning_not_verified" to "Địa điểm này chưa được xác minh, nên thông tin có thể không đáng tin cậy. Nếu bạn biết nơi đây vẫn chấp nhận sats, hãy nhấn Xác minh. Nếu bạn biết nơi đây không còn chấp nhận, hãy nhấn Báo cáo.",

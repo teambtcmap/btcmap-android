@@ -30,6 +30,9 @@ import java.io.File
 import java.io.FileOutputStream
 import java.net.HttpURLConnection
 import java.net.URL
+import java.time.Instant
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 
 /**
  * Reports whether the published APK is newer than this build, and opens the
@@ -114,9 +117,13 @@ class UpdateNotificationController(
             .setTitle(strings["update_available"])
             .setMessage(
                 if (isBeta) {
+                    // A beta is rebuilt at one version code, so its codes alone
+                    // would read "313 to 313": the dialog names when each build
+                    // was made instead, which is what differs between deploys.
                     strings.format(
                         "update_available_description_beta",
-                        BuildConfig.VERSION_CODE, update.versionCode
+                        buildStamp(BuildConfig.BUILD_TIME, BuildConfig.VERSION_NAME),
+                        buildStamp(update.buildTime, update.versionName),
                     )
                 } else {
                     strings.format(
@@ -316,3 +323,24 @@ class UpdateNotificationController(
             if (isBeta) UpdateCheck.BETA_MANIFEST_URL else UpdateCheck.RELEASE_MANIFEST_URL
     }
 }
+
+/** How a build time reads in the beta update dialog. */
+private val BUILD_TIME_FORMAT: DateTimeFormatter =
+    DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
+
+/**
+ * A beta's build stamp for the update dialog: its build time as a date, or
+ * [versionName] when the build carries no stamp — a locally built beta, which a
+ * deploy never publishes. The build time, not the version code, is what tells
+ * one beta deploy from the next.
+ */
+internal fun buildStamp(
+    buildTime: Long,
+    versionName: String,
+    zone: ZoneId = ZoneId.systemDefault(),
+): String =
+    if (buildTime > 0) {
+        BUILD_TIME_FORMAT.withZone(zone).format(Instant.ofEpochMilli(buildTime))
+    } else {
+        versionName
+    }

@@ -385,7 +385,7 @@ internal val EN: Map<String, String> = mapOf(
         "update" to "Update",
         "update_available" to "Update available",
         "update_available_description" to "If you installed this app from a store, you can ignore this and let your store manage updates. If you installed via a direct APK, press the \"Get APK\" button to update.\n\nCurrent version: %1\$s\nLatest version: %2\$s",
-        "update_available_description_beta" to "A new beta build is available. Thank you for participating in BTC Map beta testing. Please contact us if you notice a bug or have any feature suggestions.\n\nCurrent version code: %1\$d\nLatest version code: %2\$d",
+        "update_available_description_beta" to "A new beta build is available. Thank you for participating in BTC Map beta testing. Please contact us if you notice a bug or have any feature suggestions.\n\nInstalled build: %1\$s\nLatest build: %2\$s",
         "uploaded_by" to "Uploaded by %1\$s",
         "uploaded_images" to "Uploaded images",
         "uploaded_images_empty" to "You haven't uploaded any images yet.",

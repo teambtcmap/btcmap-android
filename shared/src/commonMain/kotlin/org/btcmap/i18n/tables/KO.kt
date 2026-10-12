@@ -254,7 +254,7 @@ internal val KO: Map<String, String> = mapOf(
         "tap_to_retry" to "다시 시도하려면 탭하세요",
         "update_available" to "업데이트 가능",
         "update_available_description" to "스토어에서 이 앱을 설치한 경우 이를 무시하고 스토어가 업데이트를 관리하도록 할 수 있습니다. 직접 APK를 통해 설치한 경우 업데이트하려면 \"APK 가져오기\" 버튼을 누르세요.\n\n현재 버전: %1\$s\n최신 버전: %2\$s",
-        "update_available_description_beta" to "새 베타 빌드가 제공됩니다. BTC Map 베타 테스트에 참여해 주셔서 감사합니다. 버그를 발견하거나 기능 제안이 있으면 문의해 주세요.\n\n현재 버전 코드: %1\$d\n최신 버전 코드: %2\$d",
+        "update_available_description_beta" to "새 베타 빌드가 제공됩니다. BTC Map 베타 테스트에 참여해 주셔서 감사합니다. 버그를 발견하거나 기능 제안이 있으면 문의해 주세요.\n\n설치된 빌드: %1\$s\n최신 빌드: %2\$s",
         "username" to "사용자 이름",
         "username_changed" to "사용자 이름이 업데이트되었습니다",
         "verification_warning_not_verified" to "이 장소는 아직 확인되지 않았으므로 세부 정보가 신뢰할 수 없을 수 있습니다. 아직 sats를 받는다면 확인을 누르세요. 더 이상 받지 않는다면 신고를 누르세요.",

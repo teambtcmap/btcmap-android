@@ -254,7 +254,7 @@ internal val JA: Map<String, String> = mapOf(
         "tap_to_retry" to "タップして再試行",
         "update_available" to "アップデート利用可能",
         "update_available_description" to "このアプリをストアからインストールした場合は、これは無視して、ストアにアップデートを管理させることができます。直接APKからインストールした場合は、「APKを取得」ボタンをタップしてアップデートしてください。\n\n現在のバージョン: %1\$s\n最新バージョン: %2\$s",
-        "update_available_description_beta" to "新しいベータビルドが利用可能です。BTC Mapのベータテストにご参加いただきありがとうございます。バグに気づいた場合や機能の提案がある場合は、お問い合わせください。\n\n現在のバージョンコード: %1\$d\n最新のバージョンコード: %2\$d",
+        "update_available_description_beta" to "新しいベータビルドが利用可能です。BTC Mapのベータテストにご参加いただきありがとうございます。バグに気づいた場合や機能の提案がある場合は、お問い合わせください。\n\nインストール済みのビルド: %1\$s\n最新のビルド: %2\$s",
         "username" to "ユーザー名",
         "username_changed" to "ユーザー名を更新しました",
         "verification_warning_not_verified" to "この場所はまだ確認されていないため、情報が信頼できない可能性があります。まだsatsを受け付けている場合は「確認」をタップしてください。受け付けなくなった場合は「報告」をタップしてください。",

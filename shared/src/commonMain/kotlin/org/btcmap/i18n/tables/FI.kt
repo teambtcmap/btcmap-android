@@ -254,7 +254,7 @@ internal val FI: Map<String, String> = mapOf(
         "tap_to_retry" to "Yritä uudelleen napauttamalla",
         "update_available" to "Päivitys saatavilla",
         "update_available_description" to "Jos asensit tämän sovelluksen kaupasta, voit ohittaa tämän ja antaa kauppojen hallita päivityksiä. Jos asensit suoraan APK:n kautta, paina \"Hae APK\" -painiketta päivittääksesi.\n\nNykyinen versio: %1\$s\nUusin versio: %2\$s",
-        "update_available_description_beta" to "Uusi betaversio on saatavilla. Kiitos, että osallistut BTC Mapin betatestaukseen. Ota meihin yhteyttä, jos huomaat virheen tai sinulla on ominaisuusehdotuksia.\n\nNykyinen versionumero: %1\$d\nUusin versionumero: %2\$d",
+        "update_available_description_beta" to "Uusi betaversio on saatavilla. Kiitos, että osallistut BTC Mapin betatestaukseen. Ota meihin yhteyttä, jos huomaat virheen tai sinulla on ominaisuusehdotuksia.\n\nAsennettu versio: %1\$s\nUusin versio: %2\$s",
         "username" to "Käyttäjänimi",
         "username_changed" to "Käyttäjänimi päivitetty",
         "verification_warning_not_verified" to "Tätä paikkaa ei ole vielä vahvistettu, joten sen tiedot voivat olla epäluotettavia. Jos tiedät, että se hyväksyy edelleen satseja, napauta Vahvista. Jos tiedät, ettei se enää hyväksy, napauta Ilmoita.",

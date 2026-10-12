@@ -254,7 +254,7 @@ internal val ZH: Map<String, String> = mapOf(
         "tap_to_retry" to "点按以重试",
         "update_available" to "有可用更新",
         "update_available_description" to "如果您从商店安装了此应用，可以忽略此提示并让您的商店管理更新。如果您通过直接下载 APK 安装，请按\"获取 APK\"按钮进行更新。\n\n当前版本：%1\$s\n最新版本：%2\$s",
-        "update_available_description_beta" to "有新的测试版可用。感谢您参与 BTC Map 测试。如果您发现错误或有任何功能建议，请联系我们。\n\n当前版本代码：%1\$d\n最新版本代码：%2\$d",
+        "update_available_description_beta" to "有新的测试版可用。感谢您参与 BTC Map 测试。如果您发现错误或有任何功能建议，请联系我们。\n\n已安装版本: %1\$s\n最新版本: %2\$s",
         "username" to "用户名",
         "username_changed" to "用户名已更新",
         "verification_warning_not_verified" to "此地点尚未验证，因此其详细信息可能不可靠。如果您知道它仍然接受 sats，请点按“验证”。如果您知道它已不再接受，请点按“报告”。",

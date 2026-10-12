@@ -254,7 +254,7 @@ internal val RO: Map<String, String> = mapOf(
         "tap_to_retry" to "Atingeți pentru a reîncerca",
         "update_available" to "Actualizare disponibilă",
         "update_available_description" to "Dacă ai instalat această aplicație dintr-un magazin, poți ignora acest lucru și lăsa magazinul să gestioneze actualizările. Dacă ai instalat prin APK direct, apasă butonul \"Obține APK\" pentru a actualiza.\n\nVersiunea curentă: %1\$s\nCea mai recentă versiune: %2\$s",
-        "update_available_description_beta" to "O nouă versiune beta este disponibilă. Îți mulțumim pentru participarea la testarea beta BTC Map. Te rugăm să ne contactezi dacă observi o eroare sau ai sugestii de funcționalități.\n\nCodul versiunii curente: %1\$d\nCodul celei mai recente versiuni: %2\$d",
+        "update_available_description_beta" to "O nouă versiune beta este disponibilă. Îți mulțumim pentru participarea la testarea beta BTC Map. Te rugăm să ne contactezi dacă observi o eroare sau ai sugestii de funcționalități.\n\nVersiunea instalată: %1\$s\nCea mai recentă versiune: %2\$s",
         "username" to "Nume de utilizator",
         "username_changed" to "Nume de utilizator actualizat",
         "verification_warning_not_verified" to "Acest loc nu a fost încă verificat, așa că detaliile pot fi nesigure. Dacă știi că acceptă în continuare sats, apasă Verifică. Dacă știi că nu mai acceptă, apasă Raportează.",

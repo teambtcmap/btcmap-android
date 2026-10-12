@@ -254,7 +254,7 @@ internal val NO: Map<String, String> = mapOf(
         "tap_to_retry" to "Trykk for å prøve igjen",
         "update_available" to "Oppdatering tilgjengelig",
         "update_available_description" to "Hvis du installerte denne appen fra en butikk, kan du ignorere dette og la butikken din håndtere oppdateringer. Hvis du installerte via en direkte APK, trykk på \"Få APK\"-knappen for å oppdatere.\n\nNåværende versjon: %1\$s\nNyeste versjon: %2\$s",
-        "update_available_description_beta" to "En ny betaversjon er tilgjengelig. Takk for at du deltar i BTC Map-betatesting. Kontakt oss hvis du oppdager en feil eller har forslag til funksjoner.\n\nNåværende versjonskode: %1\$d\nNyeste versjonskode: %2\$d",
+        "update_available_description_beta" to "En ny betaversjon er tilgjengelig. Takk for at du deltar i BTC Map-betatesting. Kontakt oss hvis du oppdager en feil eller har forslag til funksjoner.\n\nInstallert versjon: %1\$s\nNyeste versjon: %2\$s",
         "username" to "Brukernavn",
         "username_changed" to "Brukernavn oppdatert",
         "verification_warning_not_verified" to "Dette stedet er ikke verifisert ennå, så detaljene kan være upålitelige. Hvis du vet at det fortsatt godtar sats, trykk på Bekreft. Hvis du vet at det ikke gjør det lenger, trykk på Rapporter.",
