@@ -2,7 +2,9 @@ package org.btcmap.auth
 
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.resetMain
 import mockwebserver3.MockResponse
 import mockwebserver3.MockWebServer
 import org.btcmap.App
@@ -36,6 +38,10 @@ class SessionExpiryTest : AppTestCase() {
 
     @Before
     fun startServer() = runBlocking<Unit> {
+        // A preceding Compose test can leave its test dispatcher installed as
+        // `Dispatchers.Main`; restore the real one before this non-Compose test
+        // starts, or its app coroutines queue forever.
+        runCatching { Dispatchers.resetMain() }
         server.start()
         // This test exercises the real app API, whose onUnauthorized handler
         // clears the session. Drop the mock API installed by AppTestCase so

@@ -116,9 +116,6 @@ dependencies {
     "macAarch64"(compose.desktop.macos_arm64)
     "macAarch64"(libs.maplibre.compose.runtime.opengl.macos.arm64)
 
-    // Compose desktop UI tests: `runComposeUiTest` drives the screens without a
-    // window, so the desktop wiring can be clicked through on the JVM.
-    testImplementation(compose.uiTest)
     testImplementation(kotlin("test"))
     testImplementation(libs.junit)
     // The remote-image test builds Coil's loader directly; the main source set
@@ -128,7 +125,8 @@ dependencies {
 }
 
 tasks.test {
-    // Skiko, which the Compose test scene renders through, uses the FFM API.
+    // Skiko is on the test runtime classpath through the desktop plugin, and
+    // uses the FFM API.
     jvmArgs("--enable-native-access=ALL-UNNAMED")
 }
 

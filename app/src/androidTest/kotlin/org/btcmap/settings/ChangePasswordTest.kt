@@ -3,7 +3,7 @@ package org.btcmap.settings
 import org.btcmap.i18n.Strings
 
 import kotlinx.coroutines.runBlocking
-import androidx.compose.ui.test.junit4.createEmptyComposeRule
+import androidx.compose.ui.test.junit4.v2.createEmptyComposeRule
 import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithContentDescription

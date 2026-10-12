@@ -1,7 +1,7 @@
 package org.btcmap.feed
 
 import kotlinx.coroutines.runBlocking
-import androidx.compose.ui.test.junit4.createEmptyComposeRule
+import androidx.compose.ui.test.junit4.v2.createEmptyComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
@@ -66,7 +66,7 @@ class ActivityFeedPlaceNavigationTest : AppTestCase() {
                     }
                 }
 
-                waitUntil { apiRule.server.requestCount >= 1 }
+                composeTestRule.waitUntil(8_000) { apiRule.server.requestCount >= 1 }
                 composeTestRule.waitUntil(5_000) {
                     composeTestRule.onAllNodesWithText("Test Merchant")
                         .fetchSemanticsNodes().isNotEmpty()

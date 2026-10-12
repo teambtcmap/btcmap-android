@@ -105,43 +105,46 @@ intentional:
   back to them stay online-only.
 
 ## Testing
-- Tests are fast, run and write liberally, but never run instrumented tests (`connectedDebugAndroidTest`) unless the user
-  explicitly asks for them since those are slow.
-- Compose UI tests that run on the JVM live in `:ui:jvmTest` and `:desktopApp:test`
-  (`runComposeUiTest`, no window). `:ui`'s jvmTest puts the app's icon-font
-  directory on a `btcmap.iconFontDir` system property, and both test JVMs need
-  `--enable-native-access=ALL-UNNAMED`.
-- Compose instrumented tests use `createEmptyComposeRule` and
+- Tests are fast, run and write liberally, but never run instrumented tests
+  (`connectedDebugAndroidTest`) unless the user explicitly asks for them since
+  those are slow.
+- Compose UI tests that run on the JVM live in `:ui:jvmTest`
+  (`runComposeUiTest`, no window). `:desktopApp:test` holds plain JVM tests only
+  (bundled snapshots, remote image loading), and `:shared:jvmTest` and
+  `:app:test` hold the shared/Android unit tests. `:ui`'s jvmTest puts the app's
+  icon-font directory on a `btcmap.iconFontDir` system property, and both test
+  JVMs need `--enable-native-access=ALL-UNNAMED`.
+- Compose instrumented tests use
+  `androidx.compose.ui.test.junit4.v2.createEmptyComposeRule` and
   `androidx.compose.ui.test` (`onNodeWithText`, `onNodeWithTag`, `performClick`,
-  `performTextInput`); Espresso cannot see Compose content. Assert on a host
-  view's exposed state (e.g. `state`, `sections`, `rows`) where a `RecyclerView`
-  adapter used to be read
+  `performTextInput`); Espresso cannot see Compose content, so assert through
+  those semantics rather than a host view's state. The v2 rule's single-threaded
+  test dispatcher is also what keeps MapLibre's main-thread guard happy: the
+  deprecated v1 rule (unconfined) makes every screen that mounts the map throw
+  "Map state must be used from the main thread".
+- In an instrumented Compose test, wait with `composeTestRule.waitUntil` and pass
+  a timeout (the default is 1s), never the app-level `waitUntil`: it only sleeps
+  the test thread and never advances the v2 dispatcher, so the app's coroutines
+  never run and the test hangs. `:app` sets `timeout_msec` so a hung test fails
+  after 10s instead of wedging the run.
+- Put a test in `app/src/androidTest` only when it needs the Android host (the
+  `Activity`/`AppRootFragment`, Espresso, MapLibre). Logic and screens that are
+  shared belong in `:shared:jvmTest`, or `:ui:jvmTest` for Compose UI, where
+  they run without an emulator.
 - Add `testTag` constants in the `:ui` screen for anything a test must drive
-  (e.g. `COMMENT_FIELD_TAG`, `BOOST_CONTINUE_TAG`). A desktop screen a test must
-  drive is `internal`, not `private`; click a `Switch` through `isToggleable()`
-  and a `RadioButton` through `isSelectable()` (a toggle's row text is not
-  clickable)
+  (e.g. `COMMENT_FIELD_TAG`, `BOOST_CONTINUE_TAG`). A screen a test must drive
+  is `internal` (or `public`, when the host needs it) rather than `private`;
+  click a `Switch` through `isToggleable()` and a `RadioButton` through
+  `isSelectable()` (a toggle's row text is not clickable).
 
 ## Commits
 - Never create a commit unless the user explicitly asks for one. Implement the
-  change and leave it in the working tree for review; the changelog and version
-  code rules below apply only once a commit is actually requested.
+  change and leave it in the working tree for review; the changelog rules below apply only once a commit is actually requested.
 
 ## Changelog
 - Update `CHANGELOG.md` before committing, adding entries under the `## [Unreleased]` section
 - Only user-facing or otherwise non-trivial and important changes belong in the changelog
 
-## Version Code
-- Bump `versionCode` in `app/build.gradle.kts` with every commit made directly on
-  `master` that changes the app: increase it by one and note the new value in the
-  commit message (e.g. "Bump the version code to 66")
-- Don't bump it for changes that don't affect the shipped app, such as
-  documentation, `AGENTS.md` or other metadata
-- Do not bump `versionCode` on a feature branch that is not expected to land on
-  `master` immediately; the branch can be committed to freely and the bump added
-  when its work is merged into `master`
-- `versionName` is independent of `versionCode` and is not bumped per commit
-
 ## Terminal
 
-- never use `sleep` for more than a second, it creates unresanoble delays
+- never use `sleep` or any other delays for more than a second, including in scripts. If something is long running, prefer background execution and polling

@@ -105,7 +105,10 @@ internal fun areaPolygon(): String {
 internal fun area(
     id: Long = 1,
     name: String = "Grand Paris",
-    description: String? = null,
+    // Non-blank on purpose: `AREA_DESCRIPTION_TAG` is the signal every area test
+    // waits on for the body to render, and it is only drawn for a non-blank
+    // description (AreaScreen.DescriptionSection).
+    description: String? = "A test area.",
     icon: String? = null,
     iconWide: String? = null,
     websiteUrl: String = "https://btcmap.org/community/grand-paris",

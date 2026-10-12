@@ -196,8 +196,13 @@ internal fun MapRoute(
             return
         }
         scope.launch {
-            SavedItems.togglePlace(services.api, services.db, place.id, place.name.orEmpty())
-            bookmarked = SavedItems.isPlaceSaved(services.db, place.id)
+            try {
+                SavedItems.togglePlace(services.api, services.db, place.id, place.name.orEmpty())
+                bookmarked = SavedItems.isPlaceSaved(services.db, place.id)
+            } catch (t: Throwable) {
+                t.rethrowIfCancellation()
+                platform.showError(t)
+            }
         }
     }
 

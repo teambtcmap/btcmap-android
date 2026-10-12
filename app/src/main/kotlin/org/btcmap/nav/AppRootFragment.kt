@@ -142,7 +142,9 @@ class AppRootFragment : Fragment() {
             // the whole root in it, without recreating the activity.
             onLanguageChanged = { labels = context.androidAppLabels() }
             startRoute = routeFromArgs(arguments)
-            onExit = { requireActivity().finish() }
+            // A coroutine (e.g. the profile's logout) can call this after the
+            // fragment detached, so it must not `requireActivity()`.
+            onExit = { activity?.finish() }
         }
 
         // System back pops the Compose stack and only closes the app at the map.

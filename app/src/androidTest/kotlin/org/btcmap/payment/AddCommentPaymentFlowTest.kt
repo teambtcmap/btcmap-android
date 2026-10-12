@@ -3,7 +3,8 @@ package org.btcmap.payment
 import org.btcmap.i18n.Strings
 
 import androidx.compose.ui.test.assertIsEnabled
-import androidx.compose.ui.test.junit4.createEmptyComposeRule
+import androidx.compose.ui.test.assertIsNotEnabled
+import androidx.compose.ui.test.junit4.v2.createEmptyComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithTag
@@ -79,8 +80,11 @@ class AddCommentPaymentFlowTest : PaymentScreenTest() {
             composeTestRule.onNodeWithTag(COMMENT_FIELD_TAG).performTextInput("gm")
             composeTestRule.onNodeWithTag(COMMENT_CONTINUE_TAG).performClick()
 
-            waitUntil { dispatcher.orderRequests.get() == 1 }
-            composeTestRule.waitUntil(5_000) { invoiceShown() && !continueShown() && !fieldShown() }
+            composeTestRule.waitUntil(8_000) { dispatcher.orderRequests.get() == 1 }
+            // The invoice replaces the continue button; the field stays on
+            // screen but locks rather than disappearing.
+            composeTestRule.waitUntil(5_000) { invoiceShown() && !continueShown() }
+            composeTestRule.onNodeWithTag(COMMENT_FIELD_TAG).assertIsNotEnabled()
         }
     }
 
@@ -93,12 +97,18 @@ class AddCommentPaymentFlowTest : PaymentScreenTest() {
             composeTestRule.onNodeWithTag(COMMENT_FIELD_TAG).performTextInput("gm")
             composeTestRule.onNodeWithTag(COMMENT_CONTINUE_TAG).performClick()
 
-            waitUntil {
-                var gone = false
-                scenario.onActivity {
-                    gone = it.supportFragmentManager.findFragmentByTag(COMMENT_TAG) == null
+            composeTestRule.waitUntil(8_000) {
+                // The screen closes by finishing the activity, so `onActivity`
+                // throws once it is gone — which is itself the success signal.
+                try {
+                    var gone = false
+                    scenario.onActivity {
+                        gone = it.supportFragmentManager.findFragmentByTag(COMMENT_TAG) == null
+                    }
+                    gone
+                } catch (_: Throwable) {
+                    true
                 }
-                gone
             }
         }
     }

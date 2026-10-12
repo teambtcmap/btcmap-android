@@ -112,8 +112,13 @@ internal fun PlaceRoute(
             return
         }
         scope.launch {
-            SavedItems.togglePlace(services.api, services.db, loaded.id, name)
-            bookmarked = SavedItems.isPlaceSaved(services.db, loaded.id)
+            try {
+                SavedItems.togglePlace(services.api, services.db, loaded.id, name)
+                bookmarked = SavedItems.isPlaceSaved(services.db, loaded.id)
+            } catch (t: Throwable) {
+                t.rethrowIfCancellation()
+                platform.showError(t)
+            }
         }
     }
 

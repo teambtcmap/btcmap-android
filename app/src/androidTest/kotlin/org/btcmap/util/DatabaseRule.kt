@@ -18,6 +18,9 @@ class DatabaseRule : TestRule {
     override fun apply(base: Statement, description: Description): Statement {
         return object : Statement() {
             override fun evaluate() {
+                // `connect()` is a separate step since the shared layer went
+                // suspending; without it the query objects are uninitialized.
+                runBlocking { db.connect() }
                 app.dbForTesting = db
                 try {
                     base.evaluate()

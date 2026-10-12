@@ -3,7 +3,7 @@ package org.btcmap.settings
 import org.btcmap.i18n.Strings
 
 import kotlinx.coroutines.runBlocking
-import androidx.compose.ui.test.junit4.createEmptyComposeRule
+import androidx.compose.ui.test.junit4.v2.createEmptyComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -66,7 +66,7 @@ class UserLogoutTest : AppTestCase() {
                 }
                 composeTestRule.onNodeWithText(logOut).performScrollTo().performClick()
 
-                waitUntil { prefs.authToken == null && runBlocking { databaseRule.db.user.select() } == null }
+                composeTestRule.waitUntil(8_000) { prefs.authToken == null && runBlocking { databaseRule.db.user.select() } == null }
 
                 Assert.assertNull(runBlocking { databaseRule.db.user.select() })
                 Assert.assertNull(prefs.authToken)

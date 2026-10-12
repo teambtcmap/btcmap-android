@@ -6,6 +6,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+- Fix saving a place or area crashing the app when the save fails — a failed request, or an expired session whose user is no longer cached — by reporting the error instead of letting it escape the screen's coroutine
+- Fix a crash when the app exits after logging out: the exit no longer calls `requireActivity()` on a fragment that has already detached
+
 - Update the beta in place: the map's update button now downloads the new APK with a progress bar and hands it to the Android package installer instead of opening it in a browser, the beta manifest carries a build time so a rebuild at the same version code is still offered, and the beta's settings gain an About section with the running version and a manual update check
 - Move the map's compass from under the search bar to the top of the right-hand button column, just above the area chips, so it wears the app's configurable button colours and lines up with the other map controls
 - Ship the desktop app for Windows and Apple Silicon macOS: the deploy commands now build a Windows MSIX (with an installer `.exe` and a portable `.zip`) and a signed macOS `.app` archive with an update feed, both from this Linux machine, alongside the existing Linux AppImage. The Windows packages install but do not start yet, and the macOS ones are untested: the packaged launcher hides the Windows system directories from MapLibre's native runtime, which is left to an upstream fix. The macOS build needs no extra tooling, and until the project has Windows and Apple certificates the packages are self-signed, so the Windows installer asks the user to trust the app's certificate first and macOS needs the usual "Open anyway" on first launch

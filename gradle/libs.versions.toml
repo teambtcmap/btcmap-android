@@ -48,7 +48,9 @@ androidx-browser = "1.10.0"
 # Material design components
 # https://github.com/material-components/material-components-android/releases
 material = "1.14.0"
-# Modern HTTP client, used only by the MockWebServer test dependency now.
+# Modern HTTP client. Coil's Android artifact still asks for 4.12.0, but the
+# app pins 5.5.0 (see `:app`'s dependency on it), which AGP's consistent
+# resolution then gives the instrumented tests too, matching MockWebServer.
 # https://github.com/square/okhttp/blob/master/CHANGELOG.md
 okhttp = "5.5.0"
 
@@ -150,6 +152,7 @@ okio = { module = "com.squareup.okio:okio", version.ref = "okio" }
 atomicfu = { module = "org.jetbrains.kotlinx:atomicfu", version.ref = "atomicfu" }
 androidx-sqlite-web = { module = "androidx.sqlite:sqlite-web", version.ref = "androidx-sqlite" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
+okhttp = { module = "com.squareup.okhttp3:okhttp", version.ref = "okhttp" }
 mockwebserver = { module = "com.squareup.okhttp3:mockwebserver3-junit4", version.ref = "okhttp" }
 androidx-compose-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4", version.ref = "androidx-compose" }
 androidx-compose-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest", version.ref = "androidx-compose" }

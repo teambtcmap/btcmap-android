@@ -3,7 +3,7 @@ package org.btcmap.place
 import org.btcmap.i18n.Strings
 
 import kotlinx.coroutines.runBlocking
-import androidx.compose.ui.test.junit4.createEmptyComposeRule
+import androidx.compose.ui.test.junit4.v2.createEmptyComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -70,8 +70,8 @@ class PlaceBookmarkTest : AppTestCase() {
         withPlace {
             save()
 
-            waitUntil { posted.get() }
-            waitUntil { savedPlaceIds().contains(1L) }
+            composeTestRule.waitUntil(8_000) { posted.get() }
+            composeTestRule.waitUntil(8_000) { savedPlaceIds().contains(1L) }
         }
     }
 
@@ -98,8 +98,8 @@ class PlaceBookmarkTest : AppTestCase() {
         withPlace {
             save()
 
-            waitUntil { deleted.get() }
-            waitUntil { savedPlaceIds().isEmpty() }
+            composeTestRule.waitUntil(8_000) { deleted.get() }
+            composeTestRule.waitUntil(8_000) { savedPlaceIds().isEmpty() }
         }
     }
 

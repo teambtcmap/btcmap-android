@@ -2,7 +2,7 @@ package org.btcmap.area
 
 import kotlinx.coroutines.runBlocking
 import androidx.compose.ui.test.assertTextContains
-import androidx.compose.ui.test.junit4.createEmptyComposeRule
+import androidx.compose.ui.test.junit4.v2.createEmptyComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
@@ -41,13 +41,14 @@ class AreaContentTest : AreaScreenTest() {
         databaseRule.db.area.insert(listOf(area(description = "Greater Paris")))
 
         withArea { _, _ ->
-            composeTestRule.waitUntil { hasTag(AREA_DESCRIPTION_TAG) }
+            composeTestRule.waitUntil(8_000) { hasTag(AREA_DESCRIPTION_TAG) }
 
             composeTestRule.onNodeWithText("Grand Paris").assertExists()
 
             composeTestRule.onNodeWithTag(AREA_DESCRIPTION_TAG)
                 .assertTextContains("Greater Paris")
-            composeTestRule.onNodeWithTag(AREA_WEBSITE_TAG)
+            // The website text sits in a clickable row, so its tag is merged.
+            composeTestRule.onNodeWithTag(AREA_WEBSITE_TAG, useUnmergedTree = true)
                 .assertTextContains("btcmap.org/community/grand-paris")
         }
     }
@@ -58,8 +59,8 @@ class AreaContentTest : AreaScreenTest() {
         databaseRule.db.area.insert(listOf(area(description = "Greater Paris")))
 
         withArea { _, area ->
-            composeTestRule.waitUntil { hasTag(AREA_DESCRIPTION_TAG) }
-            composeTestRule.waitUntil { hasTag(AREA_DESCRIPTION_TAG) }
+            composeTestRule.waitUntil(8_000) { hasTag(AREA_DESCRIPTION_TAG) }
+            composeTestRule.waitUntil(8_000) { hasTag(AREA_DESCRIPTION_TAG) }
 
             composeTestRule.onNodeWithTag(AREA_READ_MORE_TAG).assertDoesNotExist()
         }
@@ -73,8 +74,8 @@ class AreaContentTest : AreaScreenTest() {
         )
 
         withArea { _, area ->
-            composeTestRule.waitUntil { hasTag(AREA_DESCRIPTION_TAG) }
-            composeTestRule.waitUntil { hasTag(AREA_READ_MORE_TAG) }
+            composeTestRule.waitUntil(8_000) { hasTag(AREA_DESCRIPTION_TAG) }
+            composeTestRule.waitUntil(8_000) { hasTag(AREA_READ_MORE_TAG) }
 
             composeTestRule.onNodeWithTag(AREA_DESCRIPTION_TAG)
                 .assertTextContains("First paragraph.")
@@ -105,7 +106,7 @@ class AreaContentTest : AreaScreenTest() {
         )
 
         withArea { _, area ->
-            composeTestRule.waitUntil { eventCount() == 2 }
+            composeTestRule.waitUntil(8_000) { eventCount() == 2 }
 
             eventCards()[0].assertTextContains("Sooner")
             eventCards()[1].assertTextContains("Later")
@@ -119,7 +120,7 @@ class AreaContentTest : AreaScreenTest() {
         databaseRule.db.area.insert(listOf(area()))
 
         withArea { _, area ->
-            composeTestRule.waitUntil { hasTag(AREA_DESCRIPTION_TAG) }
+            composeTestRule.waitUntil(8_000) { hasTag(AREA_DESCRIPTION_TAG) }
 
             composeTestRule.onNodeWithTag(AREA_EVENTS_TITLE_TAG).assertDoesNotExist()
         }
@@ -134,7 +135,7 @@ class AreaContentTest : AreaScreenTest() {
         )
 
         withArea { scenario, area ->
-            composeTestRule.waitUntil { eventCount() == 1 }
+            composeTestRule.waitUntil(8_000) { eventCount() == 1 }
 
             lateinit var activity: Activity
             scenario.onActivity { activity = it }
@@ -161,7 +162,7 @@ class AreaContentTest : AreaScreenTest() {
         databaseRule.db.place.insert(listOf(place(osmId = "node:987654321", icon = "local_atm")))
 
         withArea { _, area ->
-            composeTestRule.waitUntil { issueCount() == 2 }
+            composeTestRule.waitUntil(8_000) { issueCount() == 2 }
 
             composeTestRule.onNodeWithTag(AREA_ISSUES_TITLE_TAG)
                 .assertTextContains("Issues (2 of 5)")
@@ -182,7 +183,7 @@ class AreaContentTest : AreaScreenTest() {
         databaseRule.db.area.insert(listOf(area()))
 
         withArea { _, area ->
-            composeTestRule.waitUntil { issueCount() == 1 }
+            composeTestRule.waitUntil(8_000) { issueCount() == 1 }
 
             composeTestRule.onNodeWithTag(AREA_ISSUES_TITLE_TAG)
                 .assertTextContains("Issues (1)")
@@ -202,7 +203,7 @@ class AreaContentTest : AreaScreenTest() {
         databaseRule.db.area.insert(listOf(area()))
 
         withArea { _, area ->
-            composeTestRule.waitUntil { issueCount() == 2 }
+            composeTestRule.waitUntil(8_000) { issueCount() == 2 }
 
             issueCards()[0].assertTextContains("Invalid value for name")
             issueCards()[1].assertTextContains("Unknown issue")
@@ -215,7 +216,7 @@ class AreaContentTest : AreaScreenTest() {
         databaseRule.db.area.insert(listOf(area()))
 
         withArea { _, area ->
-            composeTestRule.waitUntil { hasTag(AREA_DESCRIPTION_TAG) }
+            composeTestRule.waitUntil(8_000) { hasTag(AREA_DESCRIPTION_TAG) }
 
             composeTestRule.onNodeWithTag(AREA_ISSUES_TITLE_TAG).assertDoesNotExist()
         }
@@ -227,7 +228,7 @@ class AreaContentTest : AreaScreenTest() {
         databaseRule.db.area.insert(listOf(area(icon = null)))
 
         withArea { _, _ ->
-            composeTestRule.waitUntil { hasTag(AREA_DESCRIPTION_TAG) }
+            composeTestRule.waitUntil(8_000) { hasTag(AREA_DESCRIPTION_TAG) }
 
             composeTestRule.onNodeWithTag(AREA_HEADER_TAG).assertDoesNotExist()
         }
@@ -241,7 +242,7 @@ class AreaContentTest : AreaScreenTest() {
         )
 
         withArea { _, _ ->
-            composeTestRule.waitUntil { hasTag(AREA_DESCRIPTION_TAG) }
+            composeTestRule.waitUntil(8_000) { hasTag(AREA_DESCRIPTION_TAG) }
 
             composeTestRule.onNodeWithTag(AREA_HEADER_TAG).assertExists()
         }
@@ -283,7 +284,7 @@ class AreaContentTest : AreaScreenTest() {
         )
 
         withArea { _, area ->
-            composeTestRule.waitUntil { boostedCount() == 1 }
+            composeTestRule.waitUntil(8_000) { boostedCount() == 1 }
 
             composeTestRule.onNodeWithTag(AREA_BOOSTED_TITLE_TAG).assertExists()
             boostedCards()[0].assertTextContains("Boosted Cafe")
@@ -299,7 +300,7 @@ class AreaContentTest : AreaScreenTest() {
         )
 
         withArea { _, area ->
-            composeTestRule.waitUntil { hasTag(AREA_DESCRIPTION_TAG) }
+            composeTestRule.waitUntil(8_000) { hasTag(AREA_DESCRIPTION_TAG) }
 
             composeTestRule.onNodeWithTag(AREA_BOOSTED_TITLE_TAG).assertDoesNotExist()
         }

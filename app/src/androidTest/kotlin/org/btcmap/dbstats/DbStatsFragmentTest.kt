@@ -5,7 +5,7 @@ import org.btcmap.i18n.Strings
 import kotlinx.coroutines.runBlocking
 import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.hasText
-import androidx.compose.ui.test.junit4.createEmptyComposeRule
+import androidx.compose.ui.test.junit4.v2.createEmptyComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
@@ -85,7 +85,7 @@ class DbStatsFragmentTest : AppTestCase() {
         launchFragment { _, _ ->
             val before = controller.startedCount
             composeTestRule.onNodeWithContentDescription("Sync").performClick()
-            waitUntil { controller.startedCount > before }
+            composeTestRule.waitUntil(8_000) { controller.startedCount > before }
         }
     }
 

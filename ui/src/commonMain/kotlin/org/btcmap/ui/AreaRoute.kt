@@ -35,6 +35,7 @@ import org.btcmap.offline.OfflineAreaState
 import org.btcmap.offline.OfflineBounds
 import org.btcmap.platform.ioDispatcher
 import org.btcmap.saved.SavedItems
+import org.btcmap.util.rethrowIfCancellation
 import org.btcmap.settings.authorized
 import org.btcmap.settings.mapStyle
 import org.btcmap.ui.map.CITY_AREA_TYPE
@@ -130,8 +131,16 @@ internal fun AreaRoute(
                         onShowAuth()
                     } else {
                         scope.launch {
-                            SavedItems.toggleArea(services.api, services.db, loaded.id, name)
-                            saved = SavedItems.isAreaSaved(services.db, loaded.id)
+                            try {
+                                SavedItems.toggleArea(services.api, services.db, loaded.id, name)
+                                saved = SavedItems.isAreaSaved(services.db, loaded.id)
+                            } catch (t: Throwable) {
+                                // A stale session (no cached user) or a failed
+                                // request must not escape this coroutine and
+                                // crash the app.
+                                t.rethrowIfCancellation()
+                                platform.showError(t)
+                            }
                         }
                     }
                 },

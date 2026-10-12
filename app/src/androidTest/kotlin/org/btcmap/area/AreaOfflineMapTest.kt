@@ -5,7 +5,7 @@ import org.btcmap.i18n.Strings
 import kotlinx.coroutines.runBlocking
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertTextContains
-import androidx.compose.ui.test.junit4.createEmptyComposeRule
+import androidx.compose.ui.test.junit4.v2.createEmptyComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithContentDescription
@@ -96,7 +96,7 @@ class AreaOfflineMapTest : AreaScreenTest() {
 
             injectState(scenario, OfflineAreaState.Failed("boom"))
 
-            composeTestRule.waitUntil { hasTag(AREA_OFFLINE_DELETE_TAG) }
+            composeTestRule.waitUntil(8_000) { hasTag(AREA_OFFLINE_DELETE_TAG) }
             composeTestRule.onNodeWithTag(AREA_OFFLINE_DOWNLOAD_TAG).assertExists()
             composeTestRule.onNodeWithTag(AREA_OFFLINE_STATUS_TAG)
                 .assertTextContains("boom", substring = true)
@@ -114,7 +114,7 @@ class AreaOfflineMapTest : AreaScreenTest() {
 
             injectState(scenario, completeState(styleUrl = LIBERTY_STYLE_URL))
 
-            composeTestRule.waitUntil { hasTag(AREA_OFFLINE_DELETE_TAG) }
+            composeTestRule.waitUntil(8_000) { hasTag(AREA_OFFLINE_DELETE_TAG) }
             composeTestRule.onAllNodesWithText("different map style", substring = true)
                 .assertCountEquals(1)
         }
@@ -133,7 +133,7 @@ class AreaOfflineMapTest : AreaScreenTest() {
 
             injectState(scenario, completeState(styleUrl = AUTO_LIGHT_STYLE_URL))
 
-            composeTestRule.waitUntil { hasTag(AREA_OFFLINE_DELETE_TAG) }
+            composeTestRule.waitUntil(8_000) { hasTag(AREA_OFFLINE_DELETE_TAG) }
             composeTestRule.onAllNodesWithText("different map style", substring = true)
                 .assertCountEquals(0)
         }

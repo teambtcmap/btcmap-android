@@ -2,7 +2,7 @@ package org.btcmap.feed
 
 import org.btcmap.i18n.Strings
 
-import androidx.compose.ui.test.junit4.createEmptyComposeRule
+import androidx.compose.ui.test.junit4.v2.createEmptyComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithTag
@@ -54,7 +54,7 @@ class ActivityFeedErrorHandlingTest : AppTestCase() {
         try {
             ActivityScenario.launch(Activity::class.java).use { scenario ->
                 scenario.onActivity { showFeed(it) }
-                waitUntil { apiRule.server.requestCount >= 1 }
+                composeTestRule.waitUntil(8_000) { apiRule.server.requestCount >= 1 }
 
                 // The retry affordance only exists on the error state; the empty
                 // state is not retryable, so a failed load must show it.

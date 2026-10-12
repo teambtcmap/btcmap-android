@@ -42,6 +42,10 @@ android {
         buildConfigField("long", "BUILD_TIME", "${buildTime}L")
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        // Fail a test that hangs instead of letting the run block forever: a
+        // stuck test (a deadlocked coroutine, a Compose wait that never
+        // settles) would otherwise wedge the whole instrumentation run.
+        testInstrumentationRunnerArguments["timeout_msec"] = "10000"
     }
 
     testOptions {
@@ -150,6 +154,12 @@ dependencies {
     implementation(libs.coil)
     implementation(libs.coil.network)
     implementation(libs.coil.svg)
+
+    // Coil's Android artifact pulls okhttp 4.12.0, and AGP's consistent
+    // resolution pins the instrumented tests to whatever the app resolves. The
+    // OkHttp 5 MockWebServer the androidTest source set uses needs 5.x, so the
+    // app pins it up to match.
+    implementation(libs.okhttp)
 
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)

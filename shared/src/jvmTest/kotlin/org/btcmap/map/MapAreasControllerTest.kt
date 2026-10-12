@@ -1,26 +1,47 @@
 package org.btcmap.map
 
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
-import androidx.test.ext.junit.runners.AndroidJUnit4
+import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.setMain
+import kotlinx.coroutines.withTimeout
 import org.btcmap.db.table.area.Area
-import org.btcmap.util.AppTestCase
-import org.btcmap.util.waitUntil
+import org.btcmap.db.testDatabase
+import org.junit.After
 import org.junit.Assert
+import org.junit.Before
 import org.junit.Test
-import org.junit.runner.RunWith
 
-@RunWith(AndroidJUnit4::class)
-class MapAreasControllerTest : AppTestCase() {
+/**
+ * The geometry cache [MapAreasController] keeps across map moves. Ported from
+ * the Android instrumented suite: the controller is shared, so it belongs here.
+ * It dispatches on `Dispatchers.Main`, so a main dispatcher is installed for it.
+ */
+@OptIn(ExperimentalCoroutinesApi::class)
+class MapAreasControllerTest {
+
+    @Before
+    fun installMainDispatcher() {
+        Dispatchers.setMain(Dispatchers.Default)
+    }
+
+    @After
+    fun resetMainDispatcher() {
+        Dispatchers.resetMain()
+    }
 
     @Test
     fun geometryCache_isBoundedWhenManyAreasAreTouched() = runBlocking<Unit> {
         val count = MapAreasController.MAX_CACHED_GEOMETRIES + 5
-        databaseRule.db.area.insert((1..count).map { area(it.toLong()) })
+        val db = testDatabase()
+        db.area.insert((1..count).map { area(it.toLong()) })
 
-        val controller = MapAreasController(db = databaseRule.db)
+        val controller = MapAreasController(db = db)
         try {
             controller.load(LAT, LON)
-            waitUntil { controller.areas.value.isNotEmpty() }
+            controller.awaitAreas()
 
             // Every area contains the point, so every polygon is parsed and
             // cached; the least recently used are then evicted down to the cap.
@@ -36,15 +57,16 @@ class MapAreasControllerTest : AppTestCase() {
 
     @Test
     fun reload_reusesCachedGeometryForUnchangedAreas() = runBlocking<Unit> {
-        databaseRule.db.area.insert(listOf(area(1L)))
+        val db = testDatabase()
+        db.area.insert(listOf(area(1L)))
 
-        val controller = MapAreasController(db = databaseRule.db)
+        val controller = MapAreasController(db = db)
         try {
             controller.load(LAT, LON)
-            waitUntil { controller.areas.value.isNotEmpty() }
+            controller.awaitAreas()
 
             controller.reload()
-            waitUntil { controller.areas.value.isNotEmpty() }
+            controller.awaitAreas()
 
             // The area's updated_at did not change, so its polygon is served
             // from the cache instead of being parsed again.
@@ -52,6 +74,11 @@ class MapAreasControllerTest : AppTestCase() {
         } finally {
             controller.dispose()
         }
+    }
+
+    /** Waits for the map-move lookup launched by `load`/`reload` to land. */
+    private suspend fun MapAreasController.awaitAreas() = withTimeout(10_000) {
+        while (areas.value.isEmpty()) delay(10)
     }
 
     private fun area(id: Long): Area {

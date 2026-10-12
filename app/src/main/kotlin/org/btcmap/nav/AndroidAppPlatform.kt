@@ -6,6 +6,8 @@ import android.content.ClipboardManager
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.os.Handler
+import android.os.Looper
 import android.widget.Toast
 import androidx.browser.customtabs.CustomTabsClient
 import androidx.browser.customtabs.CustomTabsIntent
@@ -164,11 +166,12 @@ class AndroidAppPlatform(
     }
 
     override fun showError(throwable: Throwable) {
-        Toast.makeText(
-            activity,
-            throwable.userFacingMessage(Strings.current()["error"]),
-            Toast.LENGTH_LONG,
-        ).show()
+        // A screen's coroutine may call this from a non-Looper thread, so post
+        // the toast to the main looper rather than toasting in place.
+        val message = throwable.userFacingMessage(Strings.current()["error"])
+        Handler(Looper.getMainLooper()).post {
+            Toast.makeText(activity, message, Toast.LENGTH_LONG).show()
+        }
     }
 
     override fun openFeedItem(item: ActivityFeedItem) {

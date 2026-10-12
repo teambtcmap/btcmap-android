@@ -3,7 +3,7 @@ package org.btcmap.settings
 import org.btcmap.i18n.Strings
 
 import kotlinx.coroutines.runBlocking
-import androidx.compose.ui.test.junit4.createEmptyComposeRule
+import androidx.compose.ui.test.junit4.v2.createEmptyComposeRule
 import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onFirst
@@ -72,8 +72,8 @@ class UserProfileSavedItemsTest : AppTestCase() {
             waitForText("One")
             deleteFirst()
 
-            waitUntil { savedPlaceIds() == listOf(2L) }
-            waitUntil { !showsText("One") }
+            composeTestRule.waitUntil(8_000) { savedPlaceIds() == listOf(2L) }
+            composeTestRule.waitUntil(8_000) { !showsText("One") }
             Assert.assertEquals(0, userFetches.get())
         }
     }
@@ -98,7 +98,7 @@ class UserProfileSavedItemsTest : AppTestCase() {
             waitForText("Grand Paris")
             deleteFirst()
 
-            waitUntil { savedAreaIds() == listOf(11L) }
+            composeTestRule.waitUntil(8_000) { savedAreaIds() == listOf(11L) }
         }
     }
 
@@ -130,8 +130,8 @@ class UserProfileSavedItemsTest : AppTestCase() {
             waitForText("One")
             deleteFirst()
 
-            waitUntil { savedPlaceIds() == listOf(2L) }
-            waitUntil { userFetches.get() == 1 }
+            composeTestRule.waitUntil(8_000) { savedPlaceIds() == listOf(2L) }
+            composeTestRule.waitUntil(8_000) { userFetches.get() == 1 }
             Assert.assertEquals("Other", runBlocking { databaseRule.db.user.select() }?.savedPlaces?.single()?.name)
         }
     }

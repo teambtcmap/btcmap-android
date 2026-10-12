@@ -3,15 +3,10 @@ package org.btcmap.area
 import org.btcmap.i18n.Strings
 
 import kotlinx.coroutines.runBlocking
-import androidx.compose.ui.test.junit4.createEmptyComposeRule
+import androidx.compose.ui.test.junit4.v2.createEmptyComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.performClick
-import androidx.test.espresso.Espresso.onView
-import androidx.test.espresso.assertion.ViewAssertions.matches
-import androidx.test.espresso.matcher.RootMatchers.isDialog
-import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
-import androidx.test.espresso.matcher.ViewMatchers.withText
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import mockwebserver3.Dispatcher
 import mockwebserver3.MockResponse
@@ -20,6 +15,7 @@ import org.btcmap.R
 import org.btcmap.db.table.user.SavedItem
 import org.btcmap.db.table.user.User
 import org.btcmap.settings.authToken
+import org.btcmap.ui.ACCOUNT_USERNAME_TAG
 import org.btcmap.ui.AREA_DESCRIPTION_TAG
 import org.btcmap.util.assertNoUncaughtException
 import org.btcmap.util.waitUntil
@@ -60,8 +56,8 @@ class AreaBookmarkTest : AreaScreenTest() {
             awaitArea()
             save()
 
-            waitUntil { posted.get() }
-            waitUntil { savedAreaIds().contains(1L) }
+            composeTestRule.waitUntil(8_000) { posted.get() }
+            composeTestRule.waitUntil(8_000) { savedAreaIds().contains(1L) }
         }
     }
 
@@ -90,8 +86,8 @@ class AreaBookmarkTest : AreaScreenTest() {
             awaitArea()
             save()
 
-            waitUntil { deleted.get() }
-            waitUntil { savedAreaIds().isEmpty() }
+            composeTestRule.waitUntil(8_000) { deleted.get() }
+            composeTestRule.waitUntil(8_000) { savedAreaIds().isEmpty() }
         }
     }
 
@@ -112,14 +108,11 @@ class AreaBookmarkTest : AreaScreenTest() {
             awaitArea()
             save()
 
-            waitUntil {
-                try {
-                    onView(withText(Strings.current()["account"])).inRoot(isDialog())
-                        .check(matches(isDisplayed()))
-                    true
-                } catch (_: Throwable) {
-                    false
-                }
+            composeTestRule.waitUntil(8_000) {
+                // The auth dialog is Compose, so Espresso cannot see it; the
+                // username field's test tag is the Compose-side signal.
+                composeTestRule.onAllNodesWithTag(ACCOUNT_USERNAME_TAG)
+                    .fetchSemanticsNodes().isNotEmpty()
             }
             Assert.assertFalse(saving.get())
         }
@@ -184,7 +177,7 @@ class AreaBookmarkTest : AreaScreenTest() {
                 awaitArea()
                 save()
 
-                waitUntil { attempted.get() }
+                composeTestRule.waitUntil(8_000) { attempted.get() }
             }
         }
     }
