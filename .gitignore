@@ -34,8 +34,6 @@ app/play
 desktopApp/generated.conveyor.conf
 desktopApp/build/conveyor/
 
-# Generated basemap archive, rebuilt with ./devtools bundle basemap
-
 # Python bytecode cache
 __pycache__/
 

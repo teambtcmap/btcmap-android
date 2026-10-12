@@ -13,7 +13,7 @@ Usage:
   ./devtools app prepare-release   Build the release binaries for every supported platform
   ./devtools app bundle-data       Download latest places, areas, comments and events snapshots
   ./devtools app bundle-map-styles Bundle MapLibre styles, sprites and glyphs (--force re-downloads)
-  ./devtools bundle icons          Extract the icon-name list from the bundled font
+  ./devtools app bundle-icons      Extract the icon-name list from the bundled font
   ./devtools website deploy        Build the Hugo site and rsync it to android.btcmap.org
 EOF
 }
@@ -48,15 +48,8 @@ Commands:
                      snapshots (always refreshes)
   bundle-map-styles  Bundle MapLibre styles, sprites and glyphs (--force
                      re-downloads)
-EOF
-}
-
-print_usage_bundle() {
-  cat <<EOF
-Usage: ./devtools bundle <command>
-
-Commands:
-  icons        Extract the icon-name list from the bundled Material Symbols font
+  bundle-icons       Extract the icon-name list from the bundled Material
+                     Symbols font
 EOF
 }
 
@@ -155,24 +148,6 @@ assert_apk_signed() {
 }
 
 # END signing section
-
-# START bundle section
-
-cmd_bundle_icons() {
-  python3 bundle_icons.py "$@"
-}
-
-cmd_bundle() {
-  local target="${1:-help}"
-  shift || true
-  case "$target" in
-    icons) cmd_bundle_icons "$@" ;;
-    help|-h|--help) print_usage_bundle ;;
-    *) err "Unknown bundle command: $target"; print_usage_bundle; return 1 ;;
-  esac
-}
-
-# END bundle section
 
 # START website section
 
@@ -507,6 +482,12 @@ cmd_app_bundle_map_styles() {
   python3 bundle_map_styles.py "$@"
 }
 
+# Extracts the icon-name list from the bundled Material Symbols font into the
+# generated `MaterialSymbolNames.kt`.
+cmd_app_bundle_icons() {
+  python3 bundle_icons.py "$@"
+}
+
 cmd_app_run_android() {
   local device="emulator-5554"
   local package="org.btcmap.debug"
@@ -787,6 +768,7 @@ cmd_app() {
     prepare-release) cmd_app_prepare_release "$@" ;;
     bundle-data) cmd_app_bundle_data "$@" ;;
     bundle-map-styles) cmd_app_bundle_map_styles "$@" ;;
+    bundle-icons) cmd_app_bundle_icons "$@" ;;
     help|-h|--help) print_usage_app ;;
     *) err "Unknown app command: $target"; print_usage_app; return 1 ;;
   esac
@@ -800,7 +782,6 @@ main() {
   case "$cmd" in
     emulator) cmd_emulator "$@" ;;
     app) cmd_app "$@" ;;
-    bundle) cmd_bundle "$@" ;;
     website) cmd_website "$@" ;;
     help|-h|--help) print_usage ;;
     *) err "Unknown command: $cmd"; print_usage; return 1 ;;

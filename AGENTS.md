@@ -23,12 +23,11 @@ There are four Gradle modules:
 ./devtools app run           # Run the app (desktop by default; --android for the emulator)
 ./devtools app deploy-beta     # Build and rsync beta packages for the named platforms
 ./devtools app prepare-release # Build the release binaries for every supported platform into release/
-
-./devtools emulator start    # Boot the AVD asynchronously
-
 ./devtools app bundle-data       # Download latest places, areas, comments and events snapshots
 ./devtools app bundle-map-styles # Bundle MapLibre styles, sprites and glyphs
-./devtools bundle icons          # Extract the icon-name list from the bundled font
+./devtools app bundle-icons      # Extract the icon-name list from the bundled font
+
+./devtools emulator start    # Boot the AVD asynchronously
 
 ./devtools website deploy      # Build and rsync the documentation site to android.btcmap.org
 ```
@@ -254,7 +253,8 @@ The Windows and macOS packages are built by **Conveyor** (`desktopApp/conveyor.c
 
 Places, areas, comments, events and map styles are
 committed as assets and refreshed manually with `./devtools app bundle-data` and
-`./devtools app bundle-map-styles`. This is
+`./devtools app bundle-map-styles`, and the icon-name list with
+`./devtools app bundle-icons`. This is
 intentional:
 
 - Never propose adding CI (GitHub Actions or any other pipeline) to this
