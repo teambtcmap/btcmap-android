@@ -33,8 +33,6 @@ desktopApp/build/conveyor/
 
 # Generated basemap archive, rebuilt with ./devtools bundle basemap
 
-emulator.log
-
 # Python bytecode cache
 __pycache__/
 

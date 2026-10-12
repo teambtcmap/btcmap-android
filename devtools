@@ -77,15 +77,45 @@ EOF
 
 # START emulator section
 
+emulator_avd="btcmap"
+emulator_unit="btcmap-emulator"
+
 cmd_emulator_start() {
-  # Detach from the shell so the script can exit cleanly while the
-  # emulator keeps running.
-  nohup setsid emulator -avd Resizable_Experimental -gpu host > emulator.log 2>&1 < /dev/null & disown
+  # Validate the AVD here: systemd-run reports success even when the emulator
+  # exits immediately, so an unknown name would fail out of sight in the
+  # journal. `grep -x` keeps `btcmap` from matching `btcmap-old`.
+  if ! emulator -list-avds | grep -qx "$emulator_avd"; then
+    err "no emulator configured: AVD $emulator_avd does not exist (list them with: emulator -list-avds)"
+    return 1
+  fi
+
+  # systemd owns the emulator: it outlives this shell, `stop` shuts it down
+  # through SIGTERM (which saves the quickboot snapshot), and its output goes
+  # to the journal instead of a file.
+  if systemctl --user is-active --quiet "$emulator_unit"; then
+    echo "The emulator is already running."
+    echo "Stop it with: ./devtools emulator stop"
+    return 0
+  fi
+
+  systemd-run --user --unit="$emulator_unit" --collect emulator -avd "$emulator_avd" -gpu host
+  echo "Emulator output: journalctl --user -u $emulator_unit"
 }
 
 cmd_emulator_stop() {
-  adb devices | grep emulator | cut -f1 | while read line; do adb -s $line emu kill; done
-  rm emulator.log
+  # The unit owns the emulator: systemd shuts it down through SIGTERM, which
+  # saves the quickboot snapshot.
+  if systemctl --user is-active --quiet "$emulator_unit"; then
+    echo "Stopping the emulator..."
+    systemctl --user stop "$emulator_unit"
+    return 0
+  fi
+
+  # An emulator the unit does not own, e.g. one started by hand.
+  local serial
+  for serial in $(adb devices | awk '$1 ~ /^emulator-/ { print $1 }'); do
+    adb -s "$serial" emu kill
+  done
 }
 
 cmd_emulator() {

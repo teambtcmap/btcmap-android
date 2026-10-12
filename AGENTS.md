@@ -12,18 +12,17 @@ There are four Gradle modules:
 - **`:ui`** — Kotlin Multiplatform (Android + JVM): the Compose Multiplatform UI (`AppTheme`, `MaterialSymbol`, the screens, and the map: `MapScreen`, its layers, markers, chips, search and place sheet), plus the single Android `AbstractComposeView` host (`AppRootComposeView`) in `androidMain`.
 - **`:desktopApp`** — the JVM Compose Desktop app, sharing `:shared` and `:ui`.
 
-## Build Commands
+## Assumed Dev Environment
+- Arch Linux (although other distros should work with no or minimal changes)
+- A desktop session with X11/XWayland and working OpenGL (latest GNOME works, probably others), with a working `systemd --user` session (the emulator runs as a user unit)
+- An AVD named `btcmap` for the emulator (devtools launches that name only, and refuses to start without it)
+- A JVM to bootstrap the Gradle wrapper (pacman -S jdk-openjdk)
 
-Bundled assets (places snapshot, map styles) are managed
-outside Gradle via the `./devtools bundle` commands, see below.
-
-## Development Environment (devtools script)
-
-The `./devtools` wrapper manages an Android emulator, website, and app deployment across all supported platforms. Default device is `emulator-5554` running the `Resizable_Experimental` AVD; debug package is `org.btcmap.debug`.
+## Main Dev Interface (devtools script)
 
 ```bash
-./devtools emulator start    # Boot AVD asynchronously (logs to emulator.log)
-./devtools emulator stop     # Shut down emulator and remove log
+./devtools emulator start    # Boot the AVD asynchronously
+./devtools emulator stop     # Shut the emulator down cleanly
 
 ./devtools app install       # Build and install debug APK
 ./devtools app run           # Run the app (desktop by default; --android for the emulator)
@@ -39,7 +38,7 @@ The `./devtools` wrapper manages an Android emulator, website, and app deploymen
 ./devtools website deploy      # Build and rsync the documentation site to android.btcmap.org
 ```
 
-When asked to "launch", "run", or "start" the app, use `./devtools app run` (runs the desktop app, launched detached — see the desktop section below) or `./devtools app run --android` (builds, installs and launches the Android build via monkey). Stop a running app with `./devtools app stop` (desktop) or `./devtools app stop --android` (force-stop on the emulator). Assume the emulator is already running when using `--android`; if it is not, start it yourself with `./devtools emulator start` and wait for boot to complete (check `adb devices` or `adb -s emulator-5554 shell getprop sys.boot_completed`). Use `./devtools app install` when only an install is needed (e.g. before running instrumented tests). `./devtools app deploy-beta` and `./devtools app deploy-release` build and push the APKs and the desktop packages to the remote `btcmap-api` host — use only when explicitly asked to publish a build. Both build the desktop app image, pack it into a Linux AppImage (with `appimagetool`, cached under `${XDG_CACHE_HOME:-~/.cache}/btcmap/appimagetool`) and build the Windows and macOS packages with Conveyor (cached under `${XDG_CACHE_HOME:-~/.cache}/btcmap/conveyor`), uploading everything under `desktop/beta/` and `desktop/release/` respectively: the beta AppImage keeps the stable name `BTC-Map-x86_64.AppImage`, the release one embeds the version, and Conveyor's output is the rest of the directory. Both also purge the files that are overwritten in place — `beta.apk`, `beta-universal.apk`, `latest-app-beta-ver.json`, and every file in the packaged site whose name a rebuild can repeat — from the BunnyCDN `static.btcmap.org` pull zone, so both therefore require a BunnyCDN API key in `BUNNY_API_KEY` or `bunny.api.key` in `local.properties`, and refuse to deploy when neither is set rather than silently leaving stale objects on the CDN. `./devtools website deploy` builds the Hugo documentation site and rsyncs it to `android.btcmap.org` — use only when explicitly asked to publish the site. That site is the Hugo project in `website/`, with its pages in `website/content/` and screenshots in `website/static/images/`.
+When asked to "launch", "run", or "start" the app, use `./devtools app run` (runs the desktop app, launched detached — see the desktop section below) or `./devtools app run --android` (builds, installs and launches the Android build via monkey). Stop a running app with `./devtools app stop` (desktop) or `./devtools app stop --android` (force-stop on the emulator). Assume the emulator is already running when using `--android`; if it is not, start it yourself with `./devtools emulator start` (a `btcmap-emulator` systemd user unit, its output in `journalctl --user -u btcmap-emulator`) and wait for boot to complete (check `adb devices` or `adb -s emulator-5554 shell getprop sys.boot_completed`). Use `./devtools app install` when only an install is needed (e.g. before running instrumented tests). `./devtools app deploy-beta` and `./devtools app deploy-release` build and push the APKs and the desktop packages to the remote `btcmap-api` host — use only when explicitly asked to publish a build. Both build the desktop app image, pack it into a Linux AppImage (with `appimagetool`, cached under `${XDG_CACHE_HOME:-~/.cache}/btcmap/appimagetool`) and build the Windows and macOS packages with Conveyor (cached under `${XDG_CACHE_HOME:-~/.cache}/btcmap/conveyor`), uploading everything under `desktop/beta/` and `desktop/release/` respectively: the beta AppImage keeps the stable name `BTC-Map-x86_64.AppImage`, the release one embeds the version, and Conveyor's output is the rest of the directory. Both also purge the files that are overwritten in place — `beta.apk`, `beta-universal.apk`, `latest-app-beta-ver.json`, and every file in the packaged site whose name a rebuild can repeat — from the BunnyCDN `static.btcmap.org` pull zone, so both therefore require a BunnyCDN API key in `BUNNY_API_KEY` or `bunny.api.key` in `local.properties`, and refuse to deploy when neither is set rather than silently leaving stale objects on the CDN. `./devtools website deploy` builds the Hugo documentation site and rsyncs it to `android.btcmap.org` — use only when explicitly asked to publish the site. That site is the Hugo project in `website/`, with its pages in `website/content/` and screenshots in `website/static/images/`.
 
 ### Verifying on the emulator
 
