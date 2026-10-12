@@ -8,11 +8,7 @@ devtools — manage the BTC Map Android dev environment.
 
 Usage:
   ./devtools emulator start     Boot the AVD asynchronously
-  ./devtools emulator stop      Shut the emulator down cleanly
-  ./devtools app install        Install debug build
   ./devtools app run            Run the app (desktop by default; --android for the emulator)
-  ./devtools app stop           Stop the running app (desktop by default)
-  ./devtools app uninstall      Uninstall the app
   ./devtools app deploy-beta    Build and deploy beta APK, desktop packages and manifest
   ./devtools app deploy-release Build and deploy release APK and desktop packages
   ./devtools bundle data        Download latest places, areas, comments and events snapshots
@@ -33,7 +29,6 @@ Usage: ./devtools emulator <command>
 
 Commands:
   start    Boot the AVD asynchronously
-  stop     Shut the emulator down cleanly
 EOF
 }
 
@@ -42,11 +37,8 @@ print_usage_app() {
 Usage: ./devtools app <command>
 
 Commands:
-  install        Install debug build
   run            Run the app. Runs the desktop app by default, or the Android
                  build on the emulator with --android.
-  stop           Stop the running app (desktop by default; --android for the emulator)
-  uninstall      Uninstall the app
   deploy-beta    Build and deploy the beta APK, the Windows/macOS packages, the
                  Linux AppImage and the beta manifest
   deploy-release Build and deploy the release APK and the Windows/macOS/Linux
@@ -89,12 +81,12 @@ cmd_emulator_start() {
     return 1
   fi
 
-  # systemd owns the emulator: it outlives this shell, `stop` shuts it down
-  # through SIGTERM (which saves the quickboot snapshot), and its output goes
-  # to the journal instead of a file.
+  # systemd owns the emulator: it outlives this shell, and stopping the unit
+  # shuts it down through SIGTERM (which saves the quickboot snapshot), with its
+  # output going to the journal instead of a file.
   if systemctl --user is-active --quiet "$emulator_unit"; then
     echo "The emulator is already running."
-    echo "Stop it with: ./devtools emulator stop"
+    echo "Stop it with: systemctl --user stop $emulator_unit"
     return 0
   fi
 
@@ -102,28 +94,11 @@ cmd_emulator_start() {
   echo "Emulator output: journalctl --user -u $emulator_unit"
 }
 
-cmd_emulator_stop() {
-  # The unit owns the emulator: systemd shuts it down through SIGTERM, which
-  # saves the quickboot snapshot.
-  if systemctl --user is-active --quiet "$emulator_unit"; then
-    echo "Stopping the emulator..."
-    systemctl --user stop "$emulator_unit"
-    return 0
-  fi
-
-  # An emulator the unit does not own, e.g. one started by hand.
-  local serial
-  for serial in $(adb devices | awk '$1 ~ /^emulator-/ { print $1 }'); do
-    adb -s "$serial" emu kill
-  done
-}
-
 cmd_emulator() {
   local sub="${1:-help}"
   shift || true
   case "$sub" in
     start)     cmd_emulator_start ;;
-    stop)      cmd_emulator_stop ;;
     help|-h|--help) print_usage_emulator ;;
     *) err "Unknown emulator command: $sub"; print_usage_emulator; return 1 ;;
   esac
@@ -523,27 +498,6 @@ purge_conveyor_site() {
 
 # START app section
 
-cmd_app_install() {
-  local device="emulator-5554"
-  local apk_path="./app/build/outputs/apk/debug/app-x86_64-debug.apk"
-
-  if ! adb devices | grep -q "^$device[[:space:]]"; then
-    echo "Error: emulator $device is not running. Start it with: ./devtools emulator start" >&2
-    return 1
-  fi
-
-  echo "Assembling debug APK..."
-  ./gradlew assembleDebug "$@"
-
-  if [ ! -f "$apk_path" ]; then
-    echo "Error: APK not found at $apk_path" >&2
-    return 1
-  fi
-
-  echo "Installing $apk_path on $device..."
-  adb -s "$device" install -r -t "$apk_path"
-}
-
 cmd_app_run_android() {
   local device="emulator-5554"
   local package="org.btcmap.debug"
@@ -579,36 +533,13 @@ cmd_app_run_desktop() {
   # start a second one.
   if pgrep -f "org.btcmap.desktop.MainK[t]" >/dev/null 2>&1; then
     echo "The desktop app is already running; not starting a second instance."
-    echo "Stop it with: ./devtools app stop"
+    echo "Stop it with: pkill -f 'org.btcmap.desktop.MainK[t]'"
     return 0
   fi
 
   echo "Launching the desktop app (logs: $log)..."
   # Detached: `run` blocks for the life of the window, so control returns here.
   (./gradlew :desktopApp:run "$@" > "$log" 2>&1 &)
-}
-
-cmd_app_stop_desktop() {
-  if ! pgrep -f "org.btcmap.desktop.MainK[t]" >/dev/null 2>&1; then
-    echo "The desktop app is not running. Nothing to do."
-    return 0
-  fi
-
-  echo "Stopping the desktop app..."
-  pgrep -f "org.btcmap.desktop.MainK[t]" | xargs -r kill
-}
-
-cmd_app_stop_android() {
-  local device="emulator-5554"
-  local package="org.btcmap.debug"
-
-  if ! adb devices | grep -q "^$device[[:space:]]"; then
-    echo "Error: emulator $device is not running. Start it with: ./devtools emulator start" >&2
-    return 1
-  fi
-
-  echo "Stopping $package on $device..."
-  adb -s "$device" shell am force-stop "$package"
 }
 
 # Chooses the app target from optional --android/--desktop flags (desktop by
@@ -637,39 +568,6 @@ cmd_app_run() {
     android) cmd_app_run_android "${app_target_args[@]}" ;;
     desktop) cmd_app_run_desktop "${app_target_args[@]}" ;;
   esac
-}
-
-cmd_app_stop() {
-  parse_app_target "$@" || return 0
-  case "$app_target" in
-    android) cmd_app_stop_android ;;
-    desktop) cmd_app_stop_desktop ;;
-  esac
-}
-
-cmd_app_uninstall() {
-  local device="emulator-5554"
-  local package="org.btcmap.debug"
-
-  if ! adb devices | grep -q "^$device[[:space:]]"; then
-    echo "Error: emulator $device is not running. Start it with: ./devtools emulator start" >&2
-    return 1
-  fi
-
-  if ! adb -s "$device" shell pm list packages "$package" 2>/dev/null \
-      | tr -d '\r' | grep -qx "package:$package"; then
-    echo "$package is not installed on $device. Nothing to do."
-    return 0
-  fi
-
-  echo "Uninstalling $package from $device..."
-  local result
-  if result=$(adb -s "$device" uninstall "$package" 2>&1); then
-    echo "$result"
-  else
-    echo "Uninstall failed: $result" >&2
-    return 1
-  fi
 }
 
 cmd_app_deploy_beta() {
@@ -799,10 +697,7 @@ cmd_app() {
   local target="${1:-help}"
   shift || true
   case "$target" in
-    install) cmd_app_install "$@" ;;
     run) cmd_app_run "$@" ;;
-    stop) cmd_app_stop "$@" ;;
-    uninstall) cmd_app_uninstall "$@" ;;
     deploy-beta) cmd_app_deploy_beta "$@" ;;
     deploy-release) cmd_app_deploy_release "$@" ;;
     help|-h|--help) print_usage_app ;;

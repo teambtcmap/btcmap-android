@@ -14,22 +14,17 @@ There are four Gradle modules:
 
 ## Assumed Dev Environment
 - Arch Linux (although other distros should work with no or minimal changes)
-- A desktop session with X11/XWayland and working OpenGL (latest GNOME works, probably others), with a working `systemd --user` session (the emulator runs as a user unit)
-- An AVD named `btcmap` for the emulator (devtools launches that name only, and refuses to start without it)
-- A JVM to bootstrap the Gradle wrapper (pacman -S jdk-openjdk)
+- A desktop session with X11/XWayland and working OpenGL (latest GNOME works, probably others)
+- A JVM to bootstrap the Gradle wrapper (pacman --sync jdk-openjdk)
 
 ## Main Dev Interface (devtools script)
 
 ```bash
-./devtools emulator start    # Boot the AVD asynchronously
-./devtools emulator stop     # Shut the emulator down cleanly
-
-./devtools app install       # Build and install debug APK
 ./devtools app run           # Run the app (desktop by default; --android for the emulator)
-./devtools app stop          # Stop the running app (desktop by default; --android for the emulator)
-./devtools app uninstall     # Remove debug package from device
 ./devtools app deploy-beta     # Build and rsync beta APK and desktop packages to btcmap-api server
 ./devtools app deploy-release  # Build and rsync release APK and desktop packages to btcmap-api server
+
+./devtools emulator start    # Boot the AVD asynchronously
 
 ./devtools bundle data         # Download latest places, areas, comments and events snapshots
 ./devtools bundle map-styles   # Bundle MapLibre styles, sprites and glyphs
@@ -38,7 +33,7 @@ There are four Gradle modules:
 ./devtools website deploy      # Build and rsync the documentation site to android.btcmap.org
 ```
 
-When asked to "launch", "run", or "start" the app, use `./devtools app run` (runs the desktop app, launched detached — see the desktop section below) or `./devtools app run --android` (builds, installs and launches the Android build via monkey). Stop a running app with `./devtools app stop` (desktop) or `./devtools app stop --android` (force-stop on the emulator). Assume the emulator is already running when using `--android`; if it is not, start it yourself with `./devtools emulator start` (a `btcmap-emulator` systemd user unit, its output in `journalctl --user -u btcmap-emulator`) and wait for boot to complete (check `adb devices` or `adb -s emulator-5554 shell getprop sys.boot_completed`). Use `./devtools app install` when only an install is needed (e.g. before running instrumented tests). `./devtools app deploy-beta` and `./devtools app deploy-release` build and push the APKs and the desktop packages to the remote `btcmap-api` host — use only when explicitly asked to publish a build. Both build the desktop app image, pack it into a Linux AppImage (with `appimagetool`, cached under `${XDG_CACHE_HOME:-~/.cache}/btcmap/appimagetool`) and build the Windows and macOS packages with Conveyor (cached under `${XDG_CACHE_HOME:-~/.cache}/btcmap/conveyor`), uploading everything under `desktop/beta/` and `desktop/release/` respectively: the beta AppImage keeps the stable name `BTC-Map-x86_64.AppImage`, the release one embeds the version, and Conveyor's output is the rest of the directory. Both also purge the files that are overwritten in place — `beta.apk`, `beta-universal.apk`, `latest-app-beta-ver.json`, and every file in the packaged site whose name a rebuild can repeat — from the BunnyCDN `static.btcmap.org` pull zone, so both therefore require a BunnyCDN API key in `BUNNY_API_KEY` or `bunny.api.key` in `local.properties`, and refuse to deploy when neither is set rather than silently leaving stale objects on the CDN. `./devtools website deploy` builds the Hugo documentation site and rsyncs it to `android.btcmap.org` — use only when explicitly asked to publish the site. That site is the Hugo project in `website/`, with its pages in `website/content/` and screenshots in `website/static/images/`.
+When asked to "launch", "run", or "start" the app, use `./devtools app run` (runs the desktop app, launched detached — see the desktop section below) or `./devtools app run --android` (builds, installs and launches the Android build via monkey). Stop the desktop window by closing it (or `pkill -f 'org.btcmap.desktop.MainK[t]'`) and the Android build with `adb -s emulator-5554 shell am force-stop org.btcmap.debug`; stop the emulator with `systemctl --user stop btcmap-emulator`. Assume the emulator is already running when using `--android`; if it is not, start it yourself with `./devtools emulator start` (a `btcmap-emulator` systemd user unit, its output in `journalctl --user -u btcmap-emulator`) and wait for boot to complete (check `adb devices` or `adb -s emulator-5554 shell getprop sys.boot_completed`). `./devtools app deploy-beta` and `./devtools app deploy-release` build and push the APKs and the desktop packages to the remote `btcmap-api` host — use only when explicitly asked to publish a build. Both build the desktop app image, pack it into a Linux AppImage (with `appimagetool`, cached under `${XDG_CACHE_HOME:-~/.cache}/btcmap/appimagetool`) and build the Windows and macOS packages with Conveyor (cached under `${XDG_CACHE_HOME:-~/.cache}/btcmap/conveyor`), uploading everything under `desktop/beta/` and `desktop/release/` respectively: the beta AppImage keeps the stable name `BTC-Map-x86_64.AppImage`, the release one embeds the version, and Conveyor's output is the rest of the directory. Both also purge the files that are overwritten in place — `beta.apk`, `beta-universal.apk`, `latest-app-beta-ver.json`, and every file in the packaged site whose name a rebuild can repeat — from the BunnyCDN `static.btcmap.org` pull zone, so both therefore require a BunnyCDN API key in `BUNNY_API_KEY` or `bunny.api.key` in `local.properties`, and refuse to deploy when neither is set rather than silently leaving stale objects on the CDN. `./devtools website deploy` builds the Hugo documentation site and rsyncs it to `android.btcmap.org` — use only when explicitly asked to publish the site. That site is the Hugo project in `website/`, with its pages in `website/content/` and screenshots in `website/static/images/`.
 
 ### Verifying on the emulator
 
@@ -136,12 +131,11 @@ Shares `:shared` and `:ui`; it opens the shared database under `$BTCMAP_HOME` or
 
 ```bash
 ./devtools app run               # open the window (detached; logs to /tmp/btcmap-desktop.log)
-./devtools app stop              # stop the running window
 ./gradlew :desktopApp:test       # Compose UI tests, no window
 ./gradlew :desktopApp:screenshot -Pscreenshot=settings:/tmp/x.png:dark
 ```
 
-Launching and stopping the window go through `./devtools`; the Compose UI tests
+Launching the window goes through `./devtools`; the Compose UI tests
 and the headless `screenshot` renderer have no wrapper and run with Gradle
 directly.
 
@@ -169,8 +163,9 @@ directly.
   `desktop: icon font ...`, and the `Rendered the first map frame` line once the
   map is up) tell you how far startup got when you next look, without blocking on
   it.
-- Stop a running window with `./devtools app stop` before a restart so only one
-  instance is ever open.
+- Close a running window before a restart so only one instance is ever open.
+  `./devtools app run` refuses to start a second one, and closing the window is
+  enough; `pkill -f 'org.btcmap.desktop.MainK[t]'` stops it without a window.
 - The running app is an XWayland client (Compose Desktop's Skiko renderer is
   X11-only on Linux), so X11 tools see it even though the session is Wayland.
   Find its window with `xdotool search --name "BTC Map"`; the client window
