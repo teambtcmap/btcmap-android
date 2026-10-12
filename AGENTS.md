@@ -20,7 +20,7 @@ There are four Gradle modules:
 ## Main Dev Interface (devtools script)
 
 ```bash
-./devtools app run           # Run the app (desktop by default; --android for the emulator)
+./devtools app run           # Run the app (desktop by default, under Compose Hot Reload; --android for the emulator, --cold for a plain desktop run)
 ./devtools app deploy-beta     # Build and rsync beta packages for the named platforms
 ./devtools app prepare-release # Build the release binaries for every supported platform into release/
 ./devtools app bundle-data       # Download latest places, areas, comments and events snapshots
@@ -31,6 +31,39 @@ There are four Gradle modules:
 
 ./devtools website deploy      # Build and rsync the documentation site to android.btcmap.org
 ```
+
+### Compose Hot Reload (desktop)
+
+The desktop run goes through **`:desktopApp:hotRun`** rather than `:desktopApp:run`, because Compose
+Multiplatform 1.12.1 bundles Compose Hot Reload and applies it to any project with a desktop target, so
+the running window can pick up an edit without a restart; `devtools` passes `--auto`, which keeps the
+Gradle build up and reloads whenever a source file changes. `--no-auto` (forwarded to Gradle) leaves the
+reload to `./gradlew :desktopApp:reload`, and `--cold` starts the plain run instead — for when the
+javaagent or the dev-tools window would be in the way.
+
+- **It needs the JetBrains Runtime, and this app needs JBR 25 specifically.** Only the JBR can redefine
+  classes it has already loaded, and the JBR 21 that Compose Hot Reload would otherwise pick cannot load
+  this project's Java 25 bytecode (`:desktopApp`, `:ui`'s JVM target and MapLibre Compose 0.20.0 are all
+  class-file version 69). The toolchain resolver provisions the matching JBR into `~/.gradle/jdks` — a
+  560 MB download, once — on the first hot run.
+- **`--auto` is a continuous Gradle build.** It survives the shell that started it (both are backgrounded)
+  and is stopped with the app: `pkill -f 'org.btcmap.desktop.MainK[t]'`.
+- **`:ui` and `:shared` reload too**, not just `:desktopApp`: the plugin copies both jars into
+  `desktopApp/build/run/main/classpath/libs`, so an edit to a screen or the map lands without a restart.
+- **The hot task does not inherit `compose.desktop.application.jvmArgs`**, so the one that matters is set
+  on the hot tasks directly in `:desktopApp` (`tasks.withType<ComposeHotRun> { jvmArgs(...) }`):
+  `--enable-native-access=ALL-UNNAMED`, without which SQLite's bundled driver, MapLibre's FFI and Skiko
+  warn that they are unrestricted. Anything else added to the application's `jvmArgs` from now on has to
+  be repeated there. `hotRun` runs the app attached, so its output — and each reload's — goes to the
+  Gradle output, `/tmp/btcmap-desktop.log` through `devtools`; only the async `hotRunAsync` detaches it
+  into `desktopApp/build/run/main/hotRun.{stdout,stderr}.txt`.
+- **The reload log is `desktopApp/build/run/main/main.chr.log`**, and it is where a reload that misbehaves
+  shows its cause: each reload's Gradle output and the `@Composable` scopes it re-resolved land there.
+- **An agent can drive the running app**: `./gradlew :desktopApp:hotMcpServer` serves the Compose Hot
+  Reload MCP server over stdio (`reload`, `get_semantic_tree`, `click`, `type_text`, `get_logs`,
+  `restart`, `reset_ui`, …), and it connects to whatever instance is already running. Its screenshot tool
+  is not usable on a Wayland session — the JDK sends `java.awt.Robot` through the xdg-desktop-portal,
+  which puts up a screen-sharing dialog and captures nothing useful here — so take screenshots by hand.
 
 ## Web Target (wasmJs)
 
@@ -108,3 +141,7 @@ intentional:
   `master` immediately; the branch can be committed to freely and the bump added
   when its work is merged into `master`
 - `versionName` is independent of `versionCode` and is not bumped per commit
+
+## Terminal
+
+- never use `sleep` for more than a second, it creates unresanoble delays

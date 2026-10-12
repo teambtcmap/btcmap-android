@@ -8,7 +8,8 @@ devtools — manage the BTC Map Android dev environment.
 
 Usage:
   ./devtools emulator start        Boot the AVD asynchronously
-  ./devtools app run               Run the app (desktop by default; --android for the emulator)
+  ./devtools app run               Run the app (desktop by default, under Compose Hot Reload;
+                                   --android for the emulator, --cold for a plain desktop run)
   ./devtools app deploy-beta       Build and deploy beta packages for the named platforms
   ./devtools app prepare-release   Build the release binaries for every supported platform
   ./devtools app bundle-data       Download latest places, areas, comments and events snapshots
@@ -37,7 +38,11 @@ Usage: ./devtools app <command>
 
 Commands:
   run                Run the app. Runs the desktop app by default, or the
-                     Android build on the emulator with --android.
+                     Android build on the emulator with --android. The desktop
+                     app runs under Compose Hot Reload, so code changes reach
+                     the running window without a restart; --cold starts a
+                     plain run instead. Remaining arguments go to Gradle, e.g.
+                     --no-auto to reload on demand instead of on every save.
   deploy-beta        Build and deploy beta packages for the named platforms:
                      --android (the APKs and update manifest), --linux (the
                      AppImage) and --windows / --macos (the Conveyor packages).
@@ -527,25 +532,52 @@ cmd_app_run_desktop() {
     return 0
   fi
 
-  echo "Launching the desktop app (logs: $log)..."
-  # Detached: `run` blocks for the life of the window, so control returns here.
-  (./gradlew :desktopApp:run "$@" > "$log" 2>&1 &)
+  local task=":desktopApp:hotRun"
+  # --auto watches the sources and reloads the running window whenever one
+  # changes, which is the point of running under hot reload here. It keeps the
+  # Gradle build alive between reloads; --no-auto (forwarded to Gradle) turns
+  # that off and leaves the reload to `./gradlew :desktopApp:reload`.
+  local args=(--auto)
+
+  if [ -z "$desktop_hot" ]; then
+    task=":desktopApp:run"
+    args=()
+    echo "Launching the desktop app (logs: $log)..."
+  else
+    # Hot reload runs the app on the JetBrains Runtime, not on the toolchain the
+    # plain run uses: only the JBR can redefine the classes it has already
+    # loaded. The toolchain resolver provisions it into ~/.gradle/jdks (a 560 MB
+    # download, once) on the first hot run.
+    echo "Launching the desktop app with Compose Hot Reload (logs: $log)..."
+    echo "Saving a source file reloads the window; the dev-tools window has a Reload UI button."
+  fi
+
+  # Detached: the task blocks for the life of the window, so control returns
+  # here. It keeps the app's output (and, under hot reload, each reload's) in
+  # $log, because `hotRun` runs the app attached.
+  (./gradlew "$task" "${args[@]}" "$@" > "$log" 2>&1 &)
 }
 
 # Chooses the app target from optional --android/--desktop flags (desktop by
 # default), leaving the remaining arguments (forwarded to Gradle) in
-# app_target_args. Prints the app usage and returns 1 when asked for help.
+# app_target_args. The desktop app runs under Compose Hot Reload unless --cold
+# is given, because reloading the running window is how the desktop app is
+# iterated on; the Android target has no equivalent and always runs plainly.
+# Prints the app usage and returns 1 when asked for help.
 app_target="desktop"
 app_target_args=()
+desktop_hot=1
 
 parse_app_target() {
   app_target="desktop"
   app_target_args=()
+  desktop_hot=1
   local arg
   for arg in "$@"; do
     case "$arg" in
       --android) app_target="android" ;;
       --desktop) app_target="desktop" ;;
+      --cold|--no-hot) desktop_hot="" ;;
       help|-h|--help) print_usage_app; return 1 ;;
       *) app_target_args+=("$arg") ;;
     esac

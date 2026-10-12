@@ -1,5 +1,6 @@
 import org.jetbrains.compose.ExperimentalComposeLibrary
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
+import org.jetbrains.compose.reload.gradle.ComposeHotRun
 import java.util.Properties
 
 plugins {
@@ -214,4 +215,17 @@ compose.desktop {
             packageName = "BTC Map"
         }
     }
+}
+
+// Compose Hot Reload launches the app with its own JVM, so the hot tasks do not
+// inherit the application's jvmArgs above. They need this one as much as `run`
+// does: SQLite's bundled driver loading its native library, MapLibre Native
+// through the FFI and Skiko through the FFM API all warn that they are
+// unrestricted without it, and every one of those calls becomes an
+// IllegalCallerException once the JDK makes `deny` the default. The jpackage
+// and Conveyor launchers carry it too, so this is only the gap left by the one
+// launcher Compose Hot Reload builds for itself — and `devtools` starts every
+// desktop run through it now.
+tasks.withType<ComposeHotRun>().configureEach {
+    jvmArgs("--enable-native-access=ALL-UNNAMED")
 }
