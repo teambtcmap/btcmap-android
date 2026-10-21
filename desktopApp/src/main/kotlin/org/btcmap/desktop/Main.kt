@@ -312,6 +312,12 @@ private fun runApp() = application {
         title = "BTC Map",
         state = rememberWindowState(placement = WindowPlacement.Maximized),
     ) {
+        // Runs once the first composition has been applied — the closest thing
+        // to "a window is on screen" this side of the surface can see. It is
+        // what `./devtools app run` waits for before it returns control (see
+        // cmd_app_run_desktop), so an early failure does not look like a launch.
+        LaunchedEffect(Unit) { println("btcmap: first composition committed") }
+
         // One offline manager per window, mirroring Android's app-scoped one: a
         // download continues across screens and is torn down with the window.
         val pixelRatio = LocalDensity.current.density

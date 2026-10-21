@@ -522,7 +522,7 @@ cmd_app_run_android() {
 }
 
 cmd_app_run_desktop() {
-  local log="/tmp/btcmap-desktop.log"
+  local log="${TMPDIR:-/tmp}/btcmap-desktop.log"
 
   # Two instances would open the same database under $BTCMAP_HOME, so refuse to
   # start a second one.
@@ -552,10 +552,45 @@ cmd_app_run_desktop() {
     echo "Saving a source file reloads the window; the dev-tools window has a Reload UI button."
   fi
 
-  # Detached: the task blocks for the life of the window, so control returns
-  # here. It keeps the app's output (and, under hot reload, each reload's) in
-  # $log, because `hotRun` runs the app attached.
-  (./gradlew "$task" "${args[@]}" "$@" > "$log" 2>&1 &)
+  echo "Waiting for the window to appear (build output: $log)..."
+
+  # Truncated here rather than by the subshell's redirection: the wait loop
+  # below must never read a marker left from the previous run before this one
+  # starts.
+  : > "$log"
+
+  # Detached, but this shell waits for the window before returning: the task
+  # blocks for the life of the window, so it keeps the app's output (and, under
+  # hot reload, each reload's) in $log, because `hotRun` runs the app attached.
+  (
+    echo "btcmap: devtools run started at $(date +%H:%M:%S.%3N)"
+    exec ./gradlew "$task" "${args[@]}" "$@"
+  ) >> "$log" 2>&1 &
+  local pid=$!
+
+  # Ctrl+C during the wait cancels the launch instead of leaving the build
+  # running invisibly after the prompt has come back.
+  trap 'kill -TERM "$pid" 2>/dev/null; echo "Launch cancelled." >&2; exit 130' INT TERM
+
+  # Block until the app has committed its first composition: a launch that fails
+  # should fail the command, not return a prompt that looks like success while
+  # the window never appears. The mark is the app's own (see Main.kt) and is the
+  # closest thing to "a window is on screen" here — it means the UI is up, not
+  # merely that Gradle finished compiling. The build (and the hot reload loop)
+  # keeps running once we return.
+  while kill -0 "$pid" 2>/dev/null; do
+    if grep -qF 'btcmap: first composition committed' "$log" 2>/dev/null; then
+      trap - INT TERM
+      echo "The app is running (logs: $log)."
+      return 0
+    fi
+    sleep 0.5
+  done
+  trap - INT TERM
+
+  echo "Error: the desktop app exited before its window appeared." >&2
+  tail -n 20 "$log" >&2
+  return 1
 }
 
 # Chooses the app target from optional --android/--desktop flags (desktop by
