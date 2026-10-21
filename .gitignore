@@ -6,6 +6,9 @@
 .classpath
 .settings/
 
+# Android signing
+*.jks
+
 # Local configuration file (sdk path, etc)
 local.properties
 
