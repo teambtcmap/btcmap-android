@@ -6,7 +6,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.unit.Density
 
 /**
  * The Material Symbols typeface used to render icon ligatures, or null when the
@@ -30,6 +32,12 @@ fun AppTheme(
      * headless screenshot has no system theme to read, so it passes this.
      */
     darkTheme: Boolean? = null,
+    /**
+     * Replaces the display density for the content. The desktop passes the
+     * Wayland session's fractional scale here: Compose Desktop's AWT host only
+     * reports whole-number scales, so a 275% session would render at 200%.
+     */
+    density: Density? = null,
     content: @Composable () -> Unit,
 ) {
     val scheme = btcmapColorScheme(darkTheme ?: isSystemInDarkTheme())
@@ -41,6 +49,7 @@ fun AppTheme(
             // to the scheme's onBackground for the whole tree.
             CompositionLocalProvider(
                 LocalContentColor provides MaterialTheme.colorScheme.onBackground,
+                LocalDensity provides (density ?: LocalDensity.current),
                 content = content,
             )
         }
