@@ -7,9 +7,9 @@ print_usage() {
 devtools — manage the BTC Map Android dev environment.
 
 Usage:
-  ./devtools emulator start        Boot the AVD asynchronously
   ./devtools app run               Run the app (desktop by default, under Compose Hot Reload;
-                                   --android for the emulator, --cold for a plain desktop run)
+                                   --android for Waydroid, which boots it first if needed;
+                                   --cold for a plain desktop run)
   ./devtools app deploy-beta       Build and deploy beta packages for the named platforms
   ./devtools app prepare-release   Build the release binaries for every supported platform
   ./devtools app bundle-data       Download latest places, areas, comments and events snapshots
@@ -23,22 +23,14 @@ err() {
   echo "Error: $*" >&2
 }
 
-print_usage_emulator() {
-  cat <<EOF
-Usage: ./devtools emulator <command>
-
-Commands:
-  start    Boot the AVD asynchronously
-EOF
-}
-
 print_usage_app() {
   cat <<EOF
 Usage: ./devtools app <command>
 
 Commands:
   run                Run the app. Runs the desktop app by default, or the
-                     Android build on the emulator with --android. The desktop
+                     Android build in Waydroid with --android, which boots
+                     Waydroid first if it is not already running. The desktop
                      app runs under Compose Hot Reload, so code changes reach
                      the running window without a restart; --cold starts a
                      plain run instead. Remaining arguments go to Gradle, e.g.
@@ -69,39 +61,161 @@ EOF
 
 # START emulator section
 
-emulator_avd="btcmap"
-emulator_unit="btcmap-emulator"
+# The Android target runs inside Waydroid — a container that boots a full
+# Android system on the host kernel — instead of Google's emulator: no AVD to
+# keep around, no emulator binary, no SDK system images. Waydroid is in Arch's
+# official repositories (`sudo pacman -S waydroid`) and fetches its image once
+# (`sudo waydroid init`). The session is driven through Waydroid's own CLI;
+# the app commands talk to the guest over adb (see the app section).
+emulator_log="waydroid.log"
 
-cmd_emulator_start() {
-  # Validate the AVD here: systemd-run reports success even when the emulator
-  # exits immediately, so an unknown name would fail out of sight in the
-  # journal. `grep -x` keeps `btcmap` from matching `btcmap-old`.
-  if ! emulator -list-avds | grep -qx "$emulator_avd"; then
-    err "no emulator configured: AVD $emulator_avd does not exist (list them with: emulator -list-avds)"
+require_waydroid() {
+  if ! command -v waydroid >/dev/null 2>&1; then
+    err "waydroid is not installed. Install it with: sudo pacman -S waydroid"
     return 1
   fi
-
-  # systemd owns the emulator: it outlives this shell, and stopping the unit
-  # shuts it down through SIGTERM (which saves the quickboot snapshot), with its
-  # output going to the journal instead of a file.
-  if systemctl --user is-active --quiet "$emulator_unit"; then
-    echo "The emulator is already running."
-    echo "Stop it with: systemctl --user stop $emulator_unit"
-    return 0
+  if waydroid status 2>&1 | grep -q "not initialized"; then
+    err "Waydroid is not initialized. Initialize it once with: sudo waydroid init"
+    return 1
   fi
-
-  systemd-run --user --unit="$emulator_unit" --collect emulator -avd "$emulator_avd" -gpu host
-  echo "Emulator output: journalctl --user -u $emulator_unit"
 }
 
-cmd_emulator() {
-  local sub="${1:-help}"
-  shift || true
-  case "$sub" in
-    start)     cmd_emulator_start ;;
-    help|-h|--help) print_usage_emulator ;;
-    *) err "Unknown emulator command: $sub"; print_usage_emulator; return 1 ;;
-  esac
+waydroid_session_running() {
+  # `waydroid status` separates the label from the value with a tab.
+  waydroid status 2>/dev/null | grep -qE '^Session:[[:space:]]*RUNNING'
+}
+
+waydroid_container_frozen() {
+  waydroid status 2>/dev/null | grep -qE '^Container:[[:space:]]*FROZEN'
+}
+
+# Waydroid suspends the guest when no app is on screen (suspend_action=freeze),
+# and a frozen guest stops answering adb — device commands would just hang.
+# Showing the full UI unfreezes it (the launcher counts as the active app).
+wake_waydroid() {
+  if waydroid_container_frozen; then
+    waydroid show-full-ui >/dev/null 2>&1 || true
+  fi
+}
+
+# Multi-window (one window per app, managed by the desktop instead of one
+# full-screen Android surface) is a persistent guest property. The guest only
+# reads it when the session starts, so changing it means restarting the session.
+waydroid_multi_window() {
+  waydroid prop get persist.waydroid.multi_windows 2>/dev/null \
+    | tr -d '[:space:]' | grep -qx true
+}
+
+start_waydroid_session() {
+  # Detached: the session manager blocks for as long as the guest runs, so this
+  # returns once Android is up, not when the session ends. Its details go to the
+  # log rather than to Waydroid's own log file, so a failed boot can be read with
+  # the tail below.
+  nohup setsid waydroid --details-to-stdout session start > "$emulator_log" 2>&1 \
+    < /dev/null & disown
+
+  echo "Booting Waydroid (logs: $emulator_log)..."
+  local waited=0
+  while [ "$waited" -lt 240 ]; do
+    if waydroid_session_running; then
+      return 0
+    fi
+    # A session manager that has died — no binder device, the container service
+    # not running — never reaches RUNNING, so stop waiting for it.
+    if ! pgrep -f '[w]aydroid .*session start' >/dev/null 2>&1; then
+      break
+    fi
+    sleep 0.5
+    waited=$((waited + 1))
+  done
+
+  echo "Error: Waydroid did not come up (see $emulator_log):" >&2
+  tail -n 20 "$emulator_log" >&2
+  return 1
+}
+
+stop_waydroid_session() {
+  waydroid session stop >/dev/null 2>&1 || true
+  local waited=0
+  while [ "$waited" -lt 40 ]; do
+    if ! waydroid_session_running; then
+      return 0
+    fi
+    sleep 0.5
+    waited=$((waited + 1))
+  done
+
+  err "Waydroid did not shut down"
+  return 1
+}
+
+# The session is what the guest's Android system runs under; without it every
+# `waydroid app` command logs "WayDroid session is stopped" and exits 0, so
+# check for it up front instead of after a silent failure.
+require_waydroid_session() {
+  require_waydroid || return 1
+  if ! waydroid_session_running; then
+    err "the Waydroid session is not running. Boot it with: ./devtools app run --android"
+    return 1
+  fi
+}
+
+# `app run --android` calls this, so there is no separate command to start
+# Waydroid: the session is a prerequisite of running the app, not a step of its
+# own. Boots it when it is not up, then applies the dev settings.
+ensure_waydroid_session() {
+  require_waydroid || return 1
+
+  local booted=0
+
+  if ! waydroid_session_running; then
+    # Waydroid's guest reaches the host through the Android binder driver. A
+    # kernel without it (or with binderfs left unmounted) can never start the
+    # container, and the failure only shows up as a session that never comes up.
+    if [ ! -e /dev/binder ] && [ ! -d /dev/binderfs ]; then
+      cat >&2 <<'EOF'
+Error: no Android binder device: /dev/binder is missing and /dev/binderfs is
+not mounted.
+
+Waydroid needs the Android binder driver. Either run a kernel that ships it
+(linux-zen), install binder_linux-dkms, or mount binderfs and link its devices
+into /dev. See https://wiki.archlinux.org/title/Waydroid.
+EOF
+      return 1
+    fi
+
+    start_waydroid_session || return 1
+    booted=1
+  fi
+
+  # The image's windowed mode (one window per app) turned out to be fragile —
+  # it regressed to fullscreen tasks and crashed SurfaceFlinger — so the dev
+  # session runs with the whole Android UI in one window instead.
+  if waydroid_multi_window; then
+    echo "Switching Waydroid back to fullscreen mode..."
+    if ! waydroid prop set persist.waydroid.multi_windows false; then
+      err "could not turn off Waydroid multi-window mode"
+      return 1
+    fi
+    # The guest reads the property when it starts, so the session has to be
+    # restarted for the display to leave freeform mode.
+    stop_waydroid_session || return 1
+    start_waydroid_session || return 1
+    booted=1
+  fi
+
+  # A frozen guest does not answer adb, so wake it, then apply the guest-side
+  # settings (screen stays on, no on-screen keyboard).
+  wake_waydroid
+  if ! configure_guest; then
+    echo "Note: could not apply the Waydroid guest settings (adb unavailable)." >&2
+  fi
+
+  if [ "$booted" -eq 1 ]; then
+    # Puts the guest on screen: the session alone has no visible window. When
+    # the session was already up, leave it where the user left it.
+    waydroid show-full-ui >/dev/null 2>&1 || true
+  fi
 }
 
 # END emulator section
@@ -493,32 +607,142 @@ cmd_app_bundle_icons() {
   python3 bundle_icons.py "$@"
 }
 
-cmd_app_run_android() {
-  local device="emulator-5554"
-  local package="org.btcmap.debug"
-  local apk_path="./app/build/outputs/apk/debug/app-x86_64-debug.apk"
+# The application id of the debug build, which is the package it installs into
+# the guest.
+app_package="org.btcmap.debug"
 
-  if ! adb devices | grep -q "^$device[[:space:]]"; then
-    echo "Error: emulator $device is not running. Start it with: ./devtools emulator start" >&2
+# The SDK is where both the build and adb come from. Gradle finds it only
+# through ANDROID_HOME/ANDROID_SDK_ROOT or `sdk.dir` in local.properties, which
+# is per checkout and gitignored; fall back to the usual per-user install so the
+# Android target works from a plain shell.
+require_android_sdk() {
+  local sdk
+  if ! sdk="$(android_sdk_dir)" || [ -z "$sdk" ] || [ ! -d "$sdk" ]; then
+    sdk="${HOME}/Android/Sdk"
+  fi
+  if [ -z "$sdk" ] || [ ! -d "$sdk" ]; then
+    err "the Android SDK was not found: set ANDROID_HOME or sdk.dir in local.properties"
     return 1
   fi
+
+  export ANDROID_HOME="$sdk"
+  case ":$PATH:" in
+    *":$sdk/platform-tools:"*) ;;
+    *) export PATH="$sdk/platform-tools:$PATH" ;;
+  esac
+  if ! command -v adb >/dev/null 2>&1; then
+    err "adb was not found in $sdk/platform-tools"
+    return 1
+  fi
+}
+
+# The guest is reached over adb on Waydroid's container network. Waydroid's own
+# `waydroid app install` logs its failures instead of failing (recent images
+# break it outright), so the app commands use adb, whose failures are visible.
+waydroid_device() {
+  require_waydroid_session || return 1
+  require_android_sdk || return 1
+  wake_waydroid
+
+  local ip serial waited=0
+  ip="$(waydroid status 2>/dev/null | sed -n 's/^IP address:[[:space:]]*//p' | head -n1)" || true
+  if [ -z "$ip" ]; then
+    err "could not read the Waydroid guest address from: waydroid status"
+    return 1
+  fi
+  serial="$ip:5555"
+
+  # The session reports RUNNING before Android has finished booting, and adb
+  # shows the guest as offline for a moment after a (re)start, so wait for the
+  # guest itself to say it is ready rather than race it.
+  while [ "$waited" -lt 120 ]; do
+    adb connect "$serial" >/dev/null 2>&1 || true
+    if [ "$(timeout 5 adb -s "$serial" shell getprop sys.boot_completed 2>/dev/null \
+        | tr -d '\r[:space:]')" = "1" ]; then
+      echo "$serial"
+      return 0
+    fi
+    sleep 1
+    waited=$((waited + 1))
+  done
+
+  err "adb cannot reach the Waydroid guest at $serial; accept its debugging prompt in Waydroid"
+  return 1
+}
+
+# Guest-side settings applied on every start:
+# - keep the Android screen on: a sleeping guest hides the app window and lets
+#   Waydroid freeze the container, which adb then cannot talk to;
+# - keep the IME away from focused fields: Waydroid presents the host keyboard as
+#   a hardware keyboard, but the image asks for the virtual keyboard anyway.
+configure_guest() {
+  local serial
+
+  # Called in this shell, not the substitution below: require_android_sdk puts
+  # platform-tools on PATH, which a subshell would not pass back.
+  require_android_sdk || return 1
+  serial="$(waydroid_device)" || return 1
+
+  timeout 15 adb -s "$serial" shell settings put system screen_off_timeout 2147483647 >/dev/null
+  timeout 15 adb -s "$serial" shell settings put secure show_ime_with_hard_keyboard 0 >/dev/null
+}
+
+install_apk() {
+  local apk_path="$1" serial
+
+  serial="$(waydroid_device)" || return 1
+
+  echo "Installing $apk_path in Waydroid..."
+  if ! timeout 180 adb -s "$serial" install -r -t "$apk_path"; then
+    err "the APK did not install (see the failure above)"
+    return 1
+  fi
+}
+
+# `waydroid app launch` is Waydroid's own launch — it also records the active
+# app for the host — whereas `am start` only updates the activity. The CLI logs
+# a failed launch and still exits 0, so wait for the process instead.
+launch_app() {
+  local serial="$1" pid waited attempt=0
+
+  while [ "$attempt" -lt 3 ]; do
+    echo "Launching $app_package..."
+    waydroid app launch "$app_package"
+
+    waited=0
+    while [ "$waited" -lt 10 ]; do
+      pid="$(timeout 5 adb -s "$serial" shell pidof "$app_package" 2>/dev/null | tr -d '\r[:space:]')" || true
+      if [ -n "$pid" ]; then
+        return 0
+      fi
+      sleep 0.5
+      waited=$((waited + 1))
+    done
+    attempt=$((attempt + 1))
+  done
+
+  err "$app_package did not start; see: waydroid log"
+  return 1
+}
+
+cmd_app_run_android() {
+  local apk_path="./app/build/outputs/apk/debug/app-x86_64-debug.apk" serial
+
+  require_android_sdk || return 1
+  ensure_waydroid_session || return 1
 
   echo "Assembling debug APK..."
   ./gradlew assembleDebug "$@"
 
   if [ ! -f "$apk_path" ]; then
-    echo "Error: APK not found at $apk_path" >&2
+    err "APK not found at $apk_path"
     return 1
   fi
 
-  echo "Installing $apk_path on $device..."
-  adb -s "$device" install -r -t "$apk_path"
+  install_apk "$apk_path" || return 1
 
-  echo "Launching $package..."
-  adb -s "$device" shell monkey -p "$package" -c android.intent.category.LAUNCHER 1
-
-  echo "Process status:"
-  adb -s "$device" shell ps -A | grep btcmap || echo "(process not visible yet — give it a moment)"
+  serial="$(waydroid_device)" || return 1
+  launch_app "$serial"
 }
 
 cmd_app_run_desktop() {
@@ -859,7 +1083,6 @@ main() {
   local cmd="${1:-help}"
   shift || true
   case "$cmd" in
-    emulator) cmd_emulator "$@" ;;
     app) cmd_app "$@" ;;
     website) cmd_website "$@" ;;
     help|-h|--help) print_usage ;;

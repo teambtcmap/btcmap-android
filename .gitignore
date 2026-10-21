@@ -12,6 +12,9 @@ local.properties
 # Release signing configuration file
 signing.properties
 
+# Waydroid session output, from ./devtools app run --android
+/waydroid.log
+
 # Build output directory
 build/
 
