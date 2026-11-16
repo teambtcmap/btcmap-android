@@ -12,10 +12,14 @@ import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import org.btcmap.db.table.event.Event
 import org.btcmap.ui.map.MarkerPalette
+
+/** Test tag for the event sheet's edit action. */
+const val EVENT_EDIT_TAG = "event-edit"
 
 /**
  * The event details shown when an event marker is selected, the map's event
@@ -23,8 +27,9 @@ import org.btcmap.ui.map.MarkerPalette
  * and actions as a header, so opening an event from the map keeps the user on
  * the map rather than pushing a screen (as the map's place sheet does).
  *
- * [onDirections] and [onDelete] are null when the host does not offer them; a
- * null delete (the signed-in user may not remove the event) draws no action.
+ * [onDirections], [onEdit] and [onDelete] are null when the host does not offer
+ * them; a null edit (the signed-in user may not edit events) or a null delete
+ * (the signed-in user may not remove the event) draws no action.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -40,6 +45,7 @@ fun EventSheet(
     onDismiss: () -> Unit,
     onOpenWebsite: (() -> Unit)? = null,
     onDirections: (() -> Unit)? = null,
+    onEdit: (() -> Unit)? = null,
     onDelete: (suspend () -> Unit)? = null,
     onDeleted: () -> Unit = onDismiss,
     modifier: Modifier = Modifier,
@@ -66,6 +72,14 @@ fun EventSheet(
             if (onDirections != null) {
                 IconButton(onClick = onDirections) {
                     MaterialSymbol(glyph = "directions", contentDescription = labels.directions)
+                }
+            }
+            if (onEdit != null) {
+                IconButton(
+                    onClick = onEdit,
+                    modifier = Modifier.testTag(EVENT_EDIT_TAG),
+                ) {
+                    MaterialSymbol(glyph = "edit", contentDescription = labels.edit)
                 }
             }
             EventDeleteAction(

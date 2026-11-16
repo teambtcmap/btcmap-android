@@ -437,6 +437,13 @@ internal fun MapRoute(
             onDismiss = { sheetEvent = null },
             onOpenWebsite = event.website?.let { url -> { platform.openUrl(url.toString()) } },
             onDirections = { platform.openDirections(event.lat, event.lon) },
+            // Editing is the server's privileged path (event manager, admin or
+            // root), so the pencil is drawn only for a user who may use it.
+            onEdit = if (canManageEvents) {
+                { onNavigate(AppRoute.EditEvent(event)) }
+            } else {
+                null
+            },
             onDelete = if (delete.canDelete) {
                 {
                     if (delete.withRpc) {

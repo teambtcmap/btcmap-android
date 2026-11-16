@@ -56,14 +56,40 @@ class EventSheetTest {
                         onDismiss = {},
                         onOpenWebsite = {},
                         onDirections = {},
+                        onEdit = {},
                         onDelete = {},
                     )
                 }
             }
             onNodeWithText("Phuket Bitcoin Meetup").assertIsDisplayed()
             onNodeWithContentDescription("Directions").assertIsDisplayed()
+            onNodeWithContentDescription("Edit event").assertIsDisplayed()
+            onNodeWithTag(EVENT_EDIT_TAG).assertIsDisplayed()
             onNodeWithTag(EVENT_DELETE_TAG).assertIsDisplayed()
             onNodeWithTag(EVENT_WEBSITE_TAG).assertExists()
+        }
+    }
+
+    @Test
+    fun drawsNoEditActionWhenTheUserMayNotEdit() {
+        runComposeUiTest {
+            setContent {
+                AppTheme {
+                    EventSheet(
+                        event = event,
+                        geoJson = "",
+                        styleUrl = "",
+                        styleJson = null,
+                        palette = palette,
+                        iconFont = null,
+                        usingOpenFreeMap = true,
+                        labels = TEST_EVENT_SCREEN_LABELS,
+                        onDismiss = {},
+                        onEdit = null,
+                    )
+                }
+            }
+            onNodeWithTag(EVENT_EDIT_TAG).assertDoesNotExist()
         }
     }
 }

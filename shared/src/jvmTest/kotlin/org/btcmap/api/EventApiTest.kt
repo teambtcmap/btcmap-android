@@ -203,6 +203,58 @@ class EventApiTest : ApiTestBase() {
     }
 
     @Test
+    fun editEvent_patchesAllFields() = runTest {
+        enqueueJson(
+            """
+            {"id":174,"lat":1.0,"lon":2.0,"name":"Meetup","website":"https://example.com","status":"live","starts_at":"2026-09-25T19:00:00+07:00","ends_at":"2026-09-25T22:00:00+07:00"}
+            """.trimIndent()
+        )
+
+        api().editEvent(
+            id = 174L,
+            lat = 1.0,
+            lon = 2.0,
+            name = "Meetup",
+            website = "https://example.com",
+            startsAt = "2026-09-25T19:00:00+07:00",
+            endsAt = "2026-09-25T22:00:00+07:00",
+        )
+
+        val request = takeRequest()
+        Assert.assertEquals("PATCH", request.method)
+        Assert.assertEquals("/v4/events/174", request.url.encodedPath)
+        Assert.assertEquals(
+            """{"lat":1.0,"lon":2.0,"name":"Meetup","website":"https://example.com","starts_at":"2026-09-25T19:00:00+07:00","ends_at":"2026-09-25T22:00:00+07:00"}""",
+            request.jsonBody(),
+        )
+    }
+
+    @Test
+    fun editEvent_clearsEndsAtWithNull() = runTest {
+        enqueueJson(
+            """
+            {"id":174,"lat":1.0,"lon":2.0,"name":"Meetup","website":"","status":"live","starts_at":"2026-09-25T19:00:00+07:00"}
+            """.trimIndent()
+        )
+
+        api().editEvent(
+            id = 174L,
+            lat = 1.0,
+            lon = 2.0,
+            name = "Meetup",
+            website = "",
+            startsAt = "2026-09-25T19:00:00+07:00",
+            endsAt = null,
+        )
+
+        val request = takeRequest()
+        Assert.assertEquals(
+            """{"lat":1.0,"lon":2.0,"name":"Meetup","website":"","starts_at":"2026-09-25T19:00:00+07:00","ends_at":null}""",
+            request.jsonBody(),
+        )
+    }
+
+    @Test
     fun getMyEvents_parsesStatusesAndDates() = runTest {
         enqueueJson(
             """

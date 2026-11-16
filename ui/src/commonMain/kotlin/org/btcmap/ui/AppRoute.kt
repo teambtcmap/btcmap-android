@@ -30,6 +30,12 @@ sealed interface AppRoute {
     data class EventDetails(val event: Event) : AppRoute
 
     /**
+     * Editing an existing event (see `AddEventScreen`), reached from the map's
+     * event sheet by an event manager, admin or root.
+     */
+    data class EditEvent(val event: Event) : AppRoute
+
+    /**
      * Adding a place at a map position (see `AddPlaceScreen`). The optional
      * pre-fill seeds the form when the place is submitted from a basemap POI,
      * which already knows the feature's name and OSM category.
@@ -146,6 +152,7 @@ fun AppRoute.key(): String = when (this) {
     is AppRoute.Boost -> "boost"
     is AppRoute.AddComment -> "add-comment"
     is AppRoute.EventDetails -> "event-details"
+    is AppRoute.EditEvent -> "edit-event"
     is AppRoute.AddPlace -> "add-place"
     is AppRoute.AddNote -> "add-note"
     is AppRoute.AddEvent -> "add-event"

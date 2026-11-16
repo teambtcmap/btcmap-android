@@ -3,7 +3,9 @@ package org.btcmap.api
 import io.ktor.http.HttpMethod
 import io.ktor.http.Url
 import kotlin.time.Instant
+import kotlinx.serialization.json.JsonNull
 import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
@@ -224,6 +226,42 @@ suspend fun Api.submitEvent(
             status = response.string("status"),
         )
     }
+}
+
+/**
+ * Edits an existing event (`PATCH /v4/events/{id}`). Requires an event manager,
+ * admin or root role, and the event's resulting location must fall inside the
+ * caller's geofence when one is set. Soft-deleted events are refused as `404`.
+ *
+ * [startsAt] and [endsAt] are absolute RFC 3339 timestamps, offsets included.
+ * The edit form shows the event's time in the device's zone and lets the user
+ * adjust it there, so the caller resolves the picked wall-clock time back in
+ * that same zone: an untouched time keeps its instant instead of being
+ * re-interpreted as local to the event's coordinates. A null [endsAt] clears
+ * the end time; `starts_at` always has a value.
+ */
+suspend fun Api.editEvent(
+    id: Long,
+    lat: Double,
+    lon: Double,
+    name: String,
+    website: String,
+    startsAt: String,
+    endsAt: String?,
+) {
+    val url = buildUrl("v4", "events", "$id")
+
+    val req = buildJsonObject {
+        put("lat", lat)
+        put("lon", lon)
+        put("name", name)
+        put("website", website)
+        put("starts_at", startsAt)
+        // An explicit null clears a previously set end time.
+        put("ends_at", endsAt?.let(::JsonPrimitive) ?: JsonNull)
+    }
+
+    call(HttpMethod.Patch, url, body = req) { }
 }
 
 internal fun JsonObject.toGetEventsItem(): GetEventsItem {

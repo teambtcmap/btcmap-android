@@ -36,6 +36,8 @@ data class AppLabels(
     val directions: String,
     val addPlace: AddPlaceLabels,
     val addEvent: AddEventLabels,
+    /** The add-event form in its edit mode: its title, save action and confirmation. */
+    val editEvent: AddEventLabels,
     val addNote: AddNoteLabels,
     val report: ReportPlaceLabels,
     val colorsTitle: String,

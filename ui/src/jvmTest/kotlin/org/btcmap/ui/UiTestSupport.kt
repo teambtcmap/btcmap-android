@@ -202,6 +202,7 @@ internal val TEST_EVENT_SCREEN_LABELS = EventScreenLabels(
     zoomIn = "Zoom in",
     zoomOut = "Zoom out",
     directions = "Directions",
+    edit = "Edit event",
     delete = "Delete event",
     deleteConfirmTitle = "Delete this event?",
     deleteConfirmMessage = "This event will be removed for everyone.",

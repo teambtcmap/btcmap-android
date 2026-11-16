@@ -52,6 +52,8 @@ data class EventScreenLabels(
     val zoomOut: String,
     /** The content description of the event sheet's directions action. */
     val directions: String,
+    /** The event sheet's edit action and the edit screen's title. */
+    val edit: String,
     /** The delete action and the confirm button's label. */
     val delete: String,
     /** The delete confirmation's title and message. */

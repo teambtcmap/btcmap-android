@@ -26,5 +26,5 @@ internal fun DateTimeFormatter.withAppLocale(): DateTimeFormatter =
 internal fun Instant.toLocalDate(): java.time.LocalDate =
     toJavaInstant().atZone(ZoneId.systemDefault()).toLocalDate()
 
-private fun Instant.toJavaInstant(): java.time.Instant =
+internal fun Instant.toJavaInstant(): java.time.Instant =
     java.time.Instant.ofEpochSecond(epochSeconds, nanosecondsOfSecond.toLong())

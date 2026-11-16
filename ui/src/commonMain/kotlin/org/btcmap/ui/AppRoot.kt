@@ -21,6 +21,7 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.withContext
 import org.btcmap.api.deleteEvent
 import org.btcmap.api.deletePlaceImage
+import org.btcmap.api.editEvent
 import org.btcmap.api.getDashboard
 import org.btcmap.api.createNote
 import org.btcmap.api.getPendingEvents
@@ -325,6 +326,32 @@ fun AppRoot(
                 initialWebsite = route.website,
                 initialStartsAt = route.startsAt,
                 initialEndsAt = route.endsAt,
+            )
+
+            is AppRoute.EditEvent -> AddEventScreen(
+                lat = route.event.lat,
+                lon = route.event.lon,
+                styleUrl = mapStyle.url,
+                styleJson = mapStyle.json,
+                labels = labels.editEvent,
+                iconFont = services.iconFont,
+                palette = markerPalette(services.settings),
+                submit = { draft ->
+                    services.api.editEvent(
+                        id = route.event.id,
+                        lat = draft.lat,
+                        lon = draft.lon,
+                        name = draft.name,
+                        website = draft.website,
+                        startsAt = draft.startsAt.toDeviceApiTimestamp(),
+                        endsAt = draft.endsAt?.toDeviceApiTimestamp(),
+                    )
+                },
+                onBack = back,
+                initialName = route.event.name,
+                initialWebsite = route.event.website?.toString().orEmpty(),
+                initialStartsAt = route.event.startsAt.toDeviceLocalDateTime(),
+                initialEndsAt = route.event.endsAt?.toDeviceLocalDateTime(),
             )
 
             is AppRoute.Report -> ScreenPage(

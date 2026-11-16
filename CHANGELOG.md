@@ -6,6 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+- Edit an event straight from the map's event sheet: an event manager, admin or root gets a pencil that opens the add-event form pre-filled with the event's name, website, position and times, and saving it patches the event instead of submitting a new one; the screen caps and centres its map and fields on wide windows like the other add screens
 - Fix saving a place or area crashing the app when the save fails — a failed request, or an expired session whose user is no longer cached — by reporting the error instead of letting it escape the screen's coroutine
 - Fix a crash when the app exits after logging out: the exit no longer calls `requireActivity()` on a fragment that has already detached
 

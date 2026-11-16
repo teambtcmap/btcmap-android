@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.relocation.BringIntoViewRequester
 import androidx.compose.foundation.relocation.bringIntoViewRequester
 import androidx.compose.foundation.rememberScrollState
@@ -44,6 +45,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.testTag
@@ -163,7 +165,12 @@ private val LOCAL_DATE_TIME_SAVER: Saver<LocalDateTime?, String> = Saver(
  *
  * The optional initial values pre-fill the form for a duplicate: [initialName],
  * [initialWebsite], [initialStartsAt] and [initialEndsAt] seed the fields, so the
- * user only has to adjust the date to repeat a regular event.
+ * user only has to adjust the date to repeat a regular event. The same form edits
+ * an existing event, seeded from its stored values.
+ *
+ * The body is capped at [CONTENT_MAX_WIDTH] and centred, so a wide desktop or
+ * tablet window neither stretches the map and the fields edge to edge nor breaks
+ * a phone.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -223,68 +230,84 @@ fun AddEventScreen(
                 )
             },
         ) { innerPadding ->
-            Column(
+            Box(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(innerPadding),
+                contentAlignment = Alignment.TopCenter,
             ) {
-                // The positioning map is a terminal confirmation's backdrop only
-                // while the form is still being filled in.
-                if (!submitted) {
-                    Box(modifier = Modifier.fillMaxWidth().height(240.dp)) {
-                        map { newLat, newLon -> center = newLat to newLon }
-                        // The hint floats on the map so it reads as belonging to
-                        // it, in the inverse-surface role M3 reserves for content
-                        // over imagery.
-                        Surface(
-                            color = MaterialTheme.colorScheme.inverseSurface.copy(alpha = 0.5f),
-                            contentColor = MaterialTheme.colorScheme.inverseOnSurface,
-                            shape = RoundedCornerShape(percent = 50),
+                Column(
+                    modifier = Modifier
+                        .widthIn(max = CONTENT_MAX_WIDTH)
+                        .fillMaxSize(),
+                ) {
+                    // The positioning map is a terminal confirmation's backdrop only
+                    // while the form is still being filled in. It is inset to the
+                    // form's margin and clipped to the theme's medium shape, so it
+                    // reads as a contained M3 media block rather than a bare
+                    // rectangle wider than the fields below it.
+                    if (!submitted) {
+                        Box(
                             modifier = Modifier
-                                .align(Alignment.BottomCenter)
-                                .padding(bottom = 12.dp),
+                                .fillMaxWidth()
+                                .padding(start = 16.dp, end = 16.dp, top = 16.dp)
+                                .height(240.dp)
+                                .clip(MaterialTheme.shapes.medium),
                         ) {
-                            Text(
-                                text = labels.dragMap,
-                                style = MaterialTheme.typography.labelMedium,
-                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
-                            )
-                        }
-                    }
-                }
-                AddEventForm(
-                    busy = busy,
-                    submitted = submitted,
-                    labels = labels,
-                    initialName = initialName,
-                    initialWebsite = initialWebsite,
-                    initialStartsAt = initialStartsAt,
-                    initialEndsAt = initialEndsAt,
-                    onSubmit = { name, website, startsAt, endsAt ->
-                        busy = true
-                        val draft = AddEventDraft(
-                            lat = center.first,
-                            lon = center.second,
-                            name = name,
-                            website = website,
-                            startsAt = startsAt.format(API_LOCAL_DATE_TIME),
-                            endsAt = endsAt?.format(API_LOCAL_DATE_TIME),
-                        )
-                        scope.launch {
-                            try {
-                                submit(draft)
-                                submitted = true
-                            } catch (t: Throwable) {
-                                error = t.message ?: t.toString()
-                            } finally {
-                                busy = false
+                            map { newLat, newLon -> center = newLat to newLon }
+                            // The hint floats on the map so it reads as belonging to
+                            // it, in the inverse-surface role M3 reserves for content
+                            // over imagery.
+                            Surface(
+                                color = MaterialTheme.colorScheme.inverseSurface.copy(alpha = 0.5f),
+                                contentColor = MaterialTheme.colorScheme.inverseOnSurface,
+                                shape = RoundedCornerShape(percent = 50),
+                                modifier = Modifier
+                                    .align(Alignment.BottomCenter)
+                                    .padding(bottom = 12.dp),
+                            ) {
+                                Text(
+                                    text = labels.dragMap,
+                                    style = MaterialTheme.typography.labelMedium,
+                                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                                )
                             }
                         }
-                    },
-                    onBack = onBack,
-                    dateTimePicker = dateTimePicker,
-                    modifier = Modifier.weight(1f),
-                )
+                    }
+                    AddEventForm(
+                        busy = busy,
+                        submitted = submitted,
+                        labels = labels,
+                        initialName = initialName,
+                        initialWebsite = initialWebsite,
+                        initialStartsAt = initialStartsAt,
+                        initialEndsAt = initialEndsAt,
+                        onSubmit = { name, website, startsAt, endsAt ->
+                            busy = true
+                            val draft = AddEventDraft(
+                                lat = center.first,
+                                lon = center.second,
+                                name = name,
+                                website = website,
+                                startsAt = startsAt.format(API_LOCAL_DATE_TIME),
+                                endsAt = endsAt?.format(API_LOCAL_DATE_TIME),
+                            )
+                            scope.launch {
+                                try {
+                                    submit(draft)
+                                    submitted = true
+                                } catch (t: Throwable) {
+                                    error = t.message ?: t.toString()
+                                } finally {
+                                    busy = false
+                                }
+                            }
+                        },
+                        onBack = onBack,
+                        dateTimePicker = dateTimePicker,
+                        modifier = Modifier.weight(1f),
+                    )
+                }
             }
         }
 

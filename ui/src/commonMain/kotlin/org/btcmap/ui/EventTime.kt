@@ -3,6 +3,7 @@ package org.btcmap.ui
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import java.time.LocalDateTime
+import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 import kotlin.time.Instant
@@ -55,3 +56,22 @@ internal fun eventTimeText(
 /** Parses the floating local date-time a duplicate pre-fill carries, or null. */
 fun String.toLocalDateTimeOrNull(): LocalDateTime? =
     runCatching { LocalDateTime.parse(this) }.getOrNull()
+
+/**
+ * The device-zone wall-clock time of this instant. The event screen and the
+ * map's event sheet display times in that zone, so the edit form is seeded with
+ * it too.
+ */
+fun Instant.toDeviceLocalDateTime(): LocalDateTime =
+    toJavaInstant().atZone(ZoneId.systemDefault()).toLocalDateTime()
+
+/**
+ * An event form's floating wall-clock time as the absolute RFC 3339 timestamp
+ * the edit endpoint takes, resolved in the device zone. Resolution in the zone
+ * the form was seeded with keeps an untouched time at the same instant; asking
+ * the server to infer the zone from the coordinates (`timezone=auto`, as a
+ * create does) would move a remote event across zones.
+ */
+fun String.toDeviceApiTimestamp(): String =
+    LocalDateTime.parse(this).atZone(ZoneId.systemDefault())
+        .format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)

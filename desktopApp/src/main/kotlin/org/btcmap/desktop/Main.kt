@@ -53,6 +53,7 @@ import org.btcmap.api.getDashboard
 import org.btcmap.api.getPendingEvents
 import org.btcmap.api.revokeEvent
 import org.btcmap.api.deleteEvent
+import org.btcmap.api.editEvent
 import org.btcmap.api.setEventStatus
 import org.btcmap.api.addPlaceImage
 import org.btcmap.api.deletePlaceImage
@@ -222,6 +223,8 @@ import org.btcmap.ui.formatBytes
 import org.btcmap.ui.loadSection
 import org.btcmap.ui.markerPalette
 import org.btcmap.ui.rememberNavController
+import org.btcmap.ui.toDeviceApiTimestamp
+import org.btcmap.ui.toDeviceLocalDateTime
 import org.btcmap.ui.toLocalDateTimeOrNull
 import org.btcmap.api.GetEventsItem
 import org.btcmap.api.toEvent
@@ -435,6 +438,9 @@ private fun runApp() = application {
                     // event marker or search result shows this sheet instead of
                     // pushing a screen, as the map's place sheet does.
                     var mapSheetEvent by remember { mutableStateOf<Event?>(null) }
+                    // The event the edit screen was opened for. Carried in state
+                    // because the form seeds itself from the event's fields.
+                    var editEvent by remember { mutableStateOf<Event?>(null) }
 
                     var isAdmin by remember { mutableStateOf(false) }
                     var canManageEvents by remember { mutableStateOf(false) }
@@ -834,6 +840,34 @@ private fun runApp() = application {
                             },
                             onBack = { nav.pop() },
                         )
+
+                        Route.EditEvent -> editEvent?.let { event ->
+                            AddEventScreen(
+                                lat = event.lat,
+                                lon = event.lon,
+                                styleUrl = HOSTED_STYLE_URL,
+                                styleJson = styleJson,
+                                labels = EDIT_EVENT_LABELS,
+                                iconFont = iconFont,
+                                palette = markerPalette(settings),
+                                initialName = event.name,
+                                initialWebsite = event.website?.toString().orEmpty(),
+                                initialStartsAt = event.startsAt.toDeviceLocalDateTime(),
+                                initialEndsAt = event.endsAt?.toDeviceLocalDateTime(),
+                                submit = { draft ->
+                                    api.editEvent(
+                                        id = event.id,
+                                        lat = draft.lat,
+                                        lon = draft.lon,
+                                        name = draft.name,
+                                        website = draft.website,
+                                        startsAt = draft.startsAt.toDeviceApiTimestamp(),
+                                        endsAt = draft.endsAt?.toDeviceApiTimestamp(),
+                                    )
+                                },
+                                onBack = { nav.pop() },
+                            )
+                        }
 
                         Route.AddNote -> AddNoteScreen(
                             lat = addNote?.lat ?: 0.0,
@@ -1424,6 +1458,15 @@ private fun runApp() = application {
                                             "&mlon=${event.lon}#map=17/${event.lat}/${event.lon}",
                                     )
                                 },
+                                onEdit = if (canManageEvents) {
+                                    {
+                                        mapSheetEvent = null
+                                        editEvent = event
+                                        nav.push(Route.EditEvent)
+                                    }
+                                } else {
+                                    null
+                                },
                                 onDelete = if (delete.canDelete) {
                                     {
                                         if (delete.withRpc) {
@@ -1615,7 +1658,7 @@ private fun DesktopAreaScreen(
 private const val JOIN_US_URL = "https://btcmap.org/join-us"
 
 /** The desktop app's full-window pages. */
-private enum class Route { Map, Area, AreaAdmin, Event, Feed, Settings, Colors, DbStats, ManageUsers, UserAdmin, ManageAreas, ManagePlaceImages, Account, Report, AddPlace, AddEvent, AddNote, AddComment, Boost, Infra, EventReview }
+private enum class Route { Map, Area, AreaAdmin, Event, EditEvent, Feed, Settings, Colors, DbStats, ManageUsers, UserAdmin, ManageAreas, ManagePlaceImages, Account, Report, AddPlace, AddEvent, AddNote, AddComment, Boost, Infra, EventReview }
 
 /**
  * What the add-event screen opens with. From the map it is just the centre; from
@@ -2023,6 +2066,7 @@ private val ACCOUNT_LABELS get() = LABELS.account
 private val REPORT_LABELS get() = LABELS.report
 private val ADD_PLACE_LABELS get() = LABELS.addPlace
 private val ADD_EVENT_LABELS get() = LABELS.addEvent
+private val EDIT_EVENT_LABELS get() = LABELS.editEvent
 private val ADD_NOTE_LABELS get() = LABELS.addNote
 private val MY_NOTES_LABELS get() = LABELS.myNotes
 private val SAVED_PLACES_LABELS get() = LABELS.savedPlaces

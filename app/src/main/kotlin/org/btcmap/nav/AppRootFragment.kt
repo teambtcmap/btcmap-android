@@ -216,6 +216,16 @@ private fun AppRoute.toArgs(): Bundle = Bundle().apply {
             putString(ARG_EVENT_ENDS_AT, event.endsAt?.toString())
         }
 
+        is AppRoute.EditEvent -> {
+            putLong(ARG_EVENT_ID, event.id)
+            putDouble(ARG_EVENT_LAT, event.lat)
+            putDouble(ARG_EVENT_LON, event.lon)
+            putString(ARG_EVENT_NAME, event.name)
+            putString(ARG_EVENT_WEBSITE, event.website?.toString())
+            putString(ARG_EVENT_STARTS_AT, event.startsAt.toString())
+            putString(ARG_EVENT_ENDS_AT, event.endsAt?.toString())
+        }
+
         is AppRoute.AddPlace -> {
             putDouble(ARG_LAT, lat)
             putDouble(ARG_LON, lon)
@@ -275,6 +285,18 @@ private fun routeFromArgs(args: Bundle?): AppRoute = when (args?.getString(ARG_K
     )
 
     "event-details" -> AppRoute.EventDetails(
+        Event(
+            id = args.getLong(ARG_EVENT_ID),
+            lat = args.getDouble(ARG_EVENT_LAT),
+            lon = args.getDouble(ARG_EVENT_LON),
+            name = args.getString(ARG_EVENT_NAME).orEmpty(),
+            website = args.getString(ARG_EVENT_WEBSITE)?.toUrlOrNull(),
+            startsAt = Instant.parse(requireNotNull(args.getString(ARG_EVENT_STARTS_AT))),
+            endsAt = args.getString(ARG_EVENT_ENDS_AT)?.let { Instant.parse(it) },
+        ),
+    )
+
+    "edit-event" -> AppRoute.EditEvent(
         Event(
             id = args.getLong(ARG_EVENT_ID),
             lat = args.getDouble(ARG_EVENT_LAT),

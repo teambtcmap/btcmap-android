@@ -36,7 +36,7 @@ android {
         targetSdk {
             version = release(37)
         }
-        versionCode = 314
+        versionCode = 315
         versionName = "1.2.0"
 
         buildConfigField("long", "BUILD_TIME", "${buildTime}L")

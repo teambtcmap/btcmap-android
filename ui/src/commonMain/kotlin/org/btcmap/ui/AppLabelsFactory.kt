@@ -75,6 +75,7 @@ fun appLabels(
         zoomIn = strings["zoom_in"],
         zoomOut = strings["zoom_out"],
         directions = strings["directions"],
+        edit = strings["edit_event"],
         delete = strings["delete"],
         deleteConfirmTitle = strings["event_delete_confirm_title"],
         deleteConfirmMessage = strings["event_delete_confirm_message"],
@@ -102,25 +103,11 @@ fun appLabels(
         backToMap = strings["back_to_map"],
         error = errorDialogLabels(strings),
     ),
-    addEvent = AddEventLabels(
-        title = strings["add_event_title"],
-        back = strings["navigate_up"],
-        name = strings["name"],
-        namePlaceholder = strings["event_name_placeholder"],
-        website = strings["event_website"],
-        websitePlaceholder = strings["website_placeholder"],
-        startsAt = strings["event_starts_at"],
-        endsAt = strings["event_ends_at"],
-        selectDateTime = strings["event_select_date_time"],
-        clearEnd = strings["event_clear_end"],
-        dragMap = strings["add_location_drag_to_adjust"],
-        required = strings["field_required"],
-        submit = strings["submit_event"],
-        submitted = strings["event_submitted"],
-        backToMap = strings["back_to_map"],
-        ok = strings["ok"],
-        cancel = strings["cancel"],
-        error = errorDialogLabels(strings),
+    addEvent = addEventLabels(strings),
+    editEvent = addEventLabels(strings).copy(
+        title = strings["edit_event"],
+        submit = strings["save"],
+        submitted = strings["event_updated"],
     ),
     addNote = AddNoteLabels(
         title = strings["add_note_title"],
@@ -473,6 +460,32 @@ private fun invoiceLabels(strings: Strings): InvoicePaymentSectionLabels =
 /** The strings shared by every failure dialog. */
 private fun errorDialogLabels(strings: Strings): ErrorDialogLabels =
     ErrorDialogLabels(title = strings["error"], ok = strings["ok"])
+
+/**
+ * The add-event form's strings. The same form edits an existing event, so the
+ * edit screen reuses them with its own title, save action and confirmation.
+ */
+private fun addEventLabels(strings: Strings): AddEventLabels =
+    AddEventLabels(
+        title = strings["add_event_title"],
+        back = strings["navigate_up"],
+        name = strings["name"],
+        namePlaceholder = strings["event_name_placeholder"],
+        website = strings["event_website"],
+        websitePlaceholder = strings["website_placeholder"],
+        startsAt = strings["event_starts_at"],
+        endsAt = strings["event_ends_at"],
+        selectDateTime = strings["event_select_date_time"],
+        clearEnd = strings["event_clear_end"],
+        dragMap = strings["add_location_drag_to_adjust"],
+        required = strings["field_required"],
+        submit = strings["submit_event"],
+        submitted = strings["event_submitted"],
+        backToMap = strings["back_to_map"],
+        ok = strings["ok"],
+        cancel = strings["cancel"],
+        error = errorDialogLabels(strings),
+    )
 
 /** The string key for each user role, falling back to the id itself. */
 private fun roleNameKey(role: String): String = when (role) {
