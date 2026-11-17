@@ -4,6 +4,7 @@ import androidx.sqlite.SQLiteConnection
 import org.btcmap.db.bindHttpUrlOrNull
 import org.btcmap.db.bindInstant
 import org.btcmap.db.bindInstantOrNull
+import org.btcmap.db.bindTextOrNull
 import org.btcmap.db.escapeLikePattern
 import org.btcmap.db.getInstantOrNull
 import kotlin.time.Instant
@@ -18,8 +19,8 @@ class EventQueries(private val conn: SQLiteConnection) {
         // the whole sync transaction with a primary-key conflict.
         conn.prepare(
             """
-            INSERT OR REPLACE INTO $TABLE ($ID, $LAT, $LON, $NAME, $WEBSITE, $STARTS_AT, $ENDS_AT, $UPDATED_AT, $DELETED_AT)
-            VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9);
+            INSERT OR REPLACE INTO $TABLE ($ID, $LAT, $LON, $NAME, $WEBSITE, $STARTS_AT, $ENDS_AT, $PLACE_OSM_ID, $UPDATED_AT, $DELETED_AT)
+            VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10);
             """
         ).use { stmt ->
             rows.forEach { row ->
@@ -30,8 +31,9 @@ class EventQueries(private val conn: SQLiteConnection) {
                 stmt.bindHttpUrlOrNull(5, row.website)
                 stmt.bindInstant(6, row.startsAt)
                 stmt.bindInstantOrNull(7, row.endsAt)
-                stmt.bindInstant(8, row.updatedAt)
-                stmt.bindInstantOrNull(9, row.deletedAt)
+                stmt.bindTextOrNull(8, row.placeOsmId)
+                stmt.bindInstant(9, row.updatedAt)
+                stmt.bindInstantOrNull(10, row.deletedAt)
                 stmt.step()
                 stmt.reset()
             }

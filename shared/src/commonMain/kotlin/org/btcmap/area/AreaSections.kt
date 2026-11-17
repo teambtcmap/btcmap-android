@@ -134,6 +134,7 @@ private fun Event.toGetEventsItem(): GetEventsItem {
         website = website,
         startsAt = startsAt,
         endsAt = endsAt,
+        placeOsmId = placeOsmId,
     )
 }
 

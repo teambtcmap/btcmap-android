@@ -29,6 +29,7 @@ class EventApiTest : ApiTestBase() {
         Assert.assertEquals("Phuket Bitcoin Meetup", events[0].name)
         Assert.assertEquals("https://meetup.example/1", events[0].website.toString())
         Assert.assertNotNull(events[0].endsAt)
+        Assert.assertEquals("node/14385962692", events[0].placeOsmId)
         Assert.assertEquals("2024-01-01T10:00:00Z", events[0].updatedAt)
         Assert.assertNull(events[0].deletedAt)
         Assert.assertEquals("2024-01-02T10:00:00Z", events[1].updatedAt)
@@ -112,6 +113,7 @@ class EventApiTest : ApiTestBase() {
         Assert.assertEquals("Phuket Bitcoin Meetup", event.name)
         Assert.assertEquals("https://meetup.example/1", event.website.toString())
         Assert.assertNotNull(event.endsAt)
+        Assert.assertEquals("node/14385962692", event.placeOsmId)
     }
 
     @Test
@@ -178,6 +180,31 @@ class EventApiTest : ApiTestBase() {
     }
 
     @Test
+    fun submitEvent_includesThePlaceOsmIdWhenGiven() = runTest {
+        enqueueJson(
+            """
+            {"id":176,"lat":1.0,"lon":2.0,"name":"Meetup","website":"","status":"pending","starts_at":"2026-09-25T19:00:00Z"}
+            """.trimIndent()
+        )
+
+        api().submitEvent(
+            lat = 1.0,
+            lon = 2.0,
+            name = "Meetup",
+            website = "",
+            startsAt = "2026-09-25T19:00:00",
+            endsAt = null,
+            placeOsmId = "node/14385962692",
+        )
+
+        val request = takeRequest()
+        Assert.assertEquals(
+            """{"lat":1.0,"lon":2.0,"name":"Meetup","website":"","starts_at":"2026-09-25T19:00:00","place_osm_id":"node/14385962692","timezone":"auto"}""",
+            request.jsonBody(),
+        )
+    }
+
+    @Test
     fun submitEvent_omitsEndsAtAndSendsEmptyWebsite() = runTest {
         enqueueJson(
             """
@@ -218,13 +245,14 @@ class EventApiTest : ApiTestBase() {
             website = "https://example.com",
             startsAt = "2026-09-25T19:00:00+07:00",
             endsAt = "2026-09-25T22:00:00+07:00",
+            placeOsmId = "node/14385962692",
         )
 
         val request = takeRequest()
         Assert.assertEquals("PATCH", request.method)
         Assert.assertEquals("/v4/events/174", request.url.encodedPath)
         Assert.assertEquals(
-            """{"lat":1.0,"lon":2.0,"name":"Meetup","website":"https://example.com","starts_at":"2026-09-25T19:00:00+07:00","ends_at":"2026-09-25T22:00:00+07:00"}""",
+            """{"lat":1.0,"lon":2.0,"name":"Meetup","website":"https://example.com","starts_at":"2026-09-25T19:00:00+07:00","ends_at":"2026-09-25T22:00:00+07:00","place_osm_id":"node/14385962692"}""",
             request.jsonBody(),
         )
     }
@@ -249,7 +277,7 @@ class EventApiTest : ApiTestBase() {
 
         val request = takeRequest()
         Assert.assertEquals(
-            """{"lat":1.0,"lon":2.0,"name":"Meetup","website":"","starts_at":"2026-09-25T19:00:00+07:00","ends_at":null}""",
+            """{"lat":1.0,"lon":2.0,"name":"Meetup","website":"","starts_at":"2026-09-25T19:00:00+07:00","ends_at":null,"place_osm_id":null}""",
             request.jsonBody(),
         )
     }
@@ -395,7 +423,8 @@ class EventApiTest : ApiTestBase() {
                 "name": "Phuket Bitcoin Meetup",
                 "website": "https://meetup.example/1",
                 "starts_at": "2025-08-29T19:00:00+07:00",
-                "ends_at": "2025-08-29T22:00:00+07:00"
+                "ends_at": "2025-08-29T22:00:00+07:00",
+                "place_osm_id": "node/14385962692"
             }
         """
 
@@ -409,6 +438,7 @@ class EventApiTest : ApiTestBase() {
                     "website": "https://meetup.example/1",
                     "starts_at": "2025-08-29T19:00:00+07:00",
                     "ends_at": "2025-08-29T22:00:00+07:00",
+                    "place_osm_id": "node/14385962692",
                     "updated_at": "2024-01-01T10:00:00Z"
                 },
                 {

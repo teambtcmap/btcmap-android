@@ -13,6 +13,7 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.runComposeUiTest
+import org.btcmap.ui.map.LocationMove
 import org.btcmap.ui.map.MarkerPalette
 import java.time.LocalDateTime
 import kotlin.test.Test
@@ -33,6 +34,9 @@ class AddEventScreenTest {
         back = "Navigate up",
         name = "Name",
         namePlaceholder = "Phuket Bitcoin Meetup",
+        osmId = "OpenStreetMap ID (optional)",
+        osmIdPlaceholder = "Search a place or enter node/123",
+        osmIdInvalid = "Use node/<id>, way/<id> or relation/<id>",
         website = "Website",
         websitePlaceholder = "example.com",
         startsAt = "Starts at",
@@ -74,7 +78,7 @@ class AddEventScreenTest {
                     palette = palette,
                     submit = { drafts += it },
                     onBack = {},
-                    map = {},
+                    map = { _, _ -> },
                     dateTimePicker = { _, _, _, _ -> },
                 )
             }
@@ -99,7 +103,7 @@ class AddEventScreenTest {
                     palette = palette,
                     submit = { error("Location (1.0, 2.0) is outside your geofence") },
                     onBack = {},
-                    map = {},
+                    map = { _, _ -> },
                     dateTimePicker = { _, _, onConfirm, _ ->
                         Button(onClick = { onConfirm(LocalDateTime.of(2026, 9, 25, 19, 0)) }) {
                             Text("confirm")
@@ -140,7 +144,7 @@ class AddEventScreenTest {
                     palette = palette,
                     submit = { drafts += it },
                     onBack = {},
-                    map = {},
+                    map = { _, _ -> },
                     // A stubbed picker that confirms a fixed local time instead
                     // of opening the Material dialogs.
                     dateTimePicker = { _, _, onConfirm, _ ->
@@ -164,5 +168,135 @@ class AddEventScreenTest {
         assertEquals(2.5, draft.lon)
         assertEquals("2026-09-25T19:00:00", draft.startsAt)
         assertNull(draft.endsAt)
+        assertNull(draft.placeOsmId)
+    }
+
+    @OptIn(ExperimentalTestApi::class)
+    @Test
+    fun initialOsmId_prefillsTheFieldAndIsSubmittedBack() {
+        val drafts = mutableListOf<AddEventDraft>()
+        runComposeUiTest {
+            setContent {
+                AddEventScreen(
+                    lat = 1.5,
+                    lon = 2.5,
+                    styleUrl = "",
+                    styleJson = null,
+                    labels = labels,
+                    iconFont = null,
+                    palette = palette,
+                    osmSearch = { emptyList() },
+                    initialName = "Meetup",
+                    initialWebsite = "https://example.com",
+                    initialOsmId = "node/14385962692",
+                    submit = { drafts += it },
+                    onBack = {},
+                    map = { _, _ -> },
+                    dateTimePicker = { _, _, onConfirm, _ ->
+                        Button(onClick = { onConfirm(LocalDateTime.of(2026, 9, 25, 19, 0)) }) {
+                            Text("confirm")
+                        }
+                    },
+                )
+            }
+            onNodeWithTag(ADD_EVENT_STARTS_TAG).performClick()
+            onNodeWithText("confirm").performClick()
+            onNodeWithTag(ADD_EVENT_SUBMIT_TAG).performScrollTo().performClick()
+
+            assertEquals("node/14385962692", drafts.single().placeOsmId)
+        }
+    }
+
+    @OptIn(ExperimentalTestApi::class)
+    @Test
+    fun osmIdField_searchesAndSubmitsThePickedReference() {
+        val drafts = mutableListOf<AddEventDraft>()
+        val queries = mutableListOf<String>()
+        var movedTo: LocationMove? = null
+        runComposeUiTest {
+            setContent {
+                AddEventScreen(
+                    lat = 1.5,
+                    lon = 2.5,
+                    styleUrl = "",
+                    styleJson = null,
+                    labels = labels,
+                    iconFont = null,
+                    palette = palette,
+                    osmSearch = { query ->
+                        queries += query
+                        listOf(
+                            OsmPlace(
+                                osmId = "node/14385962692",
+                                name = "Bitcoin Cafe",
+                                lat = 4.0,
+                                lon = 5.0,
+                            ),
+                        )
+                    },
+                    submit = { drafts += it },
+                    onBack = {},
+                    map = { moveTo, _ -> movedTo = moveTo },
+                    dateTimePicker = { _, _, onConfirm, _ ->
+                        Button(onClick = { onConfirm(LocalDateTime.of(2026, 9, 25, 19, 0)) }) {
+                            Text("confirm")
+                        }
+                    },
+                )
+            }
+            onNodeWithTag(ADD_EVENT_NAME_TAG).performTextInput("Meetup")
+            onNodeWithTag(ADD_EVENT_OSM_ID_TAG).performTextInput("bit")
+
+            waitUntil(timeoutMillis = 5_000) {
+                onAllNodesWithText("Bitcoin Cafe").fetchSemanticsNodes().isNotEmpty()
+            }
+            // Only the query with three or more characters was sent.
+            assertEquals(listOf("bit"), queries)
+            onNodeWithText("Bitcoin Cafe").performClick()
+            // Picking the place moves the pin to its coordinates.
+            runOnIdle { assertEquals(LocationMove(lat = 4.0, lon = 5.0, sequence = 1), movedTo) }
+
+            onNodeWithTag(ADD_EVENT_WEBSITE_TAG).performTextInput("https://example.com")
+            onNodeWithTag(ADD_EVENT_STARTS_TAG).performClick()
+            onNodeWithText("confirm").performClick()
+            onNodeWithTag(ADD_EVENT_SUBMIT_TAG).performScrollTo().performClick()
+
+            onNodeWithText("Event submitted.").assertIsDisplayed()
+        }
+        val draft = drafts.single()
+        assertEquals("node/14385962692", draft.placeOsmId)
+        assertEquals(4.0, draft.lat)
+        assertEquals(5.0, draft.lon)
+    }
+
+    @OptIn(ExperimentalTestApi::class)
+    @Test
+    fun malformedOsmId_isRejectedBeforeSubmit() {
+        val drafts = mutableListOf<AddEventDraft>()
+        runComposeUiTest {
+            setContent {
+                AddEventScreen(
+                    lat = 1.5,
+                    lon = 2.5,
+                    styleUrl = "",
+                    styleJson = null,
+                    labels = labels,
+                    iconFont = null,
+                    palette = palette,
+                    osmSearch = { emptyList() },
+                    submit = { drafts += it },
+                    onBack = {},
+                    map = { _, _ -> },
+                    dateTimePicker = { _, _, _, _ -> },
+                )
+            }
+            onNodeWithTag(ADD_EVENT_NAME_TAG).performTextInput("Meetup")
+            onNodeWithTag(ADD_EVENT_OSM_ID_TAG).performTextInput("node/not-a-number")
+            onNodeWithTag(ADD_EVENT_WEBSITE_TAG).performTextInput("https://example.com")
+            onNodeWithTag(ADD_EVENT_SUBMIT_TAG).performScrollTo().performClick()
+
+            onNodeWithText(labels.osmIdInvalid).assertIsDisplayed()
+        }
+        assertTrue(drafts.isEmpty())
     }
 }

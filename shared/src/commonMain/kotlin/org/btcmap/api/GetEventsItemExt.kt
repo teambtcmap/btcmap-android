@@ -15,4 +15,5 @@ fun GetEventsItem.toEvent(): Event = eventOf(
     website = website,
     startsAt = startsAt,
     endsAt = endsAt,
+    placeOsmId = placeOsmId,
 )

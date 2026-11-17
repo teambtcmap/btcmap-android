@@ -228,6 +228,7 @@ import org.btcmap.ui.rememberNavController
 import org.btcmap.ui.toDeviceApiTimestamp
 import org.btcmap.ui.toDeviceLocalDateTime
 import org.btcmap.ui.toLocalDateTimeOrNull
+import org.btcmap.ui.toOsmPlaceSearch
 import org.btcmap.api.GetEventsItem
 import org.btcmap.api.toEvent
 import org.btcmap.area.AreaIssues
@@ -836,6 +837,7 @@ private fun runApp() = application {
                             labels = ADD_EVENT_LABELS,
                             iconFont = iconFont,
                             palette = markerPalette(settings),
+                            osmSearch = nominatimSearch.toOsmPlaceSearch(),
                             initialName = addEvent?.name.orEmpty(),
                             initialWebsite = addEvent?.website.orEmpty(),
                             initialStartsAt = addEvent?.startsAt?.toLocalDateTimeOrNull(),
@@ -862,10 +864,12 @@ private fun runApp() = application {
                                 labels = EDIT_EVENT_LABELS,
                                 iconFont = iconFont,
                                 palette = markerPalette(settings),
+                                osmSearch = nominatimSearch.toOsmPlaceSearch(),
                                 initialName = event.name,
                                 initialWebsite = event.website?.toString().orEmpty(),
                                 initialStartsAt = event.startsAt.toDeviceLocalDateTime(),
                                 initialEndsAt = event.endsAt?.toDeviceLocalDateTime(),
+                                initialOsmId = event.placeOsmId.orEmpty(),
                                 submit = { draft ->
                                     api.editEvent(
                                         id = event.id,
@@ -875,6 +879,7 @@ private fun runApp() = application {
                                         website = draft.website,
                                         startsAt = draft.startsAt.toDeviceApiTimestamp(),
                                         endsAt = draft.endsAt?.toDeviceApiTimestamp(),
+                                        placeOsmId = draft.placeOsmId,
                                     )
                                 },
                                 onBack = { nav.pop() },
@@ -1854,7 +1859,7 @@ private fun renderScreen(spec: String) {
                         busy = false,
                         submitted = false,
                         labels = ADD_EVENT_LABELS,
-                        onSubmit = { _, _, _, _ -> },
+                        onSubmit = { _, _, _, _, _ -> },
                         onBack = {},
                     )
 

@@ -45,6 +45,7 @@ private const val ARG_EVENT_NAME = "app_event_name"
 private const val ARG_EVENT_WEBSITE = "app_event_website"
 private const val ARG_EVENT_STARTS_AT = "app_event_starts_at"
 private const val ARG_EVENT_ENDS_AT = "app_event_ends_at"
+private const val ARG_EVENT_PLACE_OSM_ID = "app_event_place_osm_id"
 private const val ARG_LAT = "app_lat"
 private const val ARG_LON = "app_lon"
 private const val ARG_NAME = "app_name"
@@ -214,6 +215,7 @@ private fun AppRoute.toArgs(): Bundle = Bundle().apply {
             putString(ARG_EVENT_WEBSITE, event.website?.toString())
             putString(ARG_EVENT_STARTS_AT, event.startsAt.toString())
             putString(ARG_EVENT_ENDS_AT, event.endsAt?.toString())
+            putString(ARG_EVENT_PLACE_OSM_ID, event.placeOsmId)
         }
 
         is AppRoute.EditEvent -> {
@@ -224,6 +226,7 @@ private fun AppRoute.toArgs(): Bundle = Bundle().apply {
             putString(ARG_EVENT_WEBSITE, event.website?.toString())
             putString(ARG_EVENT_STARTS_AT, event.startsAt.toString())
             putString(ARG_EVENT_ENDS_AT, event.endsAt?.toString())
+            putString(ARG_EVENT_PLACE_OSM_ID, event.placeOsmId)
         }
 
         is AppRoute.AddPlace -> {
@@ -293,6 +296,7 @@ private fun routeFromArgs(args: Bundle?): AppRoute = when (args?.getString(ARG_K
             website = args.getString(ARG_EVENT_WEBSITE)?.toUrlOrNull(),
             startsAt = Instant.parse(requireNotNull(args.getString(ARG_EVENT_STARTS_AT))),
             endsAt = args.getString(ARG_EVENT_ENDS_AT)?.let { Instant.parse(it) },
+            placeOsmId = args.getString(ARG_EVENT_PLACE_OSM_ID),
         ),
     )
 
@@ -305,6 +309,7 @@ private fun routeFromArgs(args: Bundle?): AppRoute = when (args?.getString(ARG_K
             website = args.getString(ARG_EVENT_WEBSITE)?.toUrlOrNull(),
             startsAt = Instant.parse(requireNotNull(args.getString(ARG_EVENT_STARTS_AT))),
             endsAt = args.getString(ARG_EVENT_ENDS_AT)?.let { Instant.parse(it) },
+            placeOsmId = args.getString(ARG_EVENT_PLACE_OSM_ID),
         ),
     )
 

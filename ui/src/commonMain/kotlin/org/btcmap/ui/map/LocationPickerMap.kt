@@ -28,6 +28,13 @@ private const val LOCATION_PICKER_ZOOM = 16.0
 enum class LocationPickerPin { Place, Event, Note }
 
 /**
+ * A coordinate the positioning map should move to, with [sequence] making two
+ * requests for the same point distinct so picking the same place again still
+ * recentres a map the user has panned away.
+ */
+data class LocationMove(val lat: Double, val lon: Double, val sequence: Int)
+
+/**
  * The positioning map shared by the add-place, add-event and add-note screens:
  * pan and zoom to move the centre the pin marks. The pin is the stock pin the map
  * draws for the chosen [LocationPickerPin] — [noteIcon] picks the add-note pin's
@@ -35,7 +42,8 @@ enum class LocationPickerPin { Place, Event, Note }
  * colours, so the temporary overlay matches the map underneath.
  *
  * [onCenterChanged] fires whenever the camera comes to rest, with the new centre
- * in latitude/longitude.
+ * in latitude/longitude. [moveTo] recentres the camera, as when a search result
+ * is picked.
  */
 @Composable
 fun LocationPickerMap(
@@ -48,6 +56,8 @@ fun LocationPickerMap(
     pin: LocationPickerPin = LocationPickerPin.Place,
     /** The glyph previewed when [pin] is [LocationPickerPin.Note]. */
     noteIcon: String = DEFAULT_NOTE_ICON,
+    /** A coordinate to recentre on, or null to leave the camera alone. */
+    moveTo: LocationMove? = null,
 ) {
     val state = rememberMapState(
         baseStyle = if (styleJson != null) BaseStyle.Json(styleJson) else BaseStyle.Uri(styleUrl),
@@ -57,6 +67,15 @@ fun LocationPickerMap(
     LaunchedEffect(state, onCenterChanged) {
         state.events.filterIsInstance<MapEvent.CameraMoveEnded>().collect {
             state.cameraPosition.center.let { onCenterChanged(it.latitude, it.longitude) }
+        }
+    }
+
+    LaunchedEffect(state, moveTo) {
+        val target = moveTo ?: return@LaunchedEffect
+        state.cameraPosition.let { current ->
+            state.setCameraPosition(
+                current.copy(center = Position(target.lon, target.lat)),
+            )
         }
     }
 

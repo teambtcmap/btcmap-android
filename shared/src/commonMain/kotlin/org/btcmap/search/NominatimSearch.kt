@@ -19,11 +19,16 @@ import kotlin.time.Duration.Companion.seconds
 import kotlin.time.TimeMark
 import kotlin.time.TimeSource
 
+/** The OpenStreetMap element types the event API accepts as a place link. */
+private val OSM_ELEMENT_TYPES = setOf("node", "way", "relation")
+
 /** A place the OpenStreetMap Nominatim search service found, by name. */
 data class NominatimPlace(
     val lat: Double,
     val lon: Double,
     val name: String,
+    /** The element in the API's `<type>/<id>` form, when Nominatim returned one. */
+    val osmId: String? = null,
 )
 
 /**
@@ -120,7 +125,20 @@ class NominatimSearch(
             val name = place["name"]?.jsonPrimitive?.contentOrNull?.takeIf { it.isNotBlank() }
                 ?: place["display_name"]?.jsonPrimitive?.contentOrNull
                 ?: return@mapNotNull null
-            NominatimPlace(lat = lat, lon = lon, name = name)
+            // jsonv2 names the underlying element, which is what links an
+            // event to it. Only the three element types the API accepts are
+            // kept, and only for a positive id.
+            val osmType = place["osm_type"]?.jsonPrimitive?.contentOrNull
+            val osmElementId = place["osm_id"]?.jsonPrimitive?.contentOrNull?.toLongOrNull()
+            val osmId = if (
+                osmType != null && osmType in OSM_ELEMENT_TYPES &&
+                osmElementId != null && osmElementId > 0
+            ) {
+                "$osmType/$osmElementId"
+            } else {
+                null
+            }
+            NominatimPlace(lat = lat, lon = lon, name = name, osmId = osmId)
         }
     }.getOrDefault(emptyList())
 

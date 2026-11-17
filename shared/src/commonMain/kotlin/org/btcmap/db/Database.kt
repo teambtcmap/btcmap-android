@@ -29,7 +29,7 @@ class Database(driver: SQLiteDriver, val path: String) {
          * project's history, so the stale file can be told apart from ours by
          * the pragma alone (see [initialize]).
          */
-        const val VERSION = 111
+        const val VERSION = 112
 
         /**
          * The first version this app is responsible for upgrading. Anything
@@ -519,6 +519,25 @@ class Database(driver: SQLiteDriver, val path: String) {
                             "ADD COLUMN ${org.btcmap.db.table.note.DELETED_AT} TEXT;"
                     )
                     conn.execSQL(org.btcmap.db.table.note.CREATE_INDEX_UPDATED_AT)
+                }
+
+                111 -> {
+                    // Events can link to an OpenStreetMap place, and the edit
+                    // screen now shows and changes that link. Add the column and
+                    // rewind the delta cursor so the next sync fills it for the
+                    // events cached before this version: the delta only reports
+                    // rows changed after the cursor, and without the backfill an
+                    // edit would read a missing link and then clear it on the
+                    // server. Rewinding re-downloads the event log once.
+                    conn.execSQL(
+                        "ALTER TABLE ${org.btcmap.db.table.event.TABLE} " +
+                            "ADD COLUMN ${org.btcmap.db.table.event.PLACE_OSM_ID} TEXT;"
+                    )
+                    conn.execSQL(
+                        "UPDATE ${org.btcmap.db.table.event.TABLE} " +
+                            "SET ${org.btcmap.db.table.event.UPDATED_AT} = " +
+                            "'2000-01-01T00:00:00Z';"
+                    )
                 }
 
                 else -> throw Exception("migration is missing for version $version")

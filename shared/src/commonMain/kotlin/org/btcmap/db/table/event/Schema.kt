@@ -9,6 +9,7 @@ const val NAME = "name"
 const val WEBSITE = "website"
 const val STARTS_AT = "starts_at"
 const val ENDS_AT = "ends_at"
+const val PLACE_OSM_ID = "place_osm_id"
 const val UPDATED_AT = "updated_at"
 const val DELETED_AT = "deleted_at"
 
@@ -21,6 +22,7 @@ const val CREATE = """
         $WEBSITE TEXT,
         $STARTS_AT TEXT NOT NULL,
         $ENDS_AT TEXT,
+        $PLACE_OSM_ID TEXT,
         $UPDATED_AT TEXT NOT NULL,
         $DELETED_AT TEXT
     );

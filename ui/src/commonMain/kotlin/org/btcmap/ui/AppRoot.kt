@@ -321,6 +321,7 @@ fun AppRoot(
                 labels = labels.addEvent,
                 iconFont = services.iconFont,
                 palette = markerPalette(services.settings),
+                osmSearch = services.nominatimSearch?.toOsmPlaceSearch(),
                 submit = { draft ->
                     services.api.submitEvent(
                         lat = draft.lat,
@@ -329,6 +330,7 @@ fun AppRoot(
                         website = draft.website,
                         startsAt = draft.startsAt,
                         endsAt = draft.endsAt,
+                        placeOsmId = draft.placeOsmId,
                     )
                 },
                 onBack = back,
@@ -346,6 +348,7 @@ fun AppRoot(
                 labels = labels.editEvent,
                 iconFont = services.iconFont,
                 palette = markerPalette(services.settings),
+                osmSearch = services.nominatimSearch?.toOsmPlaceSearch(),
                 submit = { draft ->
                     services.api.editEvent(
                         id = route.event.id,
@@ -355,6 +358,7 @@ fun AppRoot(
                         website = draft.website,
                         startsAt = draft.startsAt.toDeviceApiTimestamp(),
                         endsAt = draft.endsAt?.toDeviceApiTimestamp(),
+                        placeOsmId = draft.placeOsmId,
                     )
                 },
                 onBack = back,
@@ -362,6 +366,7 @@ fun AppRoot(
                 initialWebsite = route.event.website?.toString().orEmpty(),
                 initialStartsAt = route.event.startsAt.toDeviceLocalDateTime(),
                 initialEndsAt = route.event.endsAt?.toDeviceLocalDateTime(),
+                initialOsmId = route.event.placeOsmId.orEmpty(),
             )
 
             is AppRoute.Report -> ScreenPage(

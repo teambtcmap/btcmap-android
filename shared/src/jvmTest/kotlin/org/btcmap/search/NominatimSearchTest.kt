@@ -38,9 +38,9 @@ class NominatimSearchTest {
         enqueue(
             """
             [
-                {"lat":"39.8983136","lon":"116.3883278","name":"致美楼饭庄","display_name":"致美楼饭庄, 北京市"},
+                {"lat":"39.8983136","lon":"116.3883278","name":"致美楼饭庄","display_name":"致美楼饭庄, 北京市","osm_type":"node","osm_id":14385962692},
                 {"lat":"1.5","lon":"2.5","display_name":"12, Rue de la Paix, Paris"},
-                {"lat":"3.5","lon":"4.5","name":null,"display_name":"Explicit null name"}
+                {"lat":"3.5","lon":"4.5","name":null,"display_name":"Explicit null name","osm_type":"relation","osm_id":42}
             ]
             """.trimIndent(),
         )
@@ -48,11 +48,33 @@ class NominatimSearchTest {
         val places = searcher().search("致美楼饭庄", limit = 3)
 
         Assert.assertEquals(3, places.size)
-        Assert.assertEquals(NominatimPlace(39.8983136, 116.3883278, "致美楼饭庄"), places[0])
+        Assert.assertEquals(
+            NominatimPlace(39.8983136, 116.3883278, "致美楼饭庄", osmId = "node/14385962692"),
+            places[0],
+        )
         // A feature with no name is still offered by its display name.
         Assert.assertEquals(NominatimPlace(1.5, 2.5, "12, Rue de la Paix, Paris"), places[1])
         // An explicit JSON null name must not become the literal "null".
-        Assert.assertEquals(NominatimPlace(3.5, 4.5, "Explicit null name"), places[2])
+        Assert.assertEquals(
+            NominatimPlace(3.5, 4.5, "Explicit null name", osmId = "relation/42"),
+            places[2],
+        )
+    }
+
+    @Test
+    fun search_ignoresOsmElementsTheApiCannotLink() = runTest {
+        enqueue(
+            """
+            [
+                {"lat":"1.0","lon":"2.0","name":"Area","osm_type":"area","osm_id":5},
+                {"lat":"3.0","lon":"4.0","name":"Zero","osm_type":"node","osm_id":0}
+            ]
+            """.trimIndent(),
+        )
+
+        val places = searcher().search("q")
+
+        Assert.assertEquals(listOf(null, null), places.map { it.osmId })
     }
 
     @Test

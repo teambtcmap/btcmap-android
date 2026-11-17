@@ -24,6 +24,7 @@ class EventQueriesTest {
             website = "https://example.com".toUrl(),
             startsAt = Instant.parse("2024-06-01T18:00:00Z"),
             endsAt = Instant.parse("2024-06-01T20:00:00Z"),
+            placeOsmId = "node/14385962692",
         )
 
         db.event.insert(listOf(event))
@@ -34,6 +35,7 @@ class EventQueriesTest {
         Assert.assertEquals("Bitcoin Meetup", results[0].name)
         Assert.assertEquals(40.7128, results[0].lat, 0.0001)
         Assert.assertEquals(-74.0060, results[0].lon, 0.0001)
+        Assert.assertEquals("node/14385962692", results[0].placeOsmId)
     }
 
     @Test

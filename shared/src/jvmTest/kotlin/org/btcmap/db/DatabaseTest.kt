@@ -8,6 +8,7 @@ import org.junit.Assert
 import org.junit.Test
 import java.io.File
 import java.nio.file.Files
+import kotlin.time.Instant
 
 /** The `place` table as it shipped in schema version 102, with `bundled`. */
 private const val VERSION_102_PLACE_CREATE = """
@@ -119,6 +120,24 @@ private const val VERSION_104_EVENT_CREATE = """
     CREATE TABLE event (
         id INTEGER PRIMARY KEY NOT NULL,
         area_id INTEGER,
+        lat REAL NOT NULL,
+        lon REAL NOT NULL,
+        name TEXT NOT NULL,
+        website TEXT,
+        starts_at TEXT NOT NULL,
+        ends_at TEXT,
+        updated_at TEXT NOT NULL,
+        deleted_at TEXT
+    );
+"""
+
+/**
+ * The `event` table as it shipped through schema version 111, before events
+ * cached their OpenStreetMap place link. Migration 111 adds the column.
+ */
+private const val VERSION_110_EVENT_CREATE = """
+    CREATE TABLE event (
+        id INTEGER PRIMARY KEY NOT NULL,
         lat REAL NOT NULL,
         lon REAL NOT NULL,
         name TEXT NOT NULL,
@@ -400,6 +419,31 @@ class DatabaseTest {
             Assert.assertEquals(Database.VERSION, userVersion(db.conn))
             Assert.assertTrue(noteColumns(db.conn).contains("deleted_at"))
             Assert.assertTrue(indexes(db.conn, "note").contains("note_updated_at"))
+        } finally {
+            db.conn.close()
+        }
+    }
+
+    @Test
+    fun version111Database_isMigratedWithThePlaceOsmIdColumn() = runBlocking<Unit> {
+        val path = existingPath()
+        // Reproduces the last schema before events cached their OpenStreetMap
+        // place link: version 111 with the event table but without the column.
+        createVersion111Database(path)
+
+        val db = Database(BundledSQLiteDriver(), path).apply { connect() }
+
+        try {
+            // Migration 111 adds the column and rewinds the delta cursor, so the
+            // next sync re-reads every event and fills the link instead of
+            // leaving the cached rows looking unlinked.
+            Assert.assertEquals(Database.VERSION, userVersion(db.conn))
+            Assert.assertTrue(eventColumns(db.conn).contains("place_osm_id"))
+            Assert.assertEquals(
+                Instant.parse("2000-01-01T00:00:00Z"),
+                db.event.selectMaxUpdatedAt(),
+            )
+            Assert.assertEquals("Meetup", db.event.selectById(1L)!!.name)
         } finally {
             db.conn.close()
         }
@@ -719,7 +763,7 @@ class DatabaseTest {
         val conn = BundledSQLiteDriver().open(path)
         try {
             conn.execSQL(VERSION_106_PLACE_CREATE)
-            conn.execSQL(org.btcmap.db.table.event.CREATE)
+            conn.execSQL(VERSION_110_EVENT_CREATE)
             conn.execSQL(org.btcmap.db.table.comment.CREATE)
             conn.execSQL(VERSION_105_AREA_CREATE)
             conn.execSQL(org.btcmap.db.table.preference.CREATE)
@@ -750,7 +794,7 @@ class DatabaseTest {
         val conn = BundledSQLiteDriver().open(path)
         try {
             conn.execSQL(VERSION_106_PLACE_CREATE)
-            conn.execSQL(org.btcmap.db.table.event.CREATE)
+            conn.execSQL(VERSION_110_EVENT_CREATE)
             conn.execSQL(org.btcmap.db.table.comment.CREATE)
             conn.execSQL(VERSION_107_AREA_CREATE)
             conn.execSQL(org.btcmap.db.table.preference.CREATE)
@@ -774,6 +818,39 @@ class DatabaseTest {
     }
 
     /**
+     * The schema as of version 111: the current tables, with the event table
+     * still missing its `place_osm_id` column.
+     */
+    private fun createVersion111Database(path: String) {
+        val conn = BundledSQLiteDriver().open(path)
+        try {
+            conn.execSQL(VERSION_106_PLACE_CREATE)
+            conn.execSQL(VERSION_110_EVENT_CREATE)
+            conn.execSQL(org.btcmap.db.table.comment.CREATE)
+            conn.execSQL(org.btcmap.db.table.area.CREATE)
+            conn.execSQL(org.btcmap.db.table.preference.CREATE)
+            conn.execSQL(org.btcmap.db.table.note.CREATE)
+            conn.execSQL(org.btcmap.db.table.comment.CREATE_INDEX_PLACE_ID_CREATED_AT)
+            conn.execSQL(org.btcmap.db.table.comment.CREATE_INDEX_UPDATED_AT)
+            conn.execSQL(org.btcmap.db.table.place.CREATE_INDEX_UPDATED_AT)
+            conn.execSQL(org.btcmap.db.table.place.CREATE_INDEX_OSM_ID)
+            conn.execSQL(org.btcmap.db.table.place.CREATE_INDEX_BOUNDS)
+            conn.execSQL(org.btcmap.db.table.event.CREATE_INDEX_UPDATED_AT)
+            conn.execSQL(org.btcmap.db.table.event.CREATE_INDEX_BOUNDS)
+            conn.execSQL(org.btcmap.db.table.area.CREATE_INDEX_UPDATED_AT)
+            conn.execSQL(
+                "INSERT INTO event " +
+                    "(id, lat, lon, name, starts_at, updated_at) " +
+                    "VALUES (1, 1.0, 2.0, 'Meetup', '2026-11-01T09:00:00Z', " +
+                    "'2026-01-02T00:00:00Z');"
+            )
+            conn.execSQL("PRAGMA user_version=111;")
+        } finally {
+            conn.close()
+        }
+    }
+
+    /**
      * The schema as of version 110: the current tables, with the note table
      * still missing its `deleted_at` tombstone column.
      */
@@ -781,7 +858,7 @@ class DatabaseTest {
         val conn = BundledSQLiteDriver().open(path)
         try {
             conn.execSQL(VERSION_106_PLACE_CREATE)
-            conn.execSQL(org.btcmap.db.table.event.CREATE)
+            conn.execSQL(VERSION_110_EVENT_CREATE)
             conn.execSQL(org.btcmap.db.table.comment.CREATE)
             conn.execSQL(VERSION_107_AREA_CREATE)
             conn.execSQL(org.btcmap.db.table.preference.CREATE)

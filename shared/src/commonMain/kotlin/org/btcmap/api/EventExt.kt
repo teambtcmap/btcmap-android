@@ -16,6 +16,7 @@ internal fun GetEventsDeltaItem.toEvent(): Event = eventOf(
     website = website,
     startsAt = startsAt,
     endsAt = endsAt,
+    placeOsmId = placeOsmId,
     updatedAt = updatedAt.toInstant(),
     deletedAt = deletedAt?.toInstant(),
 )

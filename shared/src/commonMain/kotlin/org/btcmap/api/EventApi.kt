@@ -28,6 +28,8 @@ data class GetEventsItem(
     val website: Url?,
     val startsAt: Instant,
     val endsAt: Instant?,
+    /** The linked OpenStreetMap place in `<type>/<id>` form, when set. */
+    val placeOsmId: String?,
 )
 
 /**
@@ -43,6 +45,7 @@ data class GetEventsDeltaItem(
     val website: Url?,
     val startsAt: Instant,
     val endsAt: Instant?,
+    val placeOsmId: String?,
     val updatedAt: String,
     val deletedAt: String?,
 )
@@ -74,6 +77,7 @@ data class EventWithStatus(
     val status: String,
     val startsAt: Instant,
     val endsAt: Instant?,
+    val placeOsmId: String?,
     val startsAtLocal: String,
     val endsAtLocal: String?,
 )
@@ -197,6 +201,10 @@ private fun String.throwIfRpcError() {
  * resolves the offset, including daylight saving, for that date. The two forms
  * the endpoint accepts (explicit offset vs. local + timezone) are mutually
  * exclusive, so no offset may be present in these values.
+ *
+ * [placeOsmId] optionally links the event to an OpenStreetMap place in
+ * `<type>/<id>` form (`node`, `way` or `relation` plus a positive id); a
+ * malformed value is rejected by the server.
  */
 suspend fun Api.submitEvent(
     lat: Double,
@@ -205,6 +213,7 @@ suspend fun Api.submitEvent(
     website: String,
     startsAt: String,
     endsAt: String?,
+    placeOsmId: String? = null,
 ): SubmitEventResponse {
     val url = buildUrl("v4", "events")
 
@@ -216,6 +225,7 @@ suspend fun Api.submitEvent(
         put("website", website)
         put("starts_at", startsAt)
         endsAt?.let { put("ends_at", it) }
+        placeOsmId?.let { put("place_osm_id", it) }
         put("timezone", "auto")
     }
 
@@ -239,6 +249,10 @@ suspend fun Api.submitEvent(
  * that same zone: an untouched time keeps its instant instead of being
  * re-interpreted as local to the event's coordinates. A null [endsAt] clears
  * the end time; `starts_at` always has a value.
+ *
+ * [placeOsmId] sets the optional OpenStreetMap place link in `<type>/<id>` form;
+ * a null clears it, so callers must seed it from the event's current value when
+ * the field is untouched.
  */
 suspend fun Api.editEvent(
     id: Long,
@@ -248,6 +262,7 @@ suspend fun Api.editEvent(
     website: String,
     startsAt: String,
     endsAt: String?,
+    placeOsmId: String? = null,
 ) {
     val url = buildUrl("v4", "events", "$id")
 
@@ -259,6 +274,8 @@ suspend fun Api.editEvent(
         put("starts_at", startsAt)
         // An explicit null clears a previously set end time.
         put("ends_at", endsAt?.let(::JsonPrimitive) ?: JsonNull)
+        // An explicit null clears a previously set place link.
+        put("place_osm_id", placeOsmId?.let(::JsonPrimitive) ?: JsonNull)
     }
 
     call(HttpMethod.Patch, url, body = req) { }
@@ -273,6 +290,7 @@ internal fun JsonObject.toGetEventsItem(): GetEventsItem {
         website = nonBlankStringOrNull("website")?.toUrlOrNull(),
         startsAt = string("starts_at").toApiInstant("starts_at"),
         endsAt = stringOrNull("ends_at")?.toApiInstant("ends_at"),
+        placeOsmId = nonBlankStringOrNull("place_osm_id"),
     )
 }
 
@@ -287,6 +305,7 @@ private fun JsonObject.toEventWithStatus(): EventWithStatus {
         status = string("status"),
         startsAt = item.startsAt,
         endsAt = item.endsAt,
+        placeOsmId = item.placeOsmId,
         startsAtLocal = string("starts_at").toFloatingLocalTime(),
         endsAtLocal = stringOrNull("ends_at")?.toFloatingLocalTime(),
     )
@@ -314,6 +333,7 @@ internal fun JsonObject.toGetEventsDeltaItem(): GetEventsDeltaItem {
         website = item.website,
         startsAt = item.startsAt,
         endsAt = item.endsAt,
+        placeOsmId = item.placeOsmId,
         updatedAt = string("updated_at"),
         deletedAt = nonBlankStringOrNull("deleted_at"),
     )

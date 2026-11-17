@@ -1,5 +1,6 @@
 package org.btcmap.ui
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -36,10 +37,13 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -56,10 +60,14 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import org.btcmap.search.NominatimSearch
+import org.btcmap.ui.map.LocationMove
 import org.btcmap.ui.map.LocationPickerMap
 import org.btcmap.ui.map.LocationPickerPin
 import org.btcmap.ui.map.MarkerPalette
+import org.btcmap.util.rethrowIfCancellation
 import java.time.Instant as JavaInstant
 import java.time.LocalDateTime
 import java.time.LocalTime
@@ -69,18 +77,58 @@ import java.time.format.FormatStyle
 
 /** Test tags so a test can drive the add-event form. */
 const val ADD_EVENT_NAME_TAG = "add-event-name"
+const val ADD_EVENT_OSM_ID_TAG = "add-event-osm-id"
 const val ADD_EVENT_WEBSITE_TAG = "add-event-website"
 const val ADD_EVENT_STARTS_TAG = "add-event-starts"
 const val ADD_EVENT_ENDS_TAG = "add-event-ends"
 const val ADD_EVENT_END_CLEAR_TAG = "add-event-end-clear"
 const val ADD_EVENT_SUBMIT_TAG = "add-event-submit"
 
+/** The shortest query the OpenStreetMap ID field sends to the search service. */
+private const val OSM_SEARCH_MIN_CHARS = 3
+
+/** How long typing settles before the OpenStreetMap ID field searches. */
+private const val OSM_SEARCH_DEBOUNCE_MS = 300L
+
+/**
+ * An OpenStreetMap element the ID field's search offers. [osmId] is already in
+ * the `<type>/<id>` form the event endpoint takes.
+ */
+data class OsmPlace(
+    val osmId: String,
+    val name: String,
+    val lat: Double,
+    val lon: Double,
+)
+
+/** The OSM reference form the event endpoint takes: `<type>/<positive id>`. */
+private val OSM_ID_PATTERN = Regex("^(node|way|relation)/[1-9][0-9]*$")
+
+/**
+ * [value] in the `<type>/<id>` form the endpoint takes, or null when it is not
+ * a valid OpenStreetMap reference.
+ */
+internal fun normalizedOsmId(value: String): String? =
+    value.trim().lowercase().takeIf { OSM_ID_PATTERN.matches(it) }
+
+/**
+ * Adapts the map's [NominatimSearch] to the add-event form's OpenStreetMap ID
+ * field, keeping only the hits Nominatim can name by element.
+ */
+fun NominatimSearch.toOsmPlaceSearch(): suspend (String) -> List<OsmPlace> = { query ->
+    search(query).mapNotNull { place ->
+        val osmId = place.osmId ?: return@mapNotNull null
+        OsmPlace(osmId = osmId, name = place.name, lat = place.lat, lon = place.lon)
+    }
+}
+
 /**
  * The fields a new event is submitted with, positioned at the map centre.
  *
  * [startsAt] and [endsAt] are floating local wall-clock times (ISO 8601 with no
  * offset), because the event's time is the local time at its location — the API
- * resolves the zone from the coordinates.
+ * resolves the zone from the coordinates. [placeOsmId] is the optional
+ * OpenStreetMap place link, already in `<type>/<id>` form.
  */
 data class AddEventDraft(
     val lat: Double,
@@ -89,6 +137,7 @@ data class AddEventDraft(
     val website: String,
     val startsAt: String,
     val endsAt: String?,
+    val placeOsmId: String? = null,
 )
 
 /** The add-event screen's strings, so it stays resource-free. */
@@ -98,6 +147,11 @@ data class AddEventLabels(
     val back: String,
     val name: String,
     val namePlaceholder: String,
+    /** The optional OpenStreetMap place link field's label. */
+    val osmId: String,
+    val osmIdPlaceholder: String,
+    /** Shown when the typed OpenStreetMap reference is malformed. */
+    val osmIdInvalid: String,
     val website: String,
     val websitePlaceholder: String,
     /** The required start date and time field's label. */
@@ -166,7 +220,12 @@ private val LOCAL_DATE_TIME_SAVER: Saver<LocalDateTime?, String> = Saver(
  * The optional initial values pre-fill the form for a duplicate: [initialName],
  * [initialWebsite], [initialStartsAt] and [initialEndsAt] seed the fields, so the
  * user only has to adjust the date to repeat a regular event. The same form edits
- * an existing event, seeded from its stored values.
+ * an existing event, seeded from its stored values; [initialOsmId] carries its
+ * current OpenStreetMap place link.
+ *
+ * [osmSearch] powers the optional OpenStreetMap ID field: typing a query finds
+ * places, and picking one sets the reference and moves the pin to its
+ * coordinates. A null searcher hides the field.
  *
  * The body is capped at [CONTENT_MAX_WIDTH] and centred, so a wide desktop or
  * tablet window neither stretches the map and the fields edge to edge nor breaks
@@ -188,7 +247,14 @@ fun AddEventScreen(
     initialWebsite: String = "",
     initialStartsAt: LocalDateTime? = null,
     initialEndsAt: LocalDateTime? = null,
-    map: @Composable ((Double, Double) -> Unit) -> Unit = { onCenterChanged ->
+    /** The event's current OpenStreetMap place link when editing. */
+    initialOsmId: String = "",
+    /** Searches OpenStreetMap for the optional place link field. */
+    osmSearch: (suspend (query: String) -> List<OsmPlace>)? = null,
+    map: @Composable (
+        moveTo: LocationMove?,
+        onCenterChanged: (Double, Double) -> Unit,
+    ) -> Unit = { moveTo, onCenterChanged ->
         LocationPickerMap(
             lat = lat,
             lon = lon,
@@ -197,6 +263,7 @@ fun AddEventScreen(
             palette = palette,
             onCenterChanged = onCenterChanged,
             pin = LocationPickerPin.Event,
+            moveTo = moveTo,
         )
     },
     dateTimePicker: EventDateTimePicker = { title, initial, onConfirm, onDismiss ->
@@ -211,6 +278,10 @@ fun AddEventScreen(
     },
 ) {
     var center by remember { mutableStateOf(lat to lon) }
+    var moveTo by remember { mutableStateOf<LocationMove?>(null) }
+    // Bumped for every pick, so choosing the same place twice still recentres a
+    // map the user has since panned away.
+    var moveSequence by remember { mutableIntStateOf(0) }
     var busy by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<String?>(null) }
     var submitted by remember { mutableStateOf(false) }
@@ -254,7 +325,7 @@ fun AddEventScreen(
                                 .height(240.dp)
                                 .clip(MaterialTheme.shapes.medium),
                         ) {
-                            map { newLat, newLon -> center = newLat to newLon }
+                            map(moveTo) { newLat, newLon -> center = newLat to newLon }
                             // The hint floats on the map so it reads as belonging to
                             // it, in the inverse-surface role M3 reserves for content
                             // over imagery.
@@ -282,7 +353,18 @@ fun AddEventScreen(
                         initialWebsite = initialWebsite,
                         initialStartsAt = initialStartsAt,
                         initialEndsAt = initialEndsAt,
-                        onSubmit = { name, website, startsAt, endsAt ->
+                        initialOsmId = initialOsmId,
+                        osmSearch = osmSearch,
+                        onOsmPlaceSelected = { place ->
+                            center = place.lat to place.lon
+                            moveSequence += 1
+                            moveTo = LocationMove(
+                                lat = place.lat,
+                                lon = place.lon,
+                                sequence = moveSequence,
+                            )
+                        },
+                        onSubmit = { name, website, startsAt, endsAt, placeOsmId ->
                             busy = true
                             val draft = AddEventDraft(
                                 lat = center.first,
@@ -291,6 +373,7 @@ fun AddEventScreen(
                                 website = website,
                                 startsAt = startsAt.format(API_LOCAL_DATE_TIME),
                                 endsAt = endsAt?.format(API_LOCAL_DATE_TIME),
+                                placeOsmId = placeOsmId,
                             )
                             scope.launch {
                                 try {
@@ -330,13 +413,25 @@ fun AddEventForm(
     busy: Boolean,
     submitted: Boolean,
     labels: AddEventLabels,
-    onSubmit: (name: String, website: String, startsAt: LocalDateTime, endsAt: LocalDateTime?) -> Unit,
+    onSubmit: (
+        name: String,
+        website: String,
+        startsAt: LocalDateTime,
+        endsAt: LocalDateTime?,
+        placeOsmId: String?,
+    ) -> Unit,
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
     initialName: String = "",
     initialWebsite: String = "",
     initialStartsAt: LocalDateTime? = null,
     initialEndsAt: LocalDateTime? = null,
+    /** The event's current OpenStreetMap place link when editing. */
+    initialOsmId: String = "",
+    /** Searches OpenStreetMap for the optional place link field, or null to hide it. */
+    osmSearch: (suspend (query: String) -> List<OsmPlace>)? = null,
+    /** Called with the picked place so the screen can move the pin to it. */
+    onOsmPlaceSelected: (OsmPlace) -> Unit = {},
     dateTimePicker: EventDateTimePicker = { title, initial, onConfirm, onDismiss ->
         EventDateTimePickerDialog(
             title = title,
@@ -349,6 +444,9 @@ fun AddEventForm(
     },
 ) {
     var name by rememberSaveable { mutableStateOf(initialName) }
+    var osmId by rememberSaveable { mutableStateOf(initialOsmId) }
+    var osmResults by remember { mutableStateOf(emptyList<OsmPlace>()) }
+    var osmSearching by remember { mutableStateOf(false) }
     var website by rememberSaveable { mutableStateOf(initialWebsite) }
     // The wall-clock times the user picked, saved across a configuration change.
     // They are not bound to a zone: the API places them in the event's zone.
@@ -364,8 +462,35 @@ fun AddEventForm(
     val focusManager = LocalFocusManager.current
     val scope = rememberCoroutineScope()
     val nameRequester = remember { BringIntoViewRequester() }
+    val osmRequester = remember { BringIntoViewRequester() }
     val startsRequester = remember { BringIntoViewRequester() }
     val websiteRequester = remember { BringIntoViewRequester() }
+    val latestOsmSearch by rememberUpdatedState(osmSearch)
+
+    // The optional place link is searched as it is typed, but a complete
+    // reference is not a search term: it is what picking a result (or typing
+    // the reference by hand) produces. A short query stays quiet, as the map's
+    // own search does.
+    LaunchedEffect(osmId, osmSearch != null) {
+        val search = latestOsmSearch
+        if (search == null) return@LaunchedEffect
+        val query = osmId.trim()
+        if (normalizedOsmId(query) != null || query.length < OSM_SEARCH_MIN_CHARS) {
+            osmResults = emptyList()
+            osmSearching = false
+            return@LaunchedEffect
+        }
+        osmSearching = true
+        delay(OSM_SEARCH_DEBOUNCE_MS)
+        val results = try {
+            search(query)
+        } catch (t: Throwable) {
+            t.rethrowIfCancellation()
+            emptyList()
+        }
+        osmResults = results
+        osmSearching = false
+    }
 
     if (submitted) {
         AddEventSubmitted(labels = labels, onBack = onBack, modifier = modifier)
@@ -419,6 +544,86 @@ fun AddEventForm(
                 .bringIntoViewRequester(nameRequester)
                 .testTag(ADD_EVENT_NAME_TAG),
         )
+        if (osmSearch != null) {
+            Column(modifier = Modifier.fillMaxWidth().padding(top = 16.dp)) {
+                OutlinedTextField(
+                    value = osmId,
+                    onValueChange = { osmId = it },
+                    label = { Text(labels.osmId) },
+                    placeholder = { Text(labels.osmIdPlaceholder) },
+                    isError = attempted && osmId.isNotBlank() && normalizedOsmId(osmId) == null,
+                    supportingText = if (
+                        attempted && osmId.isNotBlank() && normalizedOsmId(osmId) == null
+                    ) {
+                        { Text(labels.osmIdInvalid) }
+                    } else {
+                        null
+                    },
+                    enabled = !busy,
+                    singleLine = true,
+                    trailingIcon = if (osmSearching) {
+                        {
+                            CircularProgressIndicator(
+                                strokeWidth = 2.dp,
+                                modifier = Modifier.size(18.dp),
+                            )
+                        }
+                    } else {
+                        null
+                    },
+                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+                    keyboardActions = KeyboardActions(
+                        onNext = { focusManager.moveFocus(FocusDirection.Down) },
+                    ),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .bringIntoViewRequester(osmRequester)
+                        .testTag(ADD_EVENT_OSM_ID_TAG),
+                )
+                // The hits sit directly under the field, like the map's own
+                // OpenStreetMap group. Picking one writes the element's
+                // reference into the field, which ends the search.
+                if (osmResults.isNotEmpty()) {
+                    Surface(
+                        shape = MaterialTheme.shapes.medium,
+                        tonalElevation = 3.dp,
+                        modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
+                    ) {
+                        Column {
+                            osmResults.forEach { place ->
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .clickable(enabled = !busy) {
+                                            osmId = place.osmId
+                                            osmResults = emptyList()
+                                            onOsmPlaceSelected(place)
+                                        }
+                                        .padding(horizontal = 16.dp, vertical = 12.dp),
+                                ) {
+                                    Column(modifier = Modifier.weight(1f)) {
+                                        Text(
+                                            text = place.name,
+                                            style = MaterialTheme.typography.bodyLarge,
+                                        )
+                                        Text(
+                                            text = place.osmId,
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        )
+                                    }
+                                    MaterialSymbol(
+                                        glyph = "travel_explore",
+                                        contentDescription = null,
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
         // The start and end fields open the date and time pickers; they are
         // buttons rather than text fields because the value is never typed.
         DateTimeField(
@@ -477,8 +682,11 @@ fun AddEventForm(
         Button(
             onClick = {
                 attempted = true
+                val placeOsmId = normalizedOsmId(osmId)
+                val invalidOsm = osmSearch != null && osmId.isNotBlank() && placeOsmId == null
                 val firstInvalid = when {
                     name.isBlank() -> nameRequester
+                    invalidOsm -> osmRequester
                     startsAt == null -> startsRequester
                     website.isBlank() -> websiteRequester
                     else -> null
@@ -489,6 +697,7 @@ fun AddEventForm(
                         website.trim(),
                         requireNotNull(startsAt),
                         endsAt,
+                        placeOsmId,
                     )
                 } else {
                     scope.launch { firstInvalid.bringIntoView() }

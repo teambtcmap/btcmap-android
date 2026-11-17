@@ -20,6 +20,7 @@ internal fun eventOf(
     website: Url?,
     startsAt: Instant,
     endsAt: Instant?,
+    placeOsmId: String? = null,
     updatedAt: Instant = Instant.fromEpochSeconds(0),
     deletedAt: Instant? = null,
 ): Event = Event(
@@ -30,6 +31,7 @@ internal fun eventOf(
     website = website,
     startsAt = startsAt,
     endsAt = endsAt,
+    placeOsmId = placeOsmId,
     updatedAt = updatedAt,
     deletedAt = deletedAt,
 )
