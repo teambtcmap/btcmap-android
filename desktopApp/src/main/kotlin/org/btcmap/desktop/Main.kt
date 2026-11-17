@@ -318,7 +318,7 @@ private fun runApp() = application {
     ) {
         // Runs once the first composition has been applied — the closest thing
         // to "a window is on screen" this side of the surface can see. It is
-        // what `./devtools app run` waits for before it returns control (see
+        // what `./devtools run` waits for before it returns control (see
         // cmd_app_run_desktop), so an early failure does not look like a launch.
         LaunchedEffect(Unit) { println("btcmap: first composition committed") }
 
