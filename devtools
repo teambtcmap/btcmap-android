@@ -388,6 +388,12 @@ prepare_appimagetool() {
   printf '%s' "$apprun"
 }
 
+# The WM_CLASS AWT gives the window: the main class with its dots turned into
+# hyphens (XToolkit.getCorrectXIDString). GNOME and KDE match a window to its
+# .desktop entry by this class, so the entries below carry it as StartupWMClass;
+# without that the task list falls back to the class name itself.
+desktop_wm_class="org-btcmap-desktop-MainKt"
+
 # Wraps the jpackage app image the Compose plugin produces (built by the
 # createDistributable task) in an AppDir and packs it into a single-file
 # AppImage at $1. The app image already carries its own runtime, so the result
@@ -423,7 +429,7 @@ exec "$HERE/usr/bin/btc-map" "$@"
 RUN
   chmod +x "$appdir/AppRun"
 
-  cat > "$appdir/btc-map.desktop" <<'DESKTOP'
+  cat > "$appdir/btc-map.desktop" <<DESKTOP
 [Desktop Entry]
 Type=Application
 Name=BTC Map
@@ -431,6 +437,7 @@ Comment=Map of Bitcoin merchants
 Exec=btc-map
 Icon=btc-map
 Categories=Finance;Network;
+StartupWMClass=$desktop_wm_class
 Terminal=false
 DESKTOP
 
@@ -751,6 +758,34 @@ cmd_app_run_android() {
   launch_app "$serial"
 }
 
+# A dev run has no installed .desktop entry, so the shell cannot name its window
+# and shows the AWT class ("org-btcmap-desktop-MainKt") in the task list. Write a
+# hidden user-level entry that matches that class (see desktop_wm_class) and
+# carries the app's name and icon; the shell picks it up while the app starts.
+register_desktop_app() {
+  local repo dir entry exec_path
+  repo="$(cd "$(dirname "$(readlink -f "$0")")" && pwd)"
+  dir="${XDG_DATA_HOME:-$HOME/.local/share}/applications"
+  entry="$dir/btcmap-desktop-dev.desktop"
+
+  # Exec arguments are quoted and backslash-escaped per the desktop entry spec.
+  exec_path="$(printf '%s' "$repo/devtools" | sed -e 's/[\\"$`]/\\&/g')"
+
+  mkdir -p "$dir"
+  cat > "$entry" <<EOF
+[Desktop Entry]
+Type=Application
+Name=BTC Map
+Comment=Map of Bitcoin merchants (development build)
+Exec="$exec_path" run
+Icon=$repo/fastlane/metadata/android/en-US/images/icon.png
+Terminal=false
+Categories=Finance;Network;
+StartupWMClass=$desktop_wm_class
+NoDisplay=true
+EOF
+}
+
 # The PIDs of the JVM running the desktop app. Filtering on the executable
 # keeps this to the app itself: `pgrep -f` alone also matches a shell or editor
 # whose command line merely mentions the main class.
@@ -800,6 +835,12 @@ stop_desktop_app() {
 
 cmd_app_run_desktop() {
   local log="${TMPDIR:-/tmp}/btcmap-desktop.log"
+
+  # Registers the window's name before it opens, so the shell can label it in
+  # the task list.
+  if ! register_desktop_app; then
+    echo "Note: could not register the desktop app; the task list may show the Java class name." >&2
+  fi
 
   # One copy at a time: a new run replaces the running app instead of adding a
   # second window over the same database.
