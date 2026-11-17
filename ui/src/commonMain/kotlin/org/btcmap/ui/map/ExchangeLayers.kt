@@ -7,6 +7,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.btcmap.map.EXCHANGE_MARKER_ICON_PREFIX
 import org.btcmap.map.ICON_OFFSET_Y
+import org.btcmap.map.MAP_OBJECT_KIND_EXCHANGE
 import org.maplibre.compose.expressions.dsl.Feature
 import org.maplibre.compose.expressions.dsl.all
 import org.maplibre.compose.expressions.dsl.condition
@@ -14,6 +15,7 @@ import org.maplibre.compose.expressions.dsl.const
 import org.maplibre.compose.expressions.dsl.convertToBoolean
 import org.maplibre.compose.expressions.dsl.convertToNumber
 import org.maplibre.compose.expressions.dsl.convertToString
+import org.maplibre.compose.expressions.dsl.eq
 import org.maplibre.compose.expressions.dsl.gt
 import org.maplibre.compose.expressions.dsl.gte
 import org.maplibre.compose.expressions.dsl.image
@@ -27,6 +29,7 @@ import org.maplibre.compose.layers.CircleLayer
 import org.maplibre.compose.layers.LayerDefaults
 import org.maplibre.compose.layers.SymbolLayer
 import org.maplibre.compose.sources.GeoJsonData
+import org.maplibre.compose.sources.GeoJsonSource
 import org.maplibre.compose.sources.rememberGeoJsonSource
 
 const val EXCHANGE_CLUSTER_BACKGROUND_LAYER_ID = "exchange_cluster_background"
@@ -81,69 +84,87 @@ fun ExchangeLayers(
     )
 
     if (showMarkers) {
-        SymbolLayer(
-            id = EXCHANGE_MARKER_LAYER_ID,
+        ExchangeMarkerLayers(
             source = source,
-            filter = Feature.get("cluster").neq(const(true)),
-            iconImage = image(MARKER_PIN_IMAGE_ID),
-            iconAnchor = const(SymbolAnchor.Bottom),
-            iconAllowOverlap = const(true),
-            iconIgnorePlacement = const(true),
-            onClick = onMarkerClick,
-        )
-
-        SymbolLayer(
-            id = EXCHANGE_MARKER_ICON_LAYER_ID,
-            source = source,
-            filter = Feature.get("cluster").neq(const(true)),
-            iconImage = image(const(EXCHANGE_MARKER_ICON_PREFIX) + Feature.get("iconId").convertToString()),
-            iconAnchor = const(SymbolAnchor.Center),
-            iconOffset = const(DpOffset(0.dp, ICON_OFFSET_Y.dp)),
-            iconOpacity = switch(
-                condition(Feature.get("outdated").convertToBoolean(), const(OUTDATED_ICON_ALPHA)),
-                fallback = const(1f),
-            ),
-            iconAllowOverlap = const(true),
-            iconIgnorePlacement = const(true),
-        )
-
-        val hasComments = Feature.get("comments").convertToNumber()
-            .gt(const(0).cast<NumberValue<Number>>())
-
-        CircleLayer(
-            id = EXCHANGE_COMMENT_COUNT_BACKGROUND_LAYER_ID,
-            source = source,
-            filter = all(
-                Feature.get("cluster").neq(const(true)),
-                hasComments,
-            ),
-            color = const(badgeBackgroundColor),
-            radius = const(9.dp),
-            opacity = const(1f),
-            translate = const(DpOffset(13.dp, -43.dp)),
-            translateAnchor = const(TranslateAnchor.Viewport),
-        )
-
-        SymbolLayer(
-            id = EXCHANGE_COMMENT_COUNT_TEXT_LAYER_ID,
-            source = source,
-            filter = all(
-                Feature.get("cluster").neq(const(true)),
-                hasComments,
-            ),
-            textField = switch(
-                condition(
-                    Feature.get("comments").convertToNumber()
-                        .gte(const(10).cast<NumberValue<Number>>()),
-                    const("9+"),
-                ),
-                fallback = Feature.get("comments").convertToString(),
-            ).cast(),
-            textSize = const(11.sp),
-            textColor = const(badgeTextColor),
-            textTranslate = const(DpOffset(13.dp, -43.dp)),
-            textTranslateAnchor = const(TranslateAnchor.Viewport),
-            textAllowOverlap = const(true),
+            badgeBackgroundColor = badgeBackgroundColor,
+            badgeTextColor = badgeTextColor,
+            onMarkerClick = onMarkerClick,
         )
     }
+}
+
+/**
+ * The exchange markers alone, drawn from a source that may also carry other map
+ * object kinds. The `kind` filter keeps a shared clustered source from drawing
+ * another kind's features with the exchange pin, glyph or comment badge.
+ */
+@Composable
+internal fun ExchangeMarkerLayers(
+    source: GeoJsonSource,
+    badgeBackgroundColor: Color,
+    badgeTextColor: Color,
+    onMarkerClick: MarkerClickHandler,
+) {
+    val isNotCluster = Feature.get("cluster").neq(const(true))
+    val isExchange =
+        Feature.get("kind").convertToString().eq(const(MAP_OBJECT_KIND_EXCHANGE))
+
+    SymbolLayer(
+        id = EXCHANGE_MARKER_LAYER_ID,
+        source = source,
+        filter = all(isNotCluster, isExchange),
+        iconImage = image(MARKER_PIN_IMAGE_ID),
+        iconAnchor = const(SymbolAnchor.Bottom),
+        iconAllowOverlap = const(true),
+        iconIgnorePlacement = const(true),
+        onClick = onMarkerClick,
+    )
+
+    SymbolLayer(
+        id = EXCHANGE_MARKER_ICON_LAYER_ID,
+        source = source,
+        filter = all(isNotCluster, isExchange),
+        iconImage = image(const(EXCHANGE_MARKER_ICON_PREFIX) + Feature.get("iconId").convertToString()),
+        iconAnchor = const(SymbolAnchor.Center),
+        iconOffset = const(DpOffset(0.dp, ICON_OFFSET_Y.dp)),
+        iconOpacity = switch(
+            condition(Feature.get("outdated").convertToBoolean(), const(OUTDATED_ICON_ALPHA)),
+            fallback = const(1f),
+        ),
+        iconAllowOverlap = const(true),
+        iconIgnorePlacement = const(true),
+    )
+
+    val hasComments = Feature.get("comments").convertToNumber()
+        .gt(const(0).cast<NumberValue<Number>>())
+
+    CircleLayer(
+        id = EXCHANGE_COMMENT_COUNT_BACKGROUND_LAYER_ID,
+        source = source,
+        filter = all(isNotCluster, isExchange, hasComments),
+        color = const(badgeBackgroundColor),
+        radius = const(9.dp),
+        opacity = const(1f),
+        translate = const(DpOffset(13.dp, -43.dp)),
+        translateAnchor = const(TranslateAnchor.Viewport),
+    )
+
+    SymbolLayer(
+        id = EXCHANGE_COMMENT_COUNT_TEXT_LAYER_ID,
+        source = source,
+        filter = all(isNotCluster, isExchange, hasComments),
+        textField = switch(
+            condition(
+                Feature.get("comments").convertToNumber()
+                    .gte(const(10).cast<NumberValue<Number>>()),
+                const("9+"),
+            ),
+            fallback = Feature.get("comments").convertToString(),
+        ).cast(),
+        textSize = const(11.sp),
+        textColor = const(badgeTextColor),
+        textTranslate = const(DpOffset(13.dp, -43.dp)),
+        textTranslateAnchor = const(TranslateAnchor.Viewport),
+        textAllowOverlap = const(true),
+    )
 }

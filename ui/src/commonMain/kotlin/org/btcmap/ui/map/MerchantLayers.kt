@@ -5,13 +5,16 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.btcmap.map.MAX_COMMENT_BADGE
+import org.btcmap.map.MAP_OBJECT_KIND_MERCHANT
 import org.maplibre.compose.expressions.ast.Expression
 import org.maplibre.compose.expressions.dsl.Feature
+import org.maplibre.compose.expressions.dsl.all
 import org.maplibre.compose.expressions.dsl.condition
 import org.maplibre.compose.expressions.dsl.const
 import org.maplibre.compose.expressions.dsl.convertToBoolean
 import org.maplibre.compose.expressions.dsl.convertToNumber
 import org.maplibre.compose.expressions.dsl.convertToString
+import org.maplibre.compose.expressions.dsl.eq
 import org.maplibre.compose.expressions.dsl.gt
 import org.maplibre.compose.expressions.dsl.gte
 import org.maplibre.compose.expressions.dsl.image
@@ -25,6 +28,7 @@ import org.maplibre.compose.layers.CircleLayer
 import org.maplibre.compose.layers.LayerDefaults
 import org.maplibre.compose.layers.SymbolLayer
 import org.maplibre.compose.sources.GeoJsonData
+import org.maplibre.compose.sources.GeoJsonSource
 import org.maplibre.compose.sources.rememberGeoJsonSource
 
 const val MERCHANT_CLUSTER_BACKGROUND_LAYER_ID = "merchant_cluster_background"
@@ -75,22 +79,38 @@ fun MerchantLayers(
     )
 
     if (showMarkers) {
-        SymbolLayer(
-            id = MERCHANT_MARKER_LAYER_ID,
-            source = source,
-            filter = Feature.get("cluster").neq(const(true)),
-            sortKey = Feature.get("sortKey").convertToNumber().cast(),
-            iconImage = image(markerImageName()),
-            iconAnchor = const(SymbolAnchor.Bottom),
-            iconAllowOverlap = const(true),
-            iconIgnorePlacement = const(true),
-            iconOpacity = switch(
-                condition(Feature.get("outdated").convertToBoolean(), const(0.85f)),
-                fallback = const(1f),
-            ),
-            onClick = onMarkerClick,
-        )
+        MerchantMarkerLayers(source = source, onMarkerClick = onMarkerClick)
     }
+}
+
+/**
+ * The merchant markers alone, drawn from a source that may also carry other map
+ * object kinds. The `kind` filter keeps a shared clustered source from drawing
+ * another kind's features with the merchant image.
+ */
+@Composable
+internal fun MerchantMarkerLayers(
+    source: GeoJsonSource,
+    onMarkerClick: MarkerClickHandler,
+) {
+    SymbolLayer(
+        id = MERCHANT_MARKER_LAYER_ID,
+        source = source,
+        filter = all(
+            Feature.get("cluster").neq(const(true)),
+            Feature.get("kind").convertToString().eq(const(MAP_OBJECT_KIND_MERCHANT)),
+        ),
+        sortKey = Feature.get("sortKey").convertToNumber().cast(),
+        iconImage = image(markerImageName()),
+        iconAnchor = const(SymbolAnchor.Bottom),
+        iconAllowOverlap = const(true),
+        iconIgnorePlacement = const(true),
+        iconOpacity = switch(
+            condition(Feature.get("outdated").convertToBoolean(), const(0.85f)),
+            fallback = const(1f),
+        ),
+        onClick = onMarkerClick,
+    )
 }
 
 /**

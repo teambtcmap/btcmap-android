@@ -121,7 +121,7 @@ data class AddNoteLabels(
  *
  * [onSubmitted], when the host supplies it, replaces the in-place "note added"
  * confirmation: it runs once the note has been created, so the host can return
- * to the map at once (and, say, select the notes filter so the new note is
+ * to the map at once (and, say, reveal the notes kind so the new note is
  * visible). Null keeps the confirmation.
  */
 @OptIn(ExperimentalMaterial3Api::class)

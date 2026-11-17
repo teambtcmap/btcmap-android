@@ -14,6 +14,12 @@ const val EXCHANGE_MARKER_ICON_PREFIX = "marker-icon-"
 const val EVENT_MARKER_ICON_NAME = "marker-icon-event"
 const val EVENT_ICON = "event"
 
+/** The `kind` property each map feature carries, so one source can tell them apart. */
+const val MAP_OBJECT_KIND_MERCHANT = "merchant"
+const val MAP_OBJECT_KIND_EVENT = "event"
+const val MAP_OBJECT_KIND_EXCHANGE = "exchange"
+const val MAP_OBJECT_KIND_NOTE = "note"
+
 fun Marker.isOutdated(now: Instant = Clock.System.now()): Boolean {
     val verifiedAt = verifiedAt
     return verifiedAt == null ||
@@ -56,7 +62,10 @@ fun exchangeMarkerIconImageName(iconId: String): String {
     return "$EXCHANGE_MARKER_ICON_PREFIX$iconId"
 }
 
-fun Iterable<Marker>.toMarkerGeoJson(now: Instant = Clock.System.now()): String {
+fun Iterable<Marker>.toMarkerGeoJson(
+    now: Instant = Clock.System.now(),
+    kind: String = MAP_OBJECT_KIND_MERCHANT,
+): String {
     val sizeHint = if (this is Collection<*>) size else 0
     val sb = StringBuilder(sizeHint * ESTIMATED_BYTES_PER_FEATURE + 64)
 
@@ -71,6 +80,8 @@ fun Iterable<Marker>.toMarkerGeoJson(now: Instant = Clock.System.now()): String 
         sb.append(place.lat)
         sb.append("]},\"properties\":{\"id\":")
         sb.append(place.id)
+        sb.append(",\"kind\":")
+        sb.appendJsonString(kind)
         sb.append(",\"count\":1,\"iconId\":")
         sb.appendJsonString(place.icon)
         sb.append(",\"comments\":")

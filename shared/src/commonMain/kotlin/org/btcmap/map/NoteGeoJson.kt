@@ -23,6 +23,8 @@ fun Iterable<Note>.toNoteGeoJson(): String {
         sb.append(note.lat)
         sb.append("]},\"properties\":{\"id\":")
         sb.append(note.id)
+        sb.append(",\"kind\":")
+        sb.appendJsonString(MAP_OBJECT_KIND_NOTE)
         sb.append(",\"icon\":")
         sb.appendJsonString(note.icon)
         sb.append("}}")

@@ -82,6 +82,7 @@ import org.btcmap.ui.map.MarkerKind
 import org.btcmap.ui.map.OfflinePacks
 import org.btcmap.ui.map.SearchActions
 import org.btcmap.ui.map.categoryToken
+import org.btcmap.ui.map.visibleMarkerKinds
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withTimeoutOrNull
 import androidx.compose.material3.Text
@@ -401,10 +402,17 @@ private fun runApp() = application {
                     // A coordinate a screen asked the map to centre on (a note's
                     // banner), cleared once the map has moved there.
                     var mapFocus by remember { mutableStateOf<Pair<Double, Double>?>(null) }
-                    // The marker kind the map shows, kept here so leaving the map
-                    // for another page and returning restores the user's choice.
-                    // A plain remember, so a fresh app start begins on merchants.
-                    var markerKind by remember { mutableStateOf(MarkerKind.Merchants) }
+                    // The marker kinds the map draws, kept here so leaving the
+                    // map for another page and returning restores the user's
+                    // choices. All four start visible on a fresh install; toggles
+                    // are persisted in settings so a restart keeps the mix too.
+                    var visibleMarkerKinds by remember {
+                        mutableStateOf(settings.visibleMarkerKinds)
+                    }
+                    fun setVisibleMarkerKinds(kinds: Set<MarkerKind>) {
+                        visibleMarkerKinds = kinds
+                        settings.visibleMarkerKinds = kinds
+                    }
                     // Where the map is looking, tracked so the feed lists the
                     // areas the user is actually around rather than a fixed
                     // point. Starts where the map was last left.
@@ -538,7 +546,7 @@ private fun runApp() = application {
                             initialPlaceId = selectedPlaceId,
                             openTarget = mapFocus,
                             // A focus target only ever comes from a note's
-                            // banner, so select the notes filter to show it.
+                            // banner, so reveal the notes kind to show it.
                             openTargetMarkerKind = if (mapFocus != null) MarkerKind.Notes else null,
                             onOpenTargetConsumed = { mapFocus = null },
                             styleUrl = HOSTED_STYLE_URL,
@@ -557,8 +565,8 @@ private fun runApp() = application {
                             areaChipPalette = areaChipPalette(settings),
                             apiUrl = API_URL,
                             usingOpenFreeMap = true,
-                            markerKind = markerKind,
-                            onMarkerKindChange = { markerKind = it },
+                            visibleMarkerKinds = visibleMarkerKinds,
+                            onMarkerKindsChange = { setVisibleMarkerKinds(it) },
                             mapRotationEnabled = settings.mapRotationEnabled,
                             mapTiltEnabled = settings.mapTiltEnabled,
                             showAttribution = settings.showAttribution,
@@ -888,11 +896,13 @@ private fun runApp() = application {
                             },
                             onBack = { nav.pop() },
                             initialText = addNote?.text.orEmpty(),
-                            // A new note is only visible on the notes layer, so
-                            // return to the map at once and switch to it rather
-                            // than showing the in-place confirmation.
+                            // A new note is only visible with the notes kind, so
+                            // return to the map at once and reveal it rather than
+                            // showing the in-place confirmation.
                             onSubmitted = {
-                                if (markerKind != MarkerKind.Notes) markerKind = MarkerKind.Notes
+                                if (MarkerKind.Notes !in visibleMarkerKinds) {
+                                    setVisibleMarkerKinds(visibleMarkerKinds + MarkerKind.Notes)
+                                }
                                 nav.pop()
                             },
                         )

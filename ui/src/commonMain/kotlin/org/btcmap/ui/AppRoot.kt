@@ -51,6 +51,8 @@ import org.btcmap.sync.SyncState
 import org.btcmap.ui.map.AreaPreviewMap
 import org.btcmap.ui.map.EventMiniMap
 import org.btcmap.ui.map.MarkerKind
+import org.btcmap.ui.map.VISIBLE_MARKER_KINDS_SAVER
+import org.btcmap.ui.map.visibleMarkerKinds
 
 /**
  * The shared application root: the app's navigation, owned by `:ui` so it no
@@ -98,11 +100,17 @@ fun AppRoot(
         // A coordinate a screen asked the map to centre on (a note's banner),
         // passed to the map and cleared once it has moved there.
         var mapFocus by remember { mutableStateOf<Pair<Double, Double>?>(null) }
-        // The marker kind the map shows, kept here so leaving the map for
-        // another screen and returning restores the user's choice. It is saved
-        // across configuration changes but not persisted, so a fresh app start
-        // begins on merchants.
-        var markerKind by rememberSaveable { mutableStateOf(MarkerKind.Merchants) }
+        // The marker kinds the map draws, kept here so leaving the map for
+        // another screen and returning restores the user's choices. All four
+        // start visible on a fresh install; toggles are persisted in settings so
+        // a restart keeps the mix as well.
+        var visibleMarkerKinds by rememberSaveable(stateSaver = VISIBLE_MARKER_KINDS_SAVER) {
+            mutableStateOf(services.settings.visibleMarkerKinds)
+        }
+        fun setVisibleMarkerKinds(kinds: Set<MarkerKind>) {
+            visibleMarkerKinds = kinds
+            services.settings.visibleMarkerKinds = kinds
+        }
         // The place whose sheet is open on the map, kept here so leaving the map
         // for another screen — the report form, say — and returning reopens the
         // sheet rather than dropping the selection. Saved across configuration
@@ -155,8 +163,8 @@ fun AppRoot(
                 onOpenPlaceConsumed = onOpenPlaceConsumed,
                 onNavigate = { nav.push(it) },
                 onShowAuth = { showAuth = true },
-                markerKind = markerKind,
-                onMarkerKindChange = { markerKind = it },
+                visibleMarkerKinds = visibleMarkerKinds,
+                onMarkerKindsChange = { setVisibleMarkerKinds(it) },
                 selectedPlaceId = selectedPlaceId,
                 onSelectedPlaceIdChange = { selectedPlaceId = it },
                 modifier = modifier,
@@ -294,11 +302,13 @@ fun AppRoot(
                 },
                 onBack = back,
                 initialText = route.text,
-                // A new note is only visible on the notes layer, so return to
-                // the map at once and switch to it rather than showing the
-                // in-place confirmation.
+                // A new note is only visible with the notes kind, so return to
+                // the map at once and reveal it rather than showing the in-place
+                // confirmation.
                 onSubmitted = {
-                    if (markerKind != MarkerKind.Notes) markerKind = MarkerKind.Notes
+                    if (MarkerKind.Notes !in visibleMarkerKinds) {
+                        setVisibleMarkerKinds(visibleMarkerKinds + MarkerKind.Notes)
+                    }
                     back()
                 },
             )

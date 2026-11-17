@@ -24,12 +24,14 @@ enum class MapColor(
     ButtonIcon("buttonIconColor", 0xFFFFFFFF.toInt()),
 
     /**
-     * Tints the selected marker-filter icon. It has no colour of its own by
-     * default: it follows [BoostedMarkerBackground] until the user picks one, so
-     * changing the boosted colour also changes the accent (see [mapColor]).
-     * [defaultArgb] mirrors the boosted default for callers that need a standalone
-     * value, and [key] keeps the name the colour had as the button border so an
-     * override set back then still applies.
+     * The app's button accent colour. The marker filter no longer uses it after
+     * moving to opacity for its hidden kinds; the setting is retained for now.
+     * It has no colour of its own by default: it follows
+     * [BoostedMarkerBackground] until the user picks one, so changing the
+     * boosted colour also changes the accent (see [mapColor]). [defaultArgb]
+     * mirrors the boosted default for callers that need a standalone value, and
+     * [key] keeps the name the colour had as the button border so an override
+     * set back then still applies.
      */
     ButtonAccent("buttonBorderColor", 0xFFF7931A.toInt(), resettable = true),
     ;

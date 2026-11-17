@@ -72,9 +72,9 @@ internal fun MapRoute(
     onOpenPlaceConsumed: () -> Unit,
     onNavigate: (AppRoute) -> Unit,
     onShowAuth: () -> Unit,
-    /** The marker kind the map shows, hoisted so it survives leaving the map. */
-    markerKind: MarkerKind,
-    onMarkerKindChange: (MarkerKind) -> Unit,
+    /** The marker kinds the map draws, hoisted so they survive leaving the map. */
+    visibleMarkerKinds: Set<MarkerKind>,
+    onMarkerKindsChange: (Set<MarkerKind>) -> Unit,
     /**
      * The place whose sheet is open, hoisted so leaving the map for another
      * screen and returning reopens it. [onSelectedPlaceIdChange] reports the
@@ -93,8 +93,8 @@ internal fun MapRoute(
 
     var currentOpenPlaceId by remember { mutableStateOf(openPlaceId) }
     var openTarget by remember { mutableStateOf<Pair<Double, Double>?>(null) }
-    // The filter to select when moving to [openTarget]. Only a note focus sets
-    // it; a place deep link keeps the current filter.
+    // The kind to reveal when moving to [openTarget]. Only a note focus sets
+    // it; a place deep link leaves the current kinds in place.
     var openTargetMarkerKind by remember { mutableStateOf<MarkerKind?>(null) }
     // The event whose sheet is open over the map. Opening an event from a
     // marker or a search result shows this sheet instead of pushing a screen,
@@ -173,8 +173,8 @@ internal fun MapRoute(
     }
 
     // A screen asked the map to centre on a coordinate (a note's banner, say):
-    // hand it to the same camera move the deep-link fallback uses, and select
-    // the notes filter so the note is actually drawn, then tell the host it was
+    // hand it to the same camera move the deep-link fallback uses, and reveal
+    // the notes kind so the note is actually drawn, then tell the host it was
     // consumed.
     LaunchedEffect(focusTarget) {
         val target = focusTarget ?: return@LaunchedEffect
@@ -249,8 +249,8 @@ internal fun MapRoute(
         areaChipPalette = areaChipPalette(services.settings),
         apiUrl = services.settings.apiUrl.toString(),
         usingOpenFreeMap = services.usingOpenFreeMap,
-        markerKind = markerKind,
-        onMarkerKindChange = onMarkerKindChange,
+        visibleMarkerKinds = visibleMarkerKinds,
+        onMarkerKindsChange = onMarkerKindsChange,
         mapRotationEnabled = services.settings.mapRotationEnabled,
         mapTiltEnabled = services.settings.mapTiltEnabled,
         iconFont = services.iconFont,

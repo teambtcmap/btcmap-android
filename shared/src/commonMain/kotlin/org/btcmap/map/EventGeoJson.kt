@@ -17,6 +17,8 @@ fun Iterable<Event>.toEventGeoJson(): String {
         sb.append(event.lat)
         sb.append("]},\"properties\":{\"id\":")
         sb.append(event.id)
+        sb.append(",\"kind\":")
+        sb.appendJsonString(MAP_OBJECT_KIND_EVENT)
         sb.append("}}")
     }
 

@@ -19,7 +19,6 @@ import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -63,7 +62,9 @@ import org.btcmap.db.table.place.Place
 import org.btcmap.map.EMPTY_GEOJSON
 import org.btcmap.map.EVENT_ICON
 import org.btcmap.map.EVENT_MARKER_ICON_NAME
+import org.btcmap.map.MAP_OBJECT_KIND_EXCHANGE
 import org.btcmap.map.exchangeMarkerIconImageName
+import org.btcmap.map.mergeFeatureCollections
 import org.btcmap.util.isUpcoming
 import org.btcmap.map.MapArea
 import org.btcmap.map.markerImageName
@@ -79,20 +80,17 @@ import org.btcmap.ui.map.AddLocationLabels
 import org.btcmap.ui.map.addLocationItems
 import org.btcmap.ui.map.AreaChipPalette
 import org.btcmap.ui.map.AreaChips
-import org.btcmap.ui.map.EventLayers
-import org.btcmap.ui.map.ExchangeLayers
 import org.btcmap.ui.map.FILTER_BUTTON_INSET
 import org.btcmap.ui.map.MAP_BADGE_OFFSET
 import org.btcmap.ui.map.MAP_CONTROLS_GAP
 import org.btcmap.ui.map.MARKER_PIN_IMAGE_ID
 import org.btcmap.ui.map.MapCameraState
+import org.btcmap.ui.map.MapObjectLayers
 import org.btcmap.ui.map.MarkerBitmapFactory
 import org.btcmap.ui.map.MarkerClickHandler
 import org.btcmap.ui.map.MarkerFilterButtons
 import org.btcmap.ui.map.MarkerKind
 import org.btcmap.ui.map.MarkerPalette
-import org.btcmap.ui.map.MerchantLayers
-import org.btcmap.ui.map.NoteLayers
 import org.btcmap.ui.map.noteMarkerImageName
 import org.btcmap.ui.map.POI_LAYER_IDS
 import org.btcmap.ui.map.PoiInfo
@@ -107,6 +105,7 @@ import org.btcmap.ui.map.rememberMapAreas
 import org.btcmap.ui.map.rememberReloadedPlace
 import org.btcmap.ui.map.rememberViewportFeatures
 import org.btcmap.ui.map.setBitmap
+import org.btcmap.ui.map.toggled
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.FilledTonalIconButton
@@ -159,12 +158,13 @@ fun MapScreen(
     apiUrl: String,
     usingOpenFreeMap: Boolean,
     /**
-     * Which marker kind the map shows, one at a time. Hoisted so a host can keep
-     * the user's choice while it leaves and returns to the map; [onMarkerKindChange]
-     * reports a choice made on the map. Merchants are the default.
+     * The marker kinds the map draws. All four are visible by default; the host
+     * hoists the set so it can keep the user's choices while it leaves and
+     * returns to the map, and [onMarkerKindsChange] reports a toggle (or a kind
+     * the map reveals for a selected feature). Any combination is valid.
      */
-    markerKind: MarkerKind = MarkerKind.Merchants,
-    onMarkerKindChange: (MarkerKind) -> Unit = {},
+    visibleMarkerKinds: Set<MarkerKind> = MarkerKind.entries.toSet(),
+    onMarkerKindsChange: (Set<MarkerKind>) -> Unit = {},
     /**
      * Whether user input may change the map's bearing. Programmatic camera
      * moves are unaffected, so the map can still be pointed at a place.
@@ -340,9 +340,9 @@ fun MapScreen(
      */
     openTarget: Pair<Double, Double>? = null,
     /**
-     * The marker kind to select when moving to [openTarget], so a host that
-     * opens the map at a note shows the notes filter. Null leaves the current
-     * filter in place.
+     * The marker kind to reveal when moving to [openTarget], so a host that
+     * opens the map at a note makes the notes visible. Null leaves the current
+     * kinds in place.
      */
     openTargetMarkerKind: MarkerKind? = null,
     /** Called once the move to [openTarget] has finished. */
@@ -420,6 +420,14 @@ fun MapScreen(
             zoom = if (currentZoom != null && currentZoom < PLACE_MIN_ZOOM) PLACE_MIN_ZOOM else null,
             padding = sheetPadding(),
         )
+
+    // Makes sure a kind the map wants to show (a deep-linked place, a focused
+    // note) is visible without hiding the others.
+    fun revealMarkerKind(kind: MarkerKind) {
+        if (kind !in visibleMarkerKinds) {
+            onMarkerKindsChange(visibleMarkerKinds + kind)
+        }
+    }
 
     val scope = rememberCoroutineScope()
     var selectedPlace by remember { mutableStateOf<Place?>(null) }
@@ -522,19 +530,18 @@ fun MapScreen(
     // style: a layer declared earlier keeps the image it resolved as missing.
     var imagesReady by remember { mutableStateOf(false) }
 
-    // The source data is filled in below, once the map state the loaders observe
-    // exists. The layer content reads it through these states.
-    val merchantsGeoJson = remember { mutableStateOf(EMPTY_GEOJSON) }
-    val exchangesGeoJson = remember { mutableStateOf(EMPTY_GEOJSON) }
-    val eventsGeoJson = remember { mutableStateOf(EMPTY_GEOJSON) }
+    // The signed-in user's notes are loaded from the database; the other kinds
+    // are viewport-bound and filled in below. All visible kinds are then merged
+    // into one clustered source.
     val noteGeoJson = remember { mutableStateOf(EMPTY_GEOJSON) }
+    val combinedGeoJson = remember { mutableStateOf(EMPTY_GEOJSON) }
 
     // The distinct icons the cached notes carry, so the map registers one pin
     // image per icon in use instead of one image for every note.
     val noteIcons = remember { mutableStateOf(emptyList<String>()) }
 
     // The signed-in user's personal notes are drawn when the notes marker kind
-    // is selected. They are not viewport-bound, so every cached note is loaded;
+    // is visible. They are not viewport-bound, so every cached note is loaded;
     // the sync's NotesChanged event bumps reloadKey to refresh them.
     LaunchedEffect(reloadKey) {
         withContext(Dispatchers.Default) {
@@ -554,10 +561,13 @@ fun MapScreen(
     // the tracking effect below moves the camera as soon as one does.
     var recenterToLocation by remember { mutableStateOf(false) }
 
+    val baseStyle =
+        if (styleJson != null) BaseStyle.Json(styleJson) else BaseStyle.Uri(styleUrl)
+
     val state = rememberMapState(
         // The bundled styles are handed over as JSON: the Compose map cannot
         // read the asset:// style the Android SDK uses.
-        baseStyle = if (styleJson != null) BaseStyle.Json(styleJson) else BaseStyle.Uri(styleUrl),
+        baseStyle = baseStyle,
         initialCameraPosition = CameraPosition(
             center = Position(initialLon, initialLat),
             zoom = initialZoom,
@@ -565,46 +575,20 @@ fun MapScreen(
             pitch = initialTilt,
         ),
     ) {
-        // Only the selected kind is declared: 0.19.0 fixed the 0.18.0 quirk that
-        // made hiding a kind stop the others drawing (see the working notes).
-        when (markerKind) {
-            MarkerKind.Merchants -> MerchantLayers(
-                geoJson = merchantsGeoJson.value,
-                clusterBackgroundColor = palette.markerBackground,
-                clusterTextColor = palette.markerIcon,
-                usingOpenFreeMap = usingOpenFreeMap,
-                showMarkers = imagesReady,
-                onMarkerClick = onMarkerClick,
-            )
-
-            MarkerKind.Events -> EventLayers(
-                geoJson = eventsGeoJson.value,
-                clusterBackgroundColor = palette.markerBackground,
-                clusterTextColor = palette.markerIcon,
-                usingOpenFreeMap = usingOpenFreeMap,
-                showMarkers = imagesReady,
-                onMarkerClick = onMarkerClick,
-            )
-
-            MarkerKind.Exchanges -> ExchangeLayers(
-                geoJson = exchangesGeoJson.value,
-                clusterBackgroundColor = palette.markerBackground,
-                clusterTextColor = palette.markerIcon,
-                badgeBackgroundColor = palette.badgeBackground,
-                badgeTextColor = palette.badgeText,
-                usingOpenFreeMap = usingOpenFreeMap,
-                showMarkers = imagesReady,
-                onMarkerClick = onMarkerClick,
-            )
-
-            // The signed-in user's own notes, shown like any other kind and
-            // never clustered.
-            MarkerKind.Notes -> NoteLayers(
-                geoJson = noteGeoJson.value,
-                showMarkers = imagesReady,
-                onClick = onNoteClick,
-            )
-        }
+        // Every visible kind is drawn from one clustered source, so a cluster can
+        // include any mix of merchants, events, exchanges and notes.
+        MapObjectLayers(
+            geoJson = combinedGeoJson.value,
+            visibleKinds = visibleMarkerKinds,
+            clusterBackgroundColor = palette.markerBackground,
+            clusterTextColor = palette.markerIcon,
+            badgeBackgroundColor = palette.badgeBackground,
+            badgeTextColor = palette.badgeText,
+            usingOpenFreeMap = usingOpenFreeMap,
+            showMarkers = imagesReady,
+            onMarkerClick = onMarkerClick,
+            onNoteClick = onNoteClick,
+        )
 
         // The puck draws the last known position. The tracking effect is the
         // only thing that moves the camera, and only when the location button
@@ -758,7 +742,7 @@ fun MapScreen(
 
     LaunchedEffect(openTarget) {
         val target = openTarget ?: return@LaunchedEffect
-        openTargetMarkerKind?.let(onMarkerKindChange)
+        openTargetMarkerKind?.let(::revealMarkerKind)
         state.animateCamera(
             CameraUpdate(center = Position(target.second, target.first), zoom = OPEN_ZOOM),
         )
@@ -772,9 +756,9 @@ fun MapScreen(
         // A deep link replaces any basemap POI sheet the map was showing.
         shownPoi = null
         selectedPlace = place
-        // The place may be of the kind the filter is hiding, so show its kind
+        // The place may be of a kind the filter is hiding, so show its kind
         // before moving to it, as the Views map did.
-        onMarkerKindChange(if (place.isMerchant()) MarkerKind.Merchants else MarkerKind.Exchanges)
+        revealMarkerKind(if (place.isMerchant()) MarkerKind.Merchants else MarkerKind.Exchanges)
         onPlaceSelected(place)
         state.animateCamera(sheetCameraUpdate(place.lat, place.lon, state.cameraPosition.zoom))
     }
@@ -850,9 +834,7 @@ fun MapScreen(
                 withContext(Dispatchers.Default) { db.place.selectById(result.placeId) }?.let { place ->
                     shownPoi = null
                     selectedPlace = place
-                    onMarkerKindChange(
-                        if (place.isMerchant()) MarkerKind.Merchants else MarkerKind.Exchanges,
-                    )
+                    revealMarkerKind(if (place.isMerchant()) MarkerKind.Merchants else MarkerKind.Exchanges)
                     onPlaceSelected(place)
                     // A search result can be anywhere, so the map jumps straight
                     // to it rather than only opening its sheet; the current
@@ -964,7 +946,7 @@ fun MapScreen(
         reloadKey = reloadKey,
         idOf = { it.id },
         locationOf = { it.lat to it.lon },
-        toGeoJson = { it.toMarkerGeoJson() },
+        toGeoJson = { it.toMarkerGeoJson(kind = MAP_OBJECT_KIND_EXCHANGE) },
     ) { bounds ->
         bounds.longitudeRanges().flatMap { (minLon, maxLon) ->
             db.place.selectExchangesByBounds(bounds.south, bounds.north, minLon, maxLon, minVerifiedAt)
@@ -984,10 +966,23 @@ fun MapScreen(
         }.filter { it.startsAt.isUpcoming(now) }
     }
 
-    SideEffect {
-        merchantsGeoJson.value = merchants.geoJson
-        exchangesGeoJson.value = exchanges.geoJson
-        eventsGeoJson.value = events.geoJson
+    LaunchedEffect(
+        merchants.geoJson,
+        exchanges.geoJson,
+        events.geoJson,
+        noteGeoJson.value,
+        visibleMarkerKinds,
+    ) {
+        combinedGeoJson.value = withContext(Dispatchers.Default) {
+            mergeFeatureCollections(
+                buildList {
+                    if (MarkerKind.Merchants in visibleMarkerKinds) add(merchants.geoJson)
+                    if (MarkerKind.Events in visibleMarkerKinds) add(events.geoJson)
+                    if (MarkerKind.Exchanges in visibleMarkerKinds) add(exchanges.geoJson)
+                    if (MarkerKind.Notes in visibleMarkerKinds) add(noteGeoJson.value)
+                },
+            )
+        }
     }
 
     val markersByName = remember(merchants.snapshot) {
@@ -1019,17 +1014,32 @@ fun MapScreen(
     // features just added are built and registered. Redrawing them all on every
     // viewport change is what froze the UI once a session had accumulated many.
     val registeredImages = remember { mutableSetOf<String>() }
-    var imagesCachedFor by remember { mutableStateOf<Any?>(null) }
+    var imagesCachedFor by remember { mutableStateOf<BaseStyle?>(null) }
     var imagesCachedFactory by remember { mutableStateOf<MarkerBitmapFactory?>(null) }
 
-    LaunchedEffect(state, factory, markersByName, exchangeIcons, hasEvents, loadState, noteIcons.value) {
-        if (loadState !is StyleLoadState.Ready) return@LaunchedEffect
+    LaunchedEffect(
+        state,
+        factory,
+        markersByName,
+        exchangeIcons,
+        hasEvents,
+        loadState,
+        noteIcons.value,
+        baseStyle,
+    ) {
+        // A style switch drops every registered image and declares the layers
+        // afresh before the images exist, so wait until the requested style is
+        // the one actually loaded before rebuilding them.
+        if (loadState !is StyleLoadState.Ready || state.style.baseStyle != baseStyle) {
+            imagesCachedFor = null
+            return@LaunchedEffect
+        }
 
         // A reloaded style drops the registered images, and a new palette
         // repaints them, so rebuild everything instead of trusting the cache.
-        if (imagesCachedFor !== loadState || imagesCachedFactory !== factory) {
+        if (imagesCachedFor != baseStyle || imagesCachedFactory !== factory) {
             registeredImages.clear()
-            imagesCachedFor = loadState
+            imagesCachedFor = baseStyle
             imagesCachedFactory = factory
         }
 
@@ -1347,8 +1357,8 @@ fun MapScreen(
                     }
                 }
                 MarkerFilterButtons(
-                    selected = markerKind,
-                    onSelect = onMarkerKindChange,
+                    visible = visibleMarkerKinds,
+                    onToggle = { kind -> onMarkerKindsChange(visibleMarkerKinds.toggled(kind)) },
                     palette = areaChipPalette,
                 )
             }

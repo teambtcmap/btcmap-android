@@ -7,9 +7,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.btcmap.map.EVENT_MARKER_ICON_NAME
 import org.btcmap.map.ICON_OFFSET_Y
+import org.btcmap.map.MAP_OBJECT_KIND_EVENT
 import org.maplibre.compose.expressions.dsl.Feature
+import org.maplibre.compose.expressions.dsl.all
 import org.maplibre.compose.expressions.dsl.const
 import org.maplibre.compose.expressions.dsl.convertToString
+import org.maplibre.compose.expressions.dsl.eq
 import org.maplibre.compose.expressions.dsl.image
 import org.maplibre.compose.expressions.dsl.neq
 import org.maplibre.compose.expressions.value.SymbolAnchor
@@ -17,6 +20,7 @@ import org.maplibre.compose.layers.CircleLayer
 import org.maplibre.compose.layers.LayerDefaults
 import org.maplibre.compose.layers.SymbolLayer
 import org.maplibre.compose.sources.GeoJsonData
+import org.maplibre.compose.sources.GeoJsonSource
 import org.maplibre.compose.sources.rememberGeoJsonSource
 
 const val EVENT_CLUSTER_BACKGROUND_LAYER_ID = "event_cluster_background"
@@ -66,26 +70,44 @@ fun EventLayers(
     )
 
     if (showMarkers) {
-        SymbolLayer(
-            id = EVENT_MARKER_LAYER_ID,
-            source = source,
-            filter = Feature.get("cluster").neq(const(true)),
-            iconImage = image(MARKER_PIN_IMAGE_ID),
-            iconAnchor = const(SymbolAnchor.Bottom),
-            iconAllowOverlap = const(true),
-            iconIgnorePlacement = const(true),
-            onClick = onMarkerClick,
-        )
-
-        SymbolLayer(
-            id = EVENT_ICON_LAYER_ID,
-            source = source,
-            filter = Feature.get("cluster").neq(const(true)),
-            iconImage = image(EVENT_MARKER_ICON_NAME),
-            iconAnchor = const(SymbolAnchor.Center),
-            iconOffset = const(DpOffset(0.dp, ICON_OFFSET_Y.dp)),
-            iconAllowOverlap = const(true),
-            iconIgnorePlacement = const(true),
-        )
+        EventMarkerLayers(source = source, onMarkerClick = onMarkerClick)
     }
 }
+
+/**
+ * The event markers alone, drawn from a source that may also carry other map
+ * object kinds. The `kind` filter keeps a shared clustered source from drawing
+ * another kind's features with the event pin and glyph.
+ */
+@Composable
+internal fun EventMarkerLayers(
+    source: GeoJsonSource,
+    onMarkerClick: MarkerClickHandler,
+) {
+    SymbolLayer(
+        id = EVENT_MARKER_LAYER_ID,
+        source = source,
+        filter = eventMarkerFilter(),
+        iconImage = image(MARKER_PIN_IMAGE_ID),
+        iconAnchor = const(SymbolAnchor.Bottom),
+        iconAllowOverlap = const(true),
+        iconIgnorePlacement = const(true),
+        onClick = onMarkerClick,
+    )
+
+    SymbolLayer(
+        id = EVENT_ICON_LAYER_ID,
+        source = source,
+        filter = eventMarkerFilter(),
+        iconImage = image(EVENT_MARKER_ICON_NAME),
+        iconAnchor = const(SymbolAnchor.Center),
+        iconOffset = const(DpOffset(0.dp, ICON_OFFSET_Y.dp)),
+        iconAllowOverlap = const(true),
+        iconIgnorePlacement = const(true),
+    )
+}
+
+private fun eventMarkerFilter() = all(
+    Feature.get("cluster").neq(const(true)),
+    Feature.get("kind").convertToString().eq(const(MAP_OBJECT_KIND_EVENT)),
+)

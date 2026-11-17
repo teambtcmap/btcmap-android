@@ -2,22 +2,39 @@ package org.btcmap.ui.map
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.material3.FilledTonalIconButton
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.FilledTonalIconToggleButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.saveable.Saver
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import org.btcmap.ui.MaterialSymbol
 
-/** Which marker kind the map shows; one at a time, as the map's filter did. */
+/** Which marker kinds the map can draw; any combination may be shown at once. */
 enum class MarkerKind {
     Merchants,
     Events,
     Exchanges,
     Notes,
 }
+
+/** The visible kinds with [kind] added when absent and removed when present. */
+internal fun Set<MarkerKind>.toggled(kind: MarkerKind): Set<MarkerKind> =
+    if (kind in this) this - kind else this + kind
+
+/** Saves the visible kinds across a configuration change as their names. */
+internal val VISIBLE_MARKER_KINDS_SAVER: Saver<Set<MarkerKind>, List<String>> = Saver(
+    save = { kinds -> MarkerKind.entries.filter { it in kinds }.map { it.name } },
+    restore = { names ->
+        val byName = MarkerKind.entries.associateBy { it.name }
+        names.mapNotNull { byName[it] }.toSet()
+    },
+)
 
 /** Test tags for the filter buttons. */
 const val MARKER_FILTER_MERCHANTS_TAG = "marker-filter-merchants"
@@ -26,16 +43,18 @@ const val MARKER_FILTER_EXCHANGES_TAG = "marker-filter-exchanges"
 const val MARKER_FILTER_NOTES_TAG = "marker-filter-notes"
 
 /**
- * The map's marker-kind filter: one button per kind, the active one's icon
- * tinted with the button accent. Ported from the Views button group the map swap
- * dropped, whose buttons shared the app's button background and marked the
- * selected one with a border; that ring is gone, so the tinted icon now marks
- * the selection.
+ * The map's marker-kind toggles: one button per kind, each showing whether that
+ * kind is drawn and flipping it on tap. Any combination can be visible, so every
+ * kind starts on and a tap hides only the chosen one. A visible kind carries a
+ * ring in the same colour as its icon; a hidden one fades to 60% and has no ring.
+ *
+ * Ported from the Views button group the map swap dropped, whose buttons shared
+ * the app's button background and marked the selected one with a border.
  */
 @Composable
 fun MarkerFilterButtons(
-    selected: MarkerKind,
-    onSelect: (MarkerKind) -> Unit,
+    visible: Set<MarkerKind>,
+    onToggle: (MarkerKind) -> Unit,
     palette: AreaChipPalette,
     modifier: Modifier = Modifier,
 ) {
@@ -50,32 +69,32 @@ fun MarkerFilterButtons(
             kind = MarkerKind.Merchants,
             glyph = "storefront",
             tag = MARKER_FILTER_MERCHANTS_TAG,
-            selected = selected,
-            onSelect = onSelect,
+            visible = MarkerKind.Merchants in visible,
+            onToggle = onToggle,
             palette = palette,
         )
         MarkerFilterButton(
             kind = MarkerKind.Events,
             glyph = "event",
             tag = MARKER_FILTER_EVENTS_TAG,
-            selected = selected,
-            onSelect = onSelect,
+            visible = MarkerKind.Events in visible,
+            onToggle = onToggle,
             palette = palette,
         )
         MarkerFilterButton(
             kind = MarkerKind.Exchanges,
             glyph = "currency_exchange",
             tag = MARKER_FILTER_EXCHANGES_TAG,
-            selected = selected,
-            onSelect = onSelect,
+            visible = MarkerKind.Exchanges in visible,
+            onToggle = onToggle,
             palette = palette,
         )
         MarkerFilterButton(
             kind = MarkerKind.Notes,
             glyph = "notes",
             tag = MARKER_FILTER_NOTES_TAG,
-            selected = selected,
-            onSelect = onSelect,
+            visible = MarkerKind.Notes in visible,
+            onToggle = onToggle,
             palette = palette,
         )
     }
@@ -86,20 +105,41 @@ private fun MarkerFilterButton(
     kind: MarkerKind,
     glyph: String,
     tag: String,
-    selected: MarkerKind,
-    onSelect: (MarkerKind) -> Unit,
+    visible: Boolean,
+    onToggle: (MarkerKind) -> Unit,
     palette: AreaChipPalette,
 ) {
-    val isSelected = kind == selected
-    FilledTonalIconButton(
-        onClick = { onSelect(kind) },
-        colors = IconButtonDefaults.filledTonalIconButtonColors(
-            // The active kind is only tinted, so all four keep the same button
-            // background and the accent colour alone marks the selection.
+    FilledTonalIconToggleButton(
+        checked = visible,
+        onCheckedChange = { onToggle(kind) },
+        colors = IconButtonDefaults.filledTonalIconToggleButtonColors(
+            // The active kind keeps the full button colour; an inactive one
+            // fades to 60% and is not ringed.
             containerColor = palette.buttonBackground,
-            contentColor = if (isSelected) palette.buttonAccent else palette.buttonIcon,
+            contentColor = palette.buttonIcon.copy(alpha = 0.6f),
+            checkedContainerColor = palette.buttonBackground,
+            checkedContentColor = palette.buttonIcon,
         ),
-        modifier = Modifier.testTag(tag),
+        shape = CircleShape,
+        modifier = Modifier
+            .testTag(tag)
+            .then(
+                if (visible) {
+                    // The button's 48dp touch target is larger than its 40dp
+                    // circle, so draw the ring on the circle rather than around
+                    // the touch target.
+                    Modifier.drawWithContent {
+                        drawContent()
+                        drawCircle(
+                            color = palette.buttonIcon,
+                            radius = size.minDimension / 2f - FILTER_BUTTON_INSET.toPx(),
+                            style = Stroke(width = 1.dp.toPx()),
+                        )
+                    }
+                } else {
+                    Modifier
+                },
+            ),
     ) {
         MaterialSymbol(glyph = glyph, contentDescription = null)
     }

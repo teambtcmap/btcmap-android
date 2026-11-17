@@ -6,6 +6,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+- Cluster every visible map object kind together: merchants, events, exchanges and notes now share one clustered source, so a cluster can mix kinds instead of only counting objects of one kind
+- Keep the map's markers after switching the map style in Settings: a style reload now re-registers the marker bitmaps instead of leaving only the basemap visible
+- Turn the map's marker filter into independent toggles: merchants, events, exchanges and notes all start visible, and each button now shows or hides only its own kind so users can mix and match them; the mix is persisted across restarts, a visible kind gains a border in the same colour as its icon and a hidden one fades to 60% opacity without a border instead of the old orange accent
 - Edit an event straight from the map's event sheet: an event manager, admin or root gets a pencil that opens the add-event form pre-filled with the event's name, website, position and times, and saving it patches the event instead of submitting a new one; the screen caps and centres its map and fields on wide windows like the other add screens
 - Fix saving a place or area crashing the app when the save fails — a failed request, or an expired session whose user is no longer cached — by reporting the error instead of letting it escape the screen's coroutine
 - Fix a crash when the app exits after logging out: the exit no longer calls `requireActivity()` on a fragment that has already detached
@@ -31,7 +34,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Time every step of a full sync and show the last run's per-step durations, expandable from a "Last sync" row in the database screen's sync card
 - Format map distances on the desktop with the app's locale and the metre/kilometre split, so a distance under a kilometre reads in metres as it does on Android instead of a hardcoded "0.5 km"
 - Upgrade to MapLibre Compose 0.20.0: right-to-left and Arabic labels render correctly, an icon whose image arrives after its tile now appears, line patterns match the browser, locale-aware number formatting and feature queries are more accurate, and map interactions run more smoothly off the UI thread
-- Mark the map marker filter's selected kind by tinting its icon with the new "Button accent" colour instead of ringing it with a border; the accent defaults to the boosted marker colour and is overridable in Customize colors, where the old "Button border" row is renamed
 - Hide the map's event-review button while no submissions are waiting, and refresh its count after a sync reports the events changed, so an emptied or filled queue appears without leaving the map
 - Fix area managers never seeing the "Manage areas" settings row: the app checked a nonexistent `area_admin` role instead of the server's `area_manager`, so the row was hidden from exactly the users it is meant for
 - Make the "Manage areas" screen geofence-aware: an account restricted to a set of areas now sees just those (of any type, since a geofence can name a country) and loses the search field the restriction makes pointless, matching the server's area-id geofence

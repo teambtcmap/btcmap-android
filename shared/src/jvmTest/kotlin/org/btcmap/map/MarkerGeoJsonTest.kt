@@ -91,6 +91,27 @@ class MarkerGeoJsonTest {
         Assert.assertEquals(icon, properties.getValue("iconId").jsonPrimitive.content)
     }
 
+    @Test
+    fun toMarkerGeoJson_carriesTheRequestedKind() {
+        val merchant = parseJson(listOf(marker(boostedUntil = null)).toMarkerGeoJson(now))
+            .jsonObject.getValue("features").jsonArray[0].jsonObject
+            .getValue("properties").jsonObject
+        val exchange = parseJson(
+            listOf(marker(boostedUntil = null))
+                .toMarkerGeoJson(now, MAP_OBJECT_KIND_EXCHANGE),
+        ).jsonObject.getValue("features").jsonArray[0].jsonObject
+            .getValue("properties").jsonObject
+
+        Assert.assertEquals(
+            MAP_OBJECT_KIND_MERCHANT,
+            merchant.getValue("kind").jsonPrimitive.content,
+        )
+        Assert.assertEquals(
+            MAP_OBJECT_KIND_EXCHANGE,
+            exchange.getValue("kind").jsonPrimitive.content,
+        )
+    }
+
     private fun marker(
         boostedUntil: Instant?,
         verifiedAt: Instant? = Instant.parse("2026-05-01T00:00:00Z"),
