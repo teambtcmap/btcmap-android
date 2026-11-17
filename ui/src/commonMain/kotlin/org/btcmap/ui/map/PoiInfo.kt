@@ -184,6 +184,9 @@ internal fun PoiInfo.categoryGlyph(): String = when (classId) {
 /** The point as `lat, lon`, rounded to five decimals, which is about a metre. */
 internal fun PoiInfo.coordinatesLabel(): String = "${round(lat)}, ${round(lon)}"
 
+/** The point as `lat,lon`, rounded to the same ~1 m, for copying to the clipboard. */
+internal fun formatCoordinates(lat: Double, lon: Double): String = "${round(lat)},${round(lon)}"
+
 /**
  * The feature's position on openstreetmap.org. The basemap's tiles carry no OSM
  * element id (the `poi` layer has only `class`, `subclass`, `name` and `rank`), so

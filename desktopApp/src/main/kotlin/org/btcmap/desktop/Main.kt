@@ -78,6 +78,7 @@ import org.btcmap.ui.MaterialSymbol
 import org.btcmap.ui.map.AddLocationLabels
 import org.btcmap.ui.map.AreaPreviewMap
 import org.btcmap.ui.map.EventMiniMap
+import org.btcmap.ui.map.MapContextMenuLabels
 import org.btcmap.ui.map.MarkerKind
 import org.btcmap.ui.map.OfflinePacks
 import org.btcmap.ui.map.SearchActions
@@ -623,9 +624,12 @@ private fun runApp() = application {
                             },
                             onOpenUrl = { openUrl(it) },
                             addLocationLabels = ADD_LOCATION_LABELS,
+                            mapContextMenuLabels = MAP_CONTEXT_MENU_LABELS,
+                            onCopyCoordinates = { copyToClipboard(it) },
                             // A right-click offers the same add-location choices
-                            // as the search field's action, at the clicked point.
-                            addLocationOnSecondaryClick = true,
+                            // as the search field's action, plus copying the
+                            // point's coordinates, at the clicked point.
+                            contextMenuOnSecondaryClick = true,
                             onOpenFeed = { nav.push(Route.Feed) },
                             onOpenInfra = if (isAdmin) {
                                 { nav.push(Route.Infra) }
@@ -2082,6 +2086,9 @@ private val MY_NOTES_LABELS get() = LABELS.myNotes
 private val SAVED_PLACES_LABELS get() = LABELS.savedPlaces
 private val SAVED_AREAS_LABELS get() = LABELS.savedAreas
 private val ADD_LOCATION_LABELS get() = LABELS.addLocation
+private val MAP_CONTEXT_MENU_LABELS get() = MapContextMenuLabels(
+    copyCoordinates = STRINGS["copy_coordinates"],
+)
 private val PLACE_SHEET_STRINGS get() = LABELS.placeStrings
 private val DESKTOP_AREA_STRINGS get() = LABELS.area
 private val EVENT_SCREEN_LABELS get() = LABELS.eventScreen

@@ -228,6 +228,11 @@ class PoiInfoTest {
     }
 
     @Test
+    fun formatCoordinates_isCommaSeparatedLatThenLon() {
+        assertEquals("39.93412,116.44235", formatCoordinates(39.934123, 116.442349))
+    }
+
+    @Test
     fun osmLinksPointAtTheFeatureCoordinates() {
         // The basemap tiles carry no OSM element id, so the links target the
         // point, rounded to the same ~1 m as the coordinate label.

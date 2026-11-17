@@ -19,8 +19,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
@@ -351,36 +349,11 @@ private fun AddLocationAction(
         ) {
             MaterialSymbol(glyph = "add_location_alt", contentDescription = null)
         }
-        AddLocationDropdown(
+        MapContextMenu(
             expanded = expanded,
             onDismissRequest = { expanded = false },
             items = items,
         )
-    }
-}
-
-/**
- * The add-location chooser's menu: the kinds the host offers, in the same order
- * (place, event, note). Shared by the search field's add action and the map's
- * right-click context menu, so both present the same choices.
- */
-@Composable
-internal fun AddLocationDropdown(
-    expanded: Boolean,
-    onDismissRequest: () -> Unit,
-    items: List<AddLocationItem>,
-) {
-    DropdownMenu(expanded = expanded, onDismissRequest = onDismissRequest) {
-        items.forEach { item ->
-            DropdownMenuItem(
-                text = { Text(item.label) },
-                leadingIcon = { MaterialSymbol(glyph = item.glyph, contentDescription = null) },
-                onClick = {
-                    onDismissRequest()
-                    item.onClick()
-                },
-            )
-        }
     }
 }
 
@@ -390,15 +363,8 @@ internal fun addLocationItems(
     onAddEvent: (() -> Unit)?,
     onAddNote: (() -> Unit)?,
     labels: AddLocationLabels,
-): List<AddLocationItem> = buildList {
-    onAddPlace?.let { add(AddLocationItem(labels.addPlace, "place", it)) }
-    onAddEvent?.let { add(AddLocationItem(labels.addEvent, "event", it)) }
-    onAddNote?.let { add(AddLocationItem(labels.addNote, "notes", it)) }
+): List<MapContextMenuItem> = buildList {
+    onAddPlace?.let { add(MapContextMenuItem(labels.addPlace, "place", it)) }
+    onAddEvent?.let { add(MapContextMenuItem(labels.addEvent, "event", it)) }
+    onAddNote?.let { add(MapContextMenuItem(labels.addNote, "notes", it)) }
 }
-
-/** One row of the add-location chooser: its label, its leading icon and its action. */
-internal data class AddLocationItem(
-    val label: String,
-    val glyph: String,
-    val onClick: () -> Unit,
-)

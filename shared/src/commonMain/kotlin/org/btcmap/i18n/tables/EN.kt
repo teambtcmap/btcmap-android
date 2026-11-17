@@ -87,6 +87,7 @@ internal val EN: Map<String, String> = mapOf(
         "confirm_password" to "Confirm password",
         "copied_to_clipboard" to "Copied to clipboard",
         "copy" to "Copy",
+        "copy_coordinates" to "Copy coordinates",
         "could_not_check_for_updates" to "Couldn't check for updates.",
         "could_not_download_update" to "Couldn't download the update.",
         "could_not_install_update" to "Couldn't start the installer.",

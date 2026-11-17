@@ -75,9 +75,13 @@ import org.btcmap.map.toMarkerGeoJson
 import org.btcmap.map.toNoteGeoJson
 import org.btcmap.place.isMerchant
 import org.btcmap.ui.map.AREA_CHIP_SIZE
-import org.btcmap.ui.map.AddLocationDropdown
 import org.btcmap.ui.map.AddLocationLabels
 import org.btcmap.ui.map.addLocationItems
+import org.btcmap.ui.map.formatCoordinates
+import org.btcmap.ui.map.MapContextMenu
+import org.btcmap.ui.map.MapContextMenuItem
+import org.btcmap.ui.map.MapContextMenuLabels
+import org.btcmap.ui.map.mapContextMenuItems
 import org.btcmap.ui.map.AreaChipPalette
 import org.btcmap.ui.map.AreaChips
 import org.btcmap.ui.map.FILTER_BUTTON_INSET
@@ -258,16 +262,25 @@ fun MapScreen(
         addEvent = "Add an event",
         addNote = "Add a note",
     ),
+    /** The labels of the map's right-click context menu. */
+    mapContextMenuLabels: MapContextMenuLabels = MapContextMenuLabels(
+        copyCoordinates = "Copy coordinates",
+    ),
     /**
-     * Whether a secondary (right) click on the map opens the add-location
-     * chooser, creating the chosen kind at the clicked point. The choices are the
-     * same the search field's add action offers, and the host applies the same
-     * rules to them (its callbacks gate on authorization). False by default,
-     * because Android has no secondary click; only the desktop host enables it.
-     * With exactly one kind offered the click acts directly, as the action does;
-     * with none it does nothing.
+     * Copies the coordinates of the point a secondary (right) click opened the
+     * context menu at, formatted as `lat,lon`. Null leaves the action out, as on
+     * Android, which has no secondary click.
      */
-    addLocationOnSecondaryClick: Boolean = false,
+    onCopyCoordinates: ((String) -> Unit)? = null,
+    /**
+     * Whether a secondary (right) click on the map opens its context menu: the
+     * add-location choices the search field's action offers, plus the host's
+     * copy-coordinates action when it supplies one, all acting at the clicked
+     * point. False by default, because Android has no secondary click; only the
+     * desktop host enables it. With exactly one action offered the click acts
+     * directly; with none it does nothing.
+     */
+    contextMenuOnSecondaryClick: Boolean = false,
     onOpenFeed: ((List<MapArea>) -> Unit)? = null,
     /**
      * Opens the infrastructure dashboard. Null unless the signed-in user holds
@@ -446,10 +459,10 @@ fun MapScreen(
         recenterTarget = lat to lon
         recenterKey++
     }
-    // The point a right-click opened the add-location chooser at (in map-local
-    // dp, where it is anchored) and the geographic point it creates at. Null
-    // while no chooser is open.
-    var addLocationMenu by remember { mutableStateOf<AddLocationMenuState?>(null) }
+    // The point a right-click opened the map context menu at (in map-local dp,
+    // where it is anchored) and the geographic point its actions use. Null while
+    // no menu is open.
+    var mapContextMenu by remember { mutableStateOf<MapContextMenuState?>(null) }
     // The sheet shows the current row: a sync rewrites rows in place, so the
     // selected copy is re-read whenever the host bumps the reload key.
     val shownPlace = rememberReloadedPlace(selectedPlace, db, reloadKey)
@@ -615,13 +628,28 @@ fun MapScreen(
     // the result arrives on the map scope. The dismissal callback goes through a
     // live state so a changed host lambda is still the one called.
     val currentOnPlaceDismissed by rememberUpdatedState(onPlaceDismissed)
-    // A right-click's add-location action is read live, so a new host lambda is
-    // the one called without rebuilding the interactions.
+    // The right-click menu's actions are read live, so a new host lambda is the
+    // one called without rebuilding the interactions.
     val currentOnAddPlace by rememberUpdatedState(onAddPlace)
     val currentOnAddEvent by rememberUpdatedState(onAddEvent)
     val currentOnAddNote by rememberUpdatedState(onAddNote)
+    val currentOnCopyCoordinates by rememberUpdatedState(onCopyCoordinates)
     val currentAddLocationLabels by rememberUpdatedState(addLocationLabels)
-    val mapInteractions = remember(mapRotationEnabled, mapTiltEnabled, addLocationOnSecondaryClick) {
+    val currentMapContextMenuLabels by rememberUpdatedState(mapContextMenuLabels)
+
+    // The rows the right-click menu shows at (lat, lon).
+    fun contextMenuItems(lat: Double, lon: Double): List<MapContextMenuItem> = mapContextMenuItems(
+        onAddPlace = currentOnAddPlace?.let { create -> { create(lat, lon) } },
+        onAddEvent = currentOnAddEvent?.let { create -> { create(lat, lon) } },
+        onAddNote = currentOnAddNote?.let { create -> { create(lat, lon) } },
+        addLocationLabels = currentAddLocationLabels,
+        onCopyCoordinates = currentOnCopyCoordinates?.let { copy ->
+            { copy(formatCoordinates(lat, lon)) }
+        },
+        copyCoordinatesLabel = currentMapContextMenuLabels.copyCoordinates,
+    )
+
+    val mapInteractions = remember(mapRotationEnabled, mapTiltEnabled, contextMenuOnSecondaryClick) {
         MapInteractions {
             camera {
                 // Bearing permission. A gesture binding cannot re-enable a
@@ -660,29 +688,18 @@ fun MapScreen(
                 }
                 // A right-click is the library's secondary click, which it routes
                 // to the long-press callback; a touch long press arrives here too,
-                // so the button is checked. It opens the same add-location choices
-                // the search field's action offers, but at the clicked point. With
-                // one kind it acts directly, as that action does; with none it
-                // leaves the click alone.
-                if (addLocationOnSecondaryClick) {
+                // so the button is checked. It opens the map's context menu at the
+                // clicked point, with the add-location kinds the search field's
+                // action offers and the copy-coordinates action. With one action
+                // it acts directly; with none it leaves the click alone.
+                if (contextMenuOnSecondaryClick) {
                     longClick {
                         onEvent { event ->
                             if (PointerButton.Secondary !in event.buttons) {
                                 return@onEvent ClickResult.Pass
                             }
                             val position = event.position ?: return@onEvent ClickResult.Pass
-                            val items = addLocationItems(
-                                onAddPlace = currentOnAddPlace?.let { create ->
-                                    { create(position.latitude, position.longitude) }
-                                },
-                                onAddEvent = currentOnAddEvent?.let { create ->
-                                    { create(position.latitude, position.longitude) }
-                                },
-                                onAddNote = currentOnAddNote?.let { create ->
-                                    { create(position.latitude, position.longitude) }
-                                },
-                                labels = currentAddLocationLabels,
-                            )
+                            val items = contextMenuItems(position.latitude, position.longitude)
                             when (items.size) {
                                 0 -> ClickResult.Pass
                                 1 -> {
@@ -691,7 +708,7 @@ fun MapScreen(
                                 }
 
                                 else -> {
-                                    addLocationMenu = AddLocationMenuState(
+                                    mapContextMenu = MapContextMenuState(
                                         offset = event.screenOffset,
                                         lat = position.latitude,
                                         lon = position.longitude,
@@ -1388,25 +1405,13 @@ fun MapScreen(
                         searchBarBottomPx = it.positionInRoot().y + it.size.height
                     },
             )
-            // The add-location chooser a right-click opened, anchored at the
-            // click. The same choices and order as the search field's action.
-            addLocationMenu?.let { menu ->
+            // The context menu a right-click opened, anchored at the click.
+            mapContextMenu?.let { menu ->
                 Box(modifier = Modifier.offset(x = menu.offset.x, y = menu.offset.y)) {
-                    AddLocationDropdown(
+                    MapContextMenu(
                         expanded = true,
-                        onDismissRequest = { addLocationMenu = null },
-                        items = addLocationItems(
-                            onAddPlace = onAddPlace?.let { create ->
-                                { create(menu.lat, menu.lon) }
-                            },
-                            onAddEvent = onAddEvent?.let { create ->
-                                { create(menu.lat, menu.lon) }
-                            },
-                            onAddNote = onAddNote?.let { create ->
-                                { create(menu.lat, menu.lon) }
-                            },
-                            labels = addLocationLabels,
-                        ),
+                        onDismissRequest = { mapContextMenu = null },
+                        items = contextMenuItems(menu.lat, menu.lon),
                     )
                 }
             }
@@ -1482,10 +1487,10 @@ private const val LOCATION_ZOOM = 14.0
 private const val LOCATION_INDICATOR_LAYER_ID = "user-location"
 
 /**
- * Where a right-click opened the add-location chooser: [offset] anchors the menu
- * in map-local dp, and [lat]/[lon] are the point a chosen kind is created at.
+ * Where a right-click opened the map context menu: [offset] anchors the menu in
+ * map-local dp, and [lat]/[lon] are the point its actions use.
  */
-private data class AddLocationMenuState(
+private data class MapContextMenuState(
     val offset: DpOffset,
     val lat: Double,
     val lon: Double,
