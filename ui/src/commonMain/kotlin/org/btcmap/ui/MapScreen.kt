@@ -95,6 +95,7 @@ import org.btcmap.ui.map.MarkerBitmapFactory
 import org.btcmap.ui.map.MarkerClickHandler
 import org.btcmap.ui.map.MarkerFilterButtons
 import org.btcmap.ui.map.MarkerKind
+import org.btcmap.ui.map.mapSearchBarMargin
 import org.btcmap.ui.map.MarkerPalette
 import org.btcmap.ui.map.noteMarkerImageName
 import org.btcmap.ui.map.POI_LAYER_IDS
@@ -1398,9 +1399,11 @@ fun MapScreen(
                     .align(Alignment.TopCenter)
                     // The Views SearchBar sat below the status bar with its own
                     // 16dp margin; the map is edge-to-edge, so the inset is drawn
-                    // here rather than by the window.
+                    // here rather than by the window. The margin is larger on
+                    // the desktop, which has no status bar and follows Material
+                    // 3's unfocused search-bar margin.
                     .windowInsetsPadding(WindowInsets.statusBars)
-                    .padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 16.dp)
+                    .padding(mapSearchBarMargin)
                     // Its bottom edge, with the map's origin as the reference,
                     // bounds the top of the gap a selected place is centred in.
                     .onGloballyPositioned {
