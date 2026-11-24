@@ -3,7 +3,9 @@ package org.btcmap.ui
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -130,114 +132,122 @@ fun NoteSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .verticalScroll(rememberScrollState())
-                .padding(bottom = 32.dp),
-        ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
+        BoxWithConstraints {
+            val minHeight = if (maxHeight.value.isFinite()) maxHeight * 0.5f else 0.dp
+            Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(start = 16.dp, end = 8.dp),
+                    // Material only offers the half-expanded anchor when the content
+                    // is at least half the screen tall; without this a short note
+                    // rests lower than the camera padding assumes, so its pin lands
+                    // too high above the sheet.
+                    .heightIn(min = minHeight)
+                    .verticalScroll(rememberScrollState())
+                    .padding(bottom = 32.dp),
             ) {
-                if (onEditIcon != null) {
-                    IconButton(
-                        onClick = { editingIcon = true },
-                        modifier = Modifier.testTag(NOTE_CHANGE_ICON_TAG),
-                    ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(start = 16.dp, end = 8.dp),
+                ) {
+                    if (onEditIcon != null) {
+                        IconButton(
+                            onClick = { editingIcon = true },
+                            modifier = Modifier.testTag(NOTE_CHANGE_ICON_TAG),
+                        ) {
+                            MaterialSymbol(
+                                glyph = icon,
+                                contentDescription = labels.changeIcon,
+                                tint = MaterialTheme.colorScheme.primary,
+                            )
+                        }
+                    } else {
                         MaterialSymbol(
                             glyph = icon,
-                            contentDescription = labels.changeIcon,
+                            contentDescription = null,
                             tint = MaterialTheme.colorScheme.primary,
                         )
                     }
-                } else {
-                    MaterialSymbol(
-                        glyph = icon,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary,
-                    )
-                }
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(
-                    text = labels.title,
-                    style = MaterialTheme.typography.headlineSmall,
-                    modifier = Modifier.weight(1f),
-                )
-                DeleteAction(
-                    labels = DeleteActionLabels(
-                        delete = labels.delete,
-                        title = labels.deleteConfirmTitle,
-                        message = labels.deleteConfirmMessage,
-                        failed = labels.deleteFailed,
-                        cancel = labels.cancel,
-                    ),
-                    onDelete = onDelete,
-                    onDeleted = onDeleted,
-                    deleteTag = NOTE_DELETE_TAG,
-                    confirmTag = NOTE_DELETE_CONFIRM_TAG,
-                    errorTag = NOTE_DELETE_ERROR_TAG,
-                )
-            }
-
-            Row(
-                verticalAlignment = Alignment.Top,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(start = 16.dp, end = 8.dp, top = 8.dp, bottom = 8.dp),
-            ) {
-                // Selectable, so a long note's text can be partially copied.
-                SelectionContainer(
-                    modifier = Modifier
-                        .weight(1f)
-                        .padding(vertical = 8.dp),
-                ) {
+                    Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        text = text,
-                        style = MaterialTheme.typography.bodyLarge,
-                        modifier = Modifier.testTag(NOTE_SHEET_TEXT_TAG),
+                        text = labels.title,
+                        style = MaterialTheme.typography.headlineSmall,
+                        modifier = Modifier.weight(1f),
+                    )
+                    DeleteAction(
+                        labels = DeleteActionLabels(
+                            delete = labels.delete,
+                            title = labels.deleteConfirmTitle,
+                            message = labels.deleteConfirmMessage,
+                            failed = labels.deleteFailed,
+                            cancel = labels.cancel,
+                        ),
+                        onDelete = onDelete,
+                        onDeleted = onDeleted,
+                        deleteTag = NOTE_DELETE_TAG,
+                        confirmTag = NOTE_DELETE_CONFIRM_TAG,
+                        errorTag = NOTE_DELETE_ERROR_TAG,
                     )
                 }
-                if (onEditText != null) {
-                    IconButton(
-                        onClick = { editing = true },
-                        modifier = Modifier.testTag(NOTE_EDIT_TAG),
+    
+                Row(
+                    verticalAlignment = Alignment.Top,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(start = 16.dp, end = 8.dp, top = 8.dp, bottom = 8.dp),
+                ) {
+                    // Selectable, so a long note's text can be partially copied.
+                    SelectionContainer(
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(vertical = 8.dp),
                     ) {
-                        MaterialSymbol(glyph = "edit", contentDescription = labels.edit)
+                        Text(
+                            text = text,
+                            style = MaterialTheme.typography.bodyLarge,
+                            modifier = Modifier.testTag(NOTE_SHEET_TEXT_TAG),
+                        )
+                    }
+                    if (onEditText != null) {
+                        IconButton(
+                            onClick = { editing = true },
+                            modifier = Modifier.testTag(NOTE_EDIT_TAG),
+                        ) {
+                            MaterialSymbol(glyph = "edit", contentDescription = labels.edit)
+                        }
                     }
                 }
-            }
-
-            if (editing && onEditText != null) {
-                NoteEditDialog(
-                    initialText = text,
-                    labels = labels,
-                    onSave = onEditText,
-                    onDismiss = { editing = false },
+    
+                if (editing && onEditText != null) {
+                    NoteEditDialog(
+                        initialText = text,
+                        labels = labels,
+                        onSave = onEditText,
+                        onDismiss = { editing = false },
+                    )
+                }
+    
+                if (editingIcon && onEditIcon != null) {
+                    NoteIconDialog(
+                        initialIcon = icon,
+                        labels = labels,
+                        onSave = onEditIcon,
+                        onDismiss = { editingIcon = false },
+                    )
+                }
+    
+                NoteInfoRow(
+                    glyph = if (public) "public" else "lock",
+                    text = if (public) labels.public else labels.private,
+                    modifier = Modifier.testTag(NOTE_SHEET_VISIBILITY_TAG),
+                )
+                NoteInfoRow(
+                    glyph = "schedule",
+                    text = labels.created(createdAt.format(dateFormatter)),
+                    modifier = Modifier.testTag(NOTE_SHEET_CREATED_TAG),
                 )
             }
-
-            if (editingIcon && onEditIcon != null) {
-                NoteIconDialog(
-                    initialIcon = icon,
-                    labels = labels,
-                    onSave = onEditIcon,
-                    onDismiss = { editingIcon = false },
-                )
-            }
-
-            NoteInfoRow(
-                glyph = if (public) "public" else "lock",
-                text = if (public) labels.public else labels.private,
-                modifier = Modifier.testTag(NOTE_SHEET_VISIBILITY_TAG),
-            )
-            NoteInfoRow(
-                glyph = "schedule",
-                text = labels.created(createdAt.format(dateFormatter)),
-                modifier = Modifier.testTag(NOTE_SHEET_CREATED_TAG),
-            )
         }
     }
 }

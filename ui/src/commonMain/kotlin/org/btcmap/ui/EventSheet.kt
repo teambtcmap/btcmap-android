@@ -1,7 +1,10 @@
 package org.btcmap.ui
 
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.IconButton
@@ -58,53 +61,66 @@ fun EventSheet(
         sheetState = sheetState,
         modifier = modifier,
     ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(start = 16.dp, end = 8.dp),
-        ) {
-            Text(
-                text = event.name,
-                style = MaterialTheme.typography.headlineSmall,
-                modifier = Modifier.weight(1f),
-            )
-            if (onDirections != null) {
-                IconButton(onClick = onDirections) {
-                    MaterialSymbol(glyph = "directions", contentDescription = labels.directions)
-                }
-            }
-            if (onEdit != null) {
-                IconButton(
-                    onClick = onEdit,
-                    modifier = Modifier.testTag(EVENT_EDIT_TAG),
+        // Material only offers the half-expanded anchor when the content is at
+        // least half the screen tall. Without this a short event rests at its
+        // natural height, lower than the camera padding assumes, and its pin
+        // lands too high above the sheet.
+        BoxWithConstraints {
+            val minHeight = if (maxHeight.value.isFinite()) maxHeight * 0.5f else 0.dp
+            Column(modifier = Modifier.heightIn(min = minHeight)) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(start = 16.dp, end = 8.dp),
                 ) {
-                    MaterialSymbol(glyph = "edit", contentDescription = labels.edit)
+                    Text(
+                        text = event.name,
+                        style = MaterialTheme.typography.headlineSmall,
+                        modifier = Modifier.weight(1f),
+                    )
+                    if (onDirections != null) {
+                        IconButton(onClick = onDirections) {
+                            MaterialSymbol(
+                                glyph = "directions",
+                                contentDescription = labels.directions,
+                            )
+                        }
+                    }
+                    if (onEdit != null) {
+                        IconButton(
+                            onClick = onEdit,
+                            modifier = Modifier.testTag(EVENT_EDIT_TAG),
+                        ) {
+                            MaterialSymbol(glyph = "edit", contentDescription = labels.edit)
+                        }
+                    }
+                    EventDeleteAction(
+                        labels = labels,
+                        onDelete = onDelete,
+                        onDeleted = onDeleted,
+                    )
                 }
-            }
-            EventDeleteAction(
-                labels = labels,
-                onDelete = onDelete,
-                onDeleted = onDeleted,
-            )
-        }
 
-        EventScreen(
-            event = event,
-            geoJson = geoJson,
-            styleUrl = styleUrl,
-            styleJson = styleJson,
-            palette = palette,
-            iconFont = iconFont,
-            usingOpenFreeMap = usingOpenFreeMap,
-            labels = labels,
-            onOpenWebsite = onOpenWebsite,
-            // A flat 16dp inset lines the body up with the header above it,
-            // instead of the standalone screen's wider capped/centred margin.
-            contentPadding = 16.dp,
-            // The map is already behind the sheet, so the body does not draw
-            // its own preview.
-            showMap = false,
-        )
+                EventScreen(
+                    event = event,
+                    geoJson = geoJson,
+                    styleUrl = styleUrl,
+                    styleJson = styleJson,
+                    palette = palette,
+                    iconFont = iconFont,
+                    usingOpenFreeMap = usingOpenFreeMap,
+                    labels = labels,
+                    onOpenWebsite = onOpenWebsite,
+                    // A flat 16dp inset lines the body up with the header above
+                    // it, instead of the standalone screen's wider capped/centred
+                    // margin.
+                    contentPadding = 16.dp,
+                    // The map is already behind the sheet, so the body does not
+                    // draw its own preview.
+                    showMap = false,
+                )
+            }
+        }
     }
 }
