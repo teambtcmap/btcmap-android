@@ -437,7 +437,7 @@ private fun runApp() = application {
                     var mapFocus by remember { mutableStateOf<Pair<Double, Double>?>(null) }
                     // The marker kinds the map draws, kept here so leaving the
                     // map for another page and returning restores the user's
-                    // choices. All four start visible on a fresh install; toggles
+                    // choices. Exchanges start hidden on a fresh install; toggles
                     // are persisted in settings so a restart keeps the mix too.
                     var visibleMarkerKinds by remember {
                         mutableStateOf(settings.visibleMarkerKinds)

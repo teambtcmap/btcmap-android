@@ -12,10 +12,13 @@ import org.btcmap.ui.testSettings
 class MarkerFilterSettingsTest {
 
     @Test
-    fun defaultsToEveryKind() {
+    fun defaultsToEveryKindExceptExchanges() {
         val settings = testSettings(testDatabase())
 
-        assertEquals(MarkerKind.entries.toSet(), settings.visibleMarkerKinds)
+        assertEquals(
+            MarkerKind.entries.toSet() - MarkerKind.Exchanges,
+            settings.visibleMarkerKinds,
+        )
     }
 
     @Test

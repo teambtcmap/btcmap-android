@@ -84,6 +84,7 @@ import org.btcmap.ui.map.MapContextMenuLabels
 import org.btcmap.ui.map.mapContextMenuItems
 import org.btcmap.ui.map.AreaChipPalette
 import org.btcmap.ui.map.AreaChips
+import org.btcmap.ui.map.DEFAULT_VISIBLE_MARKER_KINDS
 import org.btcmap.ui.map.FILTER_BUTTON_INSET
 import org.btcmap.ui.map.MAP_BADGE_OFFSET
 import org.btcmap.ui.map.MAP_CONTROLS_GAP
@@ -162,12 +163,13 @@ fun MapScreen(
     apiUrl: String,
     usingOpenFreeMap: Boolean,
     /**
-     * The marker kinds the map draws. All four are visible by default; the host
-     * hoists the set so it can keep the user's choices while it leaves and
-     * returns to the map, and [onMarkerKindsChange] reports a toggle (or a kind
-     * the map reveals for a selected feature). Any combination is valid.
+     * The marker kinds the map draws. Exchanges (ATMs) are hidden by default so
+     * they do not clutter the map; the host hoists the set so it can keep the
+     * user's choices while it leaves and returns to the map, and
+     * [onMarkerKindsChange] reports a toggle (or a kind the map reveals for a
+     * selected feature). Any combination is valid.
      */
-    visibleMarkerKinds: Set<MarkerKind> = MarkerKind.entries.toSet(),
+    visibleMarkerKinds: Set<MarkerKind> = DEFAULT_VISIBLE_MARKER_KINDS,
     onMarkerKindsChange: (Set<MarkerKind>) -> Unit = {},
     /**
      * Whether user input may change the map's bearing. Programmatic camera

@@ -101,8 +101,8 @@ fun AppRoot(
         // passed to the map and cleared once it has moved there.
         var mapFocus by remember { mutableStateOf<Pair<Double, Double>?>(null) }
         // The marker kinds the map draws, kept here so leaving the map for
-        // another screen and returning restores the user's choices. All four
-        // start visible on a fresh install; toggles are persisted in settings so
+        // another screen and returning restores the user's choices. Exchanges
+        // start hidden on a fresh install; toggles are persisted in settings so
         // a restart keeps the mix as well.
         var visibleMarkerKinds by rememberSaveable(stateSaver = VISIBLE_MARKER_KINDS_SAVER) {
             mutableStateOf(services.settings.visibleMarkerKinds)

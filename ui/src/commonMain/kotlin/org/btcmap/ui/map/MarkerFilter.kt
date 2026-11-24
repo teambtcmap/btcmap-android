@@ -23,6 +23,13 @@ enum class MarkerKind {
     Notes,
 }
 
+/**
+ * The kinds drawn before the user has chosen otherwise. Exchanges (ATMs) are
+ * numerous enough to clutter the map, so they start hidden; a saved choice
+ * replaces this as soon as the user toggles any kind.
+ */
+val DEFAULT_VISIBLE_MARKER_KINDS: Set<MarkerKind> = MarkerKind.entries.toSet() - MarkerKind.Exchanges
+
 /** The visible kinds with [kind] added when absent and removed when present. */
 internal fun Set<MarkerKind>.toggled(kind: MarkerKind): Set<MarkerKind> =
     if (kind in this) this - kind else this + kind
@@ -44,9 +51,10 @@ const val MARKER_FILTER_NOTES_TAG = "marker-filter-notes"
 
 /**
  * The map's marker-kind toggles: one button per kind, each showing whether that
- * kind is drawn and flipping it on tap. Any combination can be visible, so every
- * kind starts on and a tap hides only the chosen one. A visible kind carries a
- * ring in the same colour as its icon; a hidden one fades to 60% and has no ring.
+ * kind is drawn and flipping it on tap. Any combination can be visible; every
+ * kind starts on except exchanges (ATMs), which start hidden. A visible kind
+ * carries a ring in the same colour as its icon; a hidden one fades to 60% and
+ * has no ring.
  *
  * Ported from the Views button group the map swap dropped, whose buttons shared
  * the app's button background and marked the selected one with a border.
