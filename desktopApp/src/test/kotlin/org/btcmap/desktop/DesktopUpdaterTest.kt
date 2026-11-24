@@ -6,6 +6,7 @@ import mockwebserver3.junit4.MockWebServerRule
 import okio.Buffer
 import org.btcmap.api.apiHttpClient
 import org.btcmap.update.AvailableUpdate
+import org.btcmap.update.UpdateCheck
 import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
@@ -133,14 +134,14 @@ class DesktopUpdaterTest {
     }
 
     @Test
-    fun cdnUrlFor_addsThePrefixOnlyOnce() {
+    fun cdnUrl_addsThePrefixOnlyOnce() {
         assertEquals(
             "https://cdn.static.btcmap.org/builds/btcmap-beta.AppImage",
-            cdnUrlFor("https://static.btcmap.org/builds/btcmap-beta.AppImage"),
+            UpdateCheck.cdnUrl("https://static.btcmap.org/builds/btcmap-beta.AppImage"),
         )
         assertEquals(
             "https://cdn.static.btcmap.org/builds/btcmap-beta.AppImage",
-            cdnUrlFor("https://cdn.static.btcmap.org/builds/btcmap-beta.AppImage"),
+            UpdateCheck.cdnUrl("https://cdn.static.btcmap.org/builds/btcmap-beta.AppImage"),
         )
     }
 

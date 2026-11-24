@@ -178,40 +178,52 @@ class UpdateNotificationController(
 
     /**
      * Downloads [url] into the cache, reporting progress in `0f..1f` (null while
-     * the size is unknown). Returns the file, or null on any failure.
+     * the size is unknown). Returns the file, or null on any failure. The
+     * manifest names the origin URL, so the CDN is tried first and the origin
+     * is the fallback when the CDN is down or serves a stale copy.
      */
     private suspend fun downloadApk(url: String, onProgress: (Double?) -> Unit): File? =
         withContext(Dispatchers.IO) {
-            runCatching {
-                val dir = File(context.cacheDir, UPDATES_DIR).apply { mkdirs() }
-                val file = File(dir, UPDATE_APK_NAME)
-                val connection = (URL(url).openConnection() as HttpURLConnection).apply {
-                    connectTimeout = 15_000
-                    readTimeout = 15_000
-                    instanceFollowRedirects = true
-                    setRequestProperty("User-Agent", USER_AGENT)
-                }
+            val dir = File(context.cacheDir, UPDATES_DIR).apply { mkdirs() }
+            val file = File(dir, UPDATE_APK_NAME)
+            for (candidate in listOf(UpdateCheck.cdnUrl(url), url).distinct()) {
                 try {
-                    val total = connection.contentLengthLong.takeIf { it > 0 }
-                    connection.inputStream.use { input ->
-                        FileOutputStream(file).use { output ->
-                            val buffer = ByteArray(64 * 1024)
-                            var read = 0L
-                            while (true) {
-                                val count = input.read(buffer)
-                                if (count < 0) break
-                                output.write(buffer, 0, count)
-                                read += count
-                                onProgress(total?.let { read.toDouble() / it })
-                            }
-                        }
-                    }
-                    file
-                } finally {
-                    connection.disconnect()
+                    downloadFrom(candidate, file, onProgress)
+                    return@withContext file
+                } catch (t: Throwable) {
+                    t.rethrowIfCancellation()
                 }
-            }.getOrNull()
+            }
+            null
         }
+
+    /** Downloads one candidate into [file], truncating whatever was there. */
+    private fun downloadFrom(url: String, file: File, onProgress: (Double?) -> Unit) {
+        val connection = (URL(url).openConnection() as HttpURLConnection).apply {
+            connectTimeout = 15_000
+            readTimeout = 15_000
+            instanceFollowRedirects = true
+            setRequestProperty("User-Agent", USER_AGENT)
+        }
+        try {
+            val total = connection.contentLengthLong.takeIf { it > 0 }
+            connection.inputStream.use { input ->
+                FileOutputStream(file).use { output ->
+                    val buffer = ByteArray(64 * 1024)
+                    var read = 0L
+                    while (true) {
+                        val count = input.read(buffer)
+                        if (count < 0) break
+                        output.write(buffer, 0, count)
+                        read += count
+                        onProgress(total?.let { read.toDouble() / it })
+                    }
+                }
+            }
+        } finally {
+            connection.disconnect()
+        }
+    }
 
     /** Hands [apk] to the system package installer; false when it cannot start. */
     private fun launchInstaller(apk: File): Boolean = runCatching {
@@ -298,6 +310,7 @@ class UpdateNotificationController(
         currentVersionCode = BuildConfig.VERSION_CODE,
         isDebugBuild = BuildConfig.DEBUG,
         currentBuildTime = BuildConfig.BUILD_TIME,
+        id = if (isBeta) UpdateCheck.ANDROID_BETA_ID else null,
     )
 
     private companion object {
@@ -320,7 +333,7 @@ class UpdateNotificationController(
             get() = BuildConfig.BUILD_TYPE == "beta"
 
         fun manifestUrl(): String =
-            if (isBeta) UpdateCheck.BETA_MANIFEST_URL else UpdateCheck.RELEASE_MANIFEST_URL
+            if (isBeta) UpdateCheck.METADATA_URL else UpdateCheck.RELEASE_MANIFEST_URL
     }
 }
 

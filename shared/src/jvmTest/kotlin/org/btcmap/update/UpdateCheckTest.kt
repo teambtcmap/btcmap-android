@@ -132,6 +132,18 @@ class UpdateCheckTest : ApiTestBase() {
     }
 
     @Test
+    fun cdnUrl_prefersTheCdnHostWithoutDoublingIt() {
+        Assert.assertEquals(
+            "https://cdn.static.btcmap.org/builds/btcmap-beta.apk",
+            UpdateCheck.cdnUrl("https://static.btcmap.org/builds/btcmap-beta.apk"),
+        )
+        Assert.assertEquals(
+            "https://cdn.static.btcmap.org/builds/btcmap-beta.apk",
+            UpdateCheck.cdnUrl("https://cdn.static.btcmap.org/builds/btcmap-beta.apk"),
+        )
+    }
+
+    @Test
     fun fetch_returnsTheNewerBuild() = runTest {
         enqueueJson("""{"code": 240, "name": "1.3.0", "url": "https://example.com/app.apk"}""")
 

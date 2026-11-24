@@ -37,25 +37,27 @@ data class AvailableUpdate(
  * the desktop share one definition of the update JSON and when it counts as
  * newer.
  *
- * The Android manifests are a single entry. The desktop's `metadata.json` is a
- * dictionary of entries keyed by build id, one per platform and channel, which
- * lets new platforms join without changing the file's shape.
+ * The Android release manifest is a single entry. The beta Android, AppImage
+ * and future desktop builds read `metadata.json`, a dictionary of entries
+ * keyed by build id, one per platform, package format and channel, which lets
+ * new builds join without changing the file's shape.
  */
 object UpdateCheck {
 
     const val RELEASE_MANIFEST_URL = "https://static.btcmap.org/android/latest-app-ver.json"
 
-    const val BETA_MANIFEST_URL = "https://static.btcmap.org/android/latest-app-beta-ver.json"
-
-    const val DESKTOP_BETA_MANIFEST_URL = "https://static.btcmap.org/builds/metadata.json"
+    /** The unified manifest, a dictionary keyed by build id (see below). */
+    const val METADATA_URL = "https://static.btcmap.org/builds/metadata.json"
 
     /**
-     * The metadata entry this AppImage follows. The metadata is a dictionary
-     * keyed by build id so the same file can carry every platform, package
-     * format and channel later (`appimage-beta`, `android-release`,
-     * `windows-beta`, …).
+     * The metadata entries the deployed beta builds follow. The metadata is a
+     * dictionary keyed by build id so the same file can carry every platform,
+     * package format and channel (`appimage-beta`, `android-beta`,
+     * `windows-release`, …).
      */
     const val APPIMAGE_BETA_ID = "appimage-beta"
+
+    const val ANDROID_BETA_ID = "android-beta"
 
     /**
      * Reads [manifestUrl] and returns the update it names, or null when this
@@ -130,5 +132,23 @@ object UpdateCheck {
         if (isDebugBuild) return false
         if (latestVersionCode != currentVersionCode) return latestVersionCode > currentVersionCode
         return latestBuildTime > currentBuildTime
+    }
+
+    /**
+     * The CDN copy of an origin [url], tried before the origin itself. A URL
+     * already on the CDN is left alone, as is one without an authority.
+     */
+    fun cdnUrl(url: String): String {
+        val schemeEnd = url.indexOf("://")
+        if (schemeEnd < 0) return url
+        val authorityStart = schemeEnd + 3
+        val authorityEnd = url.indexOf('/', authorityStart)
+            .let { if (it < 0) url.length else it }
+        val authority = url.substring(authorityStart, authorityEnd)
+        val hostStart = authority.lastIndexOf('@') + 1
+        val host = authority.substring(hostStart)
+        if (host.startsWith("cdn.")) return url
+        val prefix = authorityStart + hostStart
+        return url.substring(0, prefix) + "cdn." + url.substring(prefix)
     }
 }

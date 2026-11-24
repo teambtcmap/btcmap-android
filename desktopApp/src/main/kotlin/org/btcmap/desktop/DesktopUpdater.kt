@@ -69,10 +69,10 @@ class DesktopUpdater(
     private val buildInfo: DesktopBuildInfo,
     private val httpClient: HttpClient,
     private val appImage: File? = runningAppImage(),
-    private val manifestUrl: String = UpdateCheck.DESKTOP_BETA_MANIFEST_URL,
+    private val manifestUrl: String = UpdateCheck.METADATA_URL,
     private val updateId: String = UpdateCheck.APPIMAGE_BETA_ID,
     private val userAgent: String = "btcmap-desktop",
-    private val toCdnUrl: (String) -> String = ::cdnUrlFor,
+    private val toCdnUrl: (String) -> String = UpdateCheck::cdnUrl,
 ) {
     val versionLabel: String get() = buildInfo.versionLabel
 
@@ -237,13 +237,3 @@ internal fun desktopBuildStamp(
     } else {
         versionName
     }
-
-/**
- * The CDN copy of a manifest's origin URL, tried before the origin itself. A
- * URL already on the CDN is left alone.
- */
-internal fun cdnUrlFor(raw: String): String {
-    val host = runCatching { URI(raw).host }.getOrNull() ?: return raw
-    if (host.startsWith("cdn.")) return raw
-    return raw.replaceFirst("://$host", "://cdn.$host")
-}

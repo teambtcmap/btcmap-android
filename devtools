@@ -965,6 +965,47 @@ parse_deploy_platforms() {
   fi
 }
 
+# Merges one build entry into builds/metadata.json without dropping the entries
+# other deploys published. Fetching first is what lets an Android-only or
+# Linux-only deploy share the file.
+publish_build_metadata() {
+  local id="$1" code="$2" name="$3" build_time="$4" sha256="$5" url="$6"
+  local current merged
+  current="$(mktemp)"
+  merged="$(mktemp)"
+  # The file does not exist on a fresh server.
+  if ! ssh btcmap-api cat "/srv/http/static.btcmap.org/builds/metadata.json" > "$current" 2>/dev/null; then
+    echo '{}' > "$current"
+  fi
+  python3 - "$current" "$merged" "$id" "$code" "$name" "$build_time" "$sha256" "$url" <<'PY'
+import json
+import sys
+
+current, merged, entry_id, code, name, build_time, sha256, url = sys.argv[1:]
+try:
+    with open(current) as handle:
+        metadata = json.load(handle)
+except (OSError, json.JSONDecodeError):
+    metadata = {}
+if not isinstance(metadata, dict):
+    metadata = {}
+metadata[entry_id] = {
+    "code": int(code),
+    "name": name,
+    "buildTime": int(build_time),
+    "sha256": sha256,
+    "url": url,
+}
+with open(merged, "w") as handle:
+    json.dump(metadata, handle, indent=2)
+    handle.write("\n")
+PY
+  chmod 644 "$merged"
+  rsync -avz --progress --mkpath --chmod=F644 "$merged" "$builds_dest/metadata.json"
+  rm -f "$current" "$merged"
+  purge_cdn "$builds_cdn_base/metadata.json"
+}
+
 cmd_app_deploy() {
   parse_deploy_platforms "$@" || return 1
   assert_bunny_api_key
@@ -1019,14 +1060,13 @@ cmd_app_deploy() {
 
   if [ -n "$deploy_android" ]; then
     local apk_dir="app/build/outputs/apk/beta"
-    local dest="btcmap-api:/srv/http/static.btcmap.org/android/apk/"
-    local manifest_dest="btcmap-api:/srv/http/static.btcmap.org/android/latest-app-beta-ver.json"
+    local legacy_manifest_dest="btcmap-api:/srv/http/static.btcmap.org/android/latest-app-beta-ver.json"
     local build_config="app/build/generated/source/buildConfig/beta/org/btcmap/BuildConfig.java"
 
     assert_apk_signed "$apk_dir/app-arm64-v8a-beta.apk"
     assert_apk_signed "$apk_dir/app-universal-beta.apk"
 
-    local version_code version_name build_time_value
+    local version_code version_name build_time_value sha256
     version_code="$(sed -n 's/.*VERSION_CODE = \([0-9]*\);.*/\1/p' "$build_config" | head -n1)"
     version_name="$(sed -n 's/.*VERSION_NAME = "\(.*\)";.*/\1/p' "$build_config" | head -n1)"
     build_time_value="$(sed -n 's/.*BUILD_TIME = \([0-9]*\)L;.*/\1/p' "$build_config" | head -n1)"
@@ -1034,39 +1074,51 @@ cmd_app_deploy() {
       echo "Error: could not read version info from $build_config" >&2
       return 1
     fi
+    sha256="$(sha256sum "$apk_dir/app-arm64-v8a-beta.apk" | cut -d' ' -f1)"
 
-    local manifest
-    manifest="$(mktemp)"
-    cat > "$manifest" <<JSON
+    # Installs from before metadata.json read the old flat manifest. Keep
+    # writing it, pointing at the new APK, so the next update moves them onto
+    # the new feed before they ever see metadata.json.
+    local legacy_manifest
+    legacy_manifest="$(mktemp)"
+    cat > "$legacy_manifest" <<JSON
 {
   "code": $version_code,
   "name": "$version_name",
   "buildTime": $build_time_value,
-  "url": "https://cdn.static.btcmap.org/android/apk/beta.apk"
+  "url": "https://cdn.static.btcmap.org/builds/btcmap-beta.apk"
 }
 JSON
-    chmod 644 "$manifest"
+    chmod 644 "$legacy_manifest"
 
-    rsync -avz --progress "$apk_dir"/app-arm64-v8a-beta.apk "$dest/beta.apk"
-    rsync -avz --progress "$apk_dir"/app-universal-beta.apk "$dest/beta-universal.apk"
-    rsync -avz --progress --chmod=F644 "$manifest" "$manifest_dest"
-    rm -f "$manifest"
+    rsync -avz --progress --mkpath "$apk_dir"/app-arm64-v8a-beta.apk "$builds_dest/btcmap-beta.apk"
+    rsync -avz --progress "$apk_dir"/app-universal-beta.apk "$builds_dest/btcmap-beta-universal.apk"
+    rsync -avz --progress --chmod=F644 "$legacy_manifest" "$legacy_manifest_dest"
+    rm -f "$legacy_manifest"
+
+    publish_build_metadata \
+      "android-beta" \
+      "$version_code" \
+      "$version_name" \
+      "$build_time_value" \
+      "$sha256" \
+      "https://static.btcmap.org/builds/btcmap-beta.apk"
 
     # The APKs and the manifest are overwritten in place, so the pull zone would
     # keep serving its cached copy for the full max-age window unless we purge
     # it.
     purge_cdn \
-      "https://cdn.static.btcmap.org/android/apk/beta.apk" \
-      "https://cdn.static.btcmap.org/android/apk/beta-universal.apk" \
+      "$builds_cdn_base/btcmap-beta.apk" \
+      "$builds_cdn_base/btcmap-beta-universal.apk" \
       "https://cdn.static.btcmap.org/android/latest-app-beta-ver.json"
   fi
 
   if [ -n "$deploy_linux" ]; then
     build_desktop_appimage "$appimage_out"
 
-    # The updater in the AppImage reads this manifest, which names the same
-    # build stamped into the app (and its checksum, so a truncated or swapped
-    # download never replaces the installed file).
+    # The updater in the AppImage reads this entry, which names the same build
+    # stamped into the app (and its checksum, so a truncated or swapped download
+    # never replaces the installed file).
     local build_info="desktopApp/build/generated/build-info/desktop-build.properties"
     if [ ! -f "$build_info" ]; then
       err "build info not found at $build_info; run through Gradle first."
@@ -1082,28 +1134,18 @@ JSON
     fi
     sha256="$(sha256sum "$appimage_out" | cut -d' ' -f1)"
 
-    local manifest
-    manifest="$(mktemp)"
-    cat > "$manifest" <<JSON
-{
-  "appimage-beta": {
-    "code": $version_code,
-    "name": "$version_name",
-    "buildTime": $build_time_value,
-    "sha256": "$sha256",
-    "url": "https://static.btcmap.org/builds/btcmap-beta.AppImage"
-  }
-}
-JSON
-    chmod 644 "$manifest"
-
-    # Overwritten in place, so purge the cached copies as above.
+    # Overwritten in place, so purge the cached copy as above.
     rsync -avz --progress --mkpath --chmod=F755 "$appimage_out" "$builds_dest/btcmap-beta.AppImage"
-    rsync -avz --progress --chmod=F644 "$manifest" "$builds_dest/metadata.json"
-    rm -f "$manifest"
-    purge_cdn \
-      "$builds_cdn_base/btcmap-beta.AppImage" \
-      "$builds_cdn_base/metadata.json"
+
+    publish_build_metadata \
+      "appimage-beta" \
+      "$version_code" \
+      "$version_name" \
+      "$build_time_value" \
+      "$sha256" \
+      "https://static.btcmap.org/builds/btcmap-beta.AppImage"
+
+    purge_cdn "$builds_cdn_base/btcmap-beta.AppImage"
   fi
 
   if [ -n "$desktop" ]; then
