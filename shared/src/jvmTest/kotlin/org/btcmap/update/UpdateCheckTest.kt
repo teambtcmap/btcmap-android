@@ -94,6 +94,44 @@ class UpdateCheckTest : ApiTestBase() {
     }
 
     @Test
+    fun fetch_readsTheSelectedDictionaryEntry() = runTest {
+        enqueueJson(
+            """{
+                "android-beta": {"code": 999, "name": "9.9.9", "url": "https://example.com/app.apk"},
+                "appimage-beta": {"code": 240, "name": "1.3.0", "buildTime": 1728600000000, "url": "https://example.com/app.AppImage", "sha256": "abc"}
+            }""",
+        )
+
+        val update = UpdateCheck.fetch(
+            httpClient = HttpClient(CIO),
+            manifestUrl = server.url("/metadata.json").toString(),
+            currentVersionCode = 239,
+            isDebugBuild = false,
+            id = "appimage-beta",
+        )
+
+        Assert.assertEquals(240, update?.versionCode)
+        Assert.assertEquals("1.3.0", update?.versionName)
+        Assert.assertEquals("https://example.com/app.AppImage", update?.url)
+        Assert.assertEquals("abc", update?.sha256)
+    }
+
+    @Test
+    fun fetch_withAnIdStillReadsALegacyFlatManifest() = runTest {
+        enqueueJson("""{"code": 240, "name": "1.3.0", "url": "https://example.com/app.AppImage"}""")
+
+        val update = UpdateCheck.fetch(
+            httpClient = HttpClient(CIO),
+            manifestUrl = server.url("/metadata.json").toString(),
+            currentVersionCode = 239,
+            isDebugBuild = false,
+            id = "appimage-beta",
+        )
+
+        Assert.assertEquals(240, update?.versionCode)
+    }
+
+    @Test
     fun fetch_returnsTheNewerBuild() = runTest {
         enqueueJson("""{"code": 240, "name": "1.3.0", "url": "https://example.com/app.apk"}""")
 

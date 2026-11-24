@@ -35,6 +35,37 @@ private val appVersionCode = Regex("""versionCode\s*=\s*(\d+)""")
 
 version = appVersionName
 
+// The desktop updater's view of the running build. `devtools deploy --linux`
+// passes btcmapBuildTime and btcmapChannel=beta so a rebuilt beta can tell
+// itself apart from the one it replaces; local runs and prepare-release leave
+// the defaults, which disable update checks. Kept as a resource so it lands in
+// the AppImage without generating source or disturbing incremental compilation.
+private val desktopBuildInfoDir = layout.buildDirectory.dir("generated/build-info")
+private val desktopBuildTime = providers.gradleProperty("btcmapBuildTime").orElse("0")
+private val desktopChannel = providers.gradleProperty("btcmapChannel").orElse("none")
+
+val writeDesktopBuildInfo by tasks.registering {
+    val output = desktopBuildInfoDir.map { it.file("desktop-build.properties") }
+    inputs.property("versionName", appVersionName)
+    inputs.property("versionCode", appVersionCode)
+    inputs.property("buildTime", desktopBuildTime)
+    inputs.property("channel", desktopChannel)
+    outputs.file(output)
+    doLast {
+        output.get().asFile.apply {
+            parentFile.mkdirs()
+            writeText(
+                listOf(
+                    "versionName=$appVersionName",
+                    "versionCode=$appVersionCode",
+                    "buildTime=${desktopBuildTime.get()}",
+                    "channel=${desktopChannel.get()}",
+                ).joinToString("\n", postfix = "\n"),
+            )
+        }
+    }
+}
+
 // The Conveyor signing root key, from which every Windows and macOS package key,
 // update feed and package identity is derived. It is signing material, so it
 // lives outside the repository (beside the Android keystore) and is pointed at
@@ -48,10 +79,15 @@ private val localProperties = Properties().apply {
 private val conveyorSigningKey = localProperties.getProperty("conveyor.signing.key")
     ?.let { rootProject.file(it) }
 
-// The Android assets the desktop app reuses: the icon font, the map styles and
-// the bundled data snapshots. They are copied in as resources so the packaged
-// app carries them instead of reading them from the sources.
+// The Android assets the desktop app reuses: the app icon, the icon font, the
+// map styles and the bundled data snapshots. They are copied in as resources so
+// the packaged app carries them instead of reading them from the sources.
 val bundleAndroidAssets by tasks.registering(Copy::class) {
+    // The same icon the AppImage's desktop entry uses, so the window and the
+    // task bar agree. `Window`'s icon loads it from the classpath.
+    from(rootProject.file("fastlane/metadata/android/en-US/images/icon.png")) {
+        rename { "btc-map.png" }
+    }
     from(rootProject.file("app/src/main/assets")) {
         include("material-symbols-*.ttf")
         rename { "material-symbols.ttf" }
@@ -69,6 +105,11 @@ val bundleAndroidAssets by tasks.registering(Copy::class) {
 
 sourceSets.main {
     resources.srcDir(bundleAndroidAssets)
+    resources.srcDir(desktopBuildInfoDir)
+}
+
+tasks.named("processResources") {
+    dependsOn(writeDesktopBuildInfo)
 }
 
 // The run task launches the project's toolchain, so it needs the Java 25 one

@@ -91,6 +91,8 @@ internal val EN: Map<String, String> = mapOf(
         "could_not_check_for_updates" to "Couldn't check for updates.",
         "could_not_download_update" to "Couldn't download the update.",
         "could_not_install_update" to "Couldn't start the installer.",
+        "could_not_restart_update" to "The update is installed, but the app couldn't restart. Reopen it to finish.",
+        "could_not_update_appimage" to "Couldn't update the app. Download the latest AppImage and replace this one manually.",
         "create_account" to "Log in",
         "create_account_subtitle" to "Create a new BTC Map account",
         "current_fee" to "Current fee:",

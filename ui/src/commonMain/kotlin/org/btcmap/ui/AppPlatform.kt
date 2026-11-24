@@ -82,8 +82,9 @@ interface AppPlatform {
 
     /**
      * The running build's version label for the settings screen's "About" group,
-     * or null where the host has no update channel to report (the desktop, the
-     * release and debug builds). A null hides the group.
+     * or null where the host has no update channel to report (the release and
+     * debug builds; the desktop host checks its AppImage separately). A null
+     * hides the group.
      */
     val updateVersionLabel: String?
 

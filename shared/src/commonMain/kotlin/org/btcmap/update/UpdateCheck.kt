@@ -24,12 +24,22 @@ data class AvailableUpdate(
      * build stamped by a deploy.
      */
     val buildTime: Long = 0L,
+    /**
+     * The download's SHA-256, when the manifest names one. The Linux updater
+     * verifies it before replacing the running AppImage; the Android installer
+     * checks the APK's own signature instead.
+     */
+    val sha256: String? = null,
 )
 
 /**
- * Checks the published APK manifest against the running build, so Android and
+ * Checks a published build manifest against the running build, so Android and
  * the desktop share one definition of the update JSON and when it counts as
  * newer.
+ *
+ * The Android manifests are a single entry. The desktop's `metadata.json` is a
+ * dictionary of entries keyed by build id, one per platform and channel, which
+ * lets new platforms join without changing the file's shape.
  */
 object UpdateCheck {
 
@@ -37,10 +47,22 @@ object UpdateCheck {
 
     const val BETA_MANIFEST_URL = "https://static.btcmap.org/android/latest-app-beta-ver.json"
 
+    const val DESKTOP_BETA_MANIFEST_URL = "https://static.btcmap.org/builds/metadata.json"
+
+    /**
+     * The metadata entry this AppImage follows. The metadata is a dictionary
+     * keyed by build id so the same file can carry every platform, package
+     * format and channel later (`appimage-beta`, `android-release`,
+     * `windows-beta`, …).
+     */
+    const val APPIMAGE_BETA_ID = "appimage-beta"
+
     /**
      * Reads [manifestUrl] and returns the update it names, or null when this
-     * build is current. Debug builds are installed locally and never nagged,
-     * even when their version code is lower.
+     * build is current. [id] selects an entry from a dictionary manifest; when
+     * the manifest is a single entry, as the Android ones are, it is read
+     * directly. Debug builds are installed locally and never nagged, even when
+     * their version code is lower.
      */
     suspend fun fetch(
         httpClient: HttpClient,
@@ -48,11 +70,17 @@ object UpdateCheck {
         currentVersionCode: Int,
         isDebugBuild: Boolean,
         currentBuildTime: Long = 0L,
+        id: String? = null,
     ): AvailableUpdate? {
         val json = httpClient.executeIdempotent(HttpMethod.Get, manifestUrl.toUrl())
             .bodyAsText().trim()
 
-        val latest = parseJson(json).jsonObject
+        val root = parseJson(json).jsonObject
+        // A missing id falls back to the root so a manifest published before
+        // the dictionary shape (or the Android ones) keeps working.
+        val latest = id?.let { key -> root[key]?.jsonObject }
+            ?: root.takeIf { it["code"] != null }
+            ?: error("update manifest has no entry '$id'")
         val latestVersionCode = latest["code"]!!.jsonPrimitive.int
         val latestVersionName = latest["name"]!!.jsonPrimitive.content
         val url = latest["url"]!!.jsonPrimitive.content
@@ -60,6 +88,7 @@ object UpdateCheck {
         // one. A missing field reads as zero, so a release check keeps comparing
         // version codes alone.
         val latestBuildTime = latest["buildTime"]?.jsonPrimitive?.longOrNull ?: 0L
+        val sha256 = latest["sha256"]?.jsonPrimitive?.content?.takeIf { it.isNotBlank() }
 
         if (
             !isUpdateAvailable(
@@ -78,6 +107,7 @@ object UpdateCheck {
             versionName = latestVersionName,
             url = url,
             buildTime = latestBuildTime,
+            sha256 = sha256,
         )
     }
 

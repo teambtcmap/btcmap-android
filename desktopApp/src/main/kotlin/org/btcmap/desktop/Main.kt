@@ -8,6 +8,7 @@ import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.platform.Font
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Window
@@ -38,6 +39,7 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.Surface
 import androidx.compose.material3.TextButton
 import kotlinx.coroutines.Dispatchers
@@ -158,6 +160,7 @@ import org.maplibre.compose.resource.MapResourceProvider
 import org.btcmap.settings.showAttribution
 import org.btcmap.settings.verifiedFilterMinVerifiedAt
 import org.btcmap.sync.SyncState
+import org.btcmap.update.AvailableUpdate
 import org.btcmap.ui.AccountLabels
 import org.btcmap.ui.AccountScreen
 import org.btcmap.ui.AddEventForm
@@ -317,6 +320,8 @@ private fun runApp() = application {
     Window(
         onCloseRequest = ::exitApplication,
         title = "BTC Map",
+        // Without this the frame falls back to AWT's Java mascot on Linux.
+        icon = painterResource("btc-map.png"),
         state = rememberWindowState(placement = WindowPlacement.Maximized),
     ) {
         // Runs once the first composition has been applied — the closest thing
@@ -360,6 +365,32 @@ private fun runApp() = application {
                     val nav = rememberNavController(Route.Map)
                     val route = nav.current
                     val scope = rememberCoroutineScope()
+                    // The beta AppImage updates itself from the manifest its
+                    // deploy publishes. Local runs and release builds carry a
+                    // channel other than beta, so they get no updater at all.
+                    val buildInfo = remember { DesktopBuildInfo.load() }
+                    val appImage = remember { DesktopUpdater.runningAppImage() }
+                    val updater = remember(buildInfo, appImage) {
+                        if (buildInfo.supportsUpdates && appImage != null) {
+                            DesktopUpdater(
+                                buildInfo = buildInfo,
+                                httpClient = apiHttpClient(USER_AGENT),
+                                appImage = appImage,
+                            )
+                        } else {
+                            null
+                        }
+                    }
+                    var availableUpdate by remember { mutableStateOf<AvailableUpdate?>(null) }
+                    var showUpdateDialog by remember { mutableStateOf(false) }
+                    var updateDownloading by remember { mutableStateOf(false) }
+                    var updateProgress by remember { mutableStateOf<Double?>(null) }
+                    var updateError by remember { mutableStateOf<String?>(null) }
+                    LaunchedEffect(updater) {
+                        if (updater != null) {
+                            availableUpdate = runCatching { updater.check() }.getOrNull()
+                        }
+                    }
                     // The place the sheet is showing, and whether the account has
                     // it saved, which is what the sheet's Save row renders.
                     var selectedPlaceId by remember { mutableStateOf<Long?>(null) }
@@ -573,6 +604,8 @@ private fun runApp() = application {
                             mapTiltEnabled = settings.mapTiltEnabled,
                             showAttribution = settings.showAttribution,
                             syncVisible = syncState != SyncState.Idle,
+                            updateVisible = availableUpdate != null,
+                            onUpdateClick = { showUpdateDialog = true },
                             reloadKey = reloadKey,
                             iconFont = iconFont,
                             placeSheetStrings = PLACE_SHEET_STRINGS,
@@ -764,6 +797,102 @@ private fun runApp() = application {
                             formatDistance = LABELS.formatDistance,
                             nominatimSearch = nominatimSearch,
                             nominatimHeader = STRINGS["search_openstreetmap"],
+                        )
+                    }
+                    val pendingUpdate = availableUpdate
+                    if (showUpdateDialog && pendingUpdate != null) {
+                        AlertDialog(
+                            onDismissRequest = {
+                                if (!updateDownloading) {
+                                    showUpdateDialog = false
+                                    updateError = null
+                                }
+                            },
+                            title = { Text(STRINGS["update_available"]) },
+                            text = {
+                                Column {
+                                    Text(
+                                        STRINGS.format(
+                                            "update_available_description_beta",
+                                            desktopBuildStamp(buildInfo.buildTime, buildInfo.versionName),
+                                            desktopBuildStamp(
+                                                pendingUpdate.buildTime,
+                                                pendingUpdate.versionName,
+                                            ),
+                                        ),
+                                    )
+                                    if (updateDownloading) {
+                                        val progress = updateProgress
+                                        if (progress == null) {
+                                            LinearProgressIndicator(
+                                                modifier = Modifier
+                                                    .fillMaxWidth()
+                                                    .padding(top = 12.dp),
+                                            )
+                                        } else {
+                                            LinearProgressIndicator(
+                                                progress = { progress.toFloat() },
+                                                modifier = Modifier
+                                                    .fillMaxWidth()
+                                                    .padding(top = 12.dp),
+                                            )
+                                        }
+                                    }
+                                    updateError?.let { message ->
+                                        Text(
+                                            text = message,
+                                            color = MaterialTheme.colorScheme.error,
+                                            modifier = Modifier.padding(top = 12.dp),
+                                        )
+                                    }
+                                }
+                            },
+                            confirmButton = {
+                                TextButton(
+                                    enabled = !updateDownloading,
+                                    onClick = {
+                                        val current = updater
+                                        if (current != null) {
+                                            updateDownloading = true
+                                            updateProgress = null
+                                            updateError = null
+                                            scope.launch {
+                                                val result = current.install(pendingUpdate) { fraction ->
+                                                    updateProgress = fraction
+                                                }
+                                                updateDownloading = false
+                                                result.fold(
+                                                    onSuccess = {
+                                                        if (current.restart()) {
+                                                            exitApplication()
+                                                        } else {
+                                                            updateError =
+                                                                STRINGS["could_not_restart_update"]
+                                                        }
+                                                    },
+                                                    onFailure = { t ->
+                                                        t.rethrowIfCancellation()
+                                                        updateError = STRINGS["could_not_update_appimage"]
+                                                    },
+                                                )
+                                            }
+                                        }
+                                    },
+                                ) {
+                                    Text(STRINGS["update"])
+                                }
+                            },
+                            dismissButton = {
+                                TextButton(
+                                    enabled = !updateDownloading,
+                                    onClick = {
+                                        showUpdateDialog = false
+                                        updateError = null
+                                    },
+                                ) {
+                                    Text(STRINGS["ignore"])
+                                }
+                            },
                         )
                     }
                     if (route != Route.Map) {
@@ -1021,6 +1150,25 @@ private fun runApp() = application {
                                 db = db,
                                 labels = SETTINGS_PAGE_LABELS,
                                 includeImageStats = false,
+                                versionLabel = updater?.versionLabel,
+                                onCheckForUpdates = { onResult ->
+                                    updater?.let { current ->
+                                        scope.launch {
+                                            try {
+                                                val update = current.check()
+                                                availableUpdate = update
+                                                if (update != null) {
+                                                    showUpdateDialog = true
+                                                } else {
+                                                    onResult(STRINGS["you_are_up_to_date"])
+                                                }
+                                            } catch (t: Throwable) {
+                                                t.rethrowIfCancellation()
+                                                onResult(STRINGS["could_not_check_for_updates"])
+                                            }
+                                        }
+                                    }
+                                },
                                 onOpenAccount = { nav.push(Route.Account) },
                                 onOpenColors = { nav.push(Route.Colors) },
                                 onOpenDbStats = { nav.push(Route.DbStats) },

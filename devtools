@@ -998,17 +998,20 @@ cmd_app_deploy() {
   fi
 
   echo "Assembling: ${gradle_tasks[*]}"
-  # The beta build is stamped with its build time, so a rebuild at the same
+  # The beta builds are stamped with their build time, so a rebuild at the same
   # version code is still newer than the build an installed copy is running. The
-  # manifest written below carries the same stamp, read back from the APK's
-  # BuildConfig, so the two agree.
-  if [ -n "$deploy_android" ]; then
+  # Android manifest reads the stamp back from BuildConfig and the desktop one
+  # from the resource :desktopApp writes, so each agrees with its package.
+  local gradle_properties=()
+  if [ -n "$deploy_android$deploy_linux" ]; then
     local build_time
     build_time="$(date +%s%3N)"
-    ./gradlew "${gradle_tasks[@]}" -PbtcmapBuildTime="$build_time"
-  else
-    ./gradlew "${gradle_tasks[@]}"
+    gradle_properties+=("-PbtcmapBuildTime=$build_time")
   fi
+  if [ -n "$deploy_linux" ]; then
+    gradle_properties+=("-PbtcmapChannel=beta")
+  fi
+  ./gradlew "${gradle_tasks[@]}" "${gradle_properties[@]}"
 
   local appimage_out="desktopApp/build/compose/appimage/BTC-Map-x86_64.AppImage"
   local packages_out="desktopApp/build/conveyor/beta"
@@ -1060,9 +1063,47 @@ JSON
 
   if [ -n "$deploy_linux" ]; then
     build_desktop_appimage "$appimage_out"
-    # Overwritten in place, so purge the cached copy as above.
+
+    # The updater in the AppImage reads this manifest, which names the same
+    # build stamped into the app (and its checksum, so a truncated or swapped
+    # download never replaces the installed file).
+    local build_info="desktopApp/build/generated/build-info/desktop-build.properties"
+    if [ ! -f "$build_info" ]; then
+      err "build info not found at $build_info; run through Gradle first."
+      return 1
+    fi
+    local version_code version_name build_time_value sha256
+    version_code="$(sed -n 's/^versionCode=//p' "$build_info" | head -n1)"
+    version_name="$(sed -n 's/^versionName=//p' "$build_info" | head -n1)"
+    build_time_value="$(sed -n 's/^buildTime=//p' "$build_info" | head -n1)"
+    if [ -z "$version_code" ] || [ -z "$version_name" ] || [ -z "$build_time_value" ]; then
+      err "could not read version info from $build_info"
+      return 1
+    fi
+    sha256="$(sha256sum "$appimage_out" | cut -d' ' -f1)"
+
+    local manifest
+    manifest="$(mktemp)"
+    cat > "$manifest" <<JSON
+{
+  "appimage-beta": {
+    "code": $version_code,
+    "name": "$version_name",
+    "buildTime": $build_time_value,
+    "sha256": "$sha256",
+    "url": "https://static.btcmap.org/builds/btcmap-beta.AppImage"
+  }
+}
+JSON
+    chmod 644 "$manifest"
+
+    # Overwritten in place, so purge the cached copies as above.
     rsync -avz --progress --mkpath --chmod=F755 "$appimage_out" "$builds_dest/btcmap-beta.AppImage"
-    purge_cdn "$builds_cdn_base/btcmap-beta.AppImage"
+    rsync -avz --progress --chmod=F644 "$manifest" "$builds_dest/metadata.json"
+    rm -f "$manifest"
+    purge_cdn \
+      "$builds_cdn_base/btcmap-beta.AppImage" \
+      "$builds_cdn_base/metadata.json"
   fi
 
   if [ -n "$desktop" ]; then
