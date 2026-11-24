@@ -9,7 +9,7 @@ devtools — manage the BTC Map Android dev environment.
 Usage:
   ./devtools run                   Run the app (desktop by default; --android for
                                    Waydroid, which boots it first if needed)
-  ./devtools app deploy-beta       Build and deploy beta packages for the named platforms
+  ./devtools deploy                Build and deploy beta packages for the named platforms
   ./devtools app prepare-release   Build the release binaries for every supported platform
   ./devtools app bundle-data       Download latest places, areas, comments and events snapshots
   ./devtools app bundle-map-styles Bundle MapLibre styles, sprites and glyphs (--force re-downloads)
@@ -29,10 +29,6 @@ Usage: ./devtools app <command>
 Run the app with: ./devtools run
 
 Commands:
-  deploy-beta        Build and deploy beta packages for the named platforms:
-                     --android (the APKs and update manifest), --linux (the
-                     AppImage) and --windows / --macos (the Conveyor packages).
-                     At least one platform is required.
   prepare-release    Build the release binaries for every supported platform
                      and stage them in the repository's release/ directory
   bundle-data        Download latest places, areas, comments and events
@@ -41,6 +37,19 @@ Commands:
                      re-downloads)
   bundle-icons       Extract the icon-name list from the bundled Material
                      Symbols font
+EOF
+}
+
+print_usage_deploy() {
+  cat <<EOF
+Usage: ./devtools deploy <platform>...
+
+Build and deploy beta packages for the named platforms. At least one platform
+is required:
+  --android          The APKs and update manifest
+  --linux            The AppImage
+  --windows          The Conveyor package
+  --macos            The Conveyor package
 EOF
 }
 
@@ -454,10 +463,15 @@ DESKTOP
 
 # START conveyor section
 
-# Every desktop artifact lives under one directory on the CDN, one per channel:
-# the Windows and macOS packages Conveyor builds and the Linux AppImage.
+# Every Windows and macOS package Conveyor builds lives under one directory on
+# the CDN, one per channel.
 desktop_cdn_base="https://cdn.static.btcmap.org/desktop"
 desktop_dest="btcmap-api:/srv/http/static.btcmap.org/desktop"
+
+# The Linux AppImage lives in its own directory. The capital `AppImage`
+# extension is what desktop integration tools look for.
+builds_cdn_base="https://cdn.static.btcmap.org/builds"
+builds_dest="btcmap-api:/srv/http/static.btcmap.org/builds"
 
 # Conveyor builds the Windows (MSIX, plus an installer .exe and a portable .zip)
 # and macOS (a signed, Sparkle-updating .app archive) packages from this Linux
@@ -918,7 +932,7 @@ cmd_app_run() {
   esac
 }
 
-# The platforms `deploy-beta` can publish, each selectable on its own: the
+# The platforms `deploy` can publish, each selectable on its own: the
 # Android APKs and update manifest (--android), the Linux AppImage (--linux) and
 # the packages Conveyor builds for Windows (--windows) and Apple Silicon macOS
 # (--macos). At least one has to be named; naming several narrows neither the
@@ -940,18 +954,18 @@ parse_deploy_platforms() {
       --linux) deploy_linux=1 ;;
       --windows) deploy_windows=1 ;;
       --macos) deploy_macos=1 ;;
-      help|-h|--help) print_usage_app; return 1 ;;
-      *) err "Unknown deploy-beta parameter: $arg"; print_usage_app; return 1 ;;
+      help|-h|--help) print_usage_deploy; return 1 ;;
+      *) err "Unknown deploy parameter: $arg"; print_usage_deploy; return 1 ;;
     esac
   done
   if [ -z "$deploy_android$deploy_linux$deploy_windows$deploy_macos" ]; then
-    err "deploy-beta needs at least one platform: --android, --linux, --windows or --macos."
-    print_usage_app
+    err "deploy needs at least one platform: --android, --linux, --windows or --macos."
+    print_usage_deploy
     return 1
   fi
 }
 
-cmd_app_deploy_beta() {
+cmd_app_deploy() {
   parse_deploy_platforms "$@" || return 1
   assert_bunny_api_key
 
@@ -1047,8 +1061,8 @@ JSON
   if [ -n "$deploy_linux" ]; then
     build_desktop_appimage "$appimage_out"
     # Overwritten in place, so purge the cached copy as above.
-    rsync -avz --progress --mkpath --chmod=F755 "$appimage_out" "$beta_dest/BTC-Map-x86_64.AppImage"
-    purge_cdn "$desktop_cdn_base/beta/BTC-Map-x86_64.AppImage"
+    rsync -avz --progress --mkpath --chmod=F755 "$appimage_out" "$builds_dest/btcmap-beta.AppImage"
+    purge_cdn "$builds_cdn_base/btcmap-beta.AppImage"
   fi
 
   if [ -n "$desktop" ]; then
@@ -1133,7 +1147,6 @@ cmd_app() {
   local target="${1:-help}"
   shift || true
   case "$target" in
-    deploy-beta) cmd_app_deploy_beta "$@" ;;
     prepare-release) cmd_app_prepare_release "$@" ;;
     bundle-data) cmd_app_bundle_data "$@" ;;
     bundle-map-styles) cmd_app_bundle_map_styles "$@" ;;
@@ -1150,6 +1163,7 @@ main() {
   shift || true
   case "$cmd" in
     run) cmd_app_run "$@" ;;
+    deploy) cmd_app_deploy "$@" ;;
     app) cmd_app "$@" ;;
     website) cmd_website "$@" ;;
     help|-h|--help) print_usage ;;

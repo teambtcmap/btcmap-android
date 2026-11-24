@@ -11,7 +11,7 @@ val localProperties = Properties().apply {
 /*
  * When this build was made, in epoch milliseconds, used by the beta update
  * check to tell one deploy from the next (a beta is rebuilt at one version
- * code). `devtools app deploy-beta --android` passes an explicit
+ * code). `devtools deploy --android` passes an explicit
  * `-PbtcmapBuildTime=…` so the APK and the manifest it publishes agree; other
  * builds leave it at 0, which never looks newer than a deployed beta.
  */
